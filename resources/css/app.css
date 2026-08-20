@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@theme {
+ --color-background:#fff; --color-foreground:#0f172a; --color-card:#fff; --color-card-foreground:#0f172a;
+ --color-popover:#fff; --color-popover-foreground:#0f172a; --color-primary:#0f172a; --color-primary-foreground:#f8fafc;
+ --color-secondary:#e2e8f0; --color-secondary-foreground:#0f172a; --color-muted:#f1f5f9; --color-muted-foreground:#64748b;
+ --color-accent:#f1f5f9; --color-accent-foreground:#0f172a; --color-destructive:#dc2626; --color-destructive-foreground:#fff;
+ --color-border:#e2e8f0; --color-input:#cbd5e1; --color-ring:#334155; --color-sidebar:#f8fafc;
+ --color-sidebar-foreground:#334155; --color-sidebar-primary:#0f172a; --color-sidebar-primary-foreground:#fff;
+ --color-sidebar-accent:#e2e8f0; --color-sidebar-accent-foreground:#0f172a; --color-sidebar-border:#e2e8f0; --color-sidebar-ring:#2563eb;
+ --radius-lg:.5rem; --radius-md:.375rem; --radius-sm:.25rem;
+}
+html{font-family:ui-sans-serif,system-ui,sans-serif} body{background:var(--color-background);color:var(--color-foreground)}
+
+[data-pc-name="tooltip"] {
+ pointer-events:none;
+ position:absolute;
+ z-index:1100;
+ max-width:16rem;
+}
+[data-pc-name="tooltip"] [data-pc-section="text"] {
+ border-radius:var(--radius-md);
+ background:var(--color-slate-900);
+ color:white;
+ padding:.375rem .625rem;
+ font-size:.75rem;
+ line-height:1rem;
+ white-space:pre-line;
+ word-break:break-word;
+ box-shadow:0 4px 12px rgb(15 23 42 / 18%);
+}
+[data-pc-name="tooltip"] [data-pc-section="arrow"] {display:none}

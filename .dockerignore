@@ -1,0 +1,9 @@
+.git
+.idea
+.env
+node_modules
+vendor
+public/build
+storage/logs
+playwright-report
+test-results

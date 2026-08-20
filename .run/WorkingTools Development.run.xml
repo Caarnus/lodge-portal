@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="WorkingTools: Development" type="CompoundRunConfigurationType">
+    <toRun name="WorkingTools: Docker Compose" type="docker-deploy" />
+    <toRun name="WorkingTools: Vite Dev" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>

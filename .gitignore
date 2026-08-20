@@ -54,7 +54,8 @@ pnpm-debug.log*
 /docker-compose.override.yml
 
 # IDE and editor metadata
-/.idea/
+/.idea/*
+!/.idea/phpServers.xml
 /.fleet/
 /.vscode/
 /.zed/

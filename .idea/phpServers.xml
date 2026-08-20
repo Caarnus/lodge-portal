@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpServers">
+    <servers>
+      <server host="localhost" id="2df85b5a-1b2d-4bd6-9aae-6eaec696ac2a" name="WorkingTools" port="80" debugger_id="xdebug" use_path_mappings="true">
+        <path_mappings>
+          <mapping local-root="$PROJECT_DIR$" remote-root="/var/www/html" />
+        </path_mappings>
+      </server>
+    </servers>
+  </component>
+</project>

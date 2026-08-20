@@ -1,0 +1,93 @@
+name: lodge-portal
+x-app: &app
+  build: { context: ., dockerfile: docker/php/Dockerfile }
+  working_dir: /var/www/html
+  volumes: [".:/var/www/html", "media:/var/www/html/storage/app/public"]
+  env_file: .env
+  extra_hosts: ["host.docker.internal:host-gateway"]
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+services:
+  app:
+    <<: *app
+    healthcheck: { test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"], interval: 10s, timeout: 5s, retries: 5 }
+  queue:
+    <<: *app
+    command: php artisan queue:work --sleep=1 --tries=3 --timeout=90
+    healthcheck: { disable: true }
+  test:
+    <<: *app
+    profiles: ["tools"]
+    command: php artisan test --compact
+    environment: { APP_ENV: testing, CACHE_STORE: array, DB_CONNECTION: sqlite, DB_DATABASE: ":memory:", MAIL_MAILER: array, QUEUE_CONNECTION: sync, SESSION_DRIVER: array }
+    healthcheck: { disable: true }
+  browser:
+    image: mcr.microsoft.com/playwright:v1.62.1-noble
+    profiles: ["tools"]
+    working_dir: /var/www/html
+    command:
+      - sh
+      - -c
+      - |
+        npm ci
+        if [ ! -f public/build/manifest.json ]; then
+          echo "Missing host-built frontend assets. Run 'npm run build' before the browser service."
+          exit 1
+        fi
+        restore_hot=0
+        if [ -f public/hot ]; then
+          cp public/hot /tmp/lodge-portal-hot
+          restore_hot=1
+        fi
+        rm -f public/hot
+        cleanup() {
+          if [ "$$restore_hot" = "1" ]; then
+            cp /tmp/lodge-portal-hot public/hot
+          else
+            rm -f public/hot
+          fi
+        }
+        trap cleanup EXIT
+        npm run test:e2e
+    environment:
+      PLAYWRIGHT_BASE_URL: "http://nginx"
+      E2E_ADMIN_EMAIL: "browser-platform-admin@example.test"
+      E2E_ADMIN_PASSWORD: "Browser-Test-Password-2026"
+      E2E_USER_PASSWORD: "Browser-User-Password-2026"
+    volumes: [".:/var/www/html", "browser_node_modules:/var/www/html/node_modules"]
+    depends_on:
+      nginx: { condition: service_healthy }
+      browser-setup: { condition: service_completed_successfully }
+  browser-setup:
+    <<: *app
+    profiles: ["tools"]
+    command:
+      - sh
+      - -c
+      - php artisan migrate --force && php artisan db:seed --force && php artisan db:seed --class=BrowserTestSeeder --force && php artisan platform:admin browser-platform-admin@example.test --name="Browser Platform Administrator" --password="Browser-Test-Password-2026"
+    environment:
+      E2E_USER_PASSWORD: "Browser-User-Password-2026"
+      ADMIN_2FA_REQUIRED: "false"
+    healthcheck: { disable: true }
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["80:80"]
+    volumes: [".:/var/www/html:ro", "./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on: { app: { condition: service_healthy } }
+    healthcheck: { test: ["CMD-SHELL", "wget -qO- http://localhost/up || exit 1"], interval: 10s, timeout: 5s, retries: 5 }
+  postgres:
+    image: postgres:17-alpine
+    ports: ["5432:5432"]
+    environment: { POSTGRES_DB: lodge_portal, POSTGRES_USER: lodge_portal, POSTGRES_PASSWORD: local-development }
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U lodge_portal -d lodge_portal"], interval: 5s, timeout: 5s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+    volumes: ["redis:/data"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 10 }
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ["8025:8025"]
+    healthcheck: { test: ["CMD", "/mailpit", "readyz"], interval: 10s, timeout: 5s, retries: 5 }
+volumes: { postgres: {}, redis: {}, media: {}, browser_node_modules: {} }

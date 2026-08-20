@@ -4,7 +4,7 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The project is currently in planning and initial foundation work. The phased implementation plan and Phase 1 technical specification are complete; application scaffolding has not yet begun.
+The platform foundation is implemented: authentication, approval routing, platform and lodge administration, tenant-scoped permissions, auditing, feature flags, Docker development services, and automated Laravel/Playwright coverage are available.
 
 ## Planned Stack
 
@@ -19,9 +19,64 @@ The project is currently in planning and initial foundation work. The phased imp
 
 ## Local Development
 
-Phase 1 will provide a Docker Compose environment with the application available at `http://localhost`. It will include Nginx, PHP-FPM, PostgreSQL, Redis, a queue worker, Node.js/Vite, and Mailpit.
+The backend services run in Docker Compose, while Node.js and Vite run directly on the host for faster file watching and frontend builds. Install Node.js 24 and npm on the host before starting.
 
-Setup and development commands will be added when the Phase 1 application scaffold is implemented. Until then, there is not yet a runnable application.
+Copy `.env.example` to `.env`, then run:
+
+```bash
+docker compose build
+docker compose run --rm app composer install
+npm install
+docker compose up -d
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan platform:admin admin@example.com --name="Platform Administrator"
+```
+
+Start the host Vite development server in a separate terminal:
+
+```bash
+npm run dev
+```
+
+The application is available at `http://localhost`, Vite runs at `http://localhost:5173`, and Mailpit is available at `http://localhost:8025`.
+
+For a production-style frontend build instead of the development server, run `npm run build` on the host. Laravel will serve the generated assets from `public/build`.
+
+### PhpStorm
+
+The following shared configurations are available from PhpStorm's Run configuration menu:
+
+- `WorkingTools: Docker Compose` starts the backend Compose services.
+- `WorkingTools: Vite Dev` starts Vite directly on the host.
+- `WorkingTools: Development` starts both configurations together.
+- `WorkingTools: Vite Build` creates production frontend assets on the host.
+- `WorkingTools: Listen for Xdebug` listens for PHP debug connections.
+
+The npm configurations use the project Node.js interpreter. If PhpStorm has not selected Node.js automatically, configure it under **Settings → Languages & Frameworks → JavaScript Runtime**. The Docker configuration expects a PhpStorm Docker connection named `Docker`, which is the usual Docker Desktop connection name.
+
+The PHP image includes Xdebug with request-triggered debugging to avoid slowing normal requests. PhpStorm's shared `WorkingTools` server maps the project root to `/var/www/html` and Xdebug connects to the host on port `9003`. After rebuilding the PHP image, start `WorkingTools: Listen for Xdebug` and either use a browser Xdebug extension or add `XDEBUG_TRIGGER=PHPSTORM` to the request query string. To debug an Artisan command, use:
+
+```bash
+docker compose exec -e XDEBUG_TRIGGER=1 app php artisan your:command
+```
+
+If port `9003` has been changed globally in PhpStorm under **Settings → PHP → Debug**, change it back to `9003` or update `docker/php/xdebug.ini` to match.
+
+Common commands:
+
+```bash
+docker compose logs -f
+npm run build
+npm run test:e2e
+docker compose run --rm test
+docker compose run --rm browser
+docker compose down
+```
+
+The host `npm run test:e2e` command tests the currently running application. The containerized browser command uses the assets produced by the preceding host `npm run build`, creates clearly named synthetic test accounts and records, then executes the complete two-lodge Playwright flow. These accounts are not created by normal application seeding or startup and are not production credentials.
+
+To deliberately erase the local database, Redis data, media, and browser-test Node modules, run `docker compose down --volumes`. Host `node_modules` is not managed by Docker. This is destructive and cannot be undone.
 
 ## Documentation
 
@@ -33,7 +88,7 @@ Setup and development commands will be added when the Phase 1 application scaffo
 - [Authorization](docs/authorization.md)
 - [Coding standards](docs/coding-standards.md)
 - [Testing strategy](docs/testing-strategy.md)
-- [Architecture decision records](docs/decisions/)
+- [Architecture decision records](docs/decisions/README.md)
 
 ## Contributing
 
