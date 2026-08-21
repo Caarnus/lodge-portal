@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventOccurrenceController;
 use App\Http\Controllers\EventReminderDeliveryController;
 use App\Http\Controllers\EventReservationController;
+use App\Http\Controllers\EventReservationFieldController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -84,6 +85,8 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/restore', [EventOccurrenceController::class, 'restore'])->name('lodges.events.occurrences.restore');
     Route::post('lodges/{lodge}/events/{event}/reminder-deliveries/{delivery}/retry', [EventReminderDeliveryController::class, 'retry'])->name('lodges.events.reminder-deliveries.retry');
     Route::get('lodges/{lodge}/events/{event}/occurrences/{occurrence}/reservations', [EventReservationController::class, 'index'])->name('lodges.events.occurrences.reservations.index');
+    Route::post('lodges/{lodge}/events/{event}/reservation-fields', [EventReservationFieldController::class, 'store'])->name('lodges.events.reservation-fields.store');
+    Route::delete('lodges/{lodge}/events/{event}/reservation-fields/{field}', [EventReservationFieldController::class, 'destroy'])->name('lodges.events.reservation-fields.destroy');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {
         abort_unless($r->user()->is_platform_admin || DB::table('lodge_user_roles')
             ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);

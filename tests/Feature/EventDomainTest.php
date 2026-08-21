@@ -354,4 +354,15 @@ class EventDomainTest extends TestCase
         $this->get("/l/{$lodge->slug}/events?range=60-days")->assertOk()->assertSee('Weekly Study');
         $this->assertDatabaseCount('event_occurrences', 3);
     }
+
+    public function test_public_calendar_feed_excludes_protected_events(): void
+    {
+        $lodge = Lodge::factory()->create();
+        foreach ([['slug' => 'public-feed', 'title' => 'Public Feed', 'visibility' => EventVisibility::Public], ['slug' => 'private-feed', 'title' => 'Private Feed', 'visibility' => EventVisibility::Masons]] as $item) {
+            $event = Event::create($item + ['lodge_id' => $lodge->id, 'status' => EventStatus::Published, 'time_zone' => 'America/Chicago', 'first_starts_at' => now()->addDay(), 'duration_minutes' => 60]);
+            EventOccurrence::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'recurrence_key' => $item['slug'], 'original_starts_at' => now()->addDay(), 'starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour(), 'status' => EventOccurrenceStatus::Scheduled]);
+        }
+
+        $this->get("/l/{$lodge->slug}/calendar.ics")->assertOk()->assertHeader('content-type', 'text/calendar; charset=utf-8')->assertSee('Public Feed')->assertDontSee('Private Feed');
+    }
 }

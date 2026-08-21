@@ -39,6 +39,7 @@ class EventRequest extends FormRequest
             'reminders_enabled' => ['boolean'],
             'guest_reminders_enabled' => ['boolean'],
             'cover_media_asset_id' => ['nullable', 'integer'],
+            'confirm_schedule_change' => ['boolean'],
         ];
     }
 }

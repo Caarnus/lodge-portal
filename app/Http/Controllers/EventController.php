@@ -67,7 +67,13 @@ class EventController extends Controller
     {
         $this->allowEvent($lodge, $event);
         $before = $event->toArray();
-        $event->update($this->data($request, $lodge, $recurrence, $sanitizer) + ['updated_by' => $request->user()->id]);
+        $data = $this->data($request, $lodge, $recurrence, $sanitizer);
+        if ($this->scheduleChanged($event, $data) && ! $request->boolean('confirm_schedule_change')) {
+            $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn ($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries'))->count();
+            throw ValidationException::withMessages(['confirm_schedule_change' => "Schedule change requires confirmation. {$protected} protected future occurrence(s) will be preserved."]);
+        }
+        unset($data['confirm_schedule_change']);
+        $event->update($data + ['updated_by' => $request->user()->id]);
         $this->materialize($event->fresh(), $materializer);
         Audit::record('event.updated', $event, $lodge, $before, $event->fresh()->toArray());
 
@@ -106,6 +112,7 @@ class EventController extends Controller
         return Inertia::render('events/Edit', [
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event,
+            'reservationFields' => $event->exists ? $event->reservationFields()->get() : [],
             'reminderSubscriptionCount' => $event->exists ? $event->reminderSubscriptions()->where('status', 'active')->count() : 0,
             'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
@@ -154,6 +161,11 @@ class EventController extends Controller
     private function materialize(Event $event, EventOccurrenceMaterializer $materializer): void
     {
         $materializer->materialize($event, now()->subMonths(3)->toImmutable(), now()->addMonths(18)->toImmutable());
+    }
+
+    private function scheduleChanged(Event $event, array $data): bool
+    {
+        return collect(['first_starts_at', 'duration_minutes', 'time_zone', 'rrule'])->contains(fn (string $key) => (string) $event->getAttribute($key) !== (string) ($data[$key] ?? null));
     }
 
     private function allow(Lodge $lodge): void

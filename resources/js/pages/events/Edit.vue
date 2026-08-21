@@ -6,7 +6,7 @@ import { Link, router, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 defineOptions({ layout: AppLayout });
-const props = defineProps<{ lodge: { id: number; name: string; timezone: string }; event: any; categories: Array<{ id: number; name: string }>; media: Array<{ id: number; original_name: string }>; reminderSubscriptionCount: number }>();
+const props = defineProps<{ lodge: { id: number; name: string; timezone: string }; event: any; categories: Array<{ id: number; name: string }>; media: Array<{ id: number; original_name: string }>; reservationFields: any[]; reminderSubscriptionCount: number }>();
 const isNew = computed(() => !props.event.id);
 const form = useForm({
     title: props.event.title ?? '', slug: props.event.slug ?? '', description: props.event.description ?? '', location_name: props.event.location_name ?? '', location_details: props.event.location_details ?? '', contact_name: props.event.contact_name ?? '', contact_email: props.event.contact_email ?? '', contact_phone: props.event.contact_phone ?? '', time_zone: props.event.time_zone ?? props.lodge.timezone,
