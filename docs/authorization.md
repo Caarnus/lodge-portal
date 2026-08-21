@@ -52,7 +52,7 @@ Pending registrants may authenticate only into the pending-approval experience. 
 | Merge people or resolve conflicting links | Yes | Never lodge-scoped; platform administrator only |
 | View current public officers | Public projection only | No authentication; active lodge and published site only |
 
-The built-in Administrator receives all Phase 3 lodge permissions. The built-in Officer receives `people.view`, `people.manage`, `memberships.manage`, and `relationships.view`, but not `relationships.manage`, role management, or merge access. Member and Non-member receive no administrative Phase 3 permissions by default. Officer position, degree, membership type, and membership status never grant authorization implicitly.
+The built-in Administrator receives all Phase 3 lodge permissions. The built-in Officer receives `people.view`, `people.manage`, `memberships.manage`, and `relationships.view`, but not `relationships.manage`, role management, or merge access. Member receives `people.view` and `relationships.view`; Non-member receives no administrative Phase 3 permissions by default. Officer position, degree, membership type, and membership status never grant authorization implicitly.
 
 Person authorization has two checks: the actor has a permission in a specific lodge, and that lodge has the required relationship to the person. A permission in Lodge A cannot authorize reading or changing a person who is reachable only through Lodge B. Shared person edits record which lodge relationship authorized the action.
 

@@ -36,7 +36,7 @@ Public lodge sites and the authenticated administration application share the La
 
 ## Person and Membership Boundary
 
-People and users are global identities; memberships are lodge-owned relationships. Person identity/contact fields have one canonical value, while membership status, degree, lodge numbers, dates, notes, family-relationship provenance, officer terms, and roles retain explicit lodge ownership.
+People and users are global identities; memberships are lodge-owned relationships. Person identity/contact fields have one canonical value, while membership status, degree, Award of Gold state, lodge numbers, dates, notes, family-relationship provenance, current officers, Past Master years, and roles retain explicit lodge ownership.
 
 A lodge-scoped people query begins with its active memberships and relationships connected to those members. It does not query the global people table and filter afterward. Shared person mutation requires both a lodge permission and an active membership relationship, and the authorizing lodge is recorded in audit data. Relationship edits are the deliberate cross-owner exception: a qualifying primary lodge may edit after write-time endpoint/membership validation.
 

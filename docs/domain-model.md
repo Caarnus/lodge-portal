@@ -38,7 +38,7 @@ The lodge remains the owner of public identity fields including seal, logo, tag 
 - `OfficerAssignment`: a lodge-owned historical term with required start/end dates and an optional label, connecting a membership to a platform-owned officer position. The membership, assignment, and lodge must agree.
 - Account link: the unique optional `users.person_id` association. Revoking a lodge role does not delete this global link.
 
-Shared person identity/contact data is updated globally only through an authorized active-membership relationship. Memberships, notes, relationship provenance, officer history, and role assignments retain a lodge owner. Family relationship visibility/editing follows its explicit active-member and primary-lodge collaboration rules instead of unrestricted sharing. The global people table is never an unscoped directory.
+Shared person identity/contact data is updated globally only through an authorized active-membership relationship. Memberships, notes, relationship provenance, current officer assignments, Past Master years, and role assignments retain a lodge owner. Family relationship visibility/editing follows its explicit active-member and primary-lodge collaboration rules instead of unrestricted sharing. The global people table is never an unscoped directory.
 
 One person may have memberships in multiple lodges, but at most one membership per lodge. Ending one membership preserves the person, other memberships, account link, relationships, and history. Primary lodge is a membership string value containing a lodge number, not a required foreign key to a hosted lodge.
 

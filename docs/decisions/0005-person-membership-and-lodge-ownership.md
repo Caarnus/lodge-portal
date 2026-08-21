@@ -13,7 +13,7 @@ Keep one global person identity and optional one-to-one user link. Store lodge-s
 
 Model family relationships as connections between people with an explicit lodge owner for provenance. Any lodge with an active member at either endpoint may view the relationship. A lodge may edit it only when a qualifying endpoint has an active membership in that lodge and names that lodge number as primary. Both lodges may edit when different endpoints independently qualify. This is controlled administrative sharing, not directory visibility.
 
-Model officer terms as lodge-owned assignments from a membership to a platform-owned position reference. Terms have required start/end dates and an optional label. Assignments are public by default, while email and phone require explicit opt-in and address remains private.
+Model current officers as lodge-owned assignments from a membership to a platform-owned position reference, with one current assignment per lodge position. Assignments are public by default, while email and phone require explicit opt-in and address remains private. Track Past Master service separately as repeatable lodge/person/year records; track Award of Gold explicitly on the lodge membership.
 
 Account access remains user-and-role based. Membership, degree, family relationship, and officer position do not implicitly grant permissions. Officer assignment/removal prompts for an optional corresponding role change, but lodge access still requires an explicit role assignment decision.
 
@@ -23,7 +23,7 @@ Manual person merge is platform-admin only, transactional, conflict-aware, and a
 
 - Shared contact corrections are not duplicated across memberships.
 - Every person query must establish an authorized lodge relationship before exposing data.
-- Lodge-specific notes, memberships, and officer history remain tenant-isolated. Family relationship access is the explicit endpoint-derived exception.
+- Lodge-specific notes, memberships, current officers, and Past Master history remain tenant-isolated. Family relationship access is the explicit endpoint-derived exception.
 - Updating shared person data has cross-lodge effects and requires clear UI language and auditing.
 - Membership ending and lodge-access revocation remain separate operations.
 - Public officer rendering requires a narrow explicit projection rather than serializing person or membership records.

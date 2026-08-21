@@ -38,4 +38,29 @@ class Lodge extends Model
     {
         return $this->hasMany(MediaAsset::class);
     }
+
+    public function memberships()
+    {
+        return $this->hasMany(Membership::class);
+    }
+
+    public function ownedPersonRelationships()
+    {
+        return $this->hasMany(PersonRelationship::class, 'owning_lodge_id');
+    }
+
+    public function officerAssignments()
+    {
+        return $this->hasMany(OfficerAssignment::class);
+    }
+
+    public function pastMasterTerms()
+    {
+        return $this->hasMany(PastMasterTerm::class);
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(Role::class);
+    }
 }

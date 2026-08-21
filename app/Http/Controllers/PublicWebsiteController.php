@@ -6,6 +6,7 @@ use App\Enums\LodgeStatus;
 use App\Enums\WebsitePageStatus;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
+use App\Models\OfficerAssignment;
 use App\Models\WebsitePage;
 use App\Models\WebsitePageVersion;
 use Illuminate\Http\Request;
@@ -53,6 +54,16 @@ class PublicWebsiteController extends Controller
 
             return $ids;
         })->unique();
+        $officers = collect();
+        if ($version->sections->contains('type', 'officers_placeholder')) {
+            $officers = OfficerAssignment::query()->where('lodge_id', $lodge->id)->where('is_public', true)
+                ->with(['position', 'membership.person'])->get()->sortBy('position.sort_order')->values()->map(fn ($assignment) => [
+                    'position' => $assignment->position->name,
+                    'name' => $assignment->membership->person->display_name,
+                    'email' => $assignment->show_email ? $assignment->membership->person->email : null,
+                    'phone' => $assignment->show_phone ? $assignment->membership->person->phone : null,
+                ]);
+        }
 
         return Inertia::render('public/Website', [
             'lodge' => $lodge,
@@ -60,6 +71,7 @@ class PublicWebsiteController extends Controller
             'navigation' => $this->navigationTree($versions),
             'media' => MediaAsset::query()->whereIn('id', $mediaIds)->where('processing_status', 'ready')->where('visibility', 'public')->get()->keyBy('id'),
             'preview' => $preview,
+            'officers' => $officers,
         ]);
     }
 

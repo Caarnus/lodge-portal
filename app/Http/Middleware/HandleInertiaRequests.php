@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Lodge;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +42,20 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
         $user = $request->user();
-        $lodges = $user?->lodges()->select('lodges.id', 'lodges.name', 'lodges.slug')->distinct()->get()
-            ->map(fn ($lodge) => $lodge->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))) ?? collect();
+        $lodges = collect();
+        if ($user instanceof User) {
+            $lodgeQuery = Lodge::query();
+            if (! $user->is_platform_admin) {
+                $lodgeQuery->whereHas('users', fn (Builder $users) => $users->where('users.id', $user->id));
+            }
+            $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug'])
+                ->map(fn (Lodge $lodge) => $lodge
+                    ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
+                    ->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))
+                    ->setAttribute('can_view_people', $user->hasLodgePermission($lodge, 'people.view'))
+                    ->setAttribute('can_manage_officers', $user->hasLodgePermission($lodge, 'officers.manage'))
+                    ->setAttribute('can_manage_roles', $user->hasLodgePermission($lodge, 'roles.manage')));
+        }
         $canReviewRegistrations = $user && ($user->is_platform_admin || DB::table('lodge_user_roles')
             ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
             ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
@@ -55,6 +70,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'lodges' => $lodges,
                 'can_review_registrations' => (bool) $canReviewRegistrations,
+            ],
+            'flash' => [
+                'notice' => fn () => $request->session()->get('notice'),
+                'officer_role_prompt' => fn () => $request->session()->get('officer_role_prompt'),
             ],
         ]);
     }

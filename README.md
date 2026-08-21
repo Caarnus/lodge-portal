@@ -4,7 +4,7 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The platform foundation and public lodge website CMS are implemented: authentication, approval routing, platform and lodge administration, tenant-scoped permissions, versioned website publishing, reusable content sections, private media processing, auditing, Docker development services, and automated Laravel/Playwright coverage are available.
+The platform foundation, public lodge website CMS, and people/membership administration are implemented: authentication, approval routing, tenant-scoped permissions, structured people and memberships, family relationships, current officers and public projections, Past Master history, lodge roles, private profile photos, duplicate merging, versioned website publishing, auditing, Docker development services, and automated Laravel/Playwright coverage are available.
 
 ## Planned Stack
 

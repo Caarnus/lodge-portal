@@ -7,10 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LodgeRequest;
 use App\Models\Feature;
 use App\Models\Lodge;
-use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Audit;
+use App\Services\LodgeRoleCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,13 +45,14 @@ class LodgeController extends Controller
         return Inertia::render('platform/LodgeForm', []);
     }
 
-    public function store(LodgeRequest $r)
+    public function store(LodgeRequest $r, LodgeRoleCatalog $roles)
     {
         $data = $r->safe()->except('logo');
         if ($r->hasFile('logo')) {
             $data['logo_path'] = $r->file('logo')->store('lodges', 'public');
         }
         $lodge = Lodge::create($data);
+        $roles->ensureFor($lodge);
         Audit::record('lodge.created', $lodge, $lodge, null, $lodge->toArray());
 
         return redirect()->route('platform.lodges.edit', $lodge);
@@ -75,7 +76,7 @@ class LodgeController extends Controller
         return back();
     }
 
-    public function assignAdmin(Request $r, Lodge $lodge)
+    public function assignAdmin(Request $r, Lodge $lodge, LodgeRoleCatalog $roles)
     {
         $data = $r->validate(['email' => 'required|email', 'name' => 'nullable|string|max:255']);
         $email = strtolower($data['email']);
@@ -90,8 +91,8 @@ class LodgeController extends Controller
                 'rejection_reason' => null,
             ]);
         }
-        $role = Role::firstOrCreate(['lodge_id' => $lodge->id, 'name' => 'Administrator'], ['is_system' => true]);
-        $role->permissions()->syncWithoutDetaching(Permission::whereIn('key', ['lodge.manage', 'registration.review', 'website.manage', 'website.publish'])->pluck('id'));
+        $roles->ensureFor($lodge);
+        $role = Role::query()->where('lodge_id', $lodge->id)->where('name', 'Administrator')->firstOrFail();
         DB::table('lodge_user_roles')->updateOrInsert(['lodge_id' => $lodge->id, 'user_id' => $u->id, 'role_id' => $role->id], ['created_at' => now(), 'updated_at' => now()]);
         Audit::record('lodge.admin_assigned', $u, $lodge, null, ['user_id' => $u->id]);
 

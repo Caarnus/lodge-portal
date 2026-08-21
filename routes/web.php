@@ -1,14 +1,23 @@
 <?php
 
+use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
+use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\OfficerController;
+use App\Http\Controllers\PersonAccountController;
+use App\Http\Controllers\PersonController;
+use App\Http\Controllers\PersonPhotoController;
+use App\Http\Controllers\PersonRelationshipController;
 use App\Http\Controllers\Platform\LodgeController;
+use App\Http\Controllers\Platform\PersonMergeController;
 use App\Http\Controllers\PublicWebsiteController;
 use App\Http\Controllers\RegistrationReviewController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteSectionController;
 use App\Models\Lodge;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,16 +36,39 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
     Route::post('platform/lodges/{lodge}/admins', [LodgeController::class, 'assignAdmin'])->name('platform.lodges.admins')->middleware('platform-admin');
     Route::put('platform/lodges/{lodge}/features', [LodgeController::class, 'features'])->name('platform.lodges.features')->middleware('platform-admin');
+    Route::get('platform/people/merge', [PersonMergeController::class, 'create'])->name('platform.people.merge.create')->middleware('platform-admin');
+    Route::post('platform/people/merge', [PersonMergeController::class, 'store'])->name('platform.people.merge.store')->middleware('platform-admin');
     Route::get('registrations', [RegistrationReviewController::class, 'index'])->name('registrations.index');
     Route::patch('registrations/{user}', [RegistrationReviewController::class, 'decide'])->name('registrations.decide');
     Route::get('lodges/{lodge}/settings', [LodgeSettingsController::class, 'edit'])->name('lodges.settings.edit');
     Route::put('lodges/{lodge}/settings', [LodgeSettingsController::class, 'update'])->name('lodges.settings.update');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {
-        abort_unless($r->user()->hasLodgePermission($lodge, 'lodge.manage'), 403);
+        abort_unless($r->user()->is_platform_admin || DB::table('lodge_user_roles')
+            ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);
         $r->user()->update(['current_lodge_id' => $lodge->id]);
 
         return back();
     })->name('lodges.activate');
+
+    Route::resource('lodges.people', PersonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::put('lodges/{lodge}/memberships/{membership}', [MembershipController::class, 'update'])->name('lodges.memberships.update');
+    Route::patch('lodges/{lodge}/memberships/{membership}/end', [MembershipController::class, 'end'])->name('lodges.memberships.end');
+    Route::post('lodges/{lodge}/memberships/{membership}/past-master-terms', [MembershipController::class, 'addPastMasterTerm'])->name('lodges.memberships.past-master-terms.store');
+    Route::delete('lodges/{lodge}/memberships/{membership}/past-master-terms/{term}', [MembershipController::class, 'removePastMasterTerm'])->name('lodges.memberships.past-master-terms.destroy');
+    Route::post('lodges/{lodge}/people/{person}/relationships', [PersonRelationshipController::class, 'store'])->name('lodges.relationships.store');
+    Route::put('lodges/{lodge}/relationships/{relationship}', [PersonRelationshipController::class, 'update'])->name('lodges.relationships.update');
+    Route::delete('lodges/{lodge}/relationships/{relationship}', [PersonRelationshipController::class, 'destroy'])->name('lodges.relationships.destroy');
+    Route::post('lodges/{lodge}/people/{person}/account', [PersonAccountController::class, 'store'])->name('lodges.people.account.store');
+    Route::delete('lodges/{lodge}/people/{person}/access', [PersonAccountController::class, 'revoke'])->name('lodges.people.access.revoke');
+    Route::post('lodges/{lodge}/people/{person}/photo', [PersonPhotoController::class, 'store'])->name('lodges.people.photo.store');
+    Route::get('lodges/{lodge}/people/{person}/photo', [PersonPhotoController::class, 'show'])->name('lodges.people.photo.show');
+    Route::resource('lodges.officers', OfficerController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('lodges/{lodge}/roles', [LodgeRoleController::class, 'index'])->name('lodges.roles.index');
+    Route::get('lodges/{lodge}/role-assignments', [LodgeRoleController::class, 'assignments'])->name('lodges.roles.assignments');
+    Route::post('lodges/{lodge}/roles', [LodgeRoleController::class, 'store'])->name('lodges.roles.store');
+    Route::put('lodges/{lodge}/roles/{role}', [LodgeRoleController::class, 'update'])->name('lodges.roles.update');
+    Route::post('lodges/{lodge}/role-assignments', [LodgeRoleController::class, 'assign'])->name('lodges.roles.assign');
+    Route::delete('lodges/{lodge}/role-assignments', [LodgeRoleController::class, 'unassign'])->name('lodges.roles.unassign');
 
     Route::prefix('lodges/{lodge}/website')->name('lodges.website.')->group(function () {
         Route::get('/', [WebsiteController::class, 'index'])->name('index');

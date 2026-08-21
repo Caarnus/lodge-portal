@@ -32,7 +32,7 @@ Public route tests resolve the lodge explicitly, reject disabled statuses, allow
 
 ## People and Membership Browser Path
 
-Playwright must create a person without an account, add the same person to two lodges, assign different roles, add spouse/child relationships, verify active-member visibility and primary-lodge editing from both qualifying lodges, invite and link one account, assign a current officer term and choose a role in the modal, verify the public Officers section, switch lodge context, revoke access in one lodge, and confirm the other membership remains usable.
+Playwright must create a person without an account, add the same person to two lodges, assign different roles, add spouse/child relationships with explicit direction, verify active-member visibility and primary-lodge editing from both qualifying lodges, invite and link one account, assign a current officer and choose a role in the modal, verify the public Officers section, switch lodge context, revoke access in one lodge, and confirm the other membership remains usable.
 
 ## Person-Ownership Test Pattern
 
