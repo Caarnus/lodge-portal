@@ -119,7 +119,9 @@ Platform
 │   ├── Public Website
 │   ├── Officers
 │   ├── Events
-│   ├── Signups
+│   │   ├── Attendance Reservations
+│   │   ├── Reminder Subscriptions
+│   │   └── Volunteer Staffing / Commitments
 │   ├── Newsletters
 │   ├── Galleries
 │   ├── Scholarships
@@ -143,15 +145,16 @@ Platform
 | 1 | Platform Foundation and Lodge Provisioning | A platform administrator can create lodges and lodge admins can sign in and manage basic lodge identity. |
 | 2 | Public Lodge Website and Content Management | Each lodge can independently publish and manage a branded public website. |
 | 3 | People, Membership, and Lodge Administration | Lodges can maintain member records, accounts, roles, officers, and family relationships. |
-| 4 | Events, Recurrence, Signups, and Reminders | Lodges can manage calendars, recurring events, signups, exceptions, and email reminders. |
-| 5 | Member Portal and Directory Privacy | Members can manage their profile and control own-lodge versus cross-lodge directory visibility. |
-| 6 | Newsletters, Galleries, and Lodge Communications | Lodges can publish newsletters, photo galleries, and member/public communications. |
-| 7 | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into regional ritual-assistance discovery. |
-| 8 | Regional Discovery and Cross-Lodge Participation | Participating lodges can intentionally share events, lodge listings, member profiles, and eligible regional resources. |
-| 9 | Scholarship Management | Each lodge can securely run independent scholarship cycles and reviews. |
-| 10 | Games and Shared Content | Lodges can run shared or private Masonic trivia/game content and sessions. |
-| 11 | Newburgh Migration and Production Cutover | Existing Newburgh Lodge data is migrated, validated, and the new platform replaces the existing application. |
-| 12 | Regional Lodge Onboarding and Operational Hardening | Additional Southwest Indiana lodges can be onboarded without developer intervention for normal setup tasks. |
+| 4 | Events, Recurrence, Reservations, and Reminders | Lodges can manage calendars, recurring events, occurrence exceptions, limited-capacity reservations, reminder subscriptions, and email reminders. |
+| 5 | Volunteer Staffing and Commitments | Lodges can define event volunteer positions, members can make explicit volunteer commitments, and authorized managers can track staffing needs, rosters, and volunteer-specific reminders without conflating them with attendance reservations or reminder subscriptions. |
+| 6 | Member Portal and Directory Privacy | Members can manage their profile and control own-lodge versus cross-lodge directory visibility. |
+| 7 | Newsletters, Galleries, and Lodge Communications | Lodges can publish newsletters, photo galleries, and member/public communications. |
+| 8 | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into regional ritual-assistance discovery. |
+| 9 | Regional Discovery and Cross-Lodge Participation | Participating lodges can intentionally share events, lodge listings, member profiles, and eligible regional resources. |
+| 10 | Scholarship Management | Each lodge can securely run independent scholarship cycles and reviews. |
+| 11 | Games and Shared Content | Lodges can run shared or private Masonic trivia/game content and sessions. |
+| 12 | Newburgh Migration and Production Cutover | Existing Newburgh Lodge data is migrated, validated, and the new platform replaces the existing application. |
+| 13 | Regional Lodge Onboarding and Operational Hardening | Additional Southwest Indiana lodges can be onboarded without developer intervention for normal setup tasks. |
 
 ---
 
@@ -207,10 +210,10 @@ Each lodge must support:
 - Public phone number, optional.
 - Lodge status with initial states of active, disabled, and disabled-and-locked. A disabled lodge has its public site disabled and may be reactivated by an authorized lodge administrator; a disabled-and-locked lodge requires a platform administrator to reactivate it.
 - Basic branding fields:
-  - Logo.
-  - Primary color.
-  - Secondary color.
-  - Defaults should match Indiana Grand Lodge. Placeholder assets and colors may be used until the official assets available from `indianafreemasons.com` are selected and incorporated.
+    - Logo.
+    - Primary color.
+    - Secondary color.
+    - Defaults should match Indiana Grand Lodge. Placeholder assets and colors may be used until the official assets available from `indianafreemasons.com` are selected and incorporated.
 
 ### Authentication and Authorization
 
@@ -635,21 +638,25 @@ This phase does not include:
 
 ---
 
-# 8. Phase 4 — Events, Recurrence, Signups, and Reminders
+# 8. Phase 4 — Events, Recurrence, Reservations, and Reminders
 
 ## 8.1 Goal
 
-Provide a complete lodge event-management system with recurring events, occurrence exceptions, individual cancellations, signups, and email reminders.
+Provide a complete lodge event-management system with recurring events, occurrence exceptions, individual cancellations, optional capacity-controlled attendance reservations, independent reminder subscriptions, and email reminders.
 
 This phase should reproduce and improve the strongest event-management functionality of the current Newburgh application.
+
+The detailed and authoritative implementation contract is [docs/phase-04.md](docs/phase-04.md). If this summary and that specification differ, update this summary and follow the detailed specification.
 
 ## 8.2 Assumptions
 
 - Recurring events should use an established recurrence representation such as RRULE.
 - Individual occurrences must be addressable independently.
 - A recurring series belongs to exactly one lodge.
-- Signups may be tied to a specific occurrence rather than the whole series.
-- Some events are informational only and do not require signups.
+- Reservations always apply to a specific occurrence and consume its limited capacity.
+- Reminder subscriptions apply to one occurrence or an entire recurring series and do not consume capacity or imply attendance.
+- Volunteer commitments are a third, separate intent tied to named positions. Their schema boundary is documented in Phase 4, and volunteer staffing, commitments, rosters, and staffing reminders are implemented in Phase 5.
+- Most events may remain informational and offer reminders without enabling reservations.
 
 ## 8.3 Functional Requirements
 
@@ -660,10 +667,10 @@ Authorized lodge users can create:
 - One-time events.
 - Recurring events.
 - Events with visibility of:
-  - Public.
-  - Masons only.
-  - Lodge only.
-- Events with or without signup sheets.
+    - Public.
+    - Masons only.
+    - Lodge only.
+- Events with or without capacity-controlled reservations.
 
 Masons-only and lodge-only events must have a required Masonic qualification level. Supported initial required levels are:
 
@@ -683,7 +690,7 @@ Event data includes:
 - Time zone.
 - Category selected from lodge-enabled event categories derived from a platform-wide reference list.
 - Cover image.
-- Signup settings.
+- Reservation and reminder-subscription settings kept as separate controls.
 - Visibility.
 - Contact information.
 
@@ -700,19 +707,33 @@ Support:
 - Changing date, time, location, or description for an individual occurrence.
 - Preserving series identity.
 
-### Signups
+### Attendance Reservations
 
 Support:
 
 - Name.
 - Email.
 - Optional phone.
-- Party size or configurable attendee fields.
-- Signup limit.
-- Public signup without account where permitted.
-- Authenticated/member-only signup where configured.
-- Per-occurrence signup for recurring events.
-- Self-service cancellation/unsubscribe through secure tokens.
+- Party size and configurable attendance fields.
+- Positive occurrence capacity and maximum party size.
+- Public reservation without an account only where explicitly permitted.
+- Authenticated/member-only reservation where configured.
+- One active reservation per normalized email and occurrence.
+- Self-service cancellation through a single-purpose secure token.
+
+A reservation represents a commitment to attend. It must not also represent notification consent or a volunteer assignment.
+
+### Reminder Subscriptions
+
+Support:
+
+- Reminder-only subscription without an attendance reservation.
+- One-occurrence or recurring-series scope.
+- Authenticated subscription for eligible protected events.
+- Public email subscription where explicitly permitted.
+- Explicit, separately labeled reminder opt-in from a reservation flow.
+- Self-service unsubscription through a different single-purpose secure token.
+- One active subscription per normalized email and scope.
 
 ### Email Reminders
 
@@ -724,14 +745,14 @@ Support configurable reminders such as:
 
 The architecture should allow additional reminder schedules later.
 
-### Signup Eligibility
+### Reservation and Reminder Eligibility
 
-- Lodge-only events may only accept eligible members of the owning lodge.
-- Masons-only events may accept eligible authenticated Masons from any lodge represented on the platform when cross-lodge participation is enabled for the event.
-- Public events may accept eligible authenticated members and, where configured, public unauthenticated signups.
-- Masons-only and lodge-only eligibility must enforce the configured required degree level.
+- Lodge-only events may only accept reservations and reminder subscriptions from eligible members of the owning lodge.
+- Masons-only event details and reminders are available to eligible authenticated Masons represented on the platform. Cross-lodge reservations additionally require explicit event configuration.
+- Public events may accept authenticated reservations and subscriptions and, where separately configured, unauthenticated reservations or subscriptions.
+- Masons-only and lodge-only eligibility must enforce the configured required degree level for both interactions.
 - Members with a higher degree level are eligible for events requiring a lower degree level.
-- Only active memberships are eligible for Masons-only or lodge-only event attendance/signup. Demitted, suspended, expelled, and deceased memberships are not eligible.
+- Only active memberships are eligible for protected event details, reservations, or reminder subscriptions. Demitted, suspended, expelled, and deceased memberships are not eligible.
 - The event data model should preserve room for broader cross-lodge event participation later without requiring regional-group infrastructure in this phase.
 
 ### Calendar Integration
@@ -752,14 +773,15 @@ Published public events must be usable in the public site sections introduced in
 ## 8.4 Technical Requirements
 
 - Recurrence expansion must be deterministic and unit tested.
-- Occurrence identifiers must remain stable enough to associate signups and exceptions.
+- Occurrence identifiers must remain stable enough to associate reservations, occurrence-scoped subscriptions, deliveries, and exceptions.
 - Parent event lodge ownership must flow to every occurrence.
 - Platform-wide event-category reference values must be stored as reference data, while each lodge may configure which available categories it uses.
-- Background jobs must carry lodge and event identity explicitly.
+- Background jobs carry one stable delivery or occurrence identifier and reload the complete lodge/event ownership chain before acting; they never rely on active-lodge session state.
 - Reminder jobs must be idempotent.
 - Reminder delivery must not duplicate due to queue retries.
 - Event URLs must support recurring occurrence context.
-- Event cancellation must not delete signup history unless explicitly required.
+- Event cancellation must preserve reservation and subscription history.
+- Reservations, reminder subscriptions, and future volunteer commitments require separate tables, statuses, consent, and token lifecycles.
 
 ## 8.5 Acceptance Criteria
 
@@ -769,12 +791,13 @@ A tester can:
 2. Cancel one occurrence.
 3. Move another occurrence to a different night.
 4. Change the location of a third occurrence.
-5. Enable signup for one or all occurrences as configured.
-6. Register for a specific occurrence.
-7. Receive a test reminder.
-8. Cancel the registration through the secure management link.
-9. View correct upcoming occurrences on the public website.
-10. Confirm no occurrence can resolve into another lodge's context.
+5. Enable limited-capacity reservations for an event.
+6. Reserve for a specific occurrence and consume the correct party-size capacity.
+7. Subscribe another person to reminders without creating a reservation.
+8. Receive one test reminder even when overlapping subscription scopes exist.
+9. Cancel the reservation and unsubscribe through separate secure management links.
+10. View correct upcoming occurrences on the public website.
+11. Confirm no occurrence, reservation, or subscription can resolve into another lodge's context.
 
 ## 8.6 Automated Test Requirements
 
@@ -784,14 +807,15 @@ Tests must cover:
 - DST transitions.
 - Single-occurrence cancellation.
 - Single-occurrence overrides.
-- Signup association with occurrence.
+- Reservation association with occurrence.
+- Reminder occurrence/series scope and independence from reservations.
 - Reminder deduplication.
 - Event visibility.
 - Cross-lodge access.
-- Signup limits.
-- Signup eligibility for public, Masons-only, and lodge-only events.
+- Reservation capacity under concurrent requests.
+- Reservation and reminder-subscription eligibility for public, Masons-only, and lodge-only events.
 - Required-qualification hierarchy and default EA requirement.
-- Ineligible membership statuses being denied attendance/signup for protected events.
+- Ineligible membership statuses being denied protected event details, reservations, and subscriptions.
 - ICS/iCalendar generation.
 - Secure token management.
 
@@ -802,17 +826,186 @@ This phase does not include:
 - Regional event discovery beyond the visibility/eligibility rules needed for this phase.
 - Paid ticketing.
 - Waitlists.
+- Volunteer position management, commitments, rosters, and staffing reminders; their extension boundary is defined in this phase and implementation is deferred to Phase 5.
 - Two-way synchronization with external calendars.
 
 ---
 
-# 9. Phase 5 — Member Portal and Directory Privacy
+
+# 9. Phase 5 — Volunteer Staffing and Commitments
 
 ## 9.1 Goal
 
-Give authenticated members a personal portal and allow them to control how their profile is visible to their own lodge and to other participating lodges.
+Add a separate volunteer-staffing workflow for events so lodges can define named help positions, members can explicitly commit to those positions, and authorized lodge users can see staffing needs and volunteer rosters.
+
+Volunteer commitments are intentionally distinct from attendance reservations and reminder subscriptions:
+
+- A reservation is a commitment to attend and may consume event capacity.
+- A reminder subscription is consent to receive event notifications and does not imply attendance.
+- A volunteer commitment is an authenticated agreement to fill a named event-help position for a specific occurrence.
+
+No one interaction may silently stand in for another.
 
 ## 9.2 Assumptions
+
+- Phase 4 event, occurrence, reservation, and reminder-subscription models are already stable.
+- Volunteer staffing applies to event occurrences, including occurrences from recurring series.
+- Volunteer commitments require an authenticated account linked to an eligible person.
+- A person may volunteer without holding an attendance reservation unless a later detailed requirement explicitly says otherwise.
+- Volunteer staffing counts are planning commitments, not employment or contractual scheduling.
+- Volunteer-specific reminder messages are separate from ordinary event reminder subscriptions.
+- Regional/cross-lodge volunteer discovery is not required in this phase.
+
+## 9.3 Functional Requirements
+
+### Volunteer Positions
+
+Authorized lodge event managers can define volunteer positions for an event or, where needed, a specific occurrence.
+
+Each position supports:
+
+- Position name.
+- Optional description or instructions.
+- Number of volunteers needed.
+- Sort/display order.
+- Active/inactive state.
+- Visibility/eligibility rules consistent with the owning event.
+- Optional occurrence-specific scope where the position is not needed for every occurrence.
+
+Examples include:
+
+- Setup.
+- Registration Table.
+- Kitchen.
+- Cleanup.
+- Driver.
+- Greeter.
+
+The UI must show filled and remaining counts without exposing volunteer contact details to unauthorized users.
+
+### Volunteer Commitments
+
+Eligible authenticated members can:
+
+- View volunteer positions available to them.
+- Commit to one available position for a specific occurrence.
+- Withdraw their own commitment.
+- View their current and upcoming volunteer commitments.
+
+Authorized event managers can:
+
+- View the volunteer roster for an occurrence.
+- Add or remove a commitment administratively when appropriate.
+- See filled and remaining staffing counts.
+- Contact volunteers using authorized person/contact information.
+- Distinguish withdrawn and administratively removed commitments from active commitments.
+
+Initial commitment statuses are:
+
+- Committed.
+- Withdrawn.
+- Administratively removed.
+
+A commitment must reference exactly one person/user, one volunteer position, and one event occurrence.
+
+### Staffing Reminders
+
+The platform may send volunteer-specific reminders for active commitments.
+
+At minimum:
+
+- Volunteer reminders are based on the volunteer commitment, not the attendee reservation or ordinary reminder subscription.
+- Reminder content identifies the volunteer position and occurrence.
+- A withdrawn or administratively removed commitment must not receive future staffing reminders.
+- Delivery must be idempotent and safe under queue retries.
+- Ordinary event reminder consent must not be inferred from a volunteer commitment, and volunteer reminder delivery must not create an ordinary event reminder subscription.
+
+### Member Portal Integration
+
+Once this phase is complete, the member-facing experience should expose:
+
+- Upcoming volunteer commitments.
+- Position name.
+- Event/occurrence date and location.
+- Current commitment status.
+- A self-service withdrawal action where allowed.
+
+The broader profile and directory features remain in Phase 6.
+
+## 9.4 Technical Requirements
+
+- Volunteer positions and commitments must use dedicated tables/models and must never be stored as reservation fields, reservation flags, reminder-subscription fields, or generic event-response data.
+- Volunteer positions are lodge-owned through their event/occurrence relationship.
+- Volunteer commitments must reference the owning lodge, event, occurrence, volunteer position, authenticated user, and linked person in a way that can be revalidated server-side.
+- A volunteer position may require more than one person through a configurable needed-count value.
+- Commitments must enforce position/occurrence/lodge ownership and current eligibility.
+- The same person must not have duplicate active commitments to the same position and occurrence.
+- Whether one person may commit to multiple different positions for the same occurrence should be explicitly resolved in the detailed Phase 5 specification.
+- Volunteer counts must be derived from active commitments rather than manually maintained counters.
+- Volunteer contact information follows existing Person privacy/authorization rules and must not be exposed in public staffing counts.
+- Jobs must carry stable identifiers and reload the complete lodge/event/occurrence/position/commitment ownership chain before sending staffing reminders.
+- Audit creation, withdrawal, administrative removal, and manager-created commitments where appropriate.
+- If one UI action offers attendance reservation, ordinary reminder subscription, and volunteer commitment together, each intent must be separately labeled and explicitly confirmed, and each must create its own independent record.
+
+## 9.5 Acceptance Criteria
+
+A tester can:
+
+1. Create an event occurrence with multiple volunteer positions.
+2. Set different needed counts for those positions.
+3. Sign in as an eligible member and commit to one position.
+4. Confirm the commitment does not create an attendance reservation.
+5. Confirm the commitment does not create an ordinary reminder subscription.
+6. View filled and remaining volunteer counts.
+7. View the occurrence volunteer roster as an authorized event manager.
+8. Withdraw the commitment as the member.
+9. Add or remove a commitment administratively as an authorized manager.
+10. Receive a volunteer-specific reminder for an active commitment.
+11. Confirm a withdrawn or administratively removed commitment does not receive future staffing reminders.
+12. Confirm another lodge cannot access or manipulate the position, commitment, roster, or reminder data.
+
+## 9.6 Automated Test Requirements
+
+Tests must cover:
+
+- Volunteer position ownership and occurrence scoping.
+- Needed-count calculations.
+- Duplicate commitment prevention.
+- Commitment eligibility.
+- Commitment creation, withdrawal, and administrative removal.
+- Independence from attendance reservations.
+- Independence from ordinary reminder subscriptions.
+- Volunteer roster authorization.
+- Volunteer contact-information privacy.
+- Volunteer-specific reminder scheduling and idempotency.
+- Reminder suppression after withdrawal/removal.
+- Queue ownership revalidation.
+- Cross-lodge identifier manipulation.
+- Audit behavior.
+
+## 9.7 Non-Goals
+
+This phase does not include:
+
+- Paid or compensated staffing.
+- Employment scheduling.
+- General-purpose volunteer management unrelated to lodge events.
+- Automated substitute matching.
+- Public volunteer contact lists.
+- Regional volunteer discovery.
+- Volunteer hour tracking.
+- Attendance verification based on a volunteer commitment.
+- Automatically creating attendance reservations or ordinary reminder subscriptions from volunteer commitments.
+
+---
+
+# 10. Phase 6 — Member Portal and Directory Privacy
+
+## 10.1 Goal
+
+Give authenticated members a personal portal and allow them to control how their profile is visible to their own lodge and to other participating lodges.
+
+## 10.2 Assumptions
 
 - Member privacy requires explicit controls.
 - Cross-lodge visibility is opt-in.
@@ -820,7 +1013,7 @@ Give authenticated members a personal portal and allow them to control how their
 - Public internet directory exposure is not required.
 - One account may represent a person with multiple memberships.
 
-## 9.3 Functional Requirements
+## 10.3 Functional Requirements
 
 ### Member Dashboard
 
@@ -829,7 +1022,8 @@ A member can view:
 - Their lodge memberships.
 - Their lodge roles.
 - Upcoming events from their lodges.
-- Their event signups.
+- Their event reservations and reminder subscriptions.
+- Their upcoming volunteer commitments from Phase 5.
 - Their profile.
 - Available lodge-specific tools.
 
@@ -880,7 +1074,7 @@ Lodge officers must be able to view all maintained member fields for members of 
 
 Members with permission can search their lodge directory according to visibility rules.
 
-## 9.4 Technical Requirements
+## 10.4 Technical Requirements
 
 - Privacy rules must be enforced server-side, not only hidden in the UI.
 - Search results must not expose hidden fields.
@@ -890,7 +1084,7 @@ Members with permission can search their lodge directory according to visibility
 - Officer access to complete own-lodge member records must be authorized separately from ordinary directory visibility.
 - A person belonging to multiple lodges must receive own-lodge visibility treatment for every lodge in which they are a member.
 
-## 9.5 Acceptance Criteria
+## 10.5 Acceptance Criteria
 
 A tester can:
 
@@ -905,7 +1099,7 @@ A tester can:
 9. Hide the profile entirely.
 10. Confirm all directory searches honor the change.
 
-## 9.6 Automated Test Requirements
+## 10.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -917,7 +1111,7 @@ Tests must cover:
 - Cache/search-index invalidation where applicable.
 - Unauthorized direct profile requests.
 
-## 9.7 Non-Goals
+## 10.7 Non-Goals
 
 This phase does not include:
 
@@ -929,20 +1123,20 @@ This phase does not include:
 
 ---
 
-# 10. Phase 6 — Newsletters, Galleries, and Lodge Communications
+# 11. Phase 7 — Newsletters, Galleries, and Lodge Communications
 
-## 10.1 Goal
+## 11.1 Goal
 
 Provide lodges with complete publication and media-management tools that integrate into their public and private sites.
 
-## 10.2 Assumptions
+## 11.2 Assumptions
 
 - Newsletters and galleries belong to a lodge.
 - Some content may be public while other content is member-only.
 - Existing Newburgh newsletter concepts can inform the user experience without dictating the data model.
 - Email distribution may use a shared platform mail provider with lodge-aware sender/reply-to settings.
 
-## 10.3 Functional Requirements
+## 11.3 Functional Requirements
 
 ### Newsletters
 
@@ -984,7 +1178,7 @@ At minimum:
 - Deliver newsletter/publication notifications to eligible subscribed members if enabled.
 - Honor opt-out preferences.
 
-## 10.4 Technical Requirements
+## 11.4 Technical Requirements
 
 - Media must be lodge-owned.
 - Private media URLs must enforce authorization where practical.
@@ -993,7 +1187,7 @@ At minimum:
 - Lodge display names must not alter the authenticated mail-provider identity in an unsafe way.
 - Public and member-only caching must remain separate.
 
-## 10.5 Acceptance Criteria
+## 11.5 Acceptance Criteria
 
 A tester can:
 
@@ -1007,7 +1201,7 @@ A tester can:
 8. Confirm unsubscribe preferences are respected.
 9. Confirm Lodge A cannot manage Lodge B media.
 
-## 10.6 Automated Test Requirements
+## 11.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1019,7 +1213,7 @@ Tests must cover:
 - Unsubscribe behavior.
 - Cross-lodge access.
 
-## 10.7 Non-Goals
+## 11.7 Non-Goals
 
 This phase does not include:
 
@@ -1030,9 +1224,9 @@ This phase does not include:
 
 ---
 
-# 11. Phase 7 — Ritualist Program
+# 12. Phase 8 — Ritualist Program
 
-## 11.1 Goal
+## 12.1 Goal
 
 Provide a self-service ritual proficiency and discovery system that allows brothers to track the ritual parts they know, the parts they are learning, and their progress toward the ritualist pin program.
 
@@ -1040,7 +1234,7 @@ The system should also help lodges find brothers who may be able to assist with 
 
 This is not a testing, certification, appointment, or evaluation system.
 
-## 11.2 Assumptions
+## 12.2 Assumptions
 
 - Ritual proficiency is primarily self-reported by the individual brother.
 - The platform does not certify that a brother is proficient in a ritual part.
@@ -1054,7 +1248,7 @@ This is not a testing, certification, appointment, or evaluation system.
 - Availability should be broad enough to remain easy to maintain, such as day-of-week and time-of-day windows.
 - Exact ritual taxonomy and pin-program point values should be configurable as reference data so Indiana requirements can be represented accurately and changed without rewriting application logic.
 
-## 11.3 Functional Requirements
+## 12.3 Functional Requirements
 
 ### Ritual Reference Data
 
@@ -1117,9 +1311,9 @@ The system should support availability by:
 
 - Day of week.
 - Daypart:
-  - Morning.
-  - Afternoon.
-  - Evening.
+    - Morning.
+    - Afternoon.
+    - Evening.
 - Optional notes.
 - Enabled/disabled state.
 
@@ -1193,7 +1387,7 @@ Authorized lodge officers or other permitted members can:
 
 The planning view must not assign, schedule, confirm, or book a person.
 
-## 11.4 Technical Requirements
+## 12.4 Technical Requirements
 
 - Self-reported ritual proficiency is person-owned data.
 - Ritual reference data and pin-program point rules are platform-owned or jurisdiction/reference data.
@@ -1216,7 +1410,7 @@ The planning view must not assign, schedule, confirm, or book a person.
 - Changes to proficiency and availability should record update timestamps so searchers can judge how current the information may be.
 - The system does not need to prompt members periodically to reconfirm proficiency or availability.
 
-## 11.5 Acceptance Criteria
+## 12.5 Acceptance Criteria
 
 A tester can:
 
@@ -1236,7 +1430,7 @@ A tester can:
 14. Disable cross-lodge ritual visibility and confirm the brother disappears from regional ritual search.
 15. Confirm the search workflow provides contact/discovery information but does not create an assignment, reservation, or appointment.
 
-## 11.6 Automated Test Requirements
+## 12.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1259,7 +1453,7 @@ Tests must cover:
 - Direct URL/API attempts to access non-visible ritual data.
 - Search results identifying proficiency as self-reported.
 
-## 11.7 Non-Goals
+## 12.7 Non-Goals
 
 This phase does not include:
 
@@ -1277,13 +1471,13 @@ This phase does not include:
 
 ---
 
-# 12. Phase 8 — Regional Discovery and Cross-Lodge Participation
+# 13. Phase 9 — Regional Discovery and Cross-Lodge Participation
 
-## 12.1 Goal
+## 13.1 Goal
 
 Turn multiple isolated lodge sites into an intentionally connected Southwest Indiana network without weakening tenant isolation.
 
-## 12.2 Assumptions
+## 13.2 Assumptions
 
 - Participating lodges opt into regional visibility.
 - Public lodge metadata can be shared regionally.
@@ -1291,7 +1485,7 @@ Turn multiple isolated lodge sites into an intentionally connected Southwest Ind
 - Event visibility remains controlled by the event-owning lodge.
 - Regional grouping should not depend on one hard-coded Masonic hierarchy.
 
-## 12.3 Functional Requirements
+## 13.3 Functional Requirements
 
 ### Lodge Directory
 
@@ -1320,15 +1514,15 @@ Members can browse:
 - Participating lodge events.
 - Public regional events.
 
-### Cross-Lodge Signups
+### Cross-Lodge Reservations
 
 Eligible events may accept:
 
-- Public signups.
+- Public reservations.
 - Own-lodge members.
 - Participating-lodge members.
 
-The signup should retain the attendee's person and lodge affiliation when authenticated.
+The reservation should retain the attendee's person and lodge affiliation when authenticated. Reminder subscriptions remain separate and retain only the identity/contact snapshot needed for consent and delivery.
 
 ### Cross-Lodge Directory
 
@@ -1346,7 +1540,7 @@ A lodge may belong to multiple regional groups.
 
 For the initial implementation, platform administrators control creation and membership of regional groups. The authorization model should leave room for future group-specific administrative roles without requiring them now.
 
-## 12.4 Technical Requirements
+## 13.4 Technical Requirements
 
 - Shared discovery must never bypass the underlying resource visibility rule.
 - Regional queries must intentionally select visible records rather than disabling tenant scopes globally.
@@ -1354,7 +1548,7 @@ For the initial implementation, platform administrators control creation and mem
 - Lodge groups must be configurable entities, not hard-coded enums.
 - Search/cache layers must respect lodge participation changes.
 
-## 12.5 Acceptance Criteria
+## 13.5 Acceptance Criteria
 
 A tester can:
 
@@ -1367,20 +1561,20 @@ A tester can:
 7. Find a member from another lodge only when that member opted in.
 8. Remove a lodge from regional participation and confirm shared discovery stops.
 
-## 12.6 Automated Test Requirements
+## 13.6 Automated Test Requirements
 
 Tests must cover:
 
 - Lodge participation.
 - Event visibility matrix.
-- Cross-lodge signup eligibility.
+- Cross-lodge reservation eligibility.
 - Cross-lodge directory privacy.
 - Regional group membership.
 - Removal from group.
 - Direct URL authorization.
 - Shared queries without tenant leakage.
 
-## 12.7 Non-Goals
+## 13.7 Non-Goals
 
 This phase does not include:
 
@@ -1391,20 +1585,20 @@ This phase does not include:
 
 ---
 
-# 13. Phase 9 — Scholarship Management
+# 14. Phase 10 — Scholarship Management
 
-## 13.1 Goal
+## 14.1 Goal
 
 Provide each lodge with an isolated scholarship application and review workflow.
 
-## 13.2 Assumptions
+## 14.2 Assumptions
 
 - Scholarship applicant data is sensitive and lodge-specific.
 - Each lodge may have different application windows and reviewer committees.
 - Regional discovery does not imply shared scholarship access.
 - The current Newburgh scholarship workflow can inform requirements.
 
-## 13.3 Functional Requirements
+## 14.3 Functional Requirements
 
 ### Scholarship Module
 
@@ -1456,7 +1650,7 @@ Lodge scholarship administrators can:
 - Change statuses.
 - Close/archive cycles.
 
-## 13.4 Technical Requirements
+## 14.4 Technical Requirements
 
 - Every application is owned by exactly one lodge and one scholarship cycle.
 - Reviewers require explicit lodge-scoped scholarship permission.
@@ -1466,7 +1660,7 @@ Lodge scholarship administrators can:
 - Sensitive documents must not use public media URLs.
 - Audit important status and review changes.
 
-## 13.5 Acceptance Criteria
+## 14.5 Acceptance Criteria
 
 A tester can:
 
@@ -1479,7 +1673,7 @@ A tester can:
 7. Produce aggregate review results.
 8. Archive the cycle.
 
-## 13.6 Automated Test Requirements
+## 14.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1494,7 +1688,7 @@ Tests must cover:
 - Scholarship module disabled by default.
 - Lodge-defined custom application questions when the module is enabled.
 
-## 13.7 Non-Goals
+## 14.7 Non-Goals
 
 This phase does not include:
 
@@ -1505,20 +1699,20 @@ This phase does not include:
 
 ---
 
-# 14. Phase 10 — Games and Shared Content
+# 15. Phase 11 — Games and Shared Content
 
-## 14.1 Goal
+## 15.1 Goal
 
 Provide reusable Masonic game functionality, beginning with a Jeopardy-style trivia game, while allowing both platform-shared and lodge-private content.
 
-## 14.2 Assumptions
+## 15.2 Assumptions
 
 - Game engines are platform-level functionality.
 - Question banks may have different ownership and visibility.
 - A lodge should be able to host a game session without duplicating the engine.
 - Shared question banks can reduce duplicated content effort.
 
-## 14.3 Functional Requirements
+## 15.3 Functional Requirements
 
 ### Question Banks
 
@@ -1556,7 +1750,7 @@ Game sessions should record:
 - Selected content.
 - Session state.
 
-## 14.4 Technical Requirements
+## 15.4 Technical Requirements
 
 - Lodge-private questions remain isolated.
 - Shared banks are explicitly designated shared.
@@ -1564,7 +1758,7 @@ Game sessions should record:
 - Shared content editing requires appropriate platform or shared-content permissions.
 - Question history should not leak private banks into shared search.
 
-## 14.5 Acceptance Criteria
+## 15.5 Acceptance Criteria
 
 A tester can:
 
@@ -1578,7 +1772,7 @@ A tester can:
 8. Confirm another lodge cannot see the private bank.
 9. Confirm shared content is usable across lodges.
 
-## 14.6 Automated Test Requirements
+## 15.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1589,7 +1783,7 @@ Tests must cover:
 - Shared versus private access.
 - Cross-lodge private-content denial.
 
-## 14.7 Non-Goals
+## 15.7 Non-Goals
 
 This phase does not include:
 
@@ -1600,13 +1794,13 @@ This phase does not include:
 
 ---
 
-# 15. Phase 11 — Newburgh Migration and Production Cutover
+# 16. Phase 12 — Newburgh Migration and Production Cutover
 
-## 15.1 Goal
+## 16.1 Goal
 
 Migrate the existing Newburgh Lodge application data into the new platform and replace the legacy site without loss of required functionality or historical data.
 
-## 15.2 Assumptions
+## 16.2 Assumptions
 
 - The new platform has already been validated independently.
 - The old application's schema should not dictate the new application's schema.
@@ -1614,7 +1808,7 @@ Migrate the existing Newburgh Lodge application data into the new platform and r
 - The existing domain should continue to be usable after cutover.
 - A rollback plan is required.
 
-## 15.3 Functional Requirements
+## 16.3 Functional Requirements
 
 Migrate applicable Newburgh data including, where present:
 
@@ -1629,7 +1823,8 @@ Migrate applicable Newburgh data including, where present:
 - Events.
 - Recurrence rules.
 - Occurrence overrides/cancellations.
-- Event signups.
+- Event reservations and reminder subscriptions.
+- Volunteer positions, commitments, and applicable staffing-reminder history.
 - Newsletters.
 - Galleries/photos.
 - Scholarship data.
@@ -1645,7 +1840,7 @@ Support:
 - Preservation or redirects for important legacy URLs.
 - New tenant-aware route generation.
 
-## 15.4 Technical Requirements
+## 16.4 Technical Requirements
 
 - Migration scripts must be repeatable in a staging environment.
 - Source data must not be mutated by migration.
@@ -1656,7 +1851,7 @@ Support:
 - Recurrence exceptions must be verified carefully.
 - A final read-only or maintenance window may be used for final synchronization.
 
-## 15.5 Acceptance Criteria
+## 16.5 Acceptance Criteria
 
 A tester can verify:
 
@@ -1667,14 +1862,14 @@ A tester can verify:
 5. Family relationships are intact.
 6. Upcoming recurring events produce the same expected occurrences.
 7. Existing cancellations/exceptions are preserved.
-8. Event signups are associated correctly.
+8. Event reservations and reminder subscriptions are associated correctly.
 9. Newsletters and galleries are accessible at the proper visibility level.
 10. Scholarship records are intact and private.
 11. Ritualist records are transformed correctly.
 12. The production domain resolves to the new platform.
 13. Required legacy URLs redirect or remain functional.
 
-## 15.6 Automated Test Requirements
+## 16.6 Automated Test Requirements
 
 Create migration validation tests or scripts for:
 
@@ -1684,12 +1879,13 @@ Create migration validation tests or scripts for:
 - Duplicate person detection.
 - Membership integrity.
 - Event recurrence comparison.
-- Signup counts.
+- Reservation and reminder-subscription counts.
+- Volunteer-position and volunteer-commitment counts.
 - Media references.
 - Scholarship ownership.
 - User-account linkage.
 
-## 15.7 Non-Goals
+## 16.7 Non-Goals
 
 This phase does not include:
 
@@ -1699,20 +1895,20 @@ This phase does not include:
 
 ---
 
-# 16. Phase 12 — Regional Lodge Onboarding and Operational Hardening
+# 17. Phase 13 — Regional Lodge Onboarding and Operational Hardening
 
-## 16.1 Goal
+## 17.1 Goal
 
 Make the platform practical for onboarding additional Southwest Indiana lodges without requiring custom development for each normal deployment.
 
-## 16.2 Assumptions
+## 17.2 Assumptions
 
 - Newburgh has been migrated successfully.
 - At least one additional lodge is available as a pilot.
 - Platform administrators may initially handle account provisioning.
 - Billing is not required for initial adoption.
 
-## 16.3 Functional Requirements
+## 17.3 Functional Requirements
 
 ### Lodge Onboarding Wizard
 
@@ -1766,7 +1962,7 @@ Platform administrators need:
 - Storage usage visibility if appropriate.
 - Ability to disable or disable-and-lock a compromised or retired lodge.
 
-## 16.4 Technical Requirements
+## 17.4 Technical Requirements
 
 - Domain-to-lodge resolution must be secure and deterministic.
 - Unknown hostnames must not fall back to arbitrary lodge content.
@@ -1776,7 +1972,7 @@ Platform administrators need:
 - Backups and restore procedures must be documented.
 - Production observability must include tenant/lodge identifiers where safe.
 
-## 16.5 Acceptance Criteria
+## 17.5 Acceptance Criteria
 
 Using only platform administration tools and documented import processes, a tester can:
 
@@ -1793,7 +1989,7 @@ Using only platform administration tools and documented import processes, a test
 11. Verify tenant isolation against Newburgh.
 12. Disable the lodge and confirm the expected behavior.
 
-## 16.6 Automated Test Requirements
+## 17.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1806,7 +2002,7 @@ Tests must cover:
 - Disabled and disabled-and-locked behavior, including the correct reactivation permissions.
 - Custom-domain tenant selection.
 
-## 16.7 Non-Goals
+## 17.7 Non-Goals
 
 This phase does not include:
 
@@ -1818,18 +2014,18 @@ This phase does not include:
 
 ---
 
-# 17. Cross-Cutting Requirements
+# 18. Cross-Cutting Requirements
 
 The following requirements apply to all applicable phases.
 
-## 17.1 Authorization
+## 18.1 Authorization
 
 - Server-side authorization is mandatory for every protected action.
 - Resource ownership must be validated, not inferred from route context.
 - Lodge administrators may only administer explicitly authorized lodges.
 - Platform roles and lodge roles must remain distinct.
 
-## 17.2 Tenant Isolation
+## 18.2 Tenant Isolation
 
 Every applicable feature must test:
 
@@ -1842,7 +2038,7 @@ Every applicable feature must test:
 - Cached data.
 - API responses.
 
-## 17.3 Auditability
+## 18.3 Auditability
 
 Sensitive administrative actions should record:
 
@@ -1861,7 +2057,7 @@ At minimum this should cover:
 - Lodge configuration changes.
 - Sensitive account-linking operations.
 
-## 17.4 Background Jobs
+## 18.4 Background Jobs
 
 Every lodge-related job must explicitly retain enough context to identify:
 
@@ -1871,7 +2067,7 @@ Every lodge-related job must explicitly retain enough context to identify:
 
 Jobs must not rely on an HTTP request's current-lodge state.
 
-## 17.5 Email
+## 18.5 Email
 
 Email must support:
 
@@ -1882,29 +2078,29 @@ Email must support:
 - Idempotent scheduled delivery.
 - Delivery logging sufficient for troubleshooting.
 
-## 17.6 File Storage
+## 18.6 File Storage
 
 Files must have explicit ownership and visibility.
 
 Private files must not become publicly accessible merely because the storage backend supports public URLs.
 
-## 17.7 Search
+## 18.7 Search
 
 Search must enforce the same authorization and visibility rules as direct record access.
 
 Search must not become a bypass for privacy or tenant isolation.
 
-## 17.8 Caching
+## 18.8 Caching
 
 Cache keys for lodge-owned or visibility-sensitive data must contain enough identity and scope information to prevent cross-tenant leakage.
 
-## 17.9 Time Zones
+## 18.9 Time Zones
 
 Each lodge has a configured time zone.
 
 Events, reminders, recurrence, and date presentation must consistently respect lodge/event time zones.
 
-## 17.10 Accessibility and Responsive Design
+## 18.10 Accessibility and Responsive Design
 
 Public and authenticated interfaces should:
 
@@ -1913,7 +2109,7 @@ Public and authenticated interfaces should:
 - Avoid interactions that require hover-only behavior.
 - Preserve readable contrast when lodge branding is applied.
 
-## 17.11 Backup, Restore, and Portability
+## 18.11 Backup, Restore, and Portability
 
 The platform must support both:
 
@@ -1928,7 +2124,7 @@ The design should:
 - Avoid backup formats that make individual-lodge extraction impractical.
 - Allow future S3-compatible or other cloud object storage without redesigning the domain model.
 
-## 17.12 Logging and Monitoring
+## 18.12 Logging and Monitoring
 
 The initial deployment should favor free or open-source operational tooling.
 
@@ -1947,7 +2143,7 @@ The implementation should avoid requiring a paid monitoring SaaS for normal oper
 
 ---
 
-# 18. Implementation Stack
+# 19. Implementation Stack
 
 The initial implementation stack is:
 
@@ -1964,7 +2160,7 @@ The initial implementation stack is:
 - Locally hosted email on the application infrastructure initially.
 - Optional support for a transactional email provider later if operational needs justify it.
 
-## 18.1 Production Hosting Assumptions
+## 19.1 Production Hosting Assumptions
 
 Initial production hosting is expected to use:
 
@@ -1978,7 +2174,7 @@ Initial production hosting is expected to use:
 
 Exact package versions and service topology should be pinned in the deployment documentation when implementation begins.
 
-## 18.2 Local Development Environment
+## 19.2 Local Development Environment
 
 Local development uses Docker Compose and exposes the application at `http://localhost`. Nginx, PHP-FPM, PostgreSQL, Redis, a queue worker, Node.js/Vite, and Mailpit run as separate services. PHP-FPM and queue workers share the same application image. Database data and application media use persistent volumes, with a documented explicit reset procedure.
 
@@ -1986,7 +2182,7 @@ Docker Compose is the required development interface; production is not required
 
 ---
 
-# 19. Recommended Repository Documentation Before Coding
+# 20. Recommended Repository Documentation Before Coding
 
 Before Phase 1 implementation begins, create these project documents:
 
@@ -2020,7 +2216,7 @@ Architectural decisions that affect later phases should be recorded as ADRs rath
 
 ---
 
-# 20. Definition of Done for Every Phase
+# 21. Definition of Done for Every Phase
 
 A phase is complete only when all of the following are true:
 
@@ -2038,25 +2234,25 @@ A phase is complete only when all of the following are true:
 
 ---
 
-# 21. Recommended First Pilot Sequence
+# 22. Recommended First Pilot Sequence
 
 The practical rollout should be:
 
-1. Build Phases 1-10 on the new platform using synthetic/demo lodges.
+1. Build Phases 1-11 on the new platform using synthetic/demo lodges.
 2. Continuously exercise at least two lodges in automated and manual tests to detect tenancy assumptions.
-3. Perform Phase 11 using Newburgh Lodge as the first real production tenant.
+3. Perform Phase 12 using Newburgh Lodge as the first real production tenant.
 4. Operate Newburgh on the new platform long enough to validate day-to-day behavior.
-5. Use one additional Southwest Indiana lodge as the Phase 12 pilot.
+5. Use one additional Southwest Indiana lodge as the Phase 13 pilot.
 6. Refine onboarding based on that real second-lodge experience.
 7. Begin broader Southwest Indiana adoption only after the second lodge can be operated without custom development.
 
 ---
 
-# 22. Resolved Design Decisions and Deferred Detail
+# 23. Resolved Design Decisions and Deferred Detail
 
 The following decisions are considered established planning requirements unless a later architectural decision record explicitly changes them.
 
-## 22.1 Identity and Membership
+## 23.1 Identity and Membership
 
 - Users may self-register.
 - Self-registration requires the registrant to identify their home lodge.
@@ -2069,13 +2265,13 @@ The following decisions are considered established planning requirements unless 
 - An email address may only be directly associated with one person.
 - Shared family contact information should be represented through person relationships rather than assigning the same email to multiple people.
 - People records support:
-  - Deceased status.
-  - Optional date of death.
+    - Deceased status.
+    - Optional date of death.
 - Spouses and children remain represented in the system as appropriate so lodges can support widows and orphans.
 - Core `Person` identity/contact information is shared person-owned data. An authorized officer of any lodge in which the person has an active membership may update those fields. Changes apply globally and must be audit logged.
 - Lodge-specific information belongs on the `Membership` and may only be edited by an authorized user of that lodge.
 
-## 22.2 Lodge Administration
+## 23.2 Lodge Administration
 
 Initial built-in lodge roles are:
 
@@ -2122,20 +2318,20 @@ Primary lodge is represented by lodge number and does not require the lodge to e
 
 Officer positions are database-configured reference values.
 
-## 22.3 Privacy
+## 23.3 Privacy
 
 - Default directory visibility is own-lodge only.
 - Cross-lodge shareable fields are:
-  - Name.
-  - Address.
-  - Phone number.
-  - Email address.
-  - Degree.
+    - Name.
+    - Address.
+    - Phone number.
+    - Email address.
+    - Degree.
 - Officers may view all maintained fields for members of lodges where they are currently officers.
 - Family information is not shared outside the owning lodge.
 - Another lodge needing family-related information must contact the owning lodge rather than retrieving it through the regional directory.
 
-## 22.4 Public CMS
+## 23.4 Public CMS
 
 Initial content-section support is the catalog defined in Phase 2.
 
@@ -2144,14 +2340,14 @@ Additional rules:
 - Lodges may create arbitrary navigation/menu hierarchies.
 - Platform administrators may create custom HTML content.
 - Initial lodge branding consists of:
-  - Seal image.
-  - Logo image.
-  - Tag line.
-  - Primary color.
-  - Secondary color.
+    - Seal image.
+    - Logo image.
+    - Tag line.
+    - Primary color.
+    - Secondary color.
 - Additional components or branding controls may be added later if the initial set proves insufficient.
 
-## 22.5 Events
+## 23.5 Events
 
 Event visibility is:
 
@@ -2168,11 +2364,12 @@ Masons-only and lodge-only events require a minimum Masonic qualification. Initi
 
 Eligibility is hierarchical: EA < FC < MM < PM. A member meeting a higher qualification may attend an event requiring a lower qualification. Past Master is an event-eligibility qualification rather than a Masonic degree. Only active memberships are eligible; demitted, suspended, expelled, and deceased memberships are not eligible for Masons-only or lodge-only events.
 
-Signup behavior:
+Event interaction behavior:
 
-- Lodge-only events do not permit members of other lodges to sign up.
-- Masons-only events may permit eligible authenticated Masons from any lodge represented on the platform when cross-lodge participation is enabled for the event.
-- Public events may permit authenticated members and, where configured, public unauthenticated signups.
+- Lodge-only events do not permit members of other lodges to reserve or subscribe.
+- Masons-only event details and reminder subscriptions may be available to eligible authenticated Masons represented on the platform; cross-lodge reservations require explicit event configuration.
+- Public events may separately permit authenticated or unauthenticated reservations and reminder subscriptions.
+- Reservations consume capacity; reminder subscriptions do not imply attendance; volunteer commitments remain a separate interaction implemented in Phase 5.
 - The data model should support broader cross-lodge event participation later without requiring regional-group infrastructure in Phase 4.
 - Waitlists are not required in the initial implementation.
 
@@ -2185,46 +2382,58 @@ Calendar behavior:
 - Standards-based ICS/iCalendar support is the preferred common mechanism.
 - Two-way external calendar synchronization is not required initially.
 
-## 22.6 Ritualist Program
+## 23.6 Volunteer Staffing and Commitments
+
+- Volunteer staffing is implemented as a separate event interaction after Phase 4.
+- Volunteer positions are named, occurrence-aware staffing needs with a configurable number needed.
+- Volunteer commitments require authentication and identify one person/user filling one named position for one occurrence.
+- Volunteer commitments are independent from attendance reservations and ordinary reminder subscriptions.
+- Volunteer rosters and filled/remaining counts are available only through authorized lodge/event-management views.
+- Volunteer-specific reminders are based on active commitments and do not create or imply ordinary event reminder consent.
+- Withdrawing or administratively removing a commitment stops future volunteer-specific reminders.
+- A combined UI may offer reservation, reminder subscription, and volunteer commitment together only when each intent is separately labeled and explicitly confirmed.
+- Regional volunteer discovery, volunteer-hour tracking, and general-purpose volunteer management are deferred.
+
+## 23.7 Ritualist Program
 
 The detailed ritual taxonomy, official point values, rank thresholds, and complete list of tracked non-point parts are intentionally deferred to the Phase 7 specification.
 
 Established rules are:
 
 - Self-reported proficiency statuses:
-  - Not known.
-  - Learning.
-  - Proficient.
+    - Not known.
+    - Learning.
+    - Proficient.
 - Willingness to perform is a separate indicator from proficiency.
 - New members are not included in ritual-assistance search by default.
 - Cross-lodge ritual visibility is independent from general directory visibility.
 - Any member of a participating regional lodge may perform regional ritual-assistance searches.
 - Availability uses dayparts:
-  - Morning.
-  - Afternoon.
-  - Evening.
+    - Morning.
+    - Afternoon.
+    - Evening.
 - Availability remains informational and is not an appointment or booking system.
 - Current point totals always reflect current point values for parts in which the member is proficient.
 - A member never loses a previously achieved ritualist-program rank solely because point values later change.
 - Members are not periodically prompted to reconfirm proficiency or availability.
 
-## 22.7 Regional Organization
+## 23.8 Regional Organization
 
 - Regional structures use generic groups initially.
 - Platform administrators control regional group creation and membership.
 - Future organization-specific administrative roles may be added later.
 - A lodge may belong to multiple regional groups.
 
-## 22.8 Scholarship Module
+## 23.9 Scholarship Module
 
 - The scholarship module is disabled by default for each lodge.
 - Lodges that enable the scholarship module may define custom application questions in addition to the platform-supported scholarship fields.
 
-## 22.9 Games
+## 23.10 Games
 
 - The Jeopardy-style game includes Final Round support in the first release.
 
-## 22.10 Operations
+## 23.11 Operations
 
 ### Hosting
 
@@ -2274,7 +2483,7 @@ The backup strategy must support:
 
 ---
 
-# 23. Final Planning Recommendation
+# 24. Final Planning Recommendation
 
 The rewrite should begin with a detailed Phase 1 specification rather than a whole-application Codex prompt.
 

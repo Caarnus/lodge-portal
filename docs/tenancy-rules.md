@@ -24,3 +24,9 @@
 22. Ending a membership or revoking a lodge role affects only that lodge and does not delete the global person/user or another lodge's records.
 23. Person merges are platform-admin transactions that revalidate every dependent lodge owner and roll back on unresolved conflicts.
 24. Every cross-owner relationship edit records the authorizing lodge and revalidates visibility/edit eligibility at write time; cached or previously selected lodge context is insufficient.
+25. Events, occurrences, reservation fields, reservations, reminder rules, reminder subscriptions, and reminder deliveries carry or derive one matching lodge owner enforced at write time.
+26. Event routes load the lodge, event, and occurrence together; a valid occurrence identifier never bypasses event/lodge ownership checks.
+27. Protected-event eligibility derives from the event's owning lodge and current membership data. Active lodge context, a submitted lodge identifier, a prior reservation, or a reminder subscription never grants access.
+28. Public CMS and calendar queries return only published public occurrences for the explicitly resolved public lodge. A missing occurrence never falls back to another lodge.
+29. Event jobs carry stable identifiers and reload the complete lodge/event/occurrence/subscription/delivery ownership chain before mutation or delivery.
+30. Reservations, reminder subscriptions, and future volunteer commitments are independent intents. Creating one never authorizes, implies, or silently creates another.

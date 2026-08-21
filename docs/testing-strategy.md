@@ -41,3 +41,19 @@ Every person test distinguishes global person-owned fields from lodge-owned memb
 Shared-field tests prove an authorized change through Lodge A is visible through Lodge B and produces an audit event naming Lodge A. Negative tests prove Lodge C cannot discover the person by identifier, exact email, exact name, search, relationship endpoint, or account link.
 
 Relationship tests prove both qualifying primary lodges may edit one row, a non-primary membership lodge has view-only access, an unrelated lodge has no visibility, and eligibility is rechecked after membership changes. Merge tests verify transaction rollback for same-lodge membership and competing-account conflicts, dependent-record ownership after success, relationship deduplication, source retirement, and immutable audit contents. Public officer tests assert default-public name/position output, opt-in contact behavior, hidden assignments, and exclusion of private person/membership/family data from serialized props and HTML.
+
+## Event Browser Path
+
+Playwright must enable Lodge A event categories; create and publish a weekly event spanning a DST boundary; cancel, move, and override separate occurrences; enable capacity-controlled reservations and reminders; complete eligible member and permitted guest reservations; create a reminder-only subscription; cancel and unsubscribe through separate secure links; verify the public Upcoming Events section and event detail; exercise ICS output; switch to Lodge B; and confirm Lodge A identifiers are rejected.
+
+## Event Test Pattern
+
+Recurrence unit tests use fixed time zones and clocks. They cover daily, weekly, monthly, ordinal-monthly, yearly, count, until, spring-forward, fall-back, invalid local times, stable recurrence identities, bounded expansion, and reconciliation.
+
+Every event feature test creates at least Lodge A and Lodge B. Negative cases substitute event, occurrence, category, reservation, subscription, cover-media, reminder-rule, and delivery identifiers; alter active lodge context; and attempt direct protected URLs.
+
+Eligibility fixtures include active and ended memberships, each degree, a Past Master record, a user without a person link, a member of the owning lodge, and a member of another lodge. Tests distinguish visibility from management permission.
+
+Reservation tests cover normalized-email duplicates, party-size capacity under locks, custom fields, guest policy, token hashing, cancellation/reservation-again, occurrence cancellation, and history preservation. Subscription tests cover occurrence and series scope, normalized-email duplicates, guest policy, eligibility, consent, token hashing, unsubscribe/resubscribe, and independence from reservations. Reminder-delivery tests run dispatch repeatedly and simulate overlapping scopes, job retry, cancellation races, stale claims, failures, and explicit retry without duplicate delivery.
+
+Public event and ICS tests assert publication state, cancellation, date range, lodge isolation, protected-data exclusion, RFC escaping/folding, recurrence exceptions, and cache invalidation when caching exists.

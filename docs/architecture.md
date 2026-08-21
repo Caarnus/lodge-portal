@@ -44,4 +44,12 @@ Account access is independent of membership data. A user-person link is global a
 
 The public Officers section is a narrow read model keyed by the explicitly resolved public lodge. It returns only current, public assignment fields and never exposes a general person or membership serialization.
 
-See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), and the records in [decisions](decisions/README.md).
+## Event Boundary
+
+Events and materialized occurrences are lodge-owned. A canonical RRULE and IANA time zone define a recurring series, while bounded occurrence rows provide stable identities for overrides, attendance reservations, reminder subscriptions and deliveries, routes, and calendar output. The original recurrence identity remains stable when an occurrence moves.
+
+Protected-event visibility is derived from the explicitly loaded event lodge, the linked person, active membership, configured cross-lodge participation, and qualification. Active lodge selection never supplies eligibility. Public CMS queries return only published public occurrences for the public site's resolved lodge.
+
+Reservations consume occurrence capacity; reminder subscriptions express notification consent and consume none. They have separate status and token lifecycles. Volunteer positions and commitments are a future, third interaction type and must not be stored in either record. Jobs carry delivery or occurrence identifiers and reload the complete ownership chain. Reminder delivery rows enforce idempotent dispatch, and scheduled occurrence generation uses bounded windows rather than expanding open-ended series without limits.
+
+See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), [Phase 4](phase-04.md), and the records in [decisions](decisions/README.md).

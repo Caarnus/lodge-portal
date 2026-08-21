@@ -201,6 +201,6 @@ Execute the master plan's twelve Phase 3 acceptance steps, then also:
 - Member-controlled privacy settings or self-service profile editing.
 - Grand Lodge or legacy-data imports.
 - Ritual proficiency tracking.
-- Events, recurrence, signups, or reminders.
+- Events, recurrence, reservations, reminder subscriptions, or reminder delivery.
 - Dues, payments, financial records, or Grand Lodge synchronization.
 - Public family, contact, membership, or profile directory data beyond the explicit officer projection.

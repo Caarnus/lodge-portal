@@ -59,3 +59,24 @@ Person authorization has two checks: the actor has a permission in a specific lo
 Family relationship ownership records provenance rather than exclusive visibility. Any lodge with an active member at either endpoint may view the relationship with `relationships.view`. Editing additionally requires `relationships.manage` and an endpoint whose active membership in that lodge identifies the lodge's own number as primary. Two lodges may edit one relationship when different endpoints independently qualify; every edit records the authorizing lodge.
 
 Officer terms and lodge roles remain separate transitions. Creating an officer assignment opens a role-assignment prompt but grants nothing automatically. Ending/removing an assignment opens a role-removal prompt and retains the role by default when another current officer assignment exists.
+
+## Event Matrix
+
+| Action | Public visitor | Eligible authenticated person | User with events.manage | Platform administrator |
+|---|---:|---:|---:|---:|
+| View published public event | Yes | Yes | Yes | Yes |
+| View protected event | No | When current eligibility passes | When current eligibility passes | Yes for administration |
+| Make guest reservation | Public event only when guest reservations are enabled | Yes | Only when attendee eligibility passes | Only when attendee eligibility passes |
+| Make protected reservation | No | When visibility, qualification, and reservation policy pass | Only when attendee eligibility also passes | Only when attendee eligibility also passes |
+| Cancel own reservation | Valid single-purpose secure token or authenticated ownership | Yes | Yes | Yes |
+| Subscribe to public-event reminders | When guest reminders are enabled | Yes | Yes | Yes |
+| Subscribe to protected-event reminders | No | When current visibility and qualification pass | When current visibility and qualification pass | Yes for administration |
+| Unsubscribe from own reminders | Valid single-purpose secure token or authenticated ownership | Yes | Yes | Yes |
+| View lodge reservation roster and reminder counts | No | No | Assigned lodge | Any lodge |
+| Manage event/category/occurrence/reminders | No | No | Assigned lodge | Any lodge |
+
+events.manage is a platform-owned lodge permission. Built-in Administrator and Officer roles receive it. Member and Non-member roles do not.
+
+Event management authority does not make the actor an eligible attendee. Public, masons-only, and lodge-only visibility is evaluated from the explicitly loaded event lodge. Protected attendance additionally requires a linked person, active membership, required qualification, and any configured cross-lodge reservation flag. Reminder eligibility follows event visibility and qualification but does not require reservations to be enabled and does not consume capacity.
+
+Lodge-only qualification uses an active membership in the owning lodge. Masons-only visibility and reminder eligibility may use any active membership represented on the platform; making a reservation through another lodge's membership additionally requires the event's cross-lodge reservation flag. Past Master qualification is derived separately from degree but remains behind the active-membership gate.

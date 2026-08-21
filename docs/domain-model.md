@@ -43,3 +43,17 @@ Shared person identity/contact data is updated globally only through an authoriz
 One person may have memberships in multiple lodges, but at most one membership per lodge. Ending one membership preserves the person, other memberships, account link, relationships, and history. Primary lodge is a membership string value containing a lodge number, not a required foreign key to a hosted lodge.
 
 Manual person merge selects one survivor, moves compatible dependent records transactionally, rejects unresolved membership/account conflicts, retires the source, and records a platform-admin audit event. Email is a hard uniqueness signal; a matching name is review information only.
+
+## Events
+
+- Event category: platform-owned reference data enabled explicitly by each lodge.
+- Event: a lodge-owned one-time or recurring series containing content, location, time zone, RRULE, visibility, qualification, reservation configuration, reminder configuration, and publication state.
+- Event occurrence: a bounded, materialized lodge-owned instance with a stable original recurrence identity, effective times, cancellation state, and optional content/location overrides.
+- Reservation field: an event-owned custom attendance-response definition with an immutable key.
+- Event reservation: an occurrence-owned attendance commitment with optional user/person links, attendee snapshot, party size, validated responses, status, and a hashed cancellation token. It consumes capacity when active.
+- Reminder rule: an event-owned offset definition.
+- Reminder subscription: an event-owned notification request scoped to one occurrence or a recurring series, with optional user/person links, recipient snapshot, status, and a hashed unsubscribe token. It does not imply attendance or consume capacity.
+- Reminder delivery: an idempotency and status record connecting one subscription, rule, occurrence, and normalized recipient.
+- Volunteer position and volunteer commitment: future event-interaction records for named staffing needs and a person's agreement to fill one. They are deliberately independent from reservations and reminder subscriptions.
+
+Every event child repeats or derives lodge ownership and is validated against its parent. A recurrence key identifies the original scheduled local occurrence and does not change when the effective time moves. Protected-event eligibility is derived at request time from active membership and qualification rather than copied into a reservation or subscription.
