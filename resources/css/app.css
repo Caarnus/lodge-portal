@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
  --color-background:#fff; --color-foreground:#0f172a; --color-card:#fff; --color-card-foreground:#0f172a;
  --color-popover:#fff; --color-popover-foreground:#0f172a; --color-primary:#0f172a; --color-primary-foreground:#f8fafc;
@@ -9,7 +10,57 @@
  --color-sidebar-accent:#e2e8f0; --color-sidebar-accent-foreground:#0f172a; --color-sidebar-border:#e2e8f0; --color-sidebar-ring:#2563eb;
  --radius-lg:.5rem; --radius-md:.375rem; --radius-sm:.25rem;
 }
-html{font-family:ui-sans-serif,system-ui,sans-serif} body{background:var(--color-background);color:var(--color-foreground)}
+html { font-family: ui-sans-serif, system-ui, sans-serif; color-scheme: light; }
+
+html.dark {
+ color-scheme: dark;
+ --color-background: #0f172a;
+ --color-foreground: #f8fafc;
+ --color-card: #1e293b;
+ --color-card-foreground: #f8fafc;
+ --color-popover: #1e293b;
+ --color-popover-foreground: #f8fafc;
+ --color-primary: #f8fafc;
+ --color-primary-foreground: #0f172a;
+ --color-secondary: #334155;
+ --color-secondary-foreground: #f8fafc;
+ --color-muted: #1e293b;
+ --color-muted-foreground: #cbd5e1;
+ --color-accent: #334155;
+ --color-accent-foreground: #f8fafc;
+ --color-border: #334155;
+ --color-input: #475569;
+ --color-ring: #94a3b8;
+ --color-sidebar: #111827;
+ --color-sidebar-foreground: #e2e8f0;
+ --color-sidebar-primary: #f8fafc;
+ --color-sidebar-primary-foreground: #0f172a;
+ --color-sidebar-accent: #1e293b;
+ --color-sidebar-accent-foreground: #f8fafc;
+ --color-sidebar-border: #334155;
+ --color-sidebar-ring: #60a5fa;
+}
+
+body { background: var(--color-background); color: var(--color-foreground); }
+
+/* Some application pages use light surface utilities directly. Keep those
+   surfaces readable when the application-level dark class is active. */
+html.dark .bg-white { background-color: #1e293b; }
+html.dark .bg-slate-50 { background-color: #0f172a; }
+html.dark .bg-slate-100 { background-color: #1e293b; }
+html.dark .border,
+html.dark .border-slate-200,
+html.dark .border-slate-300 { border-color: #334155; }
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 { color: #f1f5f9; }
+html.dark .text-slate-600,
+html.dark .text-slate-500 { color: #cbd5e1; }
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover { background-color: #334155; }
+html.dark input,
+html.dark select,
+html.dark textarea { background-color: #1e293b; color: #f8fafc; border-color: #475569; }
 
 [data-pc-name="tooltip"] {
  pointer-events:none;

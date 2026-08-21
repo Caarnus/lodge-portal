@@ -40,7 +40,7 @@ const activate = (event: Event) => {
 <template>
     <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader>
-            <SidebarMenu><SidebarMenuItem><SidebarMenuButton size="lg" as-child><Link :href="route('dashboard')"><AppLogo /></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+            <SidebarMenu class="group-data-[collapsible=icon]:items-center"><SidebarMenuItem class="group-data-[collapsible=icon]:w-8"><SidebarMenuButton size="lg" as-child class="group-data-[collapsible=icon]:justify-center"><Link :href="route('dashboard')"><AppLogo /></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
             <label v-if="auth.lodges.length" class="px-2 group-data-[collapsible=icon]:hidden"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/60">Active lodge</span><select :value="activeLodge?.id" class="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-2 text-sm" @change="activate"><option v-for="lodge in auth.lodges" :key="lodge.id" :value="lodge.id">{{ lodge.name }}</option></select></label>
         </SidebarHeader>
 
