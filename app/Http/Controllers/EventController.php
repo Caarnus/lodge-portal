@@ -106,6 +106,7 @@ class EventController extends Controller
         return Inertia::render('events/Edit', [
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event,
+            'reminderSubscriptionCount' => $event->exists ? $event->reminderSubscriptions()->where('status', 'active')->count() : 0,
             'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
         ]);

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EventOccurrenceStatus;
+use App\Enums\EventReservationStatus;
+use App\Enums\ReminderDeliveryStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Lodge;
@@ -42,6 +44,8 @@ class EventOccurrenceController extends Controller
     {
         $this->allowOccurrence($lodge, $event, $occurrence);
         $occurrence->update(['status' => EventOccurrenceStatus::Cancelled, 'cancelled_at' => now()]);
+        $occurrence->reservations()->where('status', EventReservationStatus::Confirmed)->update(['status' => EventReservationStatus::EventCancelled, 'cancelled_at' => now()]);
+        $occurrence->reminderDeliveries()->whereIn('status', [ReminderDeliveryStatus::Pending, ReminderDeliveryStatus::Claimed])->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
 
         return back()->with('notice', 'Occurrence cancelled.');
     }

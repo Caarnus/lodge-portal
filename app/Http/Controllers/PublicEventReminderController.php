@@ -9,7 +9,9 @@ use App\Enums\LodgeStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Lodge;
+use App\Notifications\EventReminderSubscriptionConfirmation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 
 class PublicEventReminderController extends Controller
@@ -38,7 +40,10 @@ class PublicEventReminderController extends Controller
         }
 
         abort_unless($event->status === EventStatus::Published, 404);
-        $subscriptions->subscribe($event, $occurrence, $request->user(), $data);
+        $result = $subscriptions->subscribe($event, $occurrence, $request->user(), $data);
+        $result->subscription->load(['event', 'lodge']);
+        Notification::route('mail', [$result->subscription->email => $result->subscription->name])
+            ->notify(new EventReminderSubscriptionConfirmation($result->subscription, $result->unsubscribeToken));
 
         return back()->with('notice', 'Your reminder subscription is active.');
     }

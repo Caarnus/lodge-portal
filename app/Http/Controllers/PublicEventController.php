@@ -80,6 +80,7 @@ class PublicEventController extends Controller
             'visibility' => $event->visibility->value,
             'cover_image' => $event->coverMediaAsset?->url,
             'reservations_enabled' => $event->reservations_enabled,
+            'guest_reservations_enabled' => $event->guest_reservations_enabled,
             'capacity' => $event->capacity,
             'event_id' => $event->id,
             'is_recurring' => $event->rrule !== null,

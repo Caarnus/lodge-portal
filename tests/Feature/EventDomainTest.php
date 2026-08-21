@@ -260,6 +260,21 @@ class EventDomainTest extends TestCase
         $this->assertDatabaseHas('event_categories', ['id' => $category->id, 'name' => 'Lodge Breakfast', 'is_active' => false, 'sort_order' => 25]);
     }
 
+    public function test_event_manager_can_cancel_and_restore_own_occurrence_but_not_another_lodges(): void
+    {
+        $admin = User::factory()->create(['is_platform_admin' => true]);
+        $lodge = Lodge::factory()->create();
+        $otherLodge = Lodge::factory()->create();
+        $event = Event::create(['lodge_id' => $lodge->id, 'slug' => 'own-event', 'status' => EventStatus::Published, 'title' => 'Own', 'time_zone' => 'America/Chicago', 'first_starts_at' => now()->addDay(), 'duration_minutes' => 60, 'visibility' => EventVisibility::Public]);
+        $occurrence = EventOccurrence::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'recurrence_key' => 'own', 'original_starts_at' => now()->addDay(), 'starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour(), 'status' => EventOccurrenceStatus::Scheduled]);
+
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/events/{$event->id}/occurrences/{$occurrence->id}/cancel")->assertRedirect();
+        $this->assertDatabaseHas('event_occurrences', ['id' => $occurrence->id, 'status' => 'cancelled']);
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/events/{$event->id}/occurrences/{$occurrence->id}/restore")->assertRedirect();
+        $this->assertDatabaseHas('event_occurrences', ['id' => $occurrence->id, 'status' => 'scheduled']);
+        $this->actingAs($admin)->post("/lodges/{$otherLodge->id}/events/{$event->id}/occurrences/{$occurrence->id}/cancel")->assertNotFound();
+    }
+
     public function test_authorized_user_can_persist_an_event_from_the_editor_payload(): void
     {
         $lodge = Lodge::factory()->create(['timezone' => 'America/Chicago']);
