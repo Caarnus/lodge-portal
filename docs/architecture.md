@@ -34,4 +34,14 @@ Public lodge sites and the authenticated administration application share the La
 - Public URL handling is host-agnostic: the initial `/l/{lodge-slug}` prefix and future verified custom domains resolve through the same lodge-aware handlers.
 - Original media is private. Lodge-aware processing produces bounded, metadata-stripped public derivatives before content can be published.
 
-See [Phase 1](phase-01.md), [Phase 2](phase-02.md), and the records in [decisions](decisions/README.md).
+## Person and Membership Boundary
+
+People and users are global identities; memberships are lodge-owned relationships. Person identity/contact fields have one canonical value, while membership status, degree, lodge numbers, dates, notes, family-relationship provenance, officer terms, and roles retain explicit lodge ownership.
+
+A lodge-scoped people query begins with its active memberships and relationships connected to those members. It does not query the global people table and filter afterward. Shared person mutation requires both a lodge permission and an active membership relationship, and the authorizing lodge is recorded in audit data. Relationship edits are the deliberate cross-owner exception: a qualifying primary lodge may edit after write-time endpoint/membership validation.
+
+Account access is independent of membership data. A user-person link is global and unique; lodge access comes from explicit lodge role assignments. Ending a membership, removing a role, unlinking an account, and merging people are separate domain transitions. Officer assignment/removal may prompt for a corresponding role change but does not perform one implicitly.
+
+The public Officers section is a narrow read model keyed by the explicitly resolved public lodge. It returns only current, public assignment fields and never exposes a general person or membership serialization.
+
+See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), and the records in [decisions](decisions/README.md).

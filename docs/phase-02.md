@@ -82,6 +82,8 @@ The release includes a versioned, platform-owned default template that creates:
 
 The generated copy is Masonic-oriented but intentionally generic. It may describe fellowship, service, personal growth, and a welcoming place to learn about the lodge, but it must not invent the lodge's history, charities, officers, meeting schedule, or affiliations. Lodge-specific facts come from structured lodge data or remain clearly marked for administrator completion. Feature-backed sections display an intentional placeholder until their later module exists.
 
+Phase 3 replaces the Officers placeholder's fallback with a lodge-isolated projection of current public officer assignments. The placeholder remains the Phase 2 behavior when no such data exists.
+
 Template definitions live in application-controlled configuration or code and are covered by tests. Applying a template is idempotent only when explicitly requested for an empty site; it must not overwrite existing lodge content silently.
 
 ## Routes and UI
@@ -198,7 +200,7 @@ Execute the master plan's nine Phase 2 acceptance steps, then also:
 
 - Custom domains or TLS automation.
 - Member portal functionality.
-- Real event, officer, newsletter, or gallery management.
+- Real event, officer, newsletter, or gallery management. Officer management arrives in Phase 3; the other modules remain later work.
 - Lodge-authored JavaScript, CSS, templates, or arbitrary HTML.
 - General-purpose site builders or third-party page-builder plugins.
 - Legacy website import.
