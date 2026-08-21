@@ -2,7 +2,7 @@
 import ExpandableText from '@/components/ExpandableText.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Pencil, Plus } from 'lucide-vue-next';
+import { ExternalLink, Pencil, Plus } from 'lucide-vue-next';
 import Tooltip from 'primevue/tooltip';
 
 const vTooltip = Tooltip;
@@ -16,6 +16,7 @@ interface Lodge {
     city?: string | null;
     state?: string | null;
     status: string;
+    public_site_url?: string | null;
 }
 
 defineProps<{ lodges: Lodge[] }>();
@@ -40,7 +41,7 @@ const location = (lodge: Lodge) => [lodge.city, lodge.state].filter(Boolean).joi
         </div>
 
         <div class="mt-6 overflow-hidden rounded-lg border border-slate-200">
-            <div class="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_2.5rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 sm:grid">
+            <div class="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 sm:grid">
                 <span>Lodge</span>
                 <span>Location</span>
                 <span>Status</span>
@@ -50,7 +51,7 @@ const location = (lodge: Lodge) => [lodge.city, lodge.state].filter(Boolean).joi
             <div
                 v-for="lodge in lodges"
                 :key="lodge.id"
-                class="grid grid-cols-[minmax(0,1fr)_2.5rem] items-start gap-3 border-t border-slate-200 p-4 first:border-t-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_2.5rem] sm:gap-4 sm:first:border-t"
+                class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-t border-slate-200 p-4 first:border-t-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] sm:gap-4 sm:first:border-t"
             >
                 <div class="min-w-0">
                     <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 sm:hidden">Lodge</span>
@@ -64,14 +65,27 @@ const location = (lodge: Lodge) => [lodge.city, lodge.state].filter(Boolean).joi
                     <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 sm:hidden">Status</span>
                     <ExpandableText :text="lodge.status" label="status" class="capitalize" />
                 </div>
-                <Link
-                    :href="`/platform/lodges/${lodge.id}/edit`"
-                    :aria-label="`Edit ${lodge.name}`"
-                    class="row-start-1 inline-flex size-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:col-start-4"
-                    v-tooltip.left="{ value: `Edit ${lodge.name}`, showDelay: 2000 }"
-                >
-                    <Pencil class="size-4" aria-hidden="true" />
-                </Link>
+                <div class="row-start-1 flex justify-end gap-1 sm:col-start-4">
+                    <a
+                        v-if="lodge.public_site_url"
+                        :href="lodge.public_site_url"
+                        target="_blank"
+                        rel="noopener"
+                        :aria-label="`Visit ${lodge.name} public site`"
+                        class="inline-flex size-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                        v-tooltip.left="{ value: `Visit ${lodge.name} public site`, showDelay: 2000 }"
+                    >
+                        <ExternalLink class="size-4" aria-hidden="true" />
+                    </a>
+                    <Link
+                        :href="`/platform/lodges/${lodge.id}/edit`"
+                        :aria-label="`Edit ${lodge.name}`"
+                        class="inline-flex size-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                        v-tooltip.left="{ value: `Edit ${lodge.name}`, showDelay: 2000 }"
+                    >
+                        <Pencil class="size-4" aria-hidden="true" />
+                    </Link>
+                </div>
             </div>
 
             <p v-if="lodges.length === 0" class="p-8 text-center text-sm text-slate-500">No lodges found.</p>

@@ -28,4 +28,14 @@ class Lodge extends Model
     {
         return $this->belongsToMany(Feature::class)->withPivot('enabled')->withTimestamps();
     }
+
+    public function websitePages()
+    {
+        return $this->hasMany(WebsitePage::class);
+    }
+
+    public function mediaAssets()
+    {
+        return $this->hasMany(MediaAsset::class);
+    }
 }

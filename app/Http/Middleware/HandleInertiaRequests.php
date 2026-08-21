@@ -39,7 +39,8 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
         $user = $request->user();
-        $lodges = $user?->lodges()->select('lodges.id', 'lodges.name', 'lodges.slug')->distinct()->get() ?? collect();
+        $lodges = $user?->lodges()->select('lodges.id', 'lodges.name', 'lodges.slug')->distinct()->get()
+            ->map(fn ($lodge) => $lodge->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))) ?? collect();
         $canReviewRegistrations = $user && ($user->is_platform_admin || DB::table('lodge_user_roles')
             ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
             ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')

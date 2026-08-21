@@ -68,7 +68,7 @@ The initial catalog contains:
 
 Each section type has a server-owned validation contract and a matching Vue renderer/editor. Section configuration may be stored as JSON, but arbitrary keys are not accepted. Media references are stored as asset identifiers and validated independently of client input.
 
-Rich-text sections prefer the [PrimeVue Editor](https://primevue.dev/editor/) backed by [Quill](https://github.com/slab/quill/blob/main/LICENSE) with a deliberately limited toolbar. Both are available under no-fee open-source licenses and must not be replaced with a paid editor service or premium-only component. Before installation, the selected editor version must pass the project's dependency audit and security review. A release with an unresolved HTML-export vulnerability must not be installed; use a compatible unaffected release or another no-fee open-source editor if necessary. Editor output is always untrusted input: the server sanitizer remains the canonical security boundary for stored and rendered HTML.
+Rich-text sections use [Tiptap](https://github.com/ueberdosis/tiptap) with a deliberately limited toolbar. The selected packages use the no-fee MIT license. PrimeVue Editor with Quill was evaluated first, but the available Quill releases did not pass the project's dependency scan because of an unresolved HTML-export vulnerability. Editor output is always untrusted input: the server sanitizer remains the canonical security boundary for stored and rendered HTML.
 
 ## Templates
 

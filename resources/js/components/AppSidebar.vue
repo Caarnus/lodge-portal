@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type AuthenticatedSharedData, type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Building2, ClipboardCheck, LayoutGrid, Settings } from 'lucide-vue-next';
+import { Building2, ClipboardCheck, Globe2, LayoutGrid, Settings } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -25,6 +25,9 @@ const mainNavItems = computed<NavItem[]>(() => {
     }
     for (const lodge of auth.value.lodges) {
         items.push({ title: `${lodge.name} settings`, href: `/lodges/${lodge.id}/settings`, icon: Settings });
+        if (lodge.can_manage_website) {
+            items.push({ title: `${lodge.name} website`, href: `/lodges/${lodge.id}/website`, icon: Globe2 });
+        }
     }
 
     return items;

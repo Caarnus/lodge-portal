@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Platform;
 
+use App\Enums\LodgeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LodgeRequest;
 use App\Models\Feature;
@@ -21,7 +22,22 @@ class LodgeController extends Controller
 {
     public function index()
     {
-        return Inertia::render('platform/Lodges', ['lodges' => Lodge::orderBy('name')->get()]);
+        $lodges = Lodge::query()
+            ->withExists(['websitePages as has_published_home_page' => fn ($query) => $query
+                ->whereHas('published', fn ($version) => $version->where('is_home', true))])
+            ->orderBy('name')
+            ->get()
+            ->each(function (Lodge $lodge) {
+                $lodge->setAttribute(
+                    'public_site_url',
+                    $lodge->status === LodgeStatus::Active && $lodge->has_published_home_page
+                        ? route('public.website.home', ['lodge' => $lodge->slug], absolute: false)
+                        : null,
+                );
+                $lodge->makeHidden('has_published_home_page');
+            });
+
+        return Inertia::render('platform/Lodges', ['lodges' => $lodges]);
     }
 
     public function create()
@@ -75,7 +91,7 @@ class LodgeController extends Controller
             ]);
         }
         $role = Role::firstOrCreate(['lodge_id' => $lodge->id, 'name' => 'Administrator'], ['is_system' => true]);
-        $role->permissions()->syncWithoutDetaching(Permission::whereIn('key', ['lodge.manage', 'registration.review'])->pluck('id'));
+        $role->permissions()->syncWithoutDetaching(Permission::whereIn('key', ['lodge.manage', 'registration.review', 'website.manage', 'website.publish'])->pluck('id'));
         DB::table('lodge_user_roles')->updateOrInsert(['lodge_id' => $lodge->id, 'user_id' => $u->id, 'role_id' => $role->id], ['created_at' => now(), 'updated_at' => now()]);
         Audit::record('lodge.admin_assigned', $u, $lodge, null, ['user_id' => $u->id]);
 

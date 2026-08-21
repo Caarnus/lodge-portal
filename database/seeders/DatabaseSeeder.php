@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (['lodge.manage' => 'Manage lodge identity and settings', 'registration.review' => 'Review registrations'] as $key => $name) {
+        foreach (['lodge.manage' => 'Manage lodge identity and settings', 'registration.review' => 'Review registrations', 'website.manage' => 'Manage lodge website', 'website.publish' => 'Publish lodge website'] as $key => $name) {
             Permission::firstOrCreate(['key' => $key], ['name' => $name]);
         }
 

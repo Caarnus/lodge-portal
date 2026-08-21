@@ -8,6 +8,7 @@ use App\Models\Lodge;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\WebsitePage;
 use App\Notifications\QueuedResetPassword;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\QueryException;
@@ -16,6 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class PlatformFoundationTenancyTest extends TestCase
@@ -211,6 +213,34 @@ class PlatformFoundationTenancyTest extends TestCase
         $this->actingAs($platform)->post('/platform/lodges', $data)->assertRedirect();
 
         $this->assertDatabaseCount('lodge_user_roles', 0);
+    }
+
+    public function test_lodge_list_links_only_to_reachable_published_sites(): void
+    {
+        $platform = User::factory()->create(['is_platform_admin' => true]);
+        $published = Lodge::factory()->create(['name' => 'Alpha', 'slug' => 'alpha', 'status' => 'active']);
+        Lodge::factory()->create(['name' => 'Beta', 'slug' => 'beta', 'status' => 'active']);
+        $disabled = Lodge::factory()->create(['name' => 'Gamma', 'slug' => 'gamma', 'status' => 'disabled']);
+
+        foreach ([$published, $disabled] as $lodge) {
+            WebsitePage::create(['lodge_id' => $lodge->id])->versions()->create([
+                'lodge_id' => $lodge->id,
+                'status' => 'published',
+                'title' => 'Home',
+                'slug' => 'home',
+                'is_home' => true,
+                'show_in_navigation' => true,
+                'navigation_order' => 0,
+                'created_by' => $platform->id,
+            ]);
+        }
+
+        $this->actingAs($platform)->get('/platform/lodges')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('platform/Lodges')
+            ->has('lodges', 3)
+            ->where('lodges.0.public_site_url', '/l/alpha')
+            ->where('lodges.1.public_site_url', null)
+            ->where('lodges.2.public_site_url', null));
     }
 
     public function test_administrator_two_factor_policy_can_be_enabled_or_disabled(): void

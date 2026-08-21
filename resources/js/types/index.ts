@@ -11,6 +11,7 @@ export interface LodgeSummary {
     id: number;
     name: string;
     slug: string;
+    can_manage_website: boolean;
 }
 
 export interface BreadcrumbItem {

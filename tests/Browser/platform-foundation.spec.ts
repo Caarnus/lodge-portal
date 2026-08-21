@@ -95,6 +95,30 @@ test('platform and lodge administrators complete the two-lodge isolation flow', 
     await assignAdmin('lodge-b-admin@example.test');
     await assignAdmin('multi-lodge-admin@example.test');
 
+    const publishTemplateHome = async (lodgeId: string, lodgeSlug: string, lodgeName: string) => {
+        await page.goto(`/lodges/${lodgeId}/website`);
+        await page.getByRole('button', { name: 'Apply default template' }).click();
+        const homeRow = page.locator('article').filter({ hasText: /^Home/ }).first();
+        await homeRow.getByRole('link', { name: 'Edit page' }).click();
+        const previewUrl = await page.getByRole('link', { name: 'Preview draft' }).getAttribute('href');
+        await page.goto(previewUrl!);
+        await expect(page.getByText(/Draft preview/)).toBeVisible();
+        await page.goBack();
+        await page.getByRole('button', { name: 'Publish' }).click();
+        await expect(page).toHaveURL(new RegExp(`/lodges/${lodgeId}/website$`));
+        const aboutRow = page.locator('article').filter({ hasText: /^About/ }).first();
+        await aboutRow.getByRole('link', { name: 'Edit page' }).click();
+        await page.getByRole('button', { name: 'Publish' }).click();
+        await page.goto(`/l/${lodgeSlug}`);
+        await expect(page.getByRole('heading', { name: lodgeName, exact: true }).first()).toBeVisible();
+        await expect(page.getByRole('link', { name: 'About' })).toBeVisible();
+    };
+
+    await publishTemplateHome(lodgeAId, `browser-a-${suffix}`, lodgeAName);
+    await publishTemplateHome(lodgeBId, `browser-b-${suffix}`, lodgeBName);
+    await page.goto(`/l/browser-a-${suffix}`);
+    await expect(page.getByText(lodgeBName)).toHaveCount(0);
+
     await page.setViewportSize({ width: 420, height: 800 });
     await page.goto('/platform/lodges');
     const expandableLodgeName = page.getByRole('button', { name: 'Expand lodge name' }).first();
