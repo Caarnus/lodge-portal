@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventOccurrenceController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -12,8 +13,11 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PersonPhotoController;
 use App\Http\Controllers\PersonRelationshipController;
 use App\Http\Controllers\Platform\AccountController;
+use App\Http\Controllers\Platform\EventCategoryController as PlatformEventCategoryController;
 use App\Http\Controllers\Platform\LodgeController;
 use App\Http\Controllers\Platform\PersonMergeController;
+use App\Http\Controllers\PublicEventController;
+use App\Http\Controllers\PublicEventReminderController;
 use App\Http\Controllers\PublicWebsiteController;
 use App\Http\Controllers\RegistrationReviewController;
 use App\Http\Controllers\WebsiteController;
@@ -34,11 +38,17 @@ Route::get('dashboard', function () {
 
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
+Route::get('l/{lodge:slug}/events', [PublicEventController::class, 'index'])->name('public.events.index');
+Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderController::class, 'store'])->name('public.events.reminders.store');
+Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 'show'])->name('public.events.show');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
     Route::get('platform/accounts', [AccountController::class, 'index'])->name('platform.accounts.index')->middleware('platform-admin');
     Route::delete('platform/accounts/{user}', [AccountController::class, 'destroy'])->name('platform.accounts.destroy')->middleware('platform-admin');
+    Route::get('platform/event-categories', [PlatformEventCategoryController::class, 'index'])->name('platform.event-categories.index')->middleware('platform-admin');
+    Route::post('platform/event-categories', [PlatformEventCategoryController::class, 'store'])->name('platform.event-categories.store')->middleware('platform-admin');
+    Route::put('platform/event-categories/{eventCategory}', [PlatformEventCategoryController::class, 'update'])->name('platform.event-categories.update')->middleware('platform-admin');
     Route::post('platform/lodges/{lodge}/admins', [LodgeController::class, 'assignAdmin'])->name('platform.lodges.admins')->middleware('platform-admin');
     Route::put('platform/lodges/{lodge}/features', [LodgeController::class, 'features'])->name('platform.lodges.features')->middleware('platform-admin');
     Route::get('platform/people/merge', [PersonMergeController::class, 'create'])->name('platform.people.merge.create')->middleware('platform-admin');
@@ -57,6 +67,10 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::post('lodges/{lodge}/events/{event}/publish', [EventController::class, 'publish'])->name('lodges.events.publish');
     Route::post('lodges/{lodge}/events/{event}/cancel', [EventController::class, 'cancel'])->name('lodges.events.cancel');
     Route::post('lodges/{lodge}/events/{event}/archive', [EventController::class, 'archive'])->name('lodges.events.archive');
+    Route::get('lodges/{lodge}/events/{event}/occurrences', [EventOccurrenceController::class, 'index'])->name('lodges.events.occurrences.index');
+    Route::put('lodges/{lodge}/events/{event}/occurrences/{occurrence}', [EventOccurrenceController::class, 'update'])->name('lodges.events.occurrences.update');
+    Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/cancel', [EventOccurrenceController::class, 'cancel'])->name('lodges.events.occurrences.cancel');
+    Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/restore', [EventOccurrenceController::class, 'restore'])->name('lodges.events.occurrences.restore');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {
         abort_unless($r->user()->is_platform_admin || DB::table('lodge_user_roles')
             ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);

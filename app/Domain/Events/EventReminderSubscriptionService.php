@@ -50,6 +50,14 @@ class EventReminderSubscriptionService
         if ($occurrence && $occurrence->status !== EventOccurrenceStatus::Scheduled) {
             throw ValidationException::withMessages(['occurrence' => 'Reminder subscriptions are unavailable for this occurrence.']);
         }
+        if (! $occurrence && ! EventOccurrence::query()
+            ->where('event_id', $event->id)
+            ->where('lodge_id', $event->lodge_id)
+            ->where('status', EventOccurrenceStatus::Scheduled)
+            ->where('starts_at', '>=', now())
+            ->exists()) {
+            throw ValidationException::withMessages(['event' => 'Reminder subscriptions are unavailable for this event.']);
+        }
         if ($user && ! $this->eligibility->canView($user, $event)) {
             abort(403);
         }

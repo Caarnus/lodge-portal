@@ -32,13 +32,24 @@ class EventController extends Controller
     {
         $this->allow($lodge);
 
-        return $this->editor($lodge, new Event(['time_zone' => $lodge->timezone, 'visibility' => EventVisibility::Public->value, 'reminders_enabled' => true, 'guest_reminders_enabled' => true]));
+        return $this->editor($lodge, new Event([
+            'time_zone' => $lodge->timezone,
+            'first_starts_at' => now()->addHour()->startOfHour(),
+            'visibility' => EventVisibility::Public->value,
+            'reminders_enabled' => true,
+            'guest_reminders_enabled' => true,
+        ]));
     }
 
     public function store(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, WebsiteHtmlSanitizer $sanitizer)
     {
         $this->allow($lodge);
         $event = Event::create($this->data($request, $lodge, $recurrence, $sanitizer) + ['lodge_id' => $lodge->id, 'status' => EventStatus::Draft, 'created_by' => $request->user()->id, 'updated_by' => $request->user()->id]);
+        $event->reminderRules()->createMany([
+            ['lodge_id' => $lodge->id, 'offset_minutes' => 10080],
+            ['lodge_id' => $lodge->id, 'offset_minutes' => 1440],
+            ['lodge_id' => $lodge->id, 'offset_minutes' => 60],
+        ]);
         $this->materialize($event, $materializer);
         Audit::record('event.created', $event, $lodge, null, $event->fresh()->toArray());
 
@@ -96,7 +107,7 @@ class EventController extends Controller
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event,
             'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
-            'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'filename', 'derivative_path']),
+            'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
         ]);
     }
 
