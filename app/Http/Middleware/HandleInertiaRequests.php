@@ -54,7 +54,8 @@ class HandleInertiaRequests extends Middleware
                     ->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))
                     ->setAttribute('can_view_people', $user->hasLodgePermission($lodge, 'people.view'))
                     ->setAttribute('can_manage_officers', $user->hasLodgePermission($lodge, 'officers.manage'))
-                    ->setAttribute('can_manage_roles', $user->hasLodgePermission($lodge, 'roles.manage')));
+                    ->setAttribute('can_manage_roles', $user->hasLodgePermission($lodge, 'roles.manage'))
+                    ->setAttribute('can_manage_events', $user->hasLodgePermission($lodge, 'events.manage')));
         }
         $canReviewRegistrations = $user && ($user->is_platform_admin || DB::table('lodge_user_roles')
             ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')

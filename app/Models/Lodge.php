@@ -63,4 +63,19 @@ class Lodge extends Model
     {
         return $this->hasMany(Role::class);
     }
+
+    public function eventCategories()
+    {
+        return $this->belongsToMany(EventCategory::class)->withTimestamps();
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function eventOccurrences()
+    {
+        return $this->hasMany(EventOccurrence::class);
+    }
 }

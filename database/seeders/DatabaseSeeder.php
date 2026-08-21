@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         app(LodgeRoleCatalog::class)->seedPermissions();
         $this->call(PeopleMembershipReferenceSeeder::class);
+        $this->call(EventReferenceSeeder::class);
 
         foreach ([
             ['name' => 'Lodge A', 'number' => '101', 'slug' => 'lodge-a', 'city' => 'Evansville'],

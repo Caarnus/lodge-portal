@@ -20,6 +20,7 @@ class LodgeRoleCatalog
         'relationships.manage' => 'Manage qualifying family relationships',
         'officers.manage' => 'Manage current lodge officers',
         'roles.manage' => 'Manage lodge roles and access',
+        'events.manage' => 'Manage lodge events, reservations, and reminders',
     ];
 
     public function seedPermissions(): void
@@ -33,7 +34,7 @@ class LodgeRoleCatalog
     {
         $this->seedPermissions();
         $all = Permission::query()->whereIn('key', array_keys(self::PERMISSIONS))->pluck('id');
-        $officer = Permission::query()->whereIn('key', ['people.view', 'people.manage', 'memberships.manage', 'relationships.view'])->pluck('id');
+        $officer = Permission::query()->whereIn('key', ['people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage'])->pluck('id');
         $member = Permission::query()->whereIn('key', ['people.view', 'relationships.view'])->pluck('id');
 
         foreach (['Administrator', 'Officer', 'Member', 'Non-member'] as $name) {

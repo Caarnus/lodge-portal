@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\EventCategoryController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -45,6 +47,16 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::patch('registrations/{user}', [RegistrationReviewController::class, 'decide'])->name('registrations.decide');
     Route::get('lodges/{lodge}/settings', [LodgeSettingsController::class, 'edit'])->name('lodges.settings.edit');
     Route::put('lodges/{lodge}/settings', [LodgeSettingsController::class, 'update'])->name('lodges.settings.update');
+    Route::get('lodges/{lodge}/event-categories', [EventCategoryController::class, 'edit'])->name('lodges.event-categories.edit');
+    Route::put('lodges/{lodge}/event-categories', [EventCategoryController::class, 'update'])->name('lodges.event-categories.update');
+    Route::get('lodges/{lodge}/events', [EventController::class, 'index'])->name('lodges.events.index');
+    Route::get('lodges/{lodge}/events/create', [EventController::class, 'create'])->name('lodges.events.create');
+    Route::post('lodges/{lodge}/events', [EventController::class, 'store'])->name('lodges.events.store');
+    Route::get('lodges/{lodge}/events/{event}/edit', [EventController::class, 'edit'])->name('lodges.events.edit');
+    Route::put('lodges/{lodge}/events/{event}', [EventController::class, 'update'])->name('lodges.events.update');
+    Route::post('lodges/{lodge}/events/{event}/publish', [EventController::class, 'publish'])->name('lodges.events.publish');
+    Route::post('lodges/{lodge}/events/{event}/cancel', [EventController::class, 'cancel'])->name('lodges.events.cancel');
+    Route::post('lodges/{lodge}/events/{event}/archive', [EventController::class, 'archive'])->name('lodges.events.archive');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {
         abort_unless($r->user()->is_platform_admin || DB::table('lodge_user_roles')
             ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);

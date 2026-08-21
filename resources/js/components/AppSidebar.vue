@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type AuthenticatedSharedData, type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Building2, ClipboardCheck, Globe2, LayoutGrid, Settings, ShieldCheck, UserCog, Users, UserStar } from 'lucide-vue-next';
+import { Building2, CalendarDays, ClipboardCheck, Globe2, LayoutGrid, Settings, ShieldCheck, UserCog, Users, UserStar } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -30,6 +30,7 @@ const lodgeNavItems = computed<NavItem[]>(() => {
     if (lodge.can_view_people) items.push({ title: 'People', href: `/lodges/${lodge.id}/people`, icon: Users });
     if (lodge.can_manage_officers) items.push({ title: 'Officers', href: `/lodges/${lodge.id}/officers`, icon: UserStar });
     if (lodge.can_manage_roles) items.push({ title: 'Roles', href: `/lodges/${lodge.id}/roles`, icon: ShieldCheck });
+    if (lodge.can_manage_events) items.push({ title: 'Events', href: `/lodges/${lodge.id}/events`, icon: CalendarDays });
     return items;
 });
 const activate = (event: Event) => {

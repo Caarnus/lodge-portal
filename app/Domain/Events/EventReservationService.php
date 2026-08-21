@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Domain\Events;
+
+use App\Enums\EventOccurrenceStatus;
+use App\Enums\EventReservationStatus;
+use App\Enums\EventStatus;
+use App\Models\EventOccurrence;
+use App\Models\EventReservation;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class EventReservationService
+{
+    public function __construct(private readonly EventEligibility $eligibility) {}
+
+    public function reserve(EventOccurrence $occurrence, ?User $user, array $data): ReservationResult
+    {
+        return DB::transaction(function () use ($occurrence, $user, $data): ReservationResult {
+            $occurrence = EventOccurrence::query()->with('event')->lockForUpdate()->findOrFail($occurrence->id);
+            $event = $occurrence->event;
+            $this->ensurePermitted($occurrence, $user, $data);
+            $normalizedEmail = mb_strtolower(trim($data['email']));
+            if (EventReservation::query()->where('event_occurrence_id', $occurrence->id)->where('normalized_email', $normalizedEmail)->where('status', EventReservationStatus::Confirmed)->exists()) {
+                throw ValidationException::withMessages(['email' => 'An active reservation already exists for this email address.']);
+            }
+            $partySize = (int) ($data['party_size'] ?? 1);
+            $reserved = (int) EventReservation::query()->where('event_occurrence_id', $occurrence->id)->where('status', EventReservationStatus::Confirmed)->sum('party_size');
+            if ($reserved + $partySize > $event->capacity) {
+                throw ValidationException::withMessages(['party_size' => 'There is not enough remaining capacity for this reservation.']);
+            }
+            $token = bin2hex(random_bytes(32));
+            $reservation = EventReservation::create([
+                'event_occurrence_id' => $occurrence->id, 'event_id' => $event->id, 'lodge_id' => $event->lodge_id,
+                'user_id' => $user?->id, 'person_id' => $user?->person_id, 'name' => $data['name'], 'email' => $data['email'],
+                'normalized_email' => $normalizedEmail, 'phone' => $data['phone'] ?? null, 'party_size' => $partySize,
+                'responses' => $data['responses'] ?? null, 'status' => EventReservationStatus::Confirmed,
+                'cancellation_token_hash' => hash('sha256', $token),
+            ]);
+
+            return new ReservationResult($reservation, $token);
+        });
+    }
+
+    private function ensurePermitted(EventOccurrence $occurrence, ?User $user, array $data): void
+    {
+        $event = $occurrence->event;
+        if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || ! $event->reservations_enabled || ! $event->capacity) {
+            throw ValidationException::withMessages(['event' => 'Reservations are unavailable for this occurrence.']);
+        }
+        if ($user && ! $this->eligibility->canReserve($user, $event)) {
+            abort(403);
+        }
+        if (! $user && (! $event->guest_reservations_enabled || ! $this->eligibility->canView(null, $event))) {
+            abort(403);
+        }
+        if (($event->maximum_party_size ?? PHP_INT_MAX) < (int) ($data['party_size'] ?? 1)) {
+            throw ValidationException::withMessages(['party_size' => 'This party size exceeds the event limit.']);
+        }
+    }
+}

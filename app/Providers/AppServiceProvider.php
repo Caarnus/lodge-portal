@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Events\RecurrenceExpander;
+use App\Domain\Events\RruleRecurrenceExpander;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,14 +13,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(RecurrenceExpander::class, RruleRecurrenceExpander::class);
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+    public function boot(): void {}
 }
