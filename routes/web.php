@@ -4,6 +4,7 @@ use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventOccurrenceController;
 use App\Http\Controllers\EventReminderDeliveryController;
+use App\Http\Controllers\EventReminderRuleController;
 use App\Http\Controllers\EventReservationController;
 use App\Http\Controllers\EventReservationFieldController;
 use App\Http\Controllers\LodgeRoleController;
@@ -47,11 +48,14 @@ Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware(
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
 Route::get('l/{lodge:slug}/events', [PublicEventController::class, 'index'])->name('public.events.index');
 Route::get('l/{lodge:slug}/calendar.ics', [PublicEventCalendarController::class, 'feed'])->name('public.calendar.feed');
+Route::get('l/{lodge:slug}/events/{event}/series.ics', [PublicEventCalendarController::class, 'series'])->name('public.events.series-calendar');
 Route::get('l/{lodge:slug}/events/{occurrence}.ics', [PublicEventCalendarController::class, 'occurrence'])->name('public.events.calendar');
-Route::post('l/{lodge:slug}/events/{occurrence}/reservations', [PublicEventReservationController::class, 'store'])->name('public.events.reservations.store');
-Route::post('l/{lodge:slug}/reservations/cancel/{token}', [PublicReservationCancellationController::class, 'store'])->name('public.reservations.cancel');
-Route::post('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsubscribeController::class, 'store'])->name('public.reminders.unsubscribe');
-Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderController::class, 'store'])->name('public.events.reminders.store');
+Route::post('l/{lodge:slug}/events/{occurrence}/reservations', [PublicEventReservationController::class, 'store'])->middleware('throttle:10,1')->name('public.events.reservations.store');
+Route::get('l/{lodge:slug}/reservations/cancel/{token}', [PublicReservationCancellationController::class, 'show'])->middleware('throttle:10,1')->name('public.reservations.cancel.show');
+Route::post('l/{lodge:slug}/reservations/cancel/{token}', [PublicReservationCancellationController::class, 'store'])->middleware('throttle:10,1')->name('public.reservations.cancel');
+Route::get('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsubscribeController::class, 'show'])->middleware('throttle:10,1')->name('public.reminders.unsubscribe.show');
+Route::post('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.reminders.unsubscribe');
+Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderController::class, 'store'])->middleware('throttle:10,1')->name('public.events.reminders.store');
 Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 'show'])->name('public.events.show');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
@@ -84,7 +88,10 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/cancel', [EventOccurrenceController::class, 'cancel'])->name('lodges.events.occurrences.cancel');
     Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/restore', [EventOccurrenceController::class, 'restore'])->name('lodges.events.occurrences.restore');
     Route::post('lodges/{lodge}/events/{event}/reminder-deliveries/{delivery}/retry', [EventReminderDeliveryController::class, 'retry'])->name('lodges.events.reminder-deliveries.retry');
+    Route::post('lodges/{lodge}/events/{event}/reminder-rules', [EventReminderRuleController::class, 'store'])->name('lodges.events.reminder-rules.store');
+    Route::delete('lodges/{lodge}/events/{event}/reminder-rules/{rule}', [EventReminderRuleController::class, 'destroy'])->name('lodges.events.reminder-rules.destroy');
     Route::get('lodges/{lodge}/events/{event}/occurrences/{occurrence}/reservations', [EventReservationController::class, 'index'])->name('lodges.events.occurrences.reservations.index');
+    Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/reservations/{reservation}/cancel', [EventReservationController::class, 'cancel'])->name('lodges.events.occurrences.reservations.cancel');
     Route::post('lodges/{lodge}/events/{event}/reservation-fields', [EventReservationFieldController::class, 'store'])->name('lodges.events.reservation-fields.store');
     Route::delete('lodges/{lodge}/events/{event}/reservation-fields/{field}', [EventReservationFieldController::class, 'destroy'])->name('lodges.events.reservation-fields.destroy');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {

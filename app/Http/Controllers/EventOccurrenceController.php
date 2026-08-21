@@ -8,8 +8,12 @@ use App\Enums\ReminderDeliveryStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Lodge;
+use App\Notifications\EventOccurrenceCancelled;
 use App\Services\Audit;
+use App\Services\WebsiteHtmlSanitizer;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class EventOccurrenceController extends Controller
@@ -25,14 +29,23 @@ class EventOccurrenceController extends Controller
         ]);
     }
 
-    public function update(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence)
+    public function update(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence, WebsiteHtmlSanitizer $sanitizer)
     {
         $this->allowOccurrence($lodge, $event, $occurrence);
         $data = $request->validate([
             'starts_at' => ['nullable', 'date'], 'ends_at' => ['nullable', 'date', 'after:starts_at'],
             'title_override' => ['nullable', 'string', 'max:255'], 'description_override' => ['nullable', 'string'],
             'location_name_override' => ['nullable', 'string', 'max:255'], 'location_details_override' => ['nullable', 'string'],
+            'contact_name_override' => ['nullable', 'string', 'max:255'], 'contact_email_override' => ['nullable', 'email', 'max:255'], 'contact_phone_override' => ['nullable', 'string', 'max:40'],
         ]);
+        if (array_key_exists('description_override', $data)) {
+            $data['description_override'] = $sanitizer->sanitize($data['description_override'] ?? '');
+        }
+        foreach (['starts_at', 'ends_at'] as $field) {
+            if (filled($data[$field] ?? null)) {
+                $data[$field] = CarbonImmutable::parse($data[$field], $event->time_zone)->utc();
+            }
+        }
         $before = $occurrence->toArray();
         $occurrence->fill($data + ['overridden_at' => now()])->save();
         Audit::record('event_occurrence.updated', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
@@ -43,9 +56,12 @@ class EventOccurrenceController extends Controller
     public function cancel(Lodge $lodge, Event $event, EventOccurrence $occurrence)
     {
         $this->allowOccurrence($lodge, $event, $occurrence);
+        $before = $occurrence->toArray();
         $occurrence->update(['status' => EventOccurrenceStatus::Cancelled, 'cancelled_at' => now()]);
         $occurrence->reservations()->where('status', EventReservationStatus::Confirmed)->update(['status' => EventReservationStatus::EventCancelled, 'cancelled_at' => now()]);
         $occurrence->reminderDeliveries()->whereIn('status', [ReminderDeliveryStatus::Pending, ReminderDeliveryStatus::Claimed])->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
+        Audit::record('event_occurrence.cancelled', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
+        $this->sendCancellationNotices($occurrence);
 
         return back()->with('notice', 'Occurrence cancelled.');
     }
@@ -53,7 +69,9 @@ class EventOccurrenceController extends Controller
     public function restore(Lodge $lodge, Event $event, EventOccurrence $occurrence)
     {
         $this->allowOccurrence($lodge, $event, $occurrence);
+        $before = $occurrence->toArray();
         $occurrence->update(['status' => EventOccurrenceStatus::Scheduled, 'cancelled_at' => null]);
+        Audit::record('event_occurrence.restored', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 
         return back()->with('notice', 'Occurrence restored.');
     }
@@ -68,5 +86,16 @@ class EventOccurrenceController extends Controller
     {
         $this->allow($lodge, $event);
         abort_unless($occurrence->event_id === $event->id && $occurrence->lodge_id === $lodge->id, 404);
+    }
+
+    private function sendCancellationNotices(EventOccurrence $occurrence): void
+    {
+        $occurrence->loadMissing('event');
+        $recipients = $occurrence->reservations()->where('status', EventReservationStatus::EventCancelled)->get(['name', 'email', 'normalized_email'])
+            ->concat($occurrence->reminderSubscriptions()->where('status', 'active')->get(['name', 'email', 'normalized_email']))
+            ->unique('normalized_email');
+        foreach ($recipients as $recipient) {
+            Notification::route('mail', [$recipient->email => $recipient->name])->notify(new EventOccurrenceCancelled($occurrence));
+        }
     }
 }

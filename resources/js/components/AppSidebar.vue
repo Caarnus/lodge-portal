@@ -14,7 +14,7 @@ const activeLodge = computed(() => auth.value.lodges.find((lodge) => lodge.id ==
 const platformNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [{ title: 'Dashboard', href: '/dashboard', icon: LayoutGrid }];
     if (auth.value.user.is_platform_admin) {
-        items.push({ title: 'Lodges', href: '/platform/lodges', icon: Building2 });
+        items.push({ title: 'Platform lodges', href: '/platform/lodges', icon: Building2 });
         items.push({ title: 'Accounts', href: '/platform/accounts', icon: UserCog });
         items.push({ title: 'Event categories', href: '/platform/event-categories', icon: Tags });
         items.push({ title: 'Merge people', href: '/platform/people/merge', icon: Users });
@@ -44,7 +44,7 @@ const activate = (event: Event) => {
     <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader>
             <SidebarMenu class="group-data-[collapsible=icon]:items-center"><SidebarMenuItem class="group-data-[collapsible=icon]:w-8"><SidebarMenuButton size="lg" as-child class="group-data-[collapsible=icon]:justify-center"><Link :href="route('dashboard')"><AppLogo /></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
-            <label v-if="auth.lodges.length" class="px-2 group-data-[collapsible=icon]:hidden"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/60">Active lodge</span><select :value="activeLodge?.id" class="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-2 text-sm" @change="activate"><option v-for="lodge in auth.lodges" :key="lodge.id" :value="lodge.id">{{ lodge.name }}</option></select></label>
+            <div v-if="auth.lodges.length" class="px-2 group-data-[collapsible=icon]:hidden"><span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/60">Active lodge</span><select aria-label="Active lodge" :value="activeLodge?.id" class="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-2 text-sm" @change="activate"><option v-for="lodge in auth.lodges" :key="lodge.id" :value="lodge.id">{{ lodge.name }}</option></select></div>
         </SidebarHeader>
 
         <SidebarContent>

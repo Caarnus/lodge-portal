@@ -160,7 +160,7 @@ class WebsiteController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:150',
-            'slug' => ['required', 'alpha_dash', 'max:100', Rule::unique('website_page_versions', 'slug')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
+            'slug' => ['required', 'alpha_dash', 'max:100', Rule::notIn(['events', 'calendar.ics', 'reservations', 'reminders']), Rule::unique('website_page_versions', 'slug')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
             'is_home' => ['required', 'boolean', function ($attribute, $value, $fail) use ($lodge, $version) {
                 if ($value && WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('status', 'draft')->where('is_home', true)->when($version, fn ($query) => $query->whereKeyNot($version->id))->exists()) {
                     $fail('This lodge already has a draft home page.');

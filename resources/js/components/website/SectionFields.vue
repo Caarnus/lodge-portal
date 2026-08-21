@@ -35,6 +35,12 @@ const addLink = () => (config.value.links ??= []).push({ label: '', url: '' });
             <div v-for="(link, index) in config.links" :key="index" class="grid gap-2 sm:grid-cols-[1fr_2fr_auto]"><input v-model="link.label" aria-label="Link label" required class="field-input" placeholder="Label" /><input v-model="link.url" aria-label="Link destination" required class="field-input" placeholder="/page or https://…" /><button type="button" class="rounded border px-3" @click="config.links.splice(index, 1)">Remove</button></div>
             <button type="button" class="w-fit rounded border px-3 py-2 text-sm" @click="addLink">Add link</button>
         </template>
+        <template v-else-if="type === 'events_placeholder'">
+            <label class="field-label">Heading<input v-model="config.heading" class="field-input" /></label>
+            <label class="field-label">Empty-state message<textarea v-model="config.body" class="field-input min-h-20"></textarea></label>
+            <label class="field-label">Maximum items<input v-model.number="config.maximum_items" type="number" min="1" max="20" class="field-input" /></label>
+            <label class="flex items-center gap-2 text-sm"><input v-model="config.show_all_link" type="checkbox" /> Show complete event-list link</label>
+        </template>
         <template v-else-if="placeholders.includes(type)">
             <label class="field-label">Heading<input v-model="config.heading" class="field-input" /></label>
             <label class="field-label">Message<textarea v-model="config.body" class="field-input min-h-20"></textarea></label>

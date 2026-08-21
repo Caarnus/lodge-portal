@@ -19,6 +19,7 @@ use App\Models\EventCategory;
 use App\Models\EventOccurrence;
 use App\Models\EventReminderDelivery;
 use App\Models\EventReminderSubscription;
+use App\Models\EventReservationField;
 use App\Models\Lodge;
 use App\Models\MasonicDegree;
 use App\Models\Membership;
@@ -364,5 +365,28 @@ class EventDomainTest extends TestCase
         }
 
         $this->get("/l/{$lodge->slug}/calendar.ics")->assertOk()->assertHeader('content-type', 'text/calendar; charset=utf-8')->assertSee('Public Feed')->assertDontSee('Private Feed');
+    }
+
+    public function test_reservation_custom_responses_are_validated_and_persisted(): void
+    {
+        $lodge = Lodge::factory()->create(['timezone' => 'America/Chicago']);
+        $event = Event::create(['lodge_id' => $lodge->id, 'slug' => 'custom-response', 'status' => EventStatus::Published, 'title' => 'Custom response', 'time_zone' => 'America/Chicago', 'first_starts_at' => now()->addDay(), 'duration_minutes' => 60, 'visibility' => EventVisibility::Public, 'reservations_enabled' => true, 'guest_reservations_enabled' => true, 'capacity' => 10]);
+        $occurrence = EventOccurrence::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'recurrence_key' => 'custom-response', 'original_starts_at' => now()->addDay(), 'starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour(), 'status' => EventOccurrenceStatus::Scheduled]);
+        EventReservationField::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'key' => 'meal', 'label' => 'Meal', 'type' => 'select', 'is_required' => true, 'options' => ['Vegetarian', 'Regular'], 'is_active' => true]);
+
+        app(EventReservationService::class)->reserve($occurrence, null, ['name' => 'Guest', 'email' => 'guest@example.test', 'party_size' => 1, 'responses' => ['meal' => 'Vegetarian']]);
+
+        $this->assertDatabaseHas('event_reservations', ['event_occurrence_id' => $occurrence->id]);
+        $this->assertSame(['meal' => 'Vegetarian'], $occurrence->reservations()->sole()->responses);
+    }
+
+    public function test_series_calendar_includes_rule_cancellation_and_override(): void
+    {
+        $lodge = Lodge::factory()->create(['timezone' => 'America/Chicago']);
+        $event = Event::create(['lodge_id' => $lodge->id, 'slug' => 'calendar-series', 'status' => EventStatus::Published, 'title' => 'Calendar Series', 'time_zone' => 'America/Chicago', 'first_starts_at' => now()->addDay(), 'duration_minutes' => 60, 'rrule' => 'FREQ=WEEKLY;COUNT=2', 'visibility' => EventVisibility::Public]);
+        EventOccurrence::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'recurrence_key' => 'series-a', 'original_starts_at' => now()->addDay(), 'starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour(), 'status' => EventOccurrenceStatus::Cancelled]);
+        EventOccurrence::create(['event_id' => $event->id, 'lodge_id' => $lodge->id, 'recurrence_key' => 'series-b', 'original_starts_at' => now()->addWeek(), 'starts_at' => now()->addWeek()->addHour(), 'ends_at' => now()->addWeek()->addHours(2), 'status' => EventOccurrenceStatus::Scheduled, 'overridden_at' => now()]);
+
+        $this->get("/l/{$lodge->slug}/events/{$event->id}/series.ics")->assertOk()->assertSee('RRULE:FREQ=WEEKLY;COUNT=2')->assertSee('EXDATE;TZID=America/Chicago')->assertSee('RECURRENCE-ID;TZID=America/Chicago');
     }
 }

@@ -51,7 +51,7 @@ class PublicEventController extends Controller
     {
         $this->allowPublic($lodge);
         abort_unless($occurrence->lodge_id === $lodge->id, 404);
-        $occurrence->load(['event.category', 'event.coverMediaAsset']);
+        $occurrence->load(['event.category', 'event.coverMediaAsset', 'event.reservationFields']);
         abort_unless($occurrence->status === EventOccurrenceStatus::Scheduled && $occurrence->event->status === EventStatus::Published, 404);
         abort_unless($occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event), 404);
 
@@ -86,6 +86,9 @@ class PublicEventController extends Controller
             'is_recurring' => $event->rrule !== null,
             'reminders_enabled' => $event->reminders_enabled,
             'guest_reminders_enabled' => $event->guest_reminders_enabled,
+            'reservation_fields' => $event->relationLoaded('reservationFields') ? $event->reservationFields->where('is_active', true)->map(fn ($field) => [
+                'key' => $field->key, 'label' => $field->label, 'help_text' => $field->help_text, 'type' => $field->type->value, 'is_required' => $field->is_required, 'options' => $field->options,
+            ])->values() : [],
         ];
     }
 

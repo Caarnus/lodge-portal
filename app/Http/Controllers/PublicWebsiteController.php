@@ -71,7 +71,7 @@ class PublicWebsiteController extends Controller
         $pastMasters = collect();
         $events = collect();
         if ($version->sections->contains('type', 'events_placeholder')) {
-            $events = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('visibility', 'public'))->orderBy('starts_at')->limit(6)->get()->map(fn ($occurrence) => ['id' => $occurrence->id, 'title' => $occurrence->title_override ?: $occurrence->event->title, 'starts_at' => $occurrence->starts_at]);
+            $events = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('visibility', 'public'))->orderBy('starts_at')->limit(20)->get()->map(fn ($occurrence) => ['id' => $occurrence->id, 'title' => $occurrence->title_override ?: $occurrence->event->title, 'starts_at' => $occurrence->starts_at, 'event_category_id' => $occurrence->event->event_category_id]);
         }
         if ($version->sections->contains('type', 'past_masters_placeholder')) {
             $pastMasters = PastMasterTerm::query()
