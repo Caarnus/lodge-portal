@@ -4,7 +4,7 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The platform foundation is implemented: authentication, approval routing, platform and lodge administration, tenant-scoped permissions, auditing, feature flags, Docker development services, and automated Laravel/Playwright coverage are available.
+The platform foundation is implemented: authentication, approval routing, platform and lodge administration, tenant-scoped permissions, auditing, feature flags, Docker development services, and automated Laravel/Playwright coverage are available. The public lodge website and content-management specification is complete and is the current implementation milestone.
 
 ## Planned Stack
 
@@ -82,6 +82,7 @@ To deliberately erase the local database, Redis data, media, and browser-test No
 
 - [Phased implementation plan](multi_lodge_platform_phased_implementation_plan.md)
 - [Phase 1 specification](docs/phase-01.md)
+- [Phase 2 specification](docs/phase-02.md)
 - [Architecture](docs/architecture.md)
 - [Domain model](docs/domain-model.md)
 - [Tenancy rules](docs/tenancy-rules.md)

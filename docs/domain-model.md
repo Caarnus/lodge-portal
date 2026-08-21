@@ -16,3 +16,15 @@ Every persistent domain model must be classified as platform-owned, lodge-owned,
 - Audit event: immutable record of a sensitive action and relevant before/after state.
 
 Lodge slugs are globally unique but may be changed by an authorized administrator. Person email addresses, when present directly on people, are globally unique.
+
+## Public Website
+
+- `WebsitePage`: a stable lodge-owned page identity.
+- `WebsitePageVersion`: lodge-owned draft, published, or archived page metadata, slug, and navigation placement. A public request reads only a published version.
+- `WebsiteSection`: an ordered, typed, lodge-owned content section belonging to one page version. Its configuration is validated against the platform contract for that section type.
+- `MediaAsset`: a lodge-owned or intentionally platform-shared file with explicit visibility and storage metadata.
+- Website template: a platform-owned, versioned content recipe that creates ordinary lodge-owned pages and sections.
+
+Published content is immutable through ordinary editing. Editing occurs in a draft, and transactional publication replaces the current published version while retaining archived history. Page, version, section, navigation-parent, and media relationships must all agree on lodge ownership.
+
+The lodge remains the owner of public identity fields including seal, logo, tag line, colors, public contact details, and meeting information.

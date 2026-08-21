@@ -20,3 +20,16 @@
 | Reactivate disabled-and-locked lodge | Yes | No | No |
 
 Pending registrants may authenticate only into the pending-approval experience. Selecting a home or active lodge never grants access.
+
+## Public Website Matrix
+
+| Action | Public visitor | Platform administrator | User with `website.manage` | User with `website.publish` |
+|---|---:|---:|---:|---:|
+| View active lodge's published site | Yes | Yes | Yes | Yes |
+| View draft preview | No | Any lodge | Assigned lodge | Assigned lodge |
+| Manage branding, pages, navigation, sections, and lodge media | No | Any lodge | Assigned lodge | No, unless separately granted `website.manage` |
+| Publish or unpublish pages | No | Any lodge | No, unless separately granted `website.publish` | Assigned lodge |
+| Add a custom HTML section | No | Yes | No | No |
+| View disabled lodge's public site | No | No | No | No |
+
+`website.manage` and `website.publish` are independent platform-owned permissions. The built-in lodge Administrator role receives both. Every management action authorizes the loaded lodge-owned resource; ownership identifiers supplied in a request are never trusted.
