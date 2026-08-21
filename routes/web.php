@@ -9,6 +9,7 @@ use App\Http\Controllers\PersonAccountController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PersonPhotoController;
 use App\Http\Controllers\PersonRelationshipController;
+use App\Http\Controllers\Platform\AccountController;
 use App\Http\Controllers\Platform\LodgeController;
 use App\Http\Controllers\Platform\PersonMergeController;
 use App\Http\Controllers\PublicWebsiteController;
@@ -34,6 +35,8 @@ Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('pu
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
+    Route::get('platform/accounts', [AccountController::class, 'index'])->name('platform.accounts.index')->middleware('platform-admin');
+    Route::delete('platform/accounts/{user}', [AccountController::class, 'destroy'])->name('platform.accounts.destroy')->middleware('platform-admin');
     Route::post('platform/lodges/{lodge}/admins', [LodgeController::class, 'assignAdmin'])->name('platform.lodges.admins')->middleware('platform-admin');
     Route::put('platform/lodges/{lodge}/features', [LodgeController::class, 'features'])->name('platform.lodges.features')->middleware('platform-admin');
     Route::get('platform/people/merge', [PersonMergeController::class, 'create'])->name('platform.people.merge.create')->middleware('platform-admin');

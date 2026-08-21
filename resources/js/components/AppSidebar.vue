@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type AuthenticatedSharedData, type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Building2, ClipboardCheck, Globe2, LayoutGrid, Settings, ShieldCheck, Users, UserStar } from 'lucide-vue-next';
+import { Building2, ClipboardCheck, Globe2, LayoutGrid, Settings, ShieldCheck, UserCog, Users, UserStar } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -15,6 +15,7 @@ const platformNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [{ title: 'Dashboard', href: '/dashboard', icon: LayoutGrid }];
     if (auth.value.user.is_platform_admin) {
         items.push({ title: 'Lodges', href: '/platform/lodges', icon: Building2 });
+        items.push({ title: 'Accounts', href: '/platform/accounts', icon: UserCog });
         items.push({ title: 'Merge people', href: '/platform/people/merge', icon: Users });
     }
     if (auth.value.can_review_registrations) items.push({ title: 'Registrations', href: '/registrations', icon: ClipboardCheck });

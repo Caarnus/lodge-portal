@@ -7,6 +7,7 @@ use App\Enums\WebsitePageStatus;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Models\OfficerAssignment;
+use App\Models\PastMasterTerm;
 use App\Models\WebsitePage;
 use App\Models\WebsitePageVersion;
 use Illuminate\Http\Request;
@@ -64,6 +65,19 @@ class PublicWebsiteController extends Controller
                     'phone' => $assignment->show_phone ? $assignment->membership->person->phone : null,
                 ]);
         }
+        $pastMasters = collect();
+        if ($version->sections->contains('type', 'past_masters_placeholder')) {
+            $pastMasters = PastMasterTerm::query()
+                ->where('lodge_id', $lodge->id)
+                ->with('person')
+                ->orderByDesc('year')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (PastMasterTerm $term) => [
+                    'year' => $term->year,
+                    'name' => $term->person->display_name,
+                ]);
+        }
 
         return Inertia::render('public/Website', [
             'lodge' => $lodge,
@@ -72,6 +86,7 @@ class PublicWebsiteController extends Controller
             'media' => MediaAsset::query()->whereIn('id', $mediaIds)->where('processing_status', 'ready')->where('visibility', 'public')->get()->keyBy('id'),
             'preview' => $preview,
             'officers' => $officers,
+            'pastMasters' => $pastMasters,
         ]);
     }
 

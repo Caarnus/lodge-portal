@@ -61,6 +61,7 @@ html.dark .hover\:bg-slate-100:hover { background-color: #334155; }
 html.dark input,
 html.dark select,
 html.dark textarea { background-color: #1e293b; color: #f8fafc; border-color: #475569; }
+html.dark .public-rich-text p { color: #cbd5e1; }
 
 [data-pc-name="tooltip"] {
  pointer-events:none;
@@ -85,6 +86,7 @@ html.dark textarea { background-color: #1e293b; color: #f8fafc; border-color: #4
  .icon-button{@apply inline-flex size-10 shrink-0 items-center justify-center rounded-md transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:pointer-events-none disabled:opacity-30}
  .field-label{@apply grid gap-1 text-sm font-medium}
  .field-input{@apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-900}
+ .primary-button{@apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50}
  .public-rich-text h1{@apply mb-5 text-4xl font-bold}
  .public-rich-text h2{@apply mb-4 mt-8 text-3xl font-bold}
  .public-rich-text h3{@apply mb-3 mt-6 text-2xl font-semibold}

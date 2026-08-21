@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Lodge;
 use App\Models\MediaAsset;
+use App\Models\PastMasterTerm;
 use App\Models\Permission;
+use App\Models\Person;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WebsitePage;
@@ -90,6 +92,28 @@ class PublicWebsiteTest extends TestCase
         $this->assertDatabaseHas('audit_events', ['action' => 'website.page_updated', 'lodge_id' => $lodge->id]);
     }
 
+    public function test_unpublishing_a_page_retains_an_editable_draft(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $admin = $this->userFor($lodge, ['website.manage', 'website.publish']);
+        $page = $this->createPage($lodge, $admin, ['title' => 'About', 'slug' => 'about', 'is_home' => false]);
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/sections", [
+            'type' => 'rich_text',
+            'configuration' => ['html' => '<p>Editable content</p>'],
+        ])->assertRedirect();
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/publish")->assertRedirect();
+
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/unpublish")->assertRedirect();
+
+        $this->assertNotNull($page->fresh()->draft()->first());
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/website/pages/{$page->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $response) => $response
+                ->component('website/Edit')
+                ->where('draft.sections.0.configuration.html', '<p>Editable content</p>'));
+        $this->get("/l/{$lodge->slug}/about")->assertNotFound();
+    }
+
     public function test_disabled_lodges_and_cross_lodge_resource_ids_are_rejected(): void
     {
         $a = Lodge::factory()->create();
@@ -173,13 +197,39 @@ class PublicWebsiteTest extends TestCase
         $admin = $this->userFor($lodge, ['website.manage']);
         $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/template")->assertRedirect();
 
-        $this->assertSame(5, $lodge->websitePages()->count());
+        $this->assertSame(6, $lodge->websitePages()->count());
         $this->assertDatabaseHas('website_page_versions', ['lodge_id' => $lodge->id, 'title' => 'Home', 'is_home' => true, 'status' => 'draft']);
         $welcome = WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('title', 'Home')->firstOrFail()->sections()->where('type', 'rich_text')->firstOrFail();
         $this->assertStringContainsString('Masonic lodge', $welcome->configuration['html']);
 
         $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/template")->assertSessionHasErrors('template');
-        $this->assertSame(5, $lodge->websitePages()->count());
+        $this->assertSame(6, $lodge->websitePages()->count());
+    }
+
+    public function test_past_masters_section_lists_only_the_current_lodges_terms(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $otherLodge = Lodge::factory()->create();
+        $admin = $this->userFor($lodge, ['website.manage', 'website.publish']);
+        $page = $this->createPage($lodge, $admin);
+        $recent = Person::factory()->create(['name' => 'Recent Master']);
+        $earlier = Person::factory()->create(['name' => 'Earlier Master']);
+        $other = Person::factory()->create(['name' => 'Other Lodge Master']);
+        PastMasterTerm::create(['lodge_id' => $lodge->id, 'person_id' => $earlier->id, 'year' => 1999]);
+        PastMasterTerm::create(['lodge_id' => $lodge->id, 'person_id' => $recent->id, 'year' => 2024]);
+        PastMasterTerm::create(['lodge_id' => $otherLodge->id, 'person_id' => $other->id, 'year' => 2025]);
+
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/sections", [
+            'type' => 'past_masters_placeholder',
+        ])->assertRedirect();
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/publish")->assertRedirect();
+
+        $this->get("/l/{$lodge->slug}")->assertInertia(fn (Assert $response) => $response
+            ->has('pastMasters', 2)
+            ->where('pastMasters.0.year', 2024)
+            ->where('pastMasters.0.name', $recent->display_name)
+            ->where('pastMasters.1.year', 1999)
+            ->where('pastMasters.1.name', $earlier->display_name));
     }
 
     public function test_uploaded_image_original_is_private_and_normalized_derivative_is_public(): void

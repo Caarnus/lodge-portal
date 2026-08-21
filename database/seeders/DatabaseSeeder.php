@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         app(LodgeRoleCatalog::class)->seedPermissions();
-        $this->call(PhaseThreeReferenceSeeder::class);
+        $this->call(PeopleMembershipReferenceSeeder::class);
 
         foreach ([
             ['name' => 'Lodge A', 'number' => '101', 'slug' => 'lodge-a', 'city' => 'Evansville'],

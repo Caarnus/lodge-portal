@@ -60,7 +60,19 @@ class LodgeController extends Controller
 
     public function edit(Lodge $lodge)
     {
-        return Inertia::render('platform/LodgeForm', ['lodge' => $lodge, 'admins' => $lodge->users()->select('users.id', 'users.name', 'users.email')->get(), 'features' => Feature::orderBy('name')->get()->map(fn ($f) => $f->setAttribute('enabled', $lodge->features()->where('features.id', $f->id)->wherePivot('enabled', true)->exists()))]);
+        $admins = $lodge->users()
+            ->join('roles', 'roles.id', '=', 'lodge_user_roles.role_id')
+            ->where('roles.name', 'Administrator')
+            ->select('users.id', 'users.name', 'users.email')
+            ->distinct()
+            ->orderBy('users.name')
+            ->get();
+
+        return Inertia::render('platform/LodgeForm', [
+            'lodge' => $lodge,
+            'admins' => $admins,
+            'features' => Feature::orderBy('name')->get()->map(fn ($f) => $f->setAttribute('enabled', $lodge->features()->where('features.id', $f->id)->wherePivot('enabled', true)->exists())),
+        ]);
     }
 
     public function update(LodgeRequest $r, Lodge $lodge)

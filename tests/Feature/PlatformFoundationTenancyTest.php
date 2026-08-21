@@ -6,6 +6,7 @@ use App\Models\AuditEvent;
 use App\Models\Feature;
 use App\Models\Lodge;
 use App\Models\Permission;
+use App\Models\Person;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WebsitePage;
@@ -158,6 +159,71 @@ class PlatformFoundationTenancyTest extends TestCase
         $this->actingAs($platform)->post("/platform/lodges/{$l->id}/admins", ['email' => $user->email])->assertRedirect();
         $this->assertTrue($user->fresh()->hasLodgePermission($l, 'lodge.manage'));
         $this->assertDatabaseHas('audit_events', ['action' => 'lodge.admin_assigned', 'lodge_id' => $l->id]);
+    }
+
+    public function test_platform_admin_can_remove_an_account_without_removing_the_person_record(): void
+    {
+        $platform = User::factory()->create(['is_platform_admin' => true]);
+        $lodge = Lodge::factory()->create();
+        $person = Person::factory()->create();
+        $account = User::factory()->create(['person_id' => $person->id]);
+        $role = Role::create(['lodge_id' => $lodge->id, 'name' => 'Member']);
+        DB::table('lodge_user_roles')->insert([
+            'lodge_id' => $lodge->id,
+            'user_id' => $account->id,
+            'role_id' => $role->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($platform)->delete("/platform/accounts/{$account->id}")->assertRedirect();
+
+        $this->assertDatabaseMissing('users', ['id' => $account->id]);
+        $this->assertDatabaseMissing('lodge_user_roles', ['user_id' => $account->id]);
+        $this->assertDatabaseHas('people', ['id' => $person->id]);
+        $this->assertDatabaseHas('audit_events', ['action' => 'user.deleted', 'actor_id' => $platform->id]);
+    }
+
+    public function test_platform_admin_cannot_remove_their_own_account(): void
+    {
+        $platform = User::factory()->create(['is_platform_admin' => true]);
+
+        $this->actingAs($platform)->delete("/platform/accounts/{$platform->id}")
+            ->assertSessionHasErrors('account');
+
+        $this->assertDatabaseHas('users', ['id' => $platform->id]);
+    }
+
+    public function test_lodge_edit_lists_each_administrator_once_and_excludes_non_administrators(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $platform = User::factory()->create(['is_platform_admin' => true]);
+        $administrator = User::factory()->create();
+        $nonAdministrator = User::factory()->create();
+        $administratorRole = Role::create(['lodge_id' => $lodge->id, 'name' => 'Administrator']);
+        $officerRole = Role::create(['lodge_id' => $lodge->id, 'name' => 'Officer']);
+
+        foreach ([
+            [$administrator->id, $administratorRole->id],
+            [$administrator->id, $officerRole->id],
+            [$nonAdministrator->id, $officerRole->id],
+        ] as [$userId, $roleId]) {
+            DB::table('lodge_user_roles')->insert([
+                'lodge_id' => $lodge->id,
+                'user_id' => $userId,
+                'role_id' => $roleId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($platform)->get("/platform/lodges/{$lodge->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('platform/LodgeForm')
+                ->has('admins', 1)
+                ->where('admins.0.id', $administrator->id)
+                ->where('admins.0.email', $administrator->email));
     }
 
     public function test_platform_admin_can_invite_a_new_lodge_admin_with_queued_password_setup(): void

@@ -58,6 +58,9 @@ class DefaultWebsiteTemplate
             ['title' => 'Officers', 'slug' => 'officers', 'is_home' => false, 'order' => 30, 'sections' => [
                 ['type' => 'officers_placeholder', 'configuration' => ['heading' => 'Lodge Officers', 'body' => 'Officer information will be available soon.']],
             ]],
+            ['title' => 'Past Masters', 'slug' => 'past-masters', 'is_home' => false, 'order' => 35, 'sections' => [
+                ['type' => 'past_masters_placeholder', 'configuration' => ['heading' => 'Past Masters', 'body' => 'Our lodge is grateful for the service of these Past Masters.']],
+            ]],
             ['title' => 'Contact', 'slug' => 'contact', 'is_home' => false, 'order' => 40, 'sections' => [
                 ['type' => 'contact_information', 'configuration' => ['heading' => 'Contact Us', 'body' => 'We welcome questions from members and visitors.']],
                 ['type' => 'meeting_information', 'configuration' => ['heading' => 'Meeting Information', 'body' => 'Contact the lodge to confirm meeting details before visiting.']],

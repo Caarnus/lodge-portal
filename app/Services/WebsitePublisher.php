@@ -61,6 +61,15 @@ class WebsitePublisher
                 throw ValidationException::withMessages(['page' => 'Published home page cannot be unpublished.']);
             }
             $before = $published->toArray();
+            $draft = $published->replicate(['status', 'published_at', 'published_by']);
+            $draft->status = WebsitePageStatus::Draft;
+            $draft->created_by = $published->published_by;
+            $draft->published_at = null;
+            $draft->published_by = null;
+            $draft->save();
+            foreach ($published->sections as $section) {
+                $draft->sections()->create($section->only(['lodge_id', 'type', 'sort_order', 'configuration']));
+            }
             $published->update(['status' => WebsitePageStatus::Archived]);
             Audit::record('website.page_unpublished', $page, $page->lodge, $before, null);
         });

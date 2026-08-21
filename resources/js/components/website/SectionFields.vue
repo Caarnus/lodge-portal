@@ -2,7 +2,7 @@
 import RichTextField from './RichTextField.vue';
 defineProps<{ type: string; media: any[] }>();
 const config = defineModel<Record<string, any>>({ required: true });
-const placeholders = ['meeting_information', 'contact_information', 'officers_placeholder', 'events_placeholder', 'newsletter_placeholder', 'gallery_placeholder'];
+const placeholders = ['meeting_information', 'contact_information', 'officers_placeholder', 'past_masters_placeholder', 'events_placeholder', 'newsletter_placeholder', 'gallery_placeholder'];
 const addLink = () => (config.value.links ??= []).push({ label: '', url: '' });
 </script>
 

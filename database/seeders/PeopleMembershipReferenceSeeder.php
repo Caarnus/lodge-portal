@@ -10,7 +10,7 @@ use App\Models\RelationshipType;
 use Closure;
 use Illuminate\Database\Seeder;
 
-class PhaseThreeReferenceSeeder extends Seeder
+class PeopleMembershipReferenceSeeder extends Seeder
 {
     public function run(): void
     {
@@ -47,11 +47,14 @@ class PhaseThreeReferenceSeeder extends Seeder
 
         foreach ([
             'Worshipful Master', 'Senior Warden', 'Junior Warden', 'Treasurer', 'Secretary', 'Chaplain',
-            'Senior Deacon', 'Junior Deacon', 'Senior Steward', 'Junior Steward', 'Marshal', 'Tyler', 'Trustee',
+            'Senior Deacon', 'Junior Deacon', 'Senior Steward', 'Junior Steward', 'Marshal', 'Tyler',
         ] as $order => $name) {
             $key = str($name)->snake()->toString();
             OfficerPosition::updateOrCreate(['key' => $key], ['name' => $name, 'sort_order' => $order * 10, 'is_active' => true]);
         }
+        OfficerPosition::updateOrCreate(['key' => 'trustee1'], ['name' => 'Trustee', 'sort_order' => 120, 'is_active' => true]);
+        OfficerPosition::updateOrCreate(['key' => 'trustee2'], ['name' => 'Trustee', 'sort_order' => 130, 'is_active' => true]);
+        OfficerPosition::updateOrCreate(['key' => 'trustee3'], ['name' => 'Trustee', 'sort_order' => 140, 'is_active' => true]);
     }
 
     private function seedReferences(Closure $upsert, array $items): void

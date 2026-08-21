@@ -17,7 +17,7 @@ use App\Models\User;
 use App\Models\WebsitePage;
 use App\Services\LodgeRoleCatalog;
 use App\Services\PersonMergeService;
-use Database\Seeders\PhaseThreeReferenceSeeder;
+use Database\Seeders\PeopleMembershipReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +34,7 @@ class PeopleMembershipAdministrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(PhaseThreeReferenceSeeder::class);
+        $this->seed(PeopleMembershipReferenceSeeder::class);
     }
 
     public function test_people_are_reachable_only_through_an_active_membership_or_relationship(): void
