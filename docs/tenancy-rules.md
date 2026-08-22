@@ -31,3 +31,8 @@
 29. Event jobs carry stable identifiers and reload the complete lodge/event/occurrence/subscription/delivery ownership chain before mutation or delivery.
 30. Reservations, reminder subscriptions, and future volunteer commitments are independent intents. Creating one never authorizes, implies, or silently creates another.
 31. Volunteer positions, commitments, and staffing reminder deliveries carry matching lodge, event, and occurrence ownership. Nested volunteer routes validate every link before authorization.
+# Directory and profile ownership
+
+Directory requester authorization is evaluated from the route lodge, never `current_lodge_id`. A person-wide privacy setting belongs to the canonical person, while lodge-email preference belongs to a specific membership and its lodge. Self-service profile writes resolve the current user-to-person link server-side; submitted person or lodge identifiers never establish ownership.
+
+Directory projections may cross lodges only when the subject chose `participating_lodges`. They contain presentation fields only and are delivered with private/no-store cache policy. Originals and processed profile photos stay on private storage; derivative reads re-check requester and subject eligibility.

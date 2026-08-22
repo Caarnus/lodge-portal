@@ -7,6 +7,12 @@
 - Permissions come from a platform-owned catalog. Lodge-defined roles may compose catalog permissions but cannot invent permission identifiers.
 - Platform administration does not imply lodge membership or lodge access unless explicitly provided by platform policy for that action.
 
+## Member Directory
+
+`directory.view` is distinct from administrative People permissions. An approved, verified user needs both this permission and an active membership in the explicitly requested active lodge. Built-in Member receives only `directory.view`; Officer and Administrator retain administrative access and directory access. Platform administration alone does not bypass the active-membership directory rule.
+
+Directory scope is person-owned: `hidden`, `own_lodge`, or `participating_lodges`. Optional email, phone, address, degree, and photo fields are independently opt-in. List, search, detail, and photo use the same projection; hidden optional values are never searchable. Administrative People remains governed by `PersonAccess` and its existing people/relationship permissions.
+
 ## Phase 1 Matrix
 
 | Action | Platform administrator | Assigned lodge administrator | Other authenticated user |

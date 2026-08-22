@@ -25,6 +25,6 @@ class PersonPhotoController extends Controller
         abort_unless($access->canView($request->user(), $lodge, $person), 404);
         abort_unless($person->profile_photo_derivative_path && Storage::disk('local')->exists($person->profile_photo_derivative_path), 404);
 
-        return Storage::disk('local')->response($person->profile_photo_derivative_path, 'profile.jpg', ['Cache-Control' => 'private, max-age=3600']);
+        return Storage::disk('local')->response($person->profile_photo_derivative_path, 'profile.jpg', ['Cache-Control' => 'private, no-store']);
     }
 }

@@ -6,6 +6,12 @@
 - Laravel feature tests cover requests, policies, persistence, validation, mail, jobs, and tenant isolation.
 - Playwright tests cover critical browser workflows against the Docker environment.
 
+## Member portal and privacy pattern
+
+Directory tests use active Lodge A/B/C memberships plus a disabled lodge. They prove route-lodge authorization, 403 requester denial versus 404 invisible subject behavior, scope parity across list/detail/photo, hidden contact search non-discoverability, and no sensitive props or HTML. Profile tests cover stale links, merged/deceased people, email atomicity, privacy and communication ownership, and private photo readiness.
+
+Dashboard tests require both current `user_id` and `person_id` for historical activity rows. Browser coverage exercises dashboard, profile settings, authorized Directory navigation, public event detail, and volunteer withdrawal at mobile and desktop viewports.
+
 ## Phase 1 Browser Path
 
 Playwright must exercise platform-admin bootstrap/sign-in, creation of two lodges, assignment of separate and multi-lodge administrators, lodge switching, branding updates, blocked cross-lodge access, registration, email verification, pending status, approval/rejection, and configurable 2FA behavior.

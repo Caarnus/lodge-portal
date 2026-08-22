@@ -1,5 +1,11 @@
 # Architecture
 
+## Member portal boundary
+
+The member portal is a separate read/write boundary from administrative People. `SelfProfileService` resolves a valid current User-to-Person link for self-service writes. `DirectoryAccess` owns request-lodge eligibility and minimal presentation projections. Directory HTTP controllers never serialize Person models directly, and profile-photo derivatives are private-storage responses re-authorized for every request.
+
+The dashboard uses a read service keyed by stable user and person identifiers. It composes bounded sections and does not treat active-lodge selection as proof of membership or visibility.
+
 ## Baseline
 
 The platform is a Laravel 13 application on PHP 8.4 using Vue 3, Inertia, PrimeVue in unstyled mode, Tailwind CSS, PostgreSQL, and Redis. It is one application deployment with one shared relational database serving multiple lodge tenants.

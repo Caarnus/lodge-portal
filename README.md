@@ -4,7 +4,11 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The platform foundation, public lodge website CMS, people/membership administration, and lodge events are implemented. Events support materialized recurring occurrences, reservations, reminder subscriptions and delivery, volunteer staffing positions and commitments, ICS calendar output, event-category configuration, and tenant-scoped event management.
+The platform foundation, public lodge website CMS, people/membership administration, member profile settings, privacy-filtered directory, dashboard, and lodge events are implemented. Events support materialized recurring occurrences, reservations, reminder subscriptions and delivery, volunteer staffing positions and commitments, ICS calendar output, event-category configuration, and tenant-scoped event management.
+
+## Member privacy and directory
+
+People remain canonical shared identity records. Members manage their own directory scope, optional contact fields, photo, and per-membership lodge-email preference at `/settings/profile`. Directory responses are request-scoped, private/no-store, paginated, and never expose family, membership, account, storage, or hidden-contact data. Administrative People and member Directory are separate products with separate authorization.
 
 ## Planned Stack
 
