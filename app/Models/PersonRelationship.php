@@ -27,4 +27,9 @@ class PersonRelationship extends Model
     {
         return $this->belongsTo(RelationshipType::class, 'relationship_type_id');
     }
+
+    public function familyNewsletterSubscriptions()
+    {
+        return $this->hasMany(FamilyNewsletterSubscription::class);
+    }
 }

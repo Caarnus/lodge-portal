@@ -13,6 +13,7 @@ class MembershipCommunicationPreferenceFactory extends Factory
             'membership_id' => fn () => Membership::withoutEvents(fn () => Membership::factory()->create())->id,
             'lodge_id' => fn (array $attributes) => Membership::query()->findOrFail($attributes['membership_id'])->lodge_id,
             'receives_lodge_email' => true,
+            'receives_print_newsletter' => false,
         ];
     }
 }

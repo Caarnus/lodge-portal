@@ -15,7 +15,7 @@ class MembershipCommunicationPreference extends Model
 
     protected function casts(): array
     {
-        return ['receives_lodge_email' => 'boolean'];
+        return ['receives_lodge_email' => 'boolean', 'receives_print_newsletter' => 'boolean'];
     }
 
     public function membership()

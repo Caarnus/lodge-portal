@@ -78,6 +78,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(EventVolunteerCommitment::class);
     }
 
+    public function createdNewsletterIssues()
+    {
+        return $this->hasMany(NewsletterIssue::class, 'created_by');
+    }
+
+    public function createdLodgeCommunications()
+    {
+        return $this->hasMany(LodgeCommunication::class, 'created_by');
+    }
+
     public function hasLodgePermission(Lodge $lodge, string $permission): bool
     {
         return $this->is_platform_admin || DB::table('lodge_user_roles')->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')->where('lodge_user_roles.user_id', $this->id)->where('lodge_user_roles.lodge_id', $lodge->id)->where('permissions.key', $permission)->exists();

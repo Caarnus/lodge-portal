@@ -83,6 +83,16 @@ class Person extends Model
         return $this->hasMany(PersonRelationship::class, 'person_two_id');
     }
 
+    public function familyNewsletterSubscriptionsAsRecipient()
+    {
+        return $this->hasMany(FamilyNewsletterSubscription::class, 'recipient_person_id');
+    }
+
+    public function familyNewsletterSubscriptionsAsSponsor()
+    {
+        return $this->hasMany(FamilyNewsletterSubscription::class, 'sponsoring_person_id');
+    }
+
     public function mergedInto()
     {
         return $this->belongsTo(self::class, 'merged_into_person_id');

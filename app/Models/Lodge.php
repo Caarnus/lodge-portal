@@ -83,4 +83,49 @@ class Lodge extends Model
     {
         return $this->hasMany(EventOccurrence::class);
     }
+
+    public function newsletterIssues()
+    {
+        return $this->hasMany(NewsletterIssue::class);
+    }
+
+    public function newsletterDocuments()
+    {
+        return $this->hasMany(NewsletterDocument::class);
+    }
+
+    public function galleryAlbums()
+    {
+        return $this->hasMany(GalleryAlbum::class);
+    }
+
+    public function communications()
+    {
+        return $this->hasMany(LodgeCommunication::class);
+    }
+
+    public function communicationSetting()
+    {
+        return $this->hasOne(LodgeCommunicationSetting::class);
+    }
+
+    public function familyNewsletterSubscriptions()
+    {
+        return $this->hasMany(FamilyNewsletterSubscription::class);
+    }
+
+    public function familyNewsletterRequests()
+    {
+        return $this->hasMany(FamilyNewsletterRequest::class);
+    }
+
+    public function communicationDistributionRuns()
+    {
+        return $this->hasMany(CommunicationDistributionRun::class);
+    }
+
+    public function communicationDeliveries()
+    {
+        return $this->hasMany(CommunicationDelivery::class);
+    }
 }

@@ -61,6 +61,11 @@ class Membership extends Model
         return $this->hasOne(MembershipCommunicationPreference::class);
     }
 
+    public function communicationDeliveries()
+    {
+        return $this->hasMany(CommunicationDelivery::class);
+    }
+
     public function isActive(): bool
     {
         return $this->end_date === null && $this->status?->key === 'active';
