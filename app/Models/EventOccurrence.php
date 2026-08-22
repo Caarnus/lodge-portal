@@ -45,4 +45,19 @@ class EventOccurrence extends Model
     {
         return $this->hasMany(EventReminderDelivery::class);
     }
+
+    public function volunteerPositions()
+    {
+        return $this->hasMany(EventVolunteerPosition::class);
+    }
+
+    public function volunteerCommitments()
+    {
+        return $this->hasMany(EventVolunteerCommitment::class);
+    }
+
+    public function volunteerReminderDeliveries()
+    {
+        return $this->hasMany(EventVolunteerReminderDelivery::class);
+    }
 }

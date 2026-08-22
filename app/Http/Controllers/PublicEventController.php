@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Events\EventEligibility;
 use App\Domain\Events\EventOccurrenceMaterializer;
+use App\Domain\Events\VolunteerEligibility;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
 use App\Enums\EventVisibility;
@@ -47,7 +48,7 @@ class PublicEventController extends Controller
         ]);
     }
 
-    public function show(Request $request, Lodge $lodge, EventOccurrence $occurrence, EventEligibility $eligibility)
+    public function show(Request $request, Lodge $lodge, EventOccurrence $occurrence, EventEligibility $eligibility, VolunteerEligibility $volunteerEligibility)
     {
         $this->allowPublic($lodge);
         abort_unless($occurrence->lodge_id === $lodge->id, 404);
@@ -55,12 +56,19 @@ class PublicEventController extends Controller
         abort_unless($occurrence->status === EventOccurrenceStatus::Scheduled && $occurrence->event->status === EventStatus::Published, 404);
         abort_unless($occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event), 404);
 
-        return Inertia::render('public/EventDetail', [
+        $props = [
             'lodge' => $lodge,
             'navigation' => $this->navigation($lodge),
             'occurrence' => $this->eventData($occurrence),
             'viewer' => $request->user()?->only('name', 'email'),
-        ]);
+        ];
+        if ($volunteerEligibility->canVolunteer($request->user(), $occurrence->event) && $occurrence->starts_at->isFuture()) {
+            $positions = $occurrence->event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get();
+            $counts = \App\Models\EventVolunteerCommitment::query()->selectRaw('event_volunteer_position_id, count(*) as filled')->where('event_occurrence_id', $occurrence->id)->where('status', 'committed')->groupBy('event_volunteer_position_id')->pluck('filled', 'event_volunteer_position_id');
+            $own = \App\Models\EventVolunteerCommitment::query()->where('event_occurrence_id', $occurrence->id)->where('user_id', $request->user()->id)->where('person_id', $request->user()->person_id)->where('status', 'committed')->get()->keyBy('event_volunteer_position_id');
+            $props['staffing'] = $positions->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'description' => $position->description, 'needed_count' => $position->needed_count, 'filled_count' => (int) ($counts[$position->id] ?? 0), 'remaining_count' => max($position->needed_count - (int) ($counts[$position->id] ?? 0), 0), 'scope' => $position->event_occurrence_id ? 'occurrence' : 'series', 'commitment_id' => $own[$position->id]?->id, 'can_commit' => ! isset($own[$position->id]) && (int) ($counts[$position->id] ?? 0) < $position->needed_count, 'can_withdraw' => isset($own[$position->id])])->values();
+        }
+        return Inertia::render('public/EventDetail', $props);
     }
 
     private function eventData(EventOccurrence $occurrence): array

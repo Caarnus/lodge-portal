@@ -53,6 +53,11 @@ class Person extends Model
         return $this->hasOne(User::class);
     }
 
+    public function volunteerCommitments()
+    {
+        return $this->hasMany(EventVolunteerCommitment::class);
+    }
+
     public function memberships()
     {
         return $this->hasMany(Membership::class);

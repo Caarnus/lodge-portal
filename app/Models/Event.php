@@ -72,4 +72,14 @@ class Event extends Model
     {
         return $this->hasMany(EventReminderSubscription::class);
     }
+
+    public function volunteerPositions()
+    {
+        return $this->hasMany(EventVolunteerPosition::class);
+    }
+
+    public function volunteerCommitments()
+    {
+        return $this->hasMany(EventVolunteerCommitment::class);
+    }
 }
