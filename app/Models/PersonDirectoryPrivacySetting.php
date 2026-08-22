@@ -14,6 +14,10 @@ class PersonDirectoryPrivacySetting extends Model
 
     protected $guarded = [];
 
+    protected $primaryKey = 'person_id';
+
+    public $incrementing = false;
+
     protected function casts(): array
     {
         return [

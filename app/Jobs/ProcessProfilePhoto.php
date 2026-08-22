@@ -18,8 +18,8 @@ class ProcessProfilePhoto implements ShouldQueue
 
     public function handle(): void
     {
-        $person = Person::findOrFail($this->personId);
-        if ($person->profile_photo_path !== $this->sourcePath) {
+        $person = Person::query()->find($this->personId);
+        if (! $person || $person->merged_at || $person->is_deceased || $person->profile_photo_path !== $this->sourcePath) {
             return;
         }
         $person->update(['profile_photo_status' => 'processing', 'profile_photo_error' => null]);
@@ -29,6 +29,12 @@ class ProcessProfilePhoto implements ShouldQueue
             $bytes = class_exists(\Imagick::class) ? $this->imagick($source) : $this->gd($source);
             if (! Storage::disk('local')->put($target, $bytes)) {
                 throw new \RuntimeException('The private profile derivative could not be stored.');
+            }
+            $person->refresh();
+            if ($person->merged_at || $person->is_deceased || $person->profile_photo_path !== $this->sourcePath) {
+                Storage::disk('local')->delete($target);
+
+                return;
             }
             if ($person->profile_photo_derivative_path) {
                 Storage::disk('local')->delete($person->profile_photo_derivative_path);

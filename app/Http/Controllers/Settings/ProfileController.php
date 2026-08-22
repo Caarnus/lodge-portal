@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\LodgeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Services\SelfProfileService;
@@ -33,6 +34,22 @@ class ProfileController extends Controller
                 'mailing_city' => $person->mailing_city,
                 'mailing_state' => $person->mailing_state,
                 'mailing_postal_code' => $person->mailing_postal_code,
+            ],
+            'directoryPrivacy' => $person->directoryPrivacySetting()->firstOrCreate()->only([
+                'scope', 'show_email', 'show_phone', 'show_address', 'show_profile_photo', 'show_degree',
+            ]),
+            'communicationPreferences' => $person->memberships()->with(['lodge', 'communicationPreference', 'status'])
+                ->get()->filter(fn ($membership) => $membership->isActive() && $membership->lodge?->status === LodgeStatus::Active)
+                ->map(fn ($membership) => [
+                    'membership_id' => $membership->id,
+                    'lodge_name' => $membership->lodge->name,
+                    'lodge_number' => $membership->lodge->number,
+                    'receives_lodge_email' => $membership->communicationPreference?->receives_lodge_email ?? true,
+                ])->values(),
+            'photo' => [
+                'status' => $person->profile_photo_status,
+                'error' => $person->profile_photo_error,
+                'ready' => $person->profile_photo_status === 'ready' && filled($person->profile_photo_derivative_path),
             ],
         ]);
     }

@@ -25,6 +25,21 @@ interface Props {
         mailing_state: string | null;
         mailing_postal_code: string | null;
     };
+    directoryPrivacy: {
+        scope: "hidden" | "own_lodge" | "participating_lodges";
+        show_email: boolean;
+        show_phone: boolean;
+        show_address: boolean;
+        show_profile_photo: boolean;
+        show_degree: boolean;
+    };
+    communicationPreferences: Array<{
+        membership_id: number;
+        lodge_name: string;
+        lodge_number: string | null;
+        receives_lodge_email: boolean;
+    }>;
+    photo: { status: string | null; error: string | null; ready: boolean };
 }
 
 const props = defineProps<Props>();
@@ -54,6 +69,26 @@ const submit = () => {
     form.patch(route("profile.update"), {
         preserveScroll: true,
     });
+};
+
+const privacyForm = useForm({ ...props.directoryPrivacy });
+const photoForm = useForm<{ photo: File | null }>({ photo: null });
+
+const savePrivacy = () => {
+    privacyForm.put(route("profile.directory-privacy.update"), {
+        preserveScroll: true,
+    });
+};
+
+const saveCommunication = (membershipId: number, receivesLodgeEmail: boolean) => {
+    useForm({ receives_lodge_email: receivesLodgeEmail }).put(
+        route("profile.communication-preference.update", { membership: membershipId }),
+        { preserveScroll: true },
+    );
+};
+
+const uploadPhoto = () => {
+    photoForm.post(route("profile.photo.store"), { preserveScroll: true });
 };
 </script>
 
@@ -217,6 +252,72 @@ const submit = () => {
                     </div>
                 </form>
             </div>
+
+            <section class="mt-10 space-y-6 border-t pt-8">
+                <HeadingSmall
+                    title="Directory privacy"
+                    description="Control how your member profile appears in directories. Family information is never shared by the directory."
+                />
+                <form @submit.prevent="savePrivacy" class="space-y-5">
+                    <fieldset class="space-y-3">
+                        <legend class="text-sm font-medium">Directory visibility</legend>
+                        <label class="flex gap-3 text-sm">
+                            <input v-model="privacyForm.scope" value="hidden" type="radio" name="directory-scope" />
+                            <span><strong>Hidden</strong><br />Removes you from ordinary directories, not authorized lodge records.</span>
+                        </label>
+                        <label class="flex gap-3 text-sm">
+                            <input v-model="privacyForm.scope" value="own_lodge" type="radio" name="directory-scope" />
+                            <span><strong>My lodges</strong><br />Visible to every lodge where you have a current active membership.</span>
+                        </label>
+                        <label class="flex gap-3 text-sm">
+                            <input v-model="privacyForm.scope" value="participating_lodges" type="radio" name="directory-scope" />
+                            <span><strong>Participating lodges</strong><br />Opt in to directory sharing across participating lodges.</span>
+                        </label>
+                        <InputError :message="privacyForm.errors.scope" />
+                    </fieldset>
+                    <fieldset class="space-y-2">
+                        <legend class="text-sm font-medium">Optional directory fields</legend>
+                        <p class="text-sm text-muted-foreground">These choices apply to both directory audiences.</p>
+                        <label class="flex items-center gap-2 text-sm"><input v-model="privacyForm.show_email" type="checkbox" /> Email</label>
+                        <label class="flex items-center gap-2 text-sm"><input v-model="privacyForm.show_phone" type="checkbox" /> Phone</label>
+                        <label class="flex items-center gap-2 text-sm"><input v-model="privacyForm.show_address" type="checkbox" /> Mailing address</label>
+                        <label class="flex items-center gap-2 text-sm"><input v-model="privacyForm.show_profile_photo" type="checkbox" /> Profile photo</label>
+                        <label class="flex items-center gap-2 text-sm"><input v-model="privacyForm.show_degree" type="checkbox" /> Degree</label>
+                    </fieldset>
+                    <Button :disabled="privacyForm.processing">Save privacy</Button>
+                </form>
+            </section>
+
+            <section class="mt-10 space-y-6 border-t pt-8">
+                <HeadingSmall title="Lodge communications" description="Choose whether each active lodge membership may send lodge email." />
+                <p v-if="communicationPreferences.length === 0" class="text-sm text-muted-foreground">You have no active lodge memberships.</p>
+                <div v-for="preference in communicationPreferences" :key="preference.membership_id" class="flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="font-medium">{{ preference.lodge_name }}<span v-if="preference.lodge_number"> · {{ preference.lodge_number }}</span></p>
+                        <p class="text-sm text-muted-foreground">Lodge email for this membership.</p>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input :checked="preference.receives_lodge_email" type="checkbox" @change="saveCommunication(preference.membership_id, ($event.target as HTMLInputElement).checked)" />
+                        Receive email
+                    </label>
+                </div>
+            </section>
+
+            <section class="mt-10 space-y-6 border-t pt-8">
+                <HeadingSmall title="Profile photo" description="Your photo is stored privately and is processed before it can be shown." />
+                <img v-if="photo.ready" :src="route('profile.photo.show')" alt="Your profile photo" class="size-24 rounded-full object-cover" />
+                <p v-else-if="photo.status === 'pending' || photo.status === 'processing'" class="text-sm text-muted-foreground" aria-live="polite">Your photo is being prepared. Refresh this page in a moment.</p>
+                <p v-else-if="photo.status === 'failed'" class="text-sm text-destructive" role="alert">Photo processing failed. Choose another image and try again.</p>
+                <form @submit.prevent="uploadPhoto" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div class="grid gap-2">
+                        <Label for="profile-photo">Choose a photo</Label>
+                        <Input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" @input="photoForm.photo = ($event.target as HTMLInputElement).files?.[0] ?? null" />
+                        <InputError :message="photoForm.errors.photo" />
+                    </div>
+                    <Button :disabled="photoForm.processing || !photoForm.photo">Upload photo</Button>
+                    <Button v-if="photo.status" type="button" variant="outline" :disabled="photoForm.processing" @click="photoForm.delete(route('profile.photo.destroy'), { preserveScroll: true })">Remove photo</Button>
+                </form>
+            </section>
 
             <DeleteUser />
         </SettingsLayout>
