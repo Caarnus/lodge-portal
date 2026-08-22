@@ -1134,7 +1134,8 @@ Provide lodges with complete publication and media-management tools that integra
 ## 11.2 Assumptions
 
 - Newsletters and galleries belong to a lodge.
-- Some content may be public while other content is member-only.
+- Newsletters and lodge communications are member-only on the site, although approved family recipients may receive newsletter copies electronically or physically without portal access.
+- Gallery albums may be public, visible to authenticated Masons, or limited to members of the owning lodge.
 - Existing Newburgh newsletter concepts can inform the user experience without dictating the data model.
 - Email distribution may use a shared platform mail provider with lodge-aware sender/reply-to settings.
 
@@ -1149,8 +1150,8 @@ Authorized lodge users can:
 - Add title and cover image.
 - Add rich content or attach a PDF.
 - Publish/unpublish issues.
-- Set public or member-only visibility.
-- Display newsletters through the public site module.
+- Display newsletters through the authenticated member portal.
+- Use the public site module only as a generic member sign-in call to action without newsletter metadata.
 
 ### Galleries
 
@@ -1160,7 +1161,7 @@ Authorized lodge users can:
 - Upload photos.
 - Add captions.
 - Reorder photos.
-- Set public or member-only visibility.
+- Set public, authenticated-Mason, or owning-lodge-member visibility.
 - Publish/unpublish albums.
 
 ### Lodge Email Settings
@@ -1177,7 +1178,10 @@ Each lodge can configure:
 At minimum:
 
 - Send a test message.
+- Allow authorized administrators and officers to send a general email message to all eligible lodge members.
 - Deliver newsletter/publication notifications to eligible subscribed members if enabled.
+- Maintain member requests for mailed newsletter copies.
+- Allow eligible family of living or deceased members to request electronic, physical, or both forms of newsletter distribution without receiving portal access.
 - Honor opt-out preferences.
 
 ## 11.4 Technical Requirements
@@ -1193,15 +1197,16 @@ At minimum:
 
 A tester can:
 
-1. Create a public newsletter.
-2. Create a member-only newsletter.
-3. View each under the correct authorization state.
+1. Create and publish a member newsletter with rich content, a PDF, or both.
+2. View it as an active member and confirm anonymous/non-member site access is denied.
+3. Deliver it electronically to eligible members and approved family recipients while honoring opt-outs.
 4. Create a public gallery.
-5. Create a private gallery.
+5. Create authenticated-Mason and owning-lodge-member galleries.
 6. Configure lodge email identity.
-7. Send a test communication.
-8. Confirm unsubscribe preferences are respected.
-9. Confirm Lodge A cannot manage Lodge B media.
+7. Send a test communication and a general member message as an authorized administrator or officer.
+8. Prepare a physical newsletter distribution for opted-in members and eligible family recipients.
+9. Confirm unsubscribe preferences are respected.
+10. Confirm Lodge A cannot manage Lodge B media, recipients, or communications.
 
 ## 11.6 Automated Test Requirements
 
@@ -2398,7 +2403,7 @@ Calendar behavior:
 
 ## 23.7 Ritualist Program
 
-The detailed ritual taxonomy, official point values, rank thresholds, and complete list of tracked non-point parts are intentionally deferred to the Phase 7 specification.
+The detailed ritual taxonomy, official point values, rank thresholds, and complete list of tracked non-point parts are intentionally deferred to the Phase 8 specification.
 
 Established rules are:
 
