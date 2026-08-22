@@ -1,24 +1,33 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
-import { TooltipContent, TooltipPortal, useForwardPropsEmits, type TooltipContentEmits, type TooltipContentProps } from 'radix-vue';
-import { computed, type HTMLAttributes } from 'vue';
+import { cn } from "@/lib/utils";
+import {
+    TooltipContent,
+    TooltipPortal,
+    useForwardPropsEmits,
+    type TooltipContentEmits,
+    type TooltipContentProps,
+} from "radix-vue";
+import { computed, type HTMLAttributes } from "vue";
 
 defineOptions({
     inheritAttrs: false,
 });
 
-const props = withDefaults(defineProps<TooltipContentProps & { class?: HTMLAttributes['class'] }>(), {
-    side: 'top',
-    sideOffset: 4,
-    align: 'center',
-    alignOffset: 0,
-    avoidCollisions: true,
-    collisionBoundary: () => [],
-    collisionPadding: 0,
-    arrowPadding: 0,
-    sticky: 'partial',
-    hideWhenDetached: false,
-});
+const props = withDefaults(
+    defineProps<TooltipContentProps & { class?: HTMLAttributes["class"] }>(),
+    {
+        side: "top",
+        sideOffset: 4,
+        align: "center",
+        alignOffset: 0,
+        avoidCollisions: true,
+        collisionBoundary: () => [],
+        collisionPadding: 0,
+        arrowPadding: 0,
+        sticky: "partial",
+        hideWhenDetached: false,
+    },
+);
 
 const emits = defineEmits<TooltipContentEmits>();
 

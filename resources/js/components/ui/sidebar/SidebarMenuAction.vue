@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
-import { Primitive, type PrimitiveProps } from 'radix-vue';
-import type { HTMLAttributes } from 'vue';
+import { cn } from "@/lib/utils";
+import { Primitive, type PrimitiveProps } from "radix-vue";
+import type { HTMLAttributes } from "vue";
 
 const props = withDefaults(
     defineProps<
         PrimitiveProps & {
             showOnHover?: boolean;
-            class?: HTMLAttributes['class'];
+            class?: HTMLAttributes["class"];
         }
     >(),
     {
-        as: 'button',
+        as: "button",
     },
 );
 </script>

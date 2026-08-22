@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import Tooltip from 'primevue/tooltip';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import Tooltip from "primevue/tooltip";
+import {
+    computed,
+    nextTick,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    watch,
+} from "vue";
 
 const vTooltip = Tooltip;
 
@@ -10,8 +17,8 @@ const props = withDefaults(
         label?: string;
     }>(),
     {
-        text: '',
-        label: 'text',
+        text: "",
+        label: "text",
     },
 );
 
@@ -20,24 +27,29 @@ const expanded = ref(false);
 const canExpand = ref(false);
 let resizeObserver: ResizeObserver | undefined;
 
-const displayText = computed(() => props.text?.trim() || '—');
+const displayText = computed(() => props.text?.trim() || "—");
 
 const measure = async () => {
     if (expanded.value) return;
 
     await nextTick();
     const element = content.value;
-    canExpand.value = element ? element.scrollWidth > element.clientWidth + 1 : false;
+    canExpand.value = element
+        ? element.scrollWidth > element.clientWidth + 1
+        : false;
 };
 
 const toggle = () => {
     if (canExpand.value) expanded.value = !expanded.value;
 };
 
-watch(() => props.text, () => {
-    expanded.value = false;
-    void measure();
-});
+watch(
+    () => props.text,
+    () => {
+        expanded.value = false;
+        void measure();
+    },
+);
 
 watch(expanded, (isExpanded) => {
     if (!isExpanded) void measure();
@@ -58,8 +70,19 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
         class="block min-w-0 max-w-full text-left"
         :class="canExpand ? 'cursor-pointer' : 'cursor-default'"
         :aria-expanded="canExpand ? expanded : undefined"
-        :aria-label="canExpand ? `${expanded ? 'Collapse' : 'Expand'} ${label}` : undefined"
-        v-tooltip.bottom="canExpand ? { value: `${expanded ? 'Collapse' : 'Expand'} ${label}`, showDelay: 2000 } : undefined"
+        :aria-label="
+            canExpand
+                ? `${expanded ? 'Collapse' : 'Expand'} ${label}`
+                : undefined
+        "
+        v-tooltip.bottom="
+            canExpand
+                ? {
+                      value: `${expanded ? 'Collapse' : 'Expand'} ${label}`,
+                      showDelay: 2000,
+                  }
+                : undefined
+        "
         @click="toggle"
     >
         <span

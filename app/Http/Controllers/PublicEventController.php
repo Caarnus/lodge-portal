@@ -11,6 +11,7 @@ use App\Enums\EventVisibility;
 use App\Enums\LodgeStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
+use App\Models\EventVolunteerCommitment;
 use App\Models\Lodge;
 use App\Models\WebsitePageVersion;
 use Illuminate\Http\Request;
@@ -64,10 +65,11 @@ class PublicEventController extends Controller
         ];
         if ($volunteerEligibility->canVolunteer($request->user(), $occurrence->event) && $occurrence->starts_at->isFuture()) {
             $positions = $occurrence->event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get();
-            $counts = \App\Models\EventVolunteerCommitment::query()->selectRaw('event_volunteer_position_id, count(*) as filled')->where('event_occurrence_id', $occurrence->id)->where('status', 'committed')->groupBy('event_volunteer_position_id')->pluck('filled', 'event_volunteer_position_id');
-            $own = \App\Models\EventVolunteerCommitment::query()->where('event_occurrence_id', $occurrence->id)->where('user_id', $request->user()->id)->where('person_id', $request->user()->person_id)->where('status', 'committed')->get()->keyBy('event_volunteer_position_id');
+            $counts = EventVolunteerCommitment::query()->selectRaw('event_volunteer_position_id, count(*) as filled')->where('event_occurrence_id', $occurrence->id)->where('status', 'committed')->groupBy('event_volunteer_position_id')->pluck('filled', 'event_volunteer_position_id');
+            $own = EventVolunteerCommitment::query()->where('event_occurrence_id', $occurrence->id)->where('user_id', $request->user()->id)->where('person_id', $request->user()->person_id)->where('status', 'committed')->get()->keyBy('event_volunteer_position_id');
             $props['staffing'] = $positions->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'description' => $position->description, 'needed_count' => $position->needed_count, 'filled_count' => (int) ($counts[$position->id] ?? 0), 'remaining_count' => max($position->needed_count - (int) ($counts[$position->id] ?? 0), 0), 'scope' => $position->event_occurrence_id ? 'occurrence' : 'series', 'commitment_id' => $own[$position->id]?->id, 'can_commit' => ! isset($own[$position->id]) && (int) ($counts[$position->id] ?? 0) < $position->needed_count, 'can_withdraw' => isset($own[$position->id])])->values();
         }
+
         return Inertia::render('public/EventDetail', $props);
     }
 

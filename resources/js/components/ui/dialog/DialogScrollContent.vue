@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
-import { X } from 'lucide-vue-next';
+import { cn } from "@/lib/utils";
+import { X } from "lucide-vue-next";
 import {
     DialogClose,
     DialogContent,
@@ -9,10 +9,12 @@ import {
     useForwardPropsEmits,
     type DialogContentEmits,
     type DialogContentProps,
-} from 'radix-vue';
-import { computed, type HTMLAttributes } from 'vue';
+} from "radix-vue";
+import { computed, type HTMLAttributes } from "vue";
 
-const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>();
+const props = defineProps<
+    DialogContentProps & { class?: HTMLAttributes["class"] }
+>();
 const emits = defineEmits<DialogContentEmits>();
 
 const delegatedProps = computed(() => {
@@ -34,7 +36,10 @@ const preventScrollbarDismiss = (event: PointerDownOutsideEvent) => {
     }
 
     const bounds = target.getBoundingClientRect();
-    if (originalEvent.clientX > bounds.right || originalEvent.clientY > bounds.bottom) {
+    if (
+        originalEvent.clientX > bounds.right ||
+        originalEvent.clientY > bounds.bottom
+    ) {
         event.preventDefault();
     }
 };
@@ -57,7 +62,9 @@ const preventScrollbarDismiss = (event: PointerDownOutsideEvent) => {
             >
                 <slot />
 
-                <DialogClose class="absolute right-3 top-3 rounded-md p-0.5 transition-colors hover:bg-secondary">
+                <DialogClose
+                    class="absolute right-3 top-3 rounded-md p-0.5 transition-colors hover:bg-secondary"
+                >
                     <X class="h-4 w-4" />
                     <span class="sr-only">Close</span>
                 </DialogClose>

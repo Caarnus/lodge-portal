@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
-import type { PrimitiveProps } from 'radix-vue';
-import { Primitive } from 'radix-vue';
-import type { HTMLAttributes } from 'vue';
+import { cn } from "@/lib/utils";
+import type { PrimitiveProps } from "radix-vue";
+import { Primitive } from "radix-vue";
+import type { HTMLAttributes } from "vue";
 
 const props = withDefaults(
     defineProps<
         PrimitiveProps & {
-            size?: 'sm' | 'md';
+            size?: "sm" | "md";
             isActive?: boolean;
-            class?: HTMLAttributes['class'];
+            class?: HTMLAttributes["class"];
         }
     >(),
     {
-        as: 'a',
-        size: 'md',
+        as: "a",
+        size: "md",
     },
 );
 </script>

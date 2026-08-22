@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import Heading from '@/components/Heading.vue';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import Heading from "@/components/Heading.vue";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { type NavItem } from "@/types";
+import { Link } from "@inertiajs/vue3";
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
-        href: '/settings/profile',
+        title: "Profile",
+        href: "/settings/profile",
     },
     {
-        title: 'Password',
-        href: '/settings/password',
+        title: "Password",
+        href: "/settings/password",
     },
     {
-        title: 'Appearance',
-        href: '/settings/appearance',
+        title: "Appearance",
+        href: "/settings/appearance",
     },
     {
-        title: 'Two-factor authentication',
-        href: '/settings/two-factor',
+        title: "Two-factor authentication",
+        href: "/settings/two-factor",
     },
 ];
 
@@ -29,16 +29,24 @@ const currentPath = window.location.pathname;
 
 <template>
     <div class="px-4 py-6">
-        <Heading title="Settings" description="Manage your profile and account settings" />
+        <Heading
+            title="Settings"
+            description="Manage your profile and account settings"
+        />
 
-        <div class="flex flex-col space-y-8 md:space-y-0 lg:flex-row lg:space-x-12 lg:space-y-0">
+        <div
+            class="flex flex-col space-y-8 md:space-y-0 lg:flex-row lg:space-x-12 lg:space-y-0"
+        >
             <aside class="w-full max-w-xl lg:w-48">
                 <nav class="flex flex-col space-x-0 space-y-1">
                     <Button
                         v-for="item in sidebarNavItems"
                         :key="item.href"
                         variant="ghost"
-                        :class="['w-full justify-start', { 'bg-muted': currentPath === item.href }]"
+                        :class="[
+                            'w-full justify-start',
+                            { 'bg-muted': currentPath === item.href },
+                        ]"
                         as-child
                     >
                         <Link :href="item.href">

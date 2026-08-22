@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
+import type { HTMLAttributes } from "vue";
 
 defineOptions({
     inheritAttrs: false,
 });
 
 interface Props {
-    className?: HTMLAttributes['class'];
+    className?: HTMLAttributes["class"];
 }
 
 defineProps<Props>();
 </script>
 
 <template>
-    <img :src="'/favicon.png'" alt="" aria-hidden="true" :class="className" v-bind="$attrs" />
+    <img
+        :src="'/favicon.png'"
+        alt=""
+        aria-hidden="true"
+        :class="className"
+        v-bind="$attrs"
+    />
 </template>

@@ -1,5 +1,9 @@
 <template>
-    <div class="relative h-16 w-64 overflow-hidden" role="img" aria-label="WorkingTools">
+    <div
+        class="relative h-16 w-64 overflow-hidden"
+        role="img"
+        aria-label="WorkingTools"
+    >
         <img
             :src="'/logo.png'"
             alt=""

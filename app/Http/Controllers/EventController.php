@@ -9,7 +9,6 @@ use App\Enums\EventStatus;
 use App\Enums\EventVisibility;
 use App\Http\Requests\EventRequest;
 use App\Models\Event;
-use App\Models\EventVolunteerPosition;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Services\Audit;

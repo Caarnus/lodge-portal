@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Sheet from '@/components/ui/sheet/Sheet.vue';
-import SheetContent from '@/components/ui/sheet/SheetContent.vue';
-import { cn } from '@/lib/utils';
-import type { HTMLAttributes } from 'vue';
-import { SIDEBAR_WIDTH_MOBILE, useSidebar } from './utils';
+import Sheet from "@/components/ui/sheet/Sheet.vue";
+import SheetContent from "@/components/ui/sheet/SheetContent.vue";
+import { cn } from "@/lib/utils";
+import type { HTMLAttributes } from "vue";
+import { SIDEBAR_WIDTH_MOBILE, useSidebar } from "./utils";
 
 defineOptions({
     inheritAttrs: false,
@@ -11,15 +11,15 @@ defineOptions({
 
 const props = withDefaults(
     defineProps<{
-        side?: 'left' | 'right';
-        variant?: 'sidebar' | 'floating' | 'inset';
-        collapsible?: 'offcanvas' | 'icon' | 'none';
-        class?: HTMLAttributes['class'];
+        side?: "left" | "right";
+        variant?: "sidebar" | "floating" | "inset";
+        collapsible?: "offcanvas" | "icon" | "none";
+        class?: HTMLAttributes["class"];
     }>(),
     {
-        side: 'left',
-        variant: 'sidebar',
-        collapsible: 'offcanvas',
+        side: "left",
+        variant: "sidebar",
+        collapsible: "offcanvas",
     },
 );
 
@@ -29,13 +29,23 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 <template>
     <div
         v-if="collapsible === 'none'"
-        :class="cn('flex h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground', props.class)"
+        :class="
+            cn(
+                'flex h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground',
+                props.class,
+            )
+        "
         v-bind="$attrs"
     >
         <slot />
     </div>
 
-    <Sheet v-else-if="isMobile" :open="openMobile" v-bind="$attrs" @update:open="setOpenMobile">
+    <Sheet
+        v-else-if="isMobile"
+        :open="openMobile"
+        v-bind="$attrs"
+        @update:open="setOpenMobile"
+    >
         <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"

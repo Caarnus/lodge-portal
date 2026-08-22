@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
-import { useVModel } from '@vueuse/core';
-import type { HTMLAttributes, InputHTMLAttributes } from 'vue';
+import { cn } from "@/lib/utils";
+import { useVModel } from "@vueuse/core";
+import type { HTMLAttributes, InputHTMLAttributes } from "vue";
 
 const props = defineProps<{
     defaultValue?: string | number;
     modelValue?: string | number;
-    class?: HTMLAttributes['class'];
-    type?: InputHTMLAttributes['type'];
+    class?: HTMLAttributes["class"];
+    type?: InputHTMLAttributes["type"];
     autocomplete?: string;
     autofocus?: boolean;
     name?: string;
@@ -18,10 +18,10 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', payload: string | number): void;
+    (e: "update:modelValue", payload: string | number): void;
 }>();
 
-const modelValue = useVModel(props, 'modelValue', emits, {
+const modelValue = useVModel(props, "modelValue", emits, {
     passive: true,
     defaultValue: props.defaultValue,
 });

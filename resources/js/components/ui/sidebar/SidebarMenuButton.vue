@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import Tooltip from '@/components/ui/tooltip/Tooltip.vue';
-import TooltipContent from '@/components/ui/tooltip/TooltipContent.vue';
-import TooltipTrigger from '@/components/ui/tooltip/TooltipTrigger.vue';
-import { computed, type Component } from 'vue';
-import SidebarMenuButtonChild, { type SidebarMenuButtonProps } from './SidebarMenuButtonChild.vue';
-import { useSidebar } from './utils';
+import Tooltip from "@/components/ui/tooltip/Tooltip.vue";
+import TooltipContent from "@/components/ui/tooltip/TooltipContent.vue";
+import TooltipTrigger from "@/components/ui/tooltip/TooltipTrigger.vue";
+import { computed, type Component } from "vue";
+import SidebarMenuButtonChild, {
+    type SidebarMenuButtonProps,
+} from "./SidebarMenuButtonChild.vue";
+import { useSidebar } from "./utils";
 
 defineOptions({
     inheritAttrs: false,
@@ -17,9 +19,9 @@ const props = withDefaults(
         }
     >(),
     {
-        as: 'button',
-        variant: 'default',
-        size: 'default',
+        as: "button",
+        variant: "default",
+        size: "default",
     },
 );
 
@@ -32,7 +34,10 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
-    <SidebarMenuButtonChild v-if="!tooltip" v-bind="{ ...delegatedProps, ...$attrs }">
+    <SidebarMenuButtonChild
+        v-if="!tooltip"
+        v-bind="{ ...delegatedProps, ...$attrs }"
+    >
         <slot />
     </SidebarMenuButtonChild>
 
@@ -42,7 +47,11 @@ const delegatedProps = computed(() => {
                 <slot />
             </SidebarMenuButtonChild>
         </TooltipTrigger>
-        <TooltipContent side="right" align="center" :hidden="state !== 'collapsed' || isMobile">
+        <TooltipContent
+            side="right"
+            align="center"
+            :hidden="state !== 'collapsed' || isMobile"
+        >
             <template v-if="typeof tooltip === 'string'">
                 {{ tooltip }}
             </template>

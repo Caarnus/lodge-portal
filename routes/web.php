@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\EventOccurrenceStatus;
+use App\Enums\EventStatus;
+use App\Enums\VolunteerCommitmentStatus;
 use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventOccurrenceController;
@@ -7,6 +10,8 @@ use App\Http\Controllers\EventReminderDeliveryController;
 use App\Http\Controllers\EventReminderRuleController;
 use App\Http\Controllers\EventReservationController;
 use App\Http\Controllers\EventReservationFieldController;
+use App\Http\Controllers\EventVolunteerController;
+use App\Http\Controllers\EventVolunteerPositionController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -25,14 +30,13 @@ use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\PublicEventReminderController;
 use App\Http\Controllers\PublicEventReservationController;
 use App\Http\Controllers\PublicEventVolunteerController;
-use App\Http\Controllers\EventVolunteerController;
-use App\Http\Controllers\EventVolunteerPositionController;
 use App\Http\Controllers\PublicReminderUnsubscribeController;
 use App\Http\Controllers\PublicReservationCancellationController;
 use App\Http\Controllers\PublicWebsiteController;
 use App\Http\Controllers\RegistrationReviewController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteSectionController;
+use App\Models\EventVolunteerCommitment;
 use App\Models\Lodge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,12 +49,13 @@ Route::get('/', function () {
 
 Route::get('dashboard', function () {
     $user = request()->user();
-    $commitments = \App\Models\EventVolunteerCommitment::query()->with(['position', 'occurrence.event', 'lodge'])
-        ->where('user_id', $user->id)->where('person_id', $user->person_id)->where('status', \App\Enums\VolunteerCommitmentStatus::Committed)
+    $commitments = EventVolunteerCommitment::query()->with(['position', 'occurrence.event', 'lodge'])
+        ->where('user_id', $user->id)->where('person_id', $user->person_id)->where('status', VolunteerCommitmentStatus::Committed)
         ->whereHas('position', fn ($query) => $query->where('is_active', true))
-        ->whereHas('event', fn ($query) => $query->where('status', \App\Enums\EventStatus::Published))
-        ->whereHas('occurrence', fn ($query) => $query->where('status', \App\Enums\EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now()))
+        ->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published))
+        ->whereHas('occurrence', fn ($query) => $query->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now()))
         ->get()->sortBy(fn ($commitment) => [$commitment->occurrence->starts_at->timestamp, $commitment->position->sort_order, $commitment->position->name])->values()->map(fn ($commitment) => ['id' => $commitment->id, 'position' => $commitment->position->name, 'event' => $commitment->event->title, 'lodge' => $commitment->lodge->name, 'starts_at' => $commitment->occurrence->starts_at, 'time_zone' => $commitment->event->time_zone, 'location' => $commitment->occurrence->location_name_override ?: $commitment->event->location_name, 'event_url' => route('public.events.show', [$commitment->lodge->slug, $commitment->occurrence->id])]);
+
     return Inertia::render('Dashboard', ['volunteerCommitments' => $commitments]);
 })->middleware(['auth', 'verified', 'approved'])->name('dashboard');
 
