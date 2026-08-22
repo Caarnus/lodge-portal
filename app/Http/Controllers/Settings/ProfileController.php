@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\SelfProfileService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,26 +17,32 @@ class ProfileController extends Controller
     /**
      * Show the user's profile settings page.
      */
-    public function edit(Request $request): Response
+    public function edit(Request $request, SelfProfileService $profiles): Response
     {
+        $person = $profiles->personFor($request->user());
+
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'profile' => [
+                'preferred_name' => $person->preferred_name,
+                'email' => $person->email ?? $request->user()->email,
+                'phone' => $person->phone,
+                'mailing_address_line_1' => $person->mailing_address_line_1,
+                'mailing_address_line_2' => $person->mailing_address_line_2,
+                'mailing_city' => $person->mailing_city,
+                'mailing_state' => $person->mailing_state,
+                'mailing_postal_code' => $person->mailing_postal_code,
+            ],
         ]);
     }
 
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, SelfProfileService $profiles): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
+        $profiles->update($request->user(), $request->validated());
 
         return to_route('profile.edit');
     }
@@ -43,8 +50,9 @@ class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, SelfProfileService $profiles): RedirectResponse
     {
+        $profiles->personFor($request->user());
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
