@@ -10,21 +10,24 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const props = defineProps<{
-    volunteerCommitments: Array<{
-        id: number;
-        position: string;
-        event: string;
-        lodge: string;
-        lodge_slug: string;
-        occurrence_id: number;
-        starts_at: string;
-        time_zone: string;
-        location: string | null;
-        event_url: string;
-    }>;
+type VolunteerCommitment = {
+    id: number;
+    position: string;
+    event: string;
+    lodge: string;
+    lodge_slug: string;
+    occurrence_id: number;
+};
+
+defineProps<{
+    memberships: Array<{ id: number; lodge: string; number: string; type: string | null; degree: string | null }>;
+    upcomingEvents: Array<{ id: number; event: string; lodge: string; url: string }>;
+    reservations: Array<{ id: number; event: string; lodge: string }>;
+    reminders: Array<{ id: number; event: string; lodge: string }>;
+    profile: { linked: boolean; directory_scope: string | null; settings_url: string };
+    volunteerCommitments: VolunteerCommitment[];
 }>();
-const withdraw = (commitment: (typeof props.volunteerCommitments)[number]) =>
+const withdraw = (commitment: VolunteerCommitment) =>
     router.patch(
         `/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}/volunteer-commitments/${commitment.id}/withdraw`,
     );
@@ -34,6 +37,13 @@ const withdraw = (commitment: (typeof props.volunteerCommitments)[number]) =>
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="mx-auto grid w-full max-w-6xl gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Memberships</h2><p v-if="!memberships.length" class="mt-2 text-sm text-muted-foreground">No active memberships.</p><ul v-else class="mt-2 text-sm"><li v-for="item in memberships" :key="item.id">{{ item.lodge }} · {{ item.number }}<br />{{ [item.type, item.degree].filter(Boolean).join(' · ') }}</li></ul></section>
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Upcoming events</h2><p v-if="!upcomingEvents.length" class="mt-2 text-sm text-muted-foreground">No upcoming events.</p><ul v-else class="mt-2 text-sm"><li v-for="item in upcomingEvents" :key="item.id"><Link :href="item.url" class="underline">{{ item.event }}</Link> · {{ item.lodge }}</li></ul></section>
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Profile</h2><p class="mt-2 text-sm text-muted-foreground">Directory: {{ profile.directory_scope ?? 'not available' }}</p><Link :href="profile.settings_url" class="mt-2 inline-block text-sm underline">Profile settings</Link></section>
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Reservations</h2><p v-if="!reservations.length" class="mt-2 text-sm text-muted-foreground">No active reservations.</p><ul v-else class="mt-2 text-sm"><li v-for="item in reservations" :key="item.id">{{ item.event }} · {{ item.lodge }}</li></ul></section>
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Reminder subscriptions</h2><p v-if="!reminders.length" class="mt-2 text-sm text-muted-foreground">No active reminders.</p><ul v-else class="mt-2 text-sm"><li v-for="item in reminders" :key="item.id">{{ item.event }} · {{ item.lodge }}</li></ul></section>
+        </div>
         <div class="mx-auto w-full max-w-4xl rounded-xl border p-6">
             <h1 class="text-xl font-semibold">
                 Upcoming volunteer commitments
@@ -51,21 +61,13 @@ const withdraw = (commitment: (typeof props.volunteerCommitments)[number]) =>
                     class="py-4"
                 >
                     <Link
-                        :href="commitment.event_url"
+                        :href="`/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}`"
                         class="font-medium text-primary underline"
                         >{{ commitment.position }} —
                         {{ commitment.event }}</Link
                     >
                     <p class="mt-1 text-sm text-muted-foreground">
-                        {{ commitment.lodge }} ·
-                        {{
-                            new Date(commitment.starts_at).toLocaleString(
-                                undefined,
-                                { timeZone: commitment.time_zone },
-                            )
-                        }}<span v-if="commitment.location">
-                            · {{ commitment.location }}</span
-                        >
+                        {{ commitment.lodge }}
                     </p>
                     <button
                         class="mt-2 text-sm underline"
