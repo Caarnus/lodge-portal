@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Domain\Directory\DirectoryAccess;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventReservationStatus;
 use App\Enums\EventStatus;
@@ -17,6 +18,8 @@ use App\Models\User;
 
 class DashboardService
 {
+    public function __construct(private readonly DirectoryAccess $directory) {}
+
     public function read(User $user): array
     {
         $personId = $user->person_id;
@@ -28,7 +31,17 @@ class DashboardService
         $lodgeIds = $memberships->pluck('lodge_id');
 
         return [
-            'memberships' => $memberships->map(fn (Membership $m) => ['id' => $m->id, 'lodge' => $m->lodge->name, 'number' => $m->lodge->number, 'type' => $m->type?->name, 'degree' => $m->degree?->name])->values(),
+            'memberships' => $memberships->map(fn (Membership $m) => [
+                'id' => $m->id,
+                'lodge' => $m->lodge->name,
+                'number' => $m->lodge->number,
+                'type' => $m->type?->name,
+                'degree' => $m->degree?->name,
+                'site_url' => route('public.website.home', $m->lodge->slug),
+                'directory_url' => $this->directory->canBrowse($user, $m->lodge)
+                    ? route('lodges.directory.index', $m->lodge)
+                    : null,
+            ])->values(),
             'upcomingEvents' => EventOccurrence::query()->with(['event', 'lodge'])->whereIn('lodge_id', $lodgeIds)
                 ->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now())
                 ->whereHas('event', fn ($q) => $q->where('status', EventStatus::Published))->orderBy('starts_at')->limit(5)->get()
