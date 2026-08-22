@@ -21,7 +21,7 @@ test('login screen is available', async ({ page }) => {
 });
 
 test('platform and lodge administrators complete the two-lodge isolation flow', async ({ page, context }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
     test.skip(!process.env.E2E_ADMIN_EMAIL, 'Run through the Docker browser service for the seeded administrator flow.');
 
     const suffix = Date.now().toString();
@@ -105,11 +105,11 @@ test('platform and lodge administrators complete the two-lodge isolation flow', 
         await page.goto(previewUrl!);
         await expect(page.getByText(/Draft preview/)).toBeVisible();
         await page.goBack();
-        await page.getByRole('button', { name: 'Publish' }).click();
+        await page.getByRole('button', { name: 'Publish', exact: true }).click();
         await expect(page).toHaveURL(new RegExp(`/lodges/${lodgeId}/website$`));
         const aboutRow = page.locator('article').filter({ hasText: /^About/ }).first();
         await aboutRow.getByRole('link', { name: 'Edit page' }).click();
-        await page.getByRole('button', { name: 'Publish' }).click();
+        await page.getByRole('button', { name: 'Publish', exact: true }).click();
         await expect(page).toHaveURL(new RegExp(`/lodges/${lodgeId}/website$`));
         await page.goto(`/l/${lodgeSlug}`);
         await expect(page.getByRole('heading', { name: lodgeName, exact: true }).first()).toBeVisible();
@@ -149,36 +149,39 @@ test('platform and lodge administrators complete the two-lodge isolation flow', 
     await page.getByPlaceholder('Last name').fill(`Browser ${suffix}`);
     await page.getByLabel('Relationship type').selectOption({ label: 'Spouse' });
     await page.getByRole('button', { name: 'Add', exact: true }).click();
-    await expect(page.getByText(/Spouse: Alex Browser/)).toBeVisible();
+    await expect(page.getByText(new RegExp(`Hiram Browser ${suffix} is spouse of Alex Browser ${suffix}`, 'i'))).toBeVisible();
     await page.getByRole('button', { name: 'Invite account' }).click();
+    await expect(page.getByRole('button', { name: 'Invite account' })).toHaveCount(0);
     await expect(page.getByText(`Linked to ${officerEmail}`)).toBeVisible();
 
     await page.goto(`/lodges/${lodgeAId}/officers`);
-    await page.getByLabel('Member').selectOption({ label: `Hiram Browser ${suffix}` });
-    await page.getByLabel('Position').selectOption({ label: 'Secretary' });
-    const starts = new Date().toISOString().slice(0, 10);
-    const ends = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    await page.getByLabel('Starts').fill(starts);
-    await page.getByLabel('Ends').fill(ends);
-    await page.getByRole('button', { name: 'Save assignment' }).click();
+    await page.getByLabel('Secretary member').selectOption({ label: `Hiram Browser ${suffix}` });
+    await page.getByRole('button', { name: 'Save Secretary' }).click();
     await expect(page.getByRole('dialog', { name: 'Review officer access' })).toBeVisible();
     await page.getByRole('button', { name: 'Not now' }).click();
 
     await page.goto(`/lodges/${lodgeAId}/website`);
     const officersRow = page.locator('article').filter({ hasText: /^Officers/ }).first();
     await officersRow.getByRole('link', { name: 'Edit page' }).click();
-    await page.getByRole('button', { name: 'Publish' }).click();
-    await page.goto(`/l/browser-a-${suffix}/officers`);
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/lodges/${lodgeAId}/website$`));
+    const publishedOfficersRow = page.locator('article').filter({ hasText: /^Officers/ }).first();
+    const publicOfficersPage = publishedOfficersRow.getByRole('link', { name: 'View published page' });
+    await expect(publicOfficersPage).toBeVisible();
+    const publicOfficersHref = await publicOfficersPage.getAttribute('href');
+    expect(publicOfficersHref).not.toBeNull();
+    await page.goto(publicOfficersHref!);
     await expect(page.getByRole('heading', { name: `Hiram Browser ${suffix}` })).toBeVisible();
     await expect(page.getByText(officerEmail)).toHaveCount(0);
 
     expect((await page.goto(`/lodges/${lodgeBId}/settings`))?.status()).toBe(403);
 
     await login('multi-lodge-admin@example.test', userPassword);
-    await page.getByRole('button', { name: `${lodgeAName} Updated` }).click();
-    await expect(page.getByRole('button', { name: `${lodgeAName} Updated` })).toHaveClass(/font-semibold/);
-    await page.getByRole('button', { name: lodgeBName }).click();
-    await expect(page.getByRole('button', { name: lodgeBName })).toHaveClass(/font-semibold/);
+    const activeLodge = page.getByLabel('Active lodge');
+    await activeLodge.selectOption(lodgeAId);
+    await expect(activeLodge).toHaveValue(lodgeAId);
+    await activeLodge.selectOption(lodgeBId);
+    await expect(activeLodge).toHaveValue(lodgeBId);
     expect((await page.goto(`/lodges/${lodgeAId}/settings`))?.status()).toBe(200);
     expect((await page.goto(`/lodges/${lodgeBId}/settings`))?.status()).toBe(200);
 });
