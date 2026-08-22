@@ -146,6 +146,10 @@ const memberRelationships = (person: any) =>
             /></Link>
         </div>
 
+        <p class="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+            This is the administrative People workspace. It can show full lodge-reachable records; member directory privacy controls presentation in Directory and does not erase lodge records. Only the member may change their privacy choices in Profile settings.
+        </p>
+
         <form
             class="mt-6 grid gap-3 rounded-lg border bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_repeat(3,minmax(8rem,1fr))_minmax(13rem,1.4fr)_auto]"
             @submit.prevent

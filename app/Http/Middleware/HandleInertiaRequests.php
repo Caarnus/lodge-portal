@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Directory\DirectoryAccess;
 use App\Models\Lodge;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,6 +52,7 @@ class HandleInertiaRequests extends Middleware
             $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug'])
                 ->map(fn (Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
+                    ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))
                     ->setAttribute('can_view_people', $user->hasLodgePermission($lodge, 'people.view'))
                     ->setAttribute('can_manage_officers', $user->hasLodgePermission($lodge, 'officers.manage'))

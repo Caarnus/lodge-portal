@@ -140,23 +140,40 @@ class PeopleMembershipAdministrationTest extends TestCase
                 ->where('people.0.relationship_summaries.0.related_is_lodge_member', true));
     }
 
-    public function test_member_role_can_view_people_and_shared_lodges_are_not_duplicated_by_multiple_roles(): void
+    public function test_member_role_cannot_reach_administrative_people_or_relationship_routes_but_can_use_directory(): void
     {
         $lodge = Lodge::factory()->create();
         app(LodgeRoleCatalog::class)->ensureFor($lodge);
-        $this->member($lodge);
-        $user = User::factory()->create(['current_lodge_id' => null]);
+        $membership = $this->member($lodge);
+        $user = User::factory()->create(['person_id' => $membership->person_id, 'current_lodge_id' => null]);
         $memberRole = Role::where('lodge_id', $lodge->id)->where('name', 'Member')->firstOrFail();
-        $officerRole = Role::where('lodge_id', $lodge->id)->where('name', 'Officer')->firstOrFail();
-        foreach ([$memberRole, $officerRole] as $role) {
+        DB::table('lodge_user_roles')->insert(['lodge_id' => $lodge->id, 'user_id' => $user->id, 'role_id' => $memberRole->id,
+            'created_at' => now(), 'updated_at' => now()]);
+
+        $this->actingAs($user)->get("/lodges/{$lodge->id}/people")->assertForbidden();
+        $this->actingAs($user)->post("/lodges/{$lodge->id}/people/{$membership->person_id}/relationships", [])->assertNotFound();
+        $this->actingAs($user)->get("/lodges/{$lodge->id}/directory")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->has('auth.lodges', 1)->where('auth.lodges.0.id', $lodge->id));
+    }
+
+    public function test_officer_and_administrator_roles_keep_people_access_while_platform_admin_has_no_directory_bypass(): void
+    {
+        $lodge = Lodge::factory()->create();
+        app(LodgeRoleCatalog::class)->ensureFor($lodge);
+
+        foreach (['Officer', 'Administrator'] as $roleName) {
+            $membership = $this->member($lodge);
+            $user = User::factory()->create(['person_id' => $membership->person_id]);
+            $role = Role::query()->where('lodge_id', $lodge->id)->where('name', $roleName)->sole();
             DB::table('lodge_user_roles')->insert(['lodge_id' => $lodge->id, 'user_id' => $user->id, 'role_id' => $role->id,
                 'created_at' => now(), 'updated_at' => now()]);
+
+            $this->actingAs($user)->get("/lodges/{$lodge->id}/people")->assertOk();
         }
 
-        $this->actingAs($user)->get("/lodges/{$lodge->id}/people")->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->has('auth.lodges', 1)->where('auth.lodges.0.id', $lodge->id));
-        $this->actingAs($user)->post("/lodges/{$lodge->id}/activate")->assertRedirect();
-        $this->assertSame($lodge->id, $user->fresh()->current_lodge_id);
+        $platformAdmin = User::factory()->create(['is_platform_admin' => true]);
+        $this->actingAs($platformAdmin)->get("/lodges/{$lodge->id}/people")->assertOk();
+        $this->actingAs($platformAdmin)->get("/lodges/{$lodge->id}/directory")->assertForbidden();
     }
 
     public function test_relationship_can_be_edited_by_each_qualifying_primary_lodge_but_not_an_unrelated_lodge(): void

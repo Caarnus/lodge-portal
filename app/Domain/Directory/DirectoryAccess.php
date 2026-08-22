@@ -116,7 +116,11 @@ class DirectoryAccess
                 'postal_code' => $person->mailing_postal_code,
             ] : null,
             'degree' => $showDegree ? $this->degreeName($person, $lodge, $audience) : null,
-            'profile_photo_url' => null,
+            'profile_photo_url' => $privacy?->show_profile_photo
+                && $person->profile_photo_status === 'ready'
+                && $person->profile_photo_derivative_path
+                ? route('lodges.directory.photo', ['lodge' => $lodge, 'person' => $person, 'audience' => $audience->value])
+                : null,
         ];
     }
 

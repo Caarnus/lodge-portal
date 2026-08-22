@@ -12,6 +12,7 @@ export interface LodgeSummary {
     name: string;
     slug: string;
     can_manage_lodge: boolean;
+    can_view_directory: boolean;
     can_manage_website: boolean;
     can_view_people: boolean;
     can_manage_officers: boolean;

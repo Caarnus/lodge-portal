@@ -3,6 +3,7 @@
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
 use App\Enums\VolunteerCommitmentStatus;
+use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\EventCategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventOccurrenceController;
@@ -59,6 +60,12 @@ Route::get('dashboard', function () {
 
     return Inertia::render('Dashboard', ['volunteerCommitments' => $commitments]);
 })->middleware(['auth', 'verified', 'approved'])->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.directory.')->group(function () {
+    Route::get('directory', [DirectoryController::class, 'index'])->middleware('throttle:60,1')->name('index');
+    Route::get('directory/{person}/photo', [DirectoryController::class, 'photo'])->name('photo');
+    Route::get('directory/{person}', [DirectoryController::class, 'show'])->name('show');
+});
 
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
