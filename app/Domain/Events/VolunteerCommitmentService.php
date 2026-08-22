@@ -5,6 +5,7 @@ namespace App\Domain\Events;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
 use App\Enums\VolunteerCommitmentStatus;
+use App\Enums\VolunteerReminderDeliveryStatus;
 use App\Models\EventOccurrence;
 use App\Models\EventVolunteerCommitment;
 use App\Models\EventVolunteerPosition;
@@ -42,6 +43,7 @@ class VolunteerCommitmentService
             if (! $manager && ($commitment->user_id !== $actor->id || $commitment->person_id !== $actor->person_id || ! $commitment->occurrence->starts_at->isFuture())) abort(403);
             $values = $manager ? ['status' => VolunteerCommitmentStatus::AdministrativelyRemoved, 'administratively_removed_at' => now(), 'removed_by' => $actor->id] : ['status' => VolunteerCommitmentStatus::Withdrawn, 'withdrawn_at' => now()];
             $commitment->update($values);
+            $commitment->reminderDelivery()->whereIn('status', [VolunteerReminderDeliveryStatus::Pending, VolunteerReminderDeliveryStatus::Claimed])->update(['status' => VolunteerReminderDeliveryStatus::Skipped, 'skip_reason' => 'commitment_inactive', 'skipped_at' => now()]);
             return $commitment->refresh();
         });
     }

@@ -24,6 +24,9 @@ class EventScheduleReconciler
                 ->whereDoesntHave('reservations')
                 ->whereDoesntHave('reminderSubscriptions')
                 ->whereDoesntHave('reminderDeliveries')
+                ->whereDoesntHave('volunteerPositions')
+                ->whereDoesntHave('volunteerCommitments')
+                ->whereDoesntHave('volunteerReminderDeliveries')
                 ->delete();
 
             return $this->materializer->materialize($event, $from, $through);

@@ -9,6 +9,7 @@ use App\Enums\EventStatus;
 use App\Enums\EventVisibility;
 use App\Http\Requests\EventRequest;
 use App\Models\Event;
+use App\Models\EventVolunteerPosition;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Services\Audit;
@@ -46,7 +47,9 @@ class EventController extends Controller
     public function store(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, WebsiteHtmlSanitizer $sanitizer)
     {
         $this->allow($lodge);
-        $event = Event::create($this->data($request, $lodge, $recurrence, $sanitizer) + ['lodge_id' => $lodge->id, 'status' => EventStatus::Draft, 'created_by' => $request->user()->id, 'updated_by' => $request->user()->id]);
+        $data = $this->data($request, $lodge, $recurrence, $sanitizer);
+        unset($data['confirm_schedule_change']);
+        $event = Event::create($data + ['lodge_id' => $lodge->id, 'status' => EventStatus::Draft, 'created_by' => $request->user()->id, 'updated_by' => $request->user()->id]);
         $event->reminderRules()->createMany([
             ['lodge_id' => $lodge->id, 'offset_minutes' => 10080],
             ['lodge_id' => $lodge->id, 'offset_minutes' => 1440],
@@ -72,7 +75,7 @@ class EventController extends Controller
         $data = $this->data($request, $lodge, $recurrence, $sanitizer);
         $scheduleChanged = $this->scheduleChanged($event, $data);
         if ($scheduleChanged && ! $request->boolean('confirm_schedule_change')) {
-            $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn ($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries'))->count();
+            $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn ($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries')->orWhereHas('volunteerPositions')->orWhereHas('volunteerCommitments')->orWhereHas('volunteerReminderDeliveries'))->count();
             throw ValidationException::withMessages(['confirm_schedule_change' => "Schedule change requires confirmation. {$protected} protected future occurrence(s) will be preserved."]);
         }
         if (filled($data['capacity'] ?? null)) {
@@ -123,6 +126,8 @@ class EventController extends Controller
                 ->update(['status' => 'event_cancelled', 'cancelled_at' => now()]);
             $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn ($occurrence) => $occurrence->reminderDeliveries()
                 ->whereIn('status', ['pending', 'claimed'])->update(['status' => 'skipped', 'skipped_at' => now()]));
+            $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn ($occurrence) => $occurrence->volunteerReminderDeliveries()
+                ->whereIn('status', ['pending', 'claimed'])->update(['status' => 'skipped', 'skip_reason' => 'event_inactive', 'skipped_at' => now()]));
         });
         Audit::record('event.cancelled', $event, $lodge, $before, $event->fresh()->toArray());
 
@@ -150,6 +155,8 @@ class EventController extends Controller
             'reservationFields' => $event->exists ? $event->reservationFields()->get() : [],
             'reminderRules' => $event->exists ? $event->reminderRules()->get(['id', 'offset_minutes']) : [],
             'reminderSubscriptionCount' => $event->exists ? $event->reminderSubscriptions()->where('status', 'active')->count() : 0,
+            'volunteerPositions' => $event->exists ? $event->volunteerPositions()->orderBy('sort_order')->orderBy('name')->get(['id', 'event_occurrence_id', 'name', 'description', 'needed_count', 'sort_order', 'is_active']) : [],
+            'occurrences' => $event->exists ? $event->occurrences()->where('starts_at', '>=', now())->orderBy('starts_at')->limit(50)->get(['id', 'starts_at', 'status']) : [],
             'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
         ]);

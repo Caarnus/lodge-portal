@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import { Head, Link } from '@inertiajs/vue3';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,30 +10,17 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-defineProps<{
-    name?: string;
-}>();
+defineProps<{ volunteerCommitments: Array<{ id: number; position: string; event: string; lodge: string; starts_at: string; time_zone: string; location: string | null; event_url: string }> }>();
 </script>
 
 <template>
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-            </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <PlaceholderPattern />
-            </div>
+        <div class="mx-auto w-full max-w-4xl rounded-xl border p-6">
+            <h1 class="text-xl font-semibold">Upcoming volunteer commitments</h1>
+            <p v-if="!volunteerCommitments.length" class="mt-3 text-sm text-muted-foreground">No upcoming volunteer commitments.</p>
+            <ul v-else class="mt-4 divide-y"><li v-for="commitment in volunteerCommitments" :key="commitment.id" class="py-4"><Link :href="commitment.event_url" class="font-medium text-primary underline">{{ commitment.position }} — {{ commitment.event }}</Link><p class="mt-1 text-sm text-muted-foreground">{{ commitment.lodge }} · {{ new Date(commitment.starts_at).toLocaleString(undefined, { timeZone: commitment.time_zone }) }}<span v-if="commitment.location"> · {{ commitment.location }}</span></p></li></ul>
         </div>
     </AppLayout>
 </template>

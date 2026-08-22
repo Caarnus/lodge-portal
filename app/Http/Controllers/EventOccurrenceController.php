@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventReservationStatus;
 use App\Enums\ReminderDeliveryStatus;
+use App\Enums\VolunteerReminderDeliveryStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Lodge;
@@ -48,6 +49,9 @@ class EventOccurrenceController extends Controller
         }
         $before = $occurrence->toArray();
         $occurrence->fill($data + ['overridden_at' => now()])->save();
+        if (array_key_exists('starts_at', $data)) {
+            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Pending)->update(['due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int) config('events.volunteer_reminder_offset_minutes', 1440)))]);
+        }
         Audit::record('event_occurrence.updated', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 
         return back()->with('notice', 'Occurrence updated.');
@@ -60,6 +64,7 @@ class EventOccurrenceController extends Controller
         $occurrence->update(['status' => EventOccurrenceStatus::Cancelled, 'cancelled_at' => now()]);
         $occurrence->reservations()->where('status', EventReservationStatus::Confirmed)->update(['status' => EventReservationStatus::EventCancelled, 'cancelled_at' => now()]);
         $occurrence->reminderDeliveries()->whereIn('status', [ReminderDeliveryStatus::Pending, ReminderDeliveryStatus::Claimed])->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
+        $occurrence->volunteerReminderDeliveries()->whereIn('status', [VolunteerReminderDeliveryStatus::Pending, VolunteerReminderDeliveryStatus::Claimed])->update(['status' => VolunteerReminderDeliveryStatus::Skipped, 'skip_reason' => 'occurrence_cancelled', 'skipped_at' => now()]);
         Audit::record('event_occurrence.cancelled', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
         $this->sendCancellationNotices($occurrence);
 
@@ -71,6 +76,9 @@ class EventOccurrenceController extends Controller
         $this->allowOccurrence($lodge, $event, $occurrence);
         $before = $occurrence->toArray();
         $occurrence->update(['status' => EventOccurrenceStatus::Scheduled, 'cancelled_at' => null]);
+        if ($occurrence->starts_at->isFuture()) {
+            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Skipped)->where('skip_reason', 'occurrence_cancelled')->whereHas('commitment', fn ($query) => $query->where('status', 'committed'))->whereHas('position', fn ($query) => $query->where('is_active', true))->update(['status' => VolunteerReminderDeliveryStatus::Pending, 'skip_reason' => null, 'skipped_at' => null, 'due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int) config('events.volunteer_reminder_offset_minutes', 1440)))]);
+        }
         Audit::record('event_occurrence.restored', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 
         return back()->with('notice', 'Occurrence restored.');

@@ -13,7 +13,9 @@ const props = defineProps<{
     media: Array<{ id: number; original_name: string }>;
     reservationFields: any[];
     reminderRules: Array<{ id: number; offset_minutes: number }>;
-    reminderSubscriptionCount: number
+    reminderSubscriptionCount: number;
+    volunteerPositions: Array<{ id: number; event_occurrence_id: number | null; name: string; description: string | null; needed_count: number; sort_order: number; is_active: boolean }>;
+    occurrences: Array<{ id: number; starts_at: string; status: string }>;
 }>();
 const isNew = computed(() => !props.event.id);
 const form = useForm({
@@ -51,6 +53,9 @@ const addReminderRule = () => {
 const removeReminderRule = (rule: {
     id: number
 }) => router.delete(`/lodges/${props.lodge.id}/events/${props.event.id}/reminder-rules/${rule.id}`);
+const volunteerForm = useForm({ event_occurrence_id: '' as string | number, name: '', description: '', needed_count: 1, sort_order: 0, is_active: true });
+const addVolunteerPosition = () => volunteerForm.post(`/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions`, { preserveScroll: true, onSuccess: () => volunteerForm.reset('name', 'description', 'needed_count', 'sort_order') });
+const deactivateVolunteerPosition = (id: number) => router.patch(`/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${id}/deactivate`, {}, { preserveScroll: true });
 </script>
 
 <template>
@@ -168,6 +173,7 @@ const removeReminderRule = (rule: {
                     </button>
                 </div>
             </section>
+            <section v-if="!isNew" class="space-y-4 rounded-lg border p-5"><h2 class="text-lg font-medium">Volunteer staffing</h2><p class="text-sm text-muted-foreground">Named staffing needs are separate from attendance reservations and reminder subscriptions.</p><ul v-if="volunteerPositions.length" class="space-y-2 text-sm"><li v-for="position in volunteerPositions" :key="position.id" class="flex flex-wrap items-center justify-between gap-2 rounded border p-3"><span><strong>{{ position.name }}</strong> · {{ position.needed_count }} needed · {{ position.event_occurrence_id ? 'Occurrence-only' : 'Every occurrence' }}<span v-if="!position.is_active"> · Inactive</span></span><button v-if="position.is_active" type="button" class="text-destructive underline" @click="deactivateVolunteerPosition(position.id)">Deactivate</button></li></ul><div class="grid gap-3 md:grid-cols-2"><label>Position name<input v-model="volunteerForm.name" maxlength="120" class="mt-1 w-full rounded-md border bg-background p-2" /><InputError :message="volunteerForm.errors.name" /></label><label>Scope<select v-model="volunteerForm.event_occurrence_id" class="mt-1 w-full rounded-md border bg-background p-2"><option value="">Every occurrence in series</option><option v-for="occurrence in occurrences.filter((item) => item.status === 'scheduled')" :key="occurrence.id" :value="occurrence.id">This occurrence: {{ new Date(occurrence.starts_at).toLocaleString() }}</option></select></label><label>Description / instructions<textarea v-model="volunteerForm.description" maxlength="2000" class="mt-1 min-h-20 w-full rounded-md border bg-background p-2" /></label><div class="grid grid-cols-2 gap-3"><label>Needed<input v-model.number="volunteerForm.needed_count" type="number" min="1" class="mt-1 w-full rounded-md border bg-background p-2" /></label><label>Order<input v-model.number="volunteerForm.sort_order" type="number" min="0" class="mt-1 w-full rounded-md border bg-background p-2" /></label></div><div class="md:col-span-2"><button type="button" :disabled="volunteerForm.processing" class="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" @click="addVolunteerPosition">Add staffing position</button></div></div></section>
             <button type="submit" :disabled="form.processing"
                     class="cursor-pointer rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:opacity-50">
                 Save event
