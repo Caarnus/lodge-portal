@@ -79,4 +79,8 @@ events.manage is a platform-owned lodge permission. Built-in Administrator and O
 
 Event management authority does not make the actor an eligible attendee. Public, masons-only, and lodge-only visibility is evaluated from the explicitly loaded event lodge. Protected attendance additionally requires a linked person, active membership, required qualification, and any configured cross-lodge reservation flag. Reminder eligibility follows event visibility and qualification but does not require reservations to be enabled and does not consume capacity.
 
+## Volunteer Staffing
+
+Volunteer commitments require an approved, verified account linked to an active member of the event-owning lodge. `events.manage` controls position management, rosters, manager-created commitments, administrative removal, and staffing-reminder retry, but never bypasses target-volunteer eligibility. Manager rosters expose names; contact fields require the existing lodge-scoped Person access rule.
+
 Lodge-only qualification uses an active membership in the owning lodge. Masons-only visibility and reminder eligibility may use any active membership represented on the platform; making a reservation through another lodge's membership additionally requires the event's cross-lodge reservation flag. Past Master qualification is derived separately from degree but remains behind the active-membership gate.

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\VolunteerCommitmentStatus;
+use App\Models\EventVolunteerCommitment;
 use App\Models\Person;
 use App\Models\PersonRelationship;
 use App\Models\RelationshipType;
@@ -26,8 +28,14 @@ class PersonMergeService
             if ($overlap) {
                 throw ValidationException::withMessages(['survivor_person_id' => 'Both people have a membership in the same lodge. Resolve that conflict first.']);
             }
+            $hasVolunteerConflict = EventVolunteerCommitment::query()->where('person_id', $survivor->id)->where('status', VolunteerCommitmentStatus::Committed)
+                ->whereExists(fn ($query) => $query->selectRaw('1')->from('event_volunteer_commitments as source_commitments')->where('source_commitments.person_id', $source->id)->where('source_commitments.status', VolunteerCommitmentStatus::Committed->value)->whereColumn('source_commitments.event_volunteer_position_id', 'event_volunteer_commitments.event_volunteer_position_id')->whereColumn('source_commitments.event_occurrence_id', 'event_volunteer_commitments.event_occurrence_id'))->exists();
+            if ($hasVolunteerConflict) {
+                throw ValidationException::withMessages(['survivor_person_id' => 'Both people have an active commitment to the same volunteer position and occurrence. Resolve that conflict first.']);
+            }
 
             $source->memberships()->update(['person_id' => $survivor->id]);
+            EventVolunteerCommitment::query()->where('person_id', $source->id)->update(['person_id' => $survivor->id]);
             foreach ($source->pastMasterTerms as $term) {
                 $survivor->pastMasterTerms()->firstOrCreate(['lodge_id' => $term->lodge_id, 'year' => $term->year]);
                 $term->delete();

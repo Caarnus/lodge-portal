@@ -10,6 +10,7 @@ use App\Models\EventOccurrence;
 use App\Models\EventVolunteerCommitment;
 use App\Models\EventVolunteerPosition;
 use App\Models\User;
+use App\Services\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +41,10 @@ class VolunteerCommitmentService
                 throw ValidationException::withMessages(['position' => 'This volunteer position is full.']);
             }
 
-            return EventVolunteerCommitment::create(['event_volunteer_position_id' => $position->id, 'event_occurrence_id' => $occurrence->id, 'event_id' => $event->id, 'lodge_id' => $event->lodge_id, 'user_id' => $target->id, 'person_id' => $target->person_id, 'status' => VolunteerCommitmentStatus::Committed, 'committed_at' => now(), 'created_by' => $actor->id]);
+            $commitment = EventVolunteerCommitment::create(['event_volunteer_position_id' => $position->id, 'event_occurrence_id' => $occurrence->id, 'event_id' => $event->id, 'lodge_id' => $event->lodge_id, 'user_id' => $target->id, 'person_id' => $target->person_id, 'status' => VolunteerCommitmentStatus::Committed, 'committed_at' => now(), 'created_by' => $actor->id]);
+            Audit::record('volunteer_commitment.created', $commitment, $event->lodge, null, $commitment->toArray());
+
+            return $commitment;
         });
     }
 
@@ -55,10 +59,13 @@ class VolunteerCommitmentService
                 abort(403);
             }
             $values = $manager ? ['status' => VolunteerCommitmentStatus::AdministrativelyRemoved, 'administratively_removed_at' => now(), 'removed_by' => $actor->id] : ['status' => VolunteerCommitmentStatus::Withdrawn, 'withdrawn_at' => now()];
+            $before = $commitment->toArray();
             $commitment->update($values);
             $commitment->reminderDelivery()->whereIn('status', [VolunteerReminderDeliveryStatus::Pending, VolunteerReminderDeliveryStatus::Claimed])->update(['status' => VolunteerReminderDeliveryStatus::Skipped, 'skip_reason' => 'commitment_inactive', 'skipped_at' => now()]);
+            $commitment = $commitment->refresh();
+            Audit::record($manager ? 'volunteer_commitment.administratively_removed' : 'volunteer_commitment.withdrawn', $commitment, $commitment->lodge, $before, $commitment->toArray());
 
-            return $commitment->refresh();
+            return $commitment;
         });
     }
 }

@@ -56,4 +56,6 @@ Eligibility fixtures include active and ended memberships, each degree, a Past M
 
 Reservation tests cover normalized-email duplicates, party-size capacity under locks, custom fields, guest policy, token hashing, cancellation/reservation-again, occurrence cancellation, and history preservation. Subscription tests cover occurrence and series scope, normalized-email duplicates, guest policy, eligibility, consent, token hashing, unsubscribe/resubscribe, and independence from reservations. Reminder-delivery tests run dispatch repeatedly and simulate overlapping scopes, job retry, cancellation races, stale claims, failures, and explicit retry without duplicate delivery.
 
+Volunteer tests use same Lodge A/Lodge B isolation pattern. They cover exact volunteer eligibility, series and occurrence position scope, hard position capacity, same-position duplicate prevention, recommit history, member privacy, manager roster authorization, lifecycle suppression, and staffing-reminder at-most-once behavior.
+
 Public event and ICS tests assert publication state, cancellation, date range, lodge isolation, protected-data exclusion, RFC escaping/folding, recurrence exceptions, and cache invalidation when caching exists.

@@ -2,8 +2,15 @@
 import AppLayout from "@/layouts/AppLayout.vue";
 import RecurrenceBuilder from "@/components/events/RecurrenceBuilder.vue";
 import InputError from "@/components/InputError.vue";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Link, router, useForm } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { CircleOff, Pencil } from "lucide-vue-next";
+import { computed, ref } from "vue";
 
 defineOptions({ layout: AppLayout });
 const props = defineProps<{
@@ -82,20 +89,40 @@ const volunteerForm = useForm({
     sort_order: 0,
     is_active: true,
 });
+const volunteerModalOpen = ref(false);
+const editingVolunteerPosition = ref<number | null>(null);
+const openVolunteerModal = (
+    position?: (typeof props.volunteerPositions)[number],
+) => {
+    editingVolunteerPosition.value = position?.id ?? null;
+    volunteerForm.reset();
+    volunteerForm.defaults({
+        event_occurrence_id: position?.event_occurrence_id ?? "",
+        name: position?.name ?? "",
+        description: position?.description ?? "",
+        needed_count: position?.needed_count ?? 1,
+        sort_order: position?.sort_order ?? 0,
+        is_active: position?.is_active ?? true,
+    });
+    volunteerForm.reset();
+    volunteerModalOpen.value = true;
+};
 const addVolunteerPosition = () =>
-    volunteerForm.post(
-        `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions`,
-        {
-            preserveScroll: true,
-            onSuccess: () =>
-                volunteerForm.reset(
-                    "name",
-                    "description",
-                    "needed_count",
-                    "sort_order",
-                ),
-        },
-    );
+    editingVolunteerPosition.value
+        ? volunteerForm.put(
+              `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${editingVolunteerPosition.value}`,
+              {
+                  preserveScroll: true,
+                  onSuccess: () => (volunteerModalOpen.value = false),
+              },
+          )
+        : volunteerForm.post(
+              `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions`,
+              {
+                  preserveScroll: true,
+                  onSuccess: () => (volunteerModalOpen.value = false),
+              },
+          );
 const deactivateVolunteerPosition = (id: number) =>
     router.patch(
         `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${id}/deactivate`,
@@ -370,97 +397,178 @@ const deactivateVolunteerPosition = (id: number) =>
                     Named staffing needs are separate from attendance
                     reservations and reminder subscriptions.
                 </p>
-                <ul v-if="volunteerPositions.length" class="space-y-2 text-sm">
-                    <li
-                        v-for="position in volunteerPositions"
-                        :key="position.id"
-                        class="flex flex-wrap items-center justify-between gap-2 rounded border p-3"
-                    >
-                        <span
-                            ><strong>{{ position.name }}</strong> ·
-                            {{ position.needed_count }} needed ·
-                            {{
-                                position.event_occurrence_id
-                                    ? "Occurrence-only"
-                                    : "Every occurrence"
-                            }}<span v-if="!position.is_active">
-                                · Inactive</span
-                            ></span
-                        >
-                        <button
-                            v-if="position.is_active"
-                            type="button"
-                            class="text-destructive underline"
-                            @click="deactivateVolunteerPosition(position.id)"
-                        >
-                            Deactivate
-                        </button>
-                    </li>
-                </ul>
-                <div class="grid gap-3 md:grid-cols-2">
-                    <label
-                        >Position name<input
-                            v-model="volunteerForm.name"
-                            maxlength="120"
-                            class="mt-1 w-full rounded-md border bg-background p-2"
-                        />
-                        <InputError
-                            :message="volunteerForm.errors.name"
-                        /> </label
-                    ><label
-                        >Scope<select
-                            v-model="volunteerForm.event_occurrence_id"
-                            class="mt-1 w-full rounded-md border bg-background p-2"
-                        >
-                            <option value="">Every occurrence in series</option>
-                            <option
-                                v-for="occurrence in occurrences.filter(
-                                    (item) => item.status === 'scheduled',
-                                )"
-                                :key="occurrence.id"
-                                :value="occurrence.id"
+                <button
+                    type="button"
+                    class="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                    @click="openVolunteerModal()"
+                >
+                    Add staffing position
+                </button>
+                <div
+                    v-if="volunteerPositions.length"
+                    class="overflow-hidden rounded border"
+                >
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="px-3 py-2">Position</th>
+                                <th class="px-3 py-2">Scope</th>
+                                <th class="px-3 py-2">Needed</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="position in volunteerPositions"
+                                :key="position.id"
+                                class="border-t"
                             >
-                                This occurrence:
-                                {{
-                                    new Date(
-                                        occurrence.starts_at,
-                                    ).toLocaleString()
-                                }}
-                            </option>
-                        </select></label
-                    ><label
-                        >Description / instructions<textarea
-                            v-model="volunteerForm.description"
-                            maxlength="2000"
-                            class="mt-1 min-h-20 w-full rounded-md border bg-background p-2"
-                        />
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label
-                            >Needed<input
-                                v-model.number="volunteerForm.needed_count"
-                                type="number"
-                                min="1"
-                                class="mt-1 w-full rounded-md border bg-background p-2" /></label
-                        ><label
-                            >Order<input
-                                v-model.number="volunteerForm.sort_order"
-                                type="number"
-                                min="0"
-                                class="mt-1 w-full rounded-md border bg-background p-2"
-                        /></label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <button
-                            type="button"
-                            :disabled="volunteerForm.processing"
-                            class="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                            @click="addVolunteerPosition"
-                        >
-                            Add staffing position
-                        </button>
-                    </div>
+                                <td class="px-3 py-2">
+                                    <strong>{{ position.name }}</strong
+                                    ><span
+                                        v-if="!position.is_active"
+                                        class="ml-2 text-muted-foreground"
+                                        >Inactive</span
+                                    >
+                                </td>
+                                <td class="px-3 py-2">
+                                    {{
+                                        position.event_occurrence_id
+                                            ? "Occurrence-only"
+                                            : "Every occurrence"
+                                    }}
+                                </td>
+                                <td class="px-3 py-2">
+                                    {{ position.needed_count }}
+                                </td>
+                                <td class="px-3 py-2">
+                                    <div class="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            title="Edit position"
+                                            aria-label="Edit position"
+                                            class="cursor-pointer rounded p-1 hover:bg-muted"
+                                            @click="
+                                                openVolunteerModal(position)
+                                            "
+                                        >
+                                            <Pencil
+                                                class="size-4"
+                                                aria-hidden="true"
+                                            />
+                                        </button>
+                                        <button
+                                            v-if="position.is_active"
+                                            type="button"
+                                            title="Deactivate position"
+                                            aria-label="Deactivate position"
+                                            class="cursor-pointer rounded p-1 text-destructive hover:bg-muted"
+                                            @click="
+                                                deactivateVolunteerPosition(
+                                                    position.id,
+                                                )
+                                            "
+                                        >
+                                            <CircleOff
+                                                class="size-4"
+                                                aria-hidden="true"
+                                            />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                <Dialog
+                    :open="volunteerModalOpen"
+                    @update:open="volunteerModalOpen = $event"
+                >
+                    <DialogContent class="max-w-xl"
+                        ><DialogHeader
+                            ><DialogTitle>{{
+                                editingVolunteerPosition
+                                    ? "Edit staffing position"
+                                    : "Add staffing position"
+                            }}</DialogTitle></DialogHeader
+                        >
+                        <div class="grid gap-3 md:grid-cols-2">
+                            <label
+                                >Position name<input
+                                    v-model="volunteerForm.name"
+                                    maxlength="120"
+                                    class="mt-1 w-full rounded-md border bg-background p-2"
+                                />
+                                <InputError
+                                    :message="volunteerForm.errors.name"
+                                /> </label
+                            ><label
+                                >Scope<select
+                                    v-model="volunteerForm.event_occurrence_id"
+                                    class="mt-1 w-full rounded-md border bg-background p-2"
+                                >
+                                    <option value="">
+                                        Every occurrence in series
+                                    </option>
+                                    <option
+                                        v-for="occurrence in occurrences.filter(
+                                            (item) =>
+                                                item.status === 'scheduled',
+                                        )"
+                                        :key="occurrence.id"
+                                        :value="occurrence.id"
+                                    >
+                                        This occurrence:
+                                        {{
+                                            new Date(
+                                                occurrence.starts_at,
+                                            ).toLocaleString()
+                                        }}
+                                    </option>
+                                </select></label
+                            ><label
+                                >Description / instructions<textarea
+                                    v-model="volunteerForm.description"
+                                    maxlength="2000"
+                                    class="mt-1 min-h-20 w-full rounded-md border bg-background p-2"
+                                />
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label
+                                    >Needed<input
+                                        v-model.number="
+                                            volunteerForm.needed_count
+                                        "
+                                        type="number"
+                                        min="1"
+                                        class="mt-1 w-full rounded-md border bg-background p-2" /></label
+                                ><label
+                                    >Order<input
+                                        v-model.number="
+                                            volunteerForm.sort_order
+                                        "
+                                        type="number"
+                                        min="0"
+                                        class="mt-1 w-full rounded-md border bg-background p-2"
+                                /></label>
+                            </div>
+                            <div class="md:col-span-2">
+                                <button
+                                    type="button"
+                                    :disabled="volunteerForm.processing"
+                                    class="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                                    @click="addVolunteerPosition"
+                                >
+                                    {{
+                                        editingVolunteerPosition
+                                            ? "Save staffing position"
+                                            : "Add staffing position"
+                                    }}
+                                </button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </section>
             <button
                 type="submit"

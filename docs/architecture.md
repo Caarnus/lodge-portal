@@ -50,6 +50,6 @@ Events and materialized occurrences are lodge-owned. A canonical RRULE and IANA 
 
 Protected-event visibility is derived from the explicitly loaded event lodge, the linked person, active membership, configured cross-lodge participation, and qualification. Active lodge selection never supplies eligibility. Public CMS queries return only published public occurrences for the public site's resolved lodge.
 
-Reservations consume occurrence capacity; reminder subscriptions express notification consent and consume none. They have separate status and token lifecycles. Volunteer positions and commitments are a future, third interaction type and must not be stored in either record. Jobs carry delivery or occurrence identifiers and reload the complete ownership chain. Reminder delivery rows enforce idempotent dispatch, and scheduled occurrence generation uses bounded windows rather than expanding open-ended series without limits.
+Reservations consume occurrence capacity; reminder subscriptions express notification consent and consume none. Volunteer positions and commitments are a third independent interaction type and are never stored in either record. Positions may be series- or occurrence-scoped; commitments bind one linked person to one position and occurrence. Staffing reminders use dedicated delivery rows and reload the complete ownership chain before mail.
 
 See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), [Phase 4](phase-04.md), and the records in [decisions](decisions/README.md).

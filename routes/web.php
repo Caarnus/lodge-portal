@@ -12,6 +12,7 @@ use App\Http\Controllers\EventReservationController;
 use App\Http\Controllers\EventReservationFieldController;
 use App\Http\Controllers\EventVolunteerController;
 use App\Http\Controllers\EventVolunteerPositionController;
+use App\Http\Controllers\EventVolunteerReminderDeliveryController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -54,7 +55,7 @@ Route::get('dashboard', function () {
         ->whereHas('position', fn ($query) => $query->where('is_active', true))
         ->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published))
         ->whereHas('occurrence', fn ($query) => $query->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now()))
-        ->get()->sortBy(fn ($commitment) => [$commitment->occurrence->starts_at->timestamp, $commitment->position->sort_order, $commitment->position->name])->values()->map(fn ($commitment) => ['id' => $commitment->id, 'position' => $commitment->position->name, 'event' => $commitment->event->title, 'lodge' => $commitment->lodge->name, 'starts_at' => $commitment->occurrence->starts_at, 'time_zone' => $commitment->event->time_zone, 'location' => $commitment->occurrence->location_name_override ?: $commitment->event->location_name, 'event_url' => route('public.events.show', [$commitment->lodge->slug, $commitment->occurrence->id])]);
+        ->get()->sortBy(fn ($commitment) => [$commitment->occurrence->starts_at->timestamp, $commitment->position->sort_order, $commitment->position->name])->values()->map(fn ($commitment) => ['id' => $commitment->id, 'position' => $commitment->position->name, 'event' => $commitment->event->title, 'lodge' => $commitment->lodge->name, 'lodge_slug' => $commitment->lodge->slug, 'occurrence_id' => $commitment->occurrence->id, 'starts_at' => $commitment->occurrence->starts_at, 'time_zone' => $commitment->event->time_zone, 'location' => $commitment->occurrence->location_name_override ?: $commitment->event->location_name, 'event_url' => route('public.events.show', [$commitment->lodge->slug, $commitment->occurrence->id])]);
 
     return Inertia::render('Dashboard', ['volunteerCommitments' => $commitments]);
 })->middleware(['auth', 'verified', 'approved'])->name('dashboard');
@@ -115,6 +116,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::get('lodges/{lodge}/events/{event}/occurrences/{occurrence}/volunteers', [EventVolunteerController::class, 'index'])->name('lodges.events.occurrences.volunteers.index');
     Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/volunteers', [EventVolunteerController::class, 'store'])->name('lodges.events.occurrences.volunteers.store');
     Route::patch('lodges/{lodge}/events/{event}/occurrences/{occurrence}/volunteers/{commitment}/remove', [EventVolunteerController::class, 'remove'])->name('lodges.events.occurrences.volunteers.remove');
+    Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/volunteer-reminders/{delivery}/retry', [EventVolunteerReminderDeliveryController::class, 'retry'])->name('lodges.events.occurrences.volunteer-reminders.retry');
     Route::post('lodges/{lodge}/events/{event}/occurrences/{occurrence}/reservations/{reservation}/cancel', [EventReservationController::class, 'cancel'])->name('lodges.events.occurrences.reservations.cancel');
     Route::post('lodges/{lodge}/events/{event}/reservation-fields', [EventReservationFieldController::class, 'store'])->name('lodges.events.reservation-fields.store');
     Route::delete('lodges/{lodge}/events/{event}/reservation-fields/{field}', [EventReservationFieldController::class, 'destroy'])->name('lodges.events.reservation-fields.destroy');

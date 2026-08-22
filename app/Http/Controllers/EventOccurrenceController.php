@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventReservationStatus;
 use App\Enums\ReminderDeliveryStatus;
+use App\Enums\VolunteerCommitmentStatus;
 use App\Enums\VolunteerReminderDeliveryStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Lodge;
+use App\Models\Membership;
+use App\Models\Person;
 use App\Notifications\EventOccurrenceCancelled;
 use App\Services\Audit;
 use App\Services\WebsiteHtmlSanitizer;
@@ -23,10 +26,35 @@ class EventOccurrenceController extends Controller
     {
         $this->allow($lodge, $event);
 
+        $occurrences = $event->occurrences()->with([
+            'reservations' => fn ($query) => $query->where('status', EventReservationStatus::Confirmed),
+            'volunteerCommitments.position',
+            'volunteerCommitments.person',
+            'volunteerCommitments.reminderDelivery',
+        ])->orderBy('starts_at')->paginate(50);
+        $positions = $event->volunteerPositions()->where('is_active', true)->get();
+        $commitments = $event->volunteerCommitments()->whereIn('event_occurrence_id', $occurrences->pluck('id'))->where('status', VolunteerCommitmentStatus::Committed)->get()->groupBy('event_occurrence_id');
+        $occurrences->setCollection($occurrences->getCollection()->map(function (EventOccurrence $occurrence) use ($event, $positions, $commitments) {
+            $applicable = $positions->filter(fn ($position) => $position->event_occurrence_id === null || $position->event_occurrence_id === $occurrence->id);
+            $filled = $commitments->get($occurrence->id, collect());
+
+            return [
+                'id' => $occurrence->id,
+                'starts_at' => $occurrence->starts_at,
+                'status' => $occurrence->status,
+                'reservation_count' => $event->reservations_enabled ? $occurrence->reservations->count() : null,
+                'reservation_roster' => $event->reservations_enabled ? $occurrence->reservations->map(fn ($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values() : [],
+                'volunteer_filled' => $filled->count(),
+                'volunteer_needed' => $applicable->sum('needed_count'),
+                'volunteer_positions' => $applicable->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn ($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
+            ];
+        }));
+
         return Inertia::render('events/Occurrences', [
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event->only('id', 'title'),
-            'occurrences' => $event->occurrences()->orderBy('starts_at')->paginate(50),
+            'occurrences' => $occurrences,
+            'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->get()->map(fn (Membership $membership) => $membership->person)->filter(fn (?Person $person) => $person?->user)->unique('id')->map(fn (Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values(),
         ]);
     }
 

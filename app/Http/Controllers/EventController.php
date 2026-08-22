@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Domain\Events\EventOccurrenceMaterializer;
 use App\Domain\Events\EventScheduleReconciler;
 use App\Domain\Events\RecurrenceExpander;
+use App\Enums\EventReservationStatus;
 use App\Enums\EventStatus;
 use App\Enums\EventVisibility;
+use App\Enums\VolunteerCommitmentStatus;
 use App\Http\Requests\EventRequest;
 use App\Models\Event;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
+use App\Models\Membership;
+use App\Models\Person;
 use App\Services\Audit;
 use App\Services\WebsiteHtmlSanitizer;
 use Carbon\CarbonImmutable;
@@ -24,10 +28,35 @@ class EventController extends Controller
     public function index(Request $request, Lodge $lodge)
     {
         $this->allow($lodge);
-        $events = $lodge->events()->with('category')->when($request->string('search')->toString(), fn ($query, string $search) => $query->where('title', 'like', "%{$search}%"))
+        $events = $lodge->events()->with([
+            'category',
+            'occurrences.reservations',
+            'occurrences.volunteerCommitments.position',
+            'occurrences.volunteerCommitments.person',
+            'occurrences.volunteerCommitments.reminderDelivery',
+        ])->when($request->string('search')->toString(), fn ($query, string $search) => $query->where('title', 'like', "%{$search}%"))
             ->orderByDesc('first_starts_at')->paginate(20)->withQueryString();
+        $events->through(function (Event $event) {
+            $occurrence = $event->occurrences->count() === 1 ? $event->occurrences->first() : null;
+            $reservations = $occurrence?->reservations->where('status', EventReservationStatus::Confirmed) ?? collect();
+            $commitments = $occurrence?->volunteerCommitments->where('status', VolunteerCommitmentStatus::Committed) ?? collect();
 
-        return Inertia::render('events/Index', ['lodge' => $lodge->only('id', 'name'), 'events' => $events]);
+            return [
+                'id' => $event->id, 'title' => $event->title, 'slug' => $event->slug, 'status' => $event->status,
+                'first_starts_at' => $event->first_starts_at, 'category' => $event->category,
+                'occurrence_count' => $event->occurrences->count(),
+                'occurrence' => $event->occurrences->count() === 1 ? [
+                    'id' => $occurrence->id,
+                    'reservation_count' => $event->reservations_enabled ? $reservations->count() : null,
+                    'reservation_roster' => $reservations->map(fn ($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values(),
+                    'volunteer_filled' => $commitments->count(),
+                    'volunteer_needed' => $event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->sum('needed_count'),
+                    'volunteer_positions' => $event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get()->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn ($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
+                ] : null,
+            ];
+        });
+
+        return Inertia::render('events/Index', ['lodge' => $lodge->only('id', 'name'), 'events' => $events, 'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->get()->map(fn (Membership $membership) => $membership->person)->filter(fn (?Person $person) => $person?->user)->unique('id')->map(fn (Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values()]);
     }
 
     public function create(Lodge $lodge)

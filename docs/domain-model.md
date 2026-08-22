@@ -54,6 +54,8 @@ Manual person merge selects one survivor, moves compatible dependent records tra
 - Reminder rule: an event-owned offset definition.
 - Reminder subscription: an event-owned notification request scoped to one occurrence or a recurring series, with optional user/person links, recipient snapshot, status, and a hashed unsubscribe token. It does not imply attendance or consume capacity.
 - Reminder delivery: an idempotency and status record connecting one subscription, rule, occurrence, and normalized recipient.
-- Volunteer position and volunteer commitment: future event-interaction records for named staffing needs and a person's agreement to fill one. They are deliberately independent from reservations and reminder subscriptions.
+- Volunteer position: an event-owned named staffing need, scoped to every occurrence or one occurrence, with a hard needed count and active state.
+- Volunteer commitment: immutable historical agreement by one linked person to fill one position for one occurrence. Only one active commitment exists for a person, position, and occurrence.
+- Volunteer staffing reminder delivery: one at-most-once delivery per commitment, independent of ordinary reminder subscriptions and deliveries.
 
 Every event child repeats or derives lodge ownership and is validated against its parent. A recurrence key identifies the original scheduled local occurrence and does not change when the effective time moves. Protected-event eligibility is derived at request time from active membership and qualification rather than copied into a reservation or subscription.

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
 import { type BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,18 +10,24 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-defineProps<{
+const props = defineProps<{
     volunteerCommitments: Array<{
         id: number;
         position: string;
         event: string;
         lodge: string;
+        lodge_slug: string;
+        occurrence_id: number;
         starts_at: string;
         time_zone: string;
         location: string | null;
         event_url: string;
     }>;
 }>();
+const withdraw = (commitment: (typeof props.volunteerCommitments)[number]) =>
+    router.patch(
+        `/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}/volunteer-commitments/${commitment.id}/withdraw`,
+    );
 </script>
 
 <template>
@@ -61,6 +67,12 @@ defineProps<{
                             · {{ commitment.location }}</span
                         >
                     </p>
+                    <button
+                        class="mt-2 text-sm underline"
+                        @click="withdraw(commitment)"
+                    >
+                        Withdraw commitment
+                    </button>
                 </li>
             </ul>
         </div>

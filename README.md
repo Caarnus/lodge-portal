@@ -4,7 +4,7 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The platform foundation, public lodge website CMS, people/membership administration, and lodge events are implemented. Events support materialized recurring occurrences, reservations, reminder subscriptions and delivery, ICS calendar output, event-category configuration, and tenant-scoped event management.
+The platform foundation, public lodge website CMS, people/membership administration, and lodge events are implemented. Events support materialized recurring occurrences, reservations, reminder subscriptions and delivery, volunteer staffing positions and commitments, ICS calendar output, event-category configuration, and tenant-scoped event management.
 
 ## Planned Stack
 
@@ -81,9 +81,10 @@ Event occurrences are materialized through an 18-month rolling horizon. Laravel 
 ```bash
 docker compose exec app php artisan events:extend-occurrence-horizon
 docker compose exec app php artisan events:dispatch-reminders
+docker compose exec app php artisan events:dispatch-volunteer-reminders
 ```
 
-Both commands are safe to rerun. Run the horizon command after deploying event schedule changes or when recovering scheduler downtime. Reminder dispatch claims deliveries before queueing them; failed deliveries require an explicit event-manager retry and are never retried automatically.
+All commands are safe to rerun. Run the horizon command after deploying event schedule changes or when recovering scheduler downtime. Reminder dispatch claims deliveries before queueing them; failed deliveries require an explicit event-manager retry and are never retried automatically. Staffing reminders are separate from ordinary event reminders and never create a reservation or reminder subscription.
 
 The host `npm run test:e2e` command tests the currently running application. The containerized browser command uses the assets produced by the preceding host `npm run build`, creates clearly named synthetic test accounts and records, then executes the complete two-lodge Playwright flow. These accounts are not created by normal application seeding or startup and are not production credentials.
 

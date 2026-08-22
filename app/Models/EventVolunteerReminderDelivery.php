@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Enums\VolunteerReminderDeliveryStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class EventVolunteerReminderDelivery extends Model
 {
+    use HasFactory;
+
     protected $guarded = [];
 
     protected function casts(): array

@@ -30,3 +30,4 @@
 28. Public CMS and calendar queries return only published public occurrences for the explicitly resolved public lodge. A missing occurrence never falls back to another lodge.
 29. Event jobs carry stable identifiers and reload the complete lodge/event/occurrence/subscription/delivery ownership chain before mutation or delivery.
 30. Reservations, reminder subscriptions, and future volunteer commitments are independent intents. Creating one never authorizes, implies, or silently creates another.
+31. Volunteer positions, commitments, and staffing reminder deliveries carry matching lodge, event, and occurrence ownership. Nested volunteer routes validate every link before authorization.
