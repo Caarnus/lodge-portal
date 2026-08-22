@@ -63,6 +63,11 @@ class Person extends Model
         return $this->hasMany(Membership::class);
     }
 
+    public function directoryPrivacySetting()
+    {
+        return $this->hasOne(PersonDirectoryPrivacySetting::class);
+    }
+
     public function pastMasterTerms()
     {
         return $this->hasMany(PastMasterTerm::class);
@@ -81,5 +86,12 @@ class Person extends Model
     public function mergedInto()
     {
         return $this->belongsTo(self::class, 'merged_into_person_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::created(fn (Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
+        static::deleting(fn (Person $person) => $person->directoryPrivacySetting()->delete());
+        static::restored(fn (Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
     }
 }

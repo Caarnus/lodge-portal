@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\VolunteerCommitmentStatus;
 use App\Models\EventVolunteerCommitment;
 use App\Models\Person;
+use App\Models\PersonDirectoryPrivacySetting;
 use App\Models\PersonRelationship;
 use App\Models\RelationshipType;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,11 @@ class PersonMergeService
         return DB::transaction(function () use ($source, $survivor) {
             $source = Person::query()->lockForUpdate()->findOrFail($source->id);
             $survivor = Person::query()->lockForUpdate()->findOrFail($survivor->id);
+            $sourcePrivacy = PersonDirectoryPrivacySetting::query()->where('person_id', $source->id)->lockForUpdate()->first();
+            $survivorPrivacy = PersonDirectoryPrivacySetting::query()->where('person_id', $survivor->id)->lockForUpdate()->first();
+            if (! $survivorPrivacy) {
+                $survivorPrivacy = $survivor->directoryPrivacySetting()->create();
+            }
             if ($source->user && $survivor->user) {
                 throw ValidationException::withMessages(['survivor_person_id' => 'Both people have accounts. Resolve the account conflict first.']);
             }
@@ -56,7 +62,12 @@ class PersonMergeService
             $before = $source->toArray();
             $source->update(['email' => null, 'merged_into_person_id' => $survivor->id, 'merged_at' => now()]);
             $source->delete();
-            Audit::record('person.merged', $survivor, null, $before, ['survivor_id' => $survivor->id, 'source_id' => $source->id]);
+            Audit::record('person.merged', $survivor, null, $before, [
+                'survivor_id' => $survivor->id,
+                'source_id' => $source->id,
+                'directory_privacy_resolution' => $survivorPrivacy->wasRecentlyCreated ? 'conservative_default' : 'survivor_existing',
+                'source_directory_privacy_present' => $sourcePrivacy !== null,
+            ]);
 
             return $survivor->fresh();
         });

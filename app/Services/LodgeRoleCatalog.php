@@ -13,6 +13,7 @@ class LodgeRoleCatalog
         'registration.review' => 'Review registrations',
         'website.manage' => 'Manage lodge website',
         'website.publish' => 'Publish lodge website',
+        'directory.view' => 'View member directory',
         'people.view' => 'View lodge-reachable people',
         'people.manage' => 'Manage shared person identity and contact details',
         'memberships.manage' => 'Manage lodge memberships',
@@ -34,11 +35,15 @@ class LodgeRoleCatalog
     {
         $this->seedPermissions();
         $all = Permission::query()->whereIn('key', array_keys(self::PERMISSIONS))->pluck('id');
-        $officer = Permission::query()->whereIn('key', ['people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage'])->pluck('id');
-        $member = Permission::query()->whereIn('key', ['people.view', 'relationships.view'])->pluck('id');
+        $officer = Permission::query()->whereIn('key', ['directory.view', 'people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage'])->pluck('id');
+        $member = Permission::query()->where('key', 'directory.view')->pluck('id');
 
         foreach (['Administrator', 'Officer', 'Member', 'Non-member'] as $name) {
-            $role = Role::firstOrCreate(['lodge_id' => $lodge->id, 'name' => $name], ['is_system' => true]);
+            $role = Role::query()->where('lodge_id', $lodge->id)->where('name', $name)->first();
+            if ($role && ! $role->is_system) {
+                continue;
+            }
+            $role ??= Role::create(['lodge_id' => $lodge->id, 'name' => $name, 'is_system' => true]);
             $role->update(['is_system' => true]);
             if ($name === 'Administrator') {
                 $role->permissions()->sync($all);

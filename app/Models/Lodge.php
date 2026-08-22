@@ -44,6 +44,11 @@ class Lodge extends Model
         return $this->hasMany(Membership::class);
     }
 
+    public function membershipCommunicationPreferences()
+    {
+        return $this->hasMany(MembershipCommunicationPreference::class);
+    }
+
     public function ownedPersonRelationships()
     {
         return $this->hasMany(PersonRelationship::class, 'owning_lodge_id');

@@ -56,8 +56,20 @@ class Membership extends Model
         return $this->hasMany(OfficerAssignment::class);
     }
 
+    public function communicationPreference()
+    {
+        return $this->hasOne(MembershipCommunicationPreference::class);
+    }
+
     public function isActive(): bool
     {
         return $this->end_date === null && $this->status?->key === 'active';
+    }
+
+    protected static function booted(): void
+    {
+        static::created(fn (Membership $membership) => $membership->communicationPreference()->firstOrCreate([
+            'lodge_id' => $membership->lodge_id,
+        ]));
     }
 }

@@ -98,6 +98,7 @@ To deliberately erase the local database, Redis data, media, and browser-test No
 - [Phase 3 specification](docs/phase-03.md)
 - [Phase 4 specification](docs/phase-04.md)
 - [Phase 5 specification](docs/phase-05.md)
+- [Phase 6 specification](docs/phase-06.md)
 - [Architecture](docs/architecture.md)
 - [Domain model](docs/domain-model.md)
 - [Tenancy rules](docs/tenancy-rules.md)

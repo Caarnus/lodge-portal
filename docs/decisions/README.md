@@ -6,3 +6,4 @@
 - [Versioned public content with controlled sections](0004-versioned-public-content.md)
 - [Separate person identity from lodge-owned membership data](0005-person-membership-and-lodge-ownership.md)
 - [Materialize event occurrences from RRULE series](0006-materialized-event-occurrences.md)
+- [Person-owned directory privacy with request-scoped projections](0007-person-owned-directory-privacy.md)
