@@ -834,6 +834,8 @@ This phase does not include:
 
 # 9. Phase 5 — Volunteer Staffing and Commitments
 
+The detailed and authoritative implementation contract is [docs/phase-05.md](docs/phase-05.md). If this summary and that specification differ, update this summary and follow the detailed specification.
+
 ## 9.1 Goal
 
 Add a separate volunteer-staffing workflow for events so lodges can define named help positions, members can explicitly commit to those positions, and authorized lodge users can see staffing needs and volunteer rosters.
@@ -940,7 +942,7 @@ The broader profile and directory features remain in Phase 6.
 - A volunteer position may require more than one person through a configurable needed-count value.
 - Commitments must enforce position/occurrence/lodge ownership and current eligibility.
 - The same person must not have duplicate active commitments to the same position and occurrence.
-- Whether one person may commit to multiple different positions for the same occurrence should be explicitly resolved in the detailed Phase 5 specification.
+- One person may commit to multiple different positions for the same occurrence. The platform prevents only duplicate active commitments by the same person to the same position and occurrence; it does not impose a cross-position limit or attempt to decide how much a volunteer can handle.
 - Volunteer counts must be derived from active commitments rather than manually maintained counters.
 - Volunteer contact information follows existing Person privacy/authorization rules and must not be exposed in public staffing counts.
 - Jobs must carry stable identifiers and reload the complete lodge/event/occurrence/position/commitment ownership chain before sending staffing reminders.
