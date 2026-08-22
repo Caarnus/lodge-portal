@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Galleries\MediaExposureService;
 use App\Enums\MediaProcessingStatus;
 use App\Jobs\ProcessMediaAsset;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
-use App\Models\WebsiteSection;
 use App\Services\Audit;
-use App\Services\WebsiteSectionCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -54,14 +53,11 @@ class MediaAssetController extends Controller
         return back();
     }
 
-    public function destroy(Lodge $lodge, MediaAsset $media, WebsiteSectionCatalog $catalog)
+    public function destroy(Lodge $lodge, MediaAsset $media, MediaExposureService $exposure)
     {
         $this->allowAsset($lodge, $media);
-        $referenced = WebsiteSection::query()->where('lodge_id', $lodge->id)
-            ->whereHas('version', fn ($query) => $query->whereIn('status', ['draft', 'published']))
-            ->get()->contains(fn ($section) => in_array($media->id, $catalog->mediaIds($section->configuration), true));
-        if ($referenced) {
-            throw ValidationException::withMessages(['media' => 'Media used by a draft or published page cannot be deleted.']);
+        if ($exposure->hasAnyReferences($media)) {
+            throw ValidationException::withMessages(['media' => 'Media used by current content cannot be deleted.']);
         }
         if (in_array($media->derivative_path, [$lodge->logo_path, $lodge->seal_path], true)) {
             throw ValidationException::withMessages(['media' => 'Media used by lodge branding cannot be deleted.']);

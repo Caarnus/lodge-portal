@@ -232,7 +232,7 @@ class PublicWebsiteTest extends TestCase
             ->where('pastMasters.1.name', $earlier->display_name));
     }
 
-    public function test_uploaded_image_original_is_private_and_normalized_derivative_is_public(): void
+    public function test_uploaded_image_original_and_private_derivative_are_private_while_public_copy_is_available(): void
     {
         Storage::fake('local');
         Storage::fake('public');
@@ -247,6 +247,7 @@ class PublicWebsiteTest extends TestCase
         $asset = MediaAsset::firstOrFail();
         $this->assertSame('ready', $asset->processing_status->value);
         Storage::disk('local')->assertExists($asset->original_path);
+        Storage::disk('local')->assertExists($asset->private_derivative_path);
         Storage::disk('public')->assertExists($asset->derivative_path);
         $this->assertSame('Lodge exterior at sunset', $asset->alt_text);
         $this->assertLessThanOrEqual(2400, max($asset->width, $asset->height));

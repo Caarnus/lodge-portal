@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Domain\Galleries\MediaExposureService;
 use App\Enums\MediaProcessingStatus;
 use App\Models\MediaAsset;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,26 +18,36 @@ class ProcessMediaAsset implements ShouldQueue
 
     public function __construct(public readonly int $lodgeId, public readonly int $mediaAssetId) {}
 
-    public function handle(): void
+    public function handle(MediaExposureService $exposure): void
     {
         $asset = MediaAsset::query()->whereKey($this->mediaAssetId)->where('lodge_id', $this->lodgeId)->firstOrFail();
         $asset->update(['processing_status' => MediaProcessingStatus::Processing, 'processing_error' => null]);
 
         try {
             $source = Storage::disk('local')->path($asset->original_path);
-            $targetPath = 'website-media/'.$asset->lodge_id.'/'.Str::uuid().'.jpg';
+            $privateTargetPath = 'website-private/'.$asset->lodge_id.'/'.Str::uuid().'.jpg';
             [$bytes, $width, $height] = class_exists(\Imagick::class)
                 ? $this->withImagick($source)
                 : $this->withGd($source);
-            Storage::disk('public')->put($targetPath, $bytes, ['visibility' => 'public']);
+            Storage::disk('local')->put($privateTargetPath, $bytes);
+            $previousPrivatePath = $asset->private_derivative_path;
+            $previousPublicPath = $asset->derivative_path;
             $asset->update([
-                'derivative_path' => $targetPath,
+                'derivative_path' => null,
+                'private_derivative_path' => $privateTargetPath,
                 'width' => $width,
                 'height' => $height,
                 'processing_status' => MediaProcessingStatus::Ready,
                 'processing_error' => null,
                 'processed_at' => now(),
             ]);
+            if ($previousPrivatePath) {
+                Storage::disk('local')->delete($previousPrivatePath);
+            }
+            if ($previousPublicPath) {
+                Storage::disk('public')->delete($previousPublicPath);
+            }
+            $exposure->syncPublicCopy($asset);
         } catch (\Throwable $exception) {
             $asset->update([
                 'processing_status' => MediaProcessingStatus::Failed,
