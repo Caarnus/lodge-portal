@@ -16,7 +16,7 @@ class MediaAssetController extends Controller
 {
     public function store(Request $request, Lodge $lodge)
     {
-        $this->allowLodge($lodge, 'website.manage');
+        abort_unless($request->user()->hasLodgePermission($lodge, 'website.manage') || $request->user()->hasLodgePermission($lodge, 'galleries.manage'), 403);
         $data = $request->validate([
             'file' => ['required', 'file', 'max:'.config('website.max_upload_kb')],
             'alt_text' => 'required|string|max:500',

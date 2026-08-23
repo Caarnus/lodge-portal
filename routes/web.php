@@ -12,6 +12,7 @@ use App\Http\Controllers\EventReservationFieldController;
 use App\Http\Controllers\EventVolunteerController;
 use App\Http\Controllers\EventVolunteerPositionController;
 use App\Http\Controllers\EventVolunteerReminderDeliveryController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
@@ -79,8 +80,25 @@ Route::get('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsubs
 Route::post('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.reminders.unsubscribe');
 Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderController::class, 'store'])->middleware('throttle:10,1')->name('public.events.reminders.store');
 Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 'show'])->name('public.events.show');
+Route::get('l/{lodge:slug}/galleries', [GalleryController::class, 'index'])->name('public.galleries.index');
+Route::get('l/{lodge:slug}/galleries/{album:slug}', [GalleryController::class, 'show'])->name('public.galleries.show');
+Route::get('l/{lodge:slug}/galleries/{album:slug}/photos/{photo}', [GalleryController::class, 'photo'])->name('public.galleries.photo');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
+    Route::prefix('lodges/{lodge}/galleries/manage')->name('lodges.galleries.')->group(function () {
+        Route::get('/', [GalleryController::class, 'manage'])->name('manage');
+        Route::post('/', [GalleryController::class, 'store'])->name('store');
+        Route::get('{album}/edit', [GalleryController::class, 'edit'])->name('edit');
+        Route::put('{album}', [GalleryController::class, 'update'])->name('update');
+        Route::post('{album}/photos', [GalleryController::class, 'addPhoto'])->name('photos.store');
+        Route::put('{album}/photos/{photo}', [GalleryController::class, 'updatePhoto'])->name('photos.update');
+        Route::delete('{album}/photos/{photo}', [GalleryController::class, 'removePhoto'])->name('photos.destroy');
+        Route::post('{album}/publish', [GalleryController::class, 'publish'])->name('publish');
+        Route::post('{album}/unpublish', [GalleryController::class, 'unpublish'])->name('unpublish');
+        Route::delete('{album}', [GalleryController::class, 'destroy'])->name('destroy');
+        Route::post('deleted/{albumId}/restore', [GalleryController::class, 'restore'])->name('restore');
+        Route::post('media', [MediaAssetController::class, 'store'])->name('media.store');
+    });
     Route::prefix('lodges/{lodge}/newsletters/manage')->name('lodges.newsletters.')->group(function () {
         Route::get('/', [NewsletterController::class, 'index'])->name('index');
         Route::post('/', [NewsletterController::class, 'store'])->name('store');

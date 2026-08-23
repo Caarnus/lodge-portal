@@ -14,6 +14,7 @@ const props = defineProps<{
     officers: any[];
     pastMasters: any[];
     events: any[];
+    galleries: any[];
 }>();
 const contrast = (hex: string) => {
     const value = hex.replace("#", "");
@@ -86,6 +87,7 @@ const secondaryForeground = computed(() =>
                 :officers="officers"
                 :past-masters="pastMasters"
                 :events="events"
+                :galleries="galleries"
                 :primary-foreground="primaryForeground"
                 :secondary-foreground="secondaryForeground"
             />

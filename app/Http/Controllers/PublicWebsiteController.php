@@ -7,6 +7,7 @@ use App\Enums\EventStatus;
 use App\Enums\LodgeStatus;
 use App\Enums\WebsitePageStatus;
 use App\Models\EventOccurrence;
+use App\Models\GalleryAlbum;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Models\OfficerAssignment;
@@ -73,6 +74,7 @@ class PublicWebsiteController extends Controller
         }
         $pastMasters = collect();
         $events = collect();
+        $galleries = collect();
         if ($version->sections->contains('type', 'events_placeholder')) {
             $events = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('visibility', 'public'))->orderBy('starts_at')->limit(20)->get()->map(fn ($occurrence) => ['id' => $occurrence->id, 'title' => $occurrence->title_override ?: $occurrence->event->title, 'starts_at' => $occurrence->starts_at, 'event_category_id' => $occurrence->event->event_category_id]);
         }
@@ -88,6 +90,13 @@ class PublicWebsiteController extends Controller
                     'name' => $term->person->display_name,
                 ]);
         }
+        if ($version->sections->contains('type', 'gallery_placeholder')) {
+            $galleries = GalleryAlbum::query()->where('lodge_id', $lodge->id)->whereHas('published', fn ($query) => $query->where('visibility', 'public'))
+                ->with(['published.photos.mediaAsset'])->orderByDesc('id')->limit(12)->get()->map(fn (GalleryAlbum $album) => [
+                    'slug' => $album->slug, 'title' => $album->published->title,
+                    'cover_photo_id' => $album->published->cover_photo_id ?: $album->published->photos->first()?->id,
+                ]);
+        }
 
         return Inertia::render('public/Website', [
             'lodge' => $lodge,
@@ -98,6 +107,7 @@ class PublicWebsiteController extends Controller
             'officers' => $officers,
             'pastMasters' => $pastMasters,
             'events' => $events,
+            'galleries' => $galleries,
         ]);
     }
 
