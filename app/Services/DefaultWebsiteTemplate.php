@@ -61,7 +61,16 @@ class DefaultWebsiteTemplate
             ['title' => 'Past Masters', 'slug' => 'past-masters', 'is_home' => false, 'order' => 35, 'sections' => [
                 ['type' => 'past_masters_placeholder', 'configuration' => ['heading' => 'Past Masters', 'body' => 'Our lodge is grateful for the service of these Past Masters.']],
             ]],
-            ['title' => 'Contact', 'slug' => 'contact', 'is_home' => false, 'order' => 40, 'sections' => [
+            ['title' => 'Newsletter', 'slug' => 'newsletter', 'is_home' => false, 'order' => 40, 'sections' => [
+                ['type' => 'newsletter_placeholder', 'configuration' => ['heading' => 'Member Newsletter', 'body' => 'Read the latest member newsletters.']],
+            ]],
+            ['title' => 'Directory', 'slug' => 'directory', 'is_home' => false, 'order' => 45, 'sections' => [
+                ['type' => 'directory_placeholder', 'configuration' => ['heading' => 'Member Directory', 'body' => 'Search the member directory.']],
+            ]],
+            ['title' => 'Gallery', 'slug' => 'gallery', 'is_home' => false, 'order' => 50, 'sections' => [
+                ['type' => 'gallery_placeholder', 'configuration' => ['heading' => 'Gallery', 'body' => 'Browse photos from lodge events and activities.']],
+            ]],
+            ['title' => 'Contact', 'slug' => 'contact', 'is_home' => false, 'order' => 60, 'sections' => [
                 ['type' => 'contact_information', 'configuration' => ['heading' => 'Contact Us', 'body' => 'We welcome questions from members and visitors.']],
                 ['type' => 'meeting_information', 'configuration' => ['heading' => 'Meeting Information', 'body' => 'Contact the lodge to confirm meeting details before visiting.']],
             ]],

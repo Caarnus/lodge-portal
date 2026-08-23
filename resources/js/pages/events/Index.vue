@@ -176,11 +176,7 @@ const retryReminder = (id: number) => {
                 </p>
             </div>
             <div class="flex gap-2">
-                <Link
-                    :href="`/lodges/${lodge.id}/event-categories`"
-                    class="rounded border border-border bg-card px-3 py-2 text-sm hover:bg-accent"
-                    >Categories</Link
-                ><button
+                <button
                     type="button"
                     class="primary-button"
                     @click="openEditor('create')"

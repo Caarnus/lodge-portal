@@ -9,6 +9,7 @@ const placeholders = [
     "past_masters_placeholder",
     "events_placeholder",
     "newsletter_placeholder",
+    "directory_placeholder",
     "gallery_placeholder",
 ];
 const addLink = () => (config.value.links ??= []).push({ label: "", url: "" });
@@ -182,6 +183,21 @@ const addLink = () => (config.value.links ??= []).push({ label: "", url: "" });
             <label class="flex items-center gap-2 text-sm"
                 ><input v-model="config.show_all_link" type="checkbox" /> Show
                 complete event-list link</label
+            >
+        </template>
+        <template v-else-if="type === 'contact_information'">
+            <label class="field-label"
+                >Heading<input v-model="config.heading" class="field-input"
+            /></label>
+            <label class="field-label"
+                >Message<textarea
+                    v-model="config.body"
+                    class="field-input min-h-20"
+                ></textarea>
+            </label>
+            <label class="field-toggle"
+                ><input v-model="config.show_contact_form" type="checkbox" />
+                Enable contact form</label
             >
         </template>
         <template v-else-if="placeholders.includes(type)">

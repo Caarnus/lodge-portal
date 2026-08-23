@@ -22,8 +22,20 @@ const page = usePage<SharedData>();
         <SidebarGroupLabel>{{ label ?? "Platform" }}</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
-                <SidebarMenuButton as-child :is-active="item.href === page.url">
-                    <Link :href="item.href">
+                <SidebarMenuButton
+                    as-child
+                    :is-active="!item.external && item.href === page.url"
+                >
+                    <a
+                        v-if="item.external"
+                        :href="item.href"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
+                    </a>
+                    <Link v-else :href="item.href">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                     </Link>

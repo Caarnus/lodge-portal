@@ -151,6 +151,12 @@ html.dark .public-rich-text p {
     .primary-button {
         @apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
+    .secondary-button {
+        @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .checkbox-field {
+        @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground;
+    }
     .public-rich-text h1 {
         @apply mb-5 text-4xl font-bold;
     }

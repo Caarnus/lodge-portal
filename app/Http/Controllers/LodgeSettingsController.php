@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\LodgeStatus;
 use App\Http\Requests\LodgeRequest;
+use App\Models\EventCategory;
 use App\Models\Lodge;
+use App\Models\Permission;
 use App\Services\Audit;
 use Inertia\Inertia;
 
@@ -19,7 +21,30 @@ class LodgeSettingsController extends Controller
     {
         $this->allow($lodge);
 
-        return Inertia::render('lodge/Settings', ['lodge' => $lodge]);
+        $user = request()->user();
+        $canManageEvents = $user->hasLodgePermission($lodge, 'events.manage');
+        $canManageRoles = $user->hasLodgePermission($lodge, 'roles.manage');
+
+        return Inertia::render('lodge/Settings', [
+            'lodge' => $lodge,
+            'canManageEvents' => $canManageEvents,
+            'canManageRoles' => $canManageRoles,
+            'eventCategories' => $canManageEvents
+                ? EventCategory::query()->orderBy('name')->get()->map(fn (EventCategory $category) => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'is_active' => $category->is_active,
+                    'enabled' => $lodge->eventCategories()->whereKey($category->id)->exists(),
+                ])->values()
+                : [],
+            'roles' => $canManageRoles
+                ? $lodge->roles()->with('permissions')->orderByDesc('is_system')->orderBy('name')->get()
+                : [],
+            'permissions' => $canManageRoles
+                ? $this->availablePermissions($lodge)
+                : [],
+        ]);
     }
 
     public function update(LodgeRequest $r, Lodge $lodge)
@@ -37,5 +62,21 @@ class LodgeSettingsController extends Controller
         Audit::record('lodge.updated', $lodge, $lodge, $before, $lodge->fresh()->toArray());
 
         return back();
+    }
+
+    private function availablePermissions(Lodge $lodge)
+    {
+        $user = request()->user();
+
+        if ($user->is_platform_admin) {
+            return Permission::query()->orderBy('name')->get();
+        }
+
+        return Permission::query()
+            ->whereHas('roles', fn ($query) => $query->whereHas('users', fn ($users) => $users
+                ->where('users.id', $user->id)
+                ->where('lodge_user_roles.lodge_id', $lodge->id)))
+            ->orderBy('name')
+            ->get();
     }
 }

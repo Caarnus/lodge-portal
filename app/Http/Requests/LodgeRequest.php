@@ -32,6 +32,7 @@ class LodgeRequest extends FormRequest
             'timezone' => 'required|timezone',
             'public_email' => 'required|email',
             'public_phone' => 'nullable|string|max:40',
+            'contact_email' => 'nullable|email|max:255',
             'status' => ['required', Rule::in(['active', 'disabled', 'disabled_locked'])],
             'date_display_format' => ['required', Rule::in(['month_year', 'month_day_year', 'day_month_year'])],
             'primary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],

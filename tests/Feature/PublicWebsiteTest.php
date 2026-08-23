@@ -92,6 +92,29 @@ class PublicWebsiteTest extends TestCase
         $this->assertDatabaseHas('audit_events', ['action' => 'website.page_updated', 'lodge_id' => $lodge->id]);
     }
 
+    public function test_published_contact_section_can_send_to_the_lodge_contact_email(): void
+    {
+        $lodge = Lodge::factory()->create(['public_email' => 'contact@example.test']);
+        $admin = $this->userFor($lodge, ['website.manage', 'website.publish']);
+        $page = $this->createPage($lodge, $admin);
+
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/sections", [
+            'type' => 'contact_information',
+            'configuration' => [
+                'heading' => 'Contact us',
+                'body' => 'We would be glad to hear from you.',
+                'show_contact_form' => true,
+            ],
+        ])->assertRedirect();
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/publish")->assertRedirect();
+
+        $this->post("/l/{$lodge->slug}/contact", [
+            'name' => 'Website Visitor',
+            'email' => 'visitor@example.test',
+            'message' => 'I would like more information.',
+        ])->assertRedirect()->assertSessionHas('notice', 'Thank you. Your message has been sent.');
+    }
+
     public function test_unpublishing_a_page_retains_an_editable_draft(): void
     {
         $lodge = Lodge::factory()->create();
@@ -197,13 +220,16 @@ class PublicWebsiteTest extends TestCase
         $admin = $this->userFor($lodge, ['website.manage']);
         $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/template")->assertRedirect();
 
-        $this->assertSame(6, $lodge->websitePages()->count());
+        $this->assertSame(9, $lodge->websitePages()->count());
         $this->assertDatabaseHas('website_page_versions', ['lodge_id' => $lodge->id, 'title' => 'Home', 'is_home' => true, 'status' => 'draft']);
         $welcome = WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('title', 'Home')->firstOrFail()->sections()->where('type', 'rich_text')->firstOrFail();
         $this->assertStringContainsString('Masonic lodge', $welcome->configuration['html']);
+        $this->assertDatabaseHas('website_page_versions', ['lodge_id' => $lodge->id, 'title' => 'Newsletter', 'slug' => 'newsletter']);
+        $this->assertDatabaseHas('website_page_versions', ['lodge_id' => $lodge->id, 'title' => 'Directory', 'slug' => 'directory']);
+        $this->assertDatabaseHas('website_page_versions', ['lodge_id' => $lodge->id, 'title' => 'Gallery', 'slug' => 'gallery']);
 
         $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/template")->assertSessionHasErrors('template');
-        $this->assertSame(6, $lodge->websitePages()->count());
+        $this->assertSame(9, $lodge->websitePages()->count());
     }
 
     public function test_past_masters_section_lists_only_the_current_lodges_terms(): void

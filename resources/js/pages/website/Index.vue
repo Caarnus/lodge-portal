@@ -48,6 +48,8 @@ const applyTemplate = () =>
     router.post(`/lodges/${props.lodge.id}/website/template`);
 const unpublish = (page: any) =>
     router.post(`/lodges/${props.lodge.id}/website/pages/${page.id}/unpublish`);
+const publish = (page: any) =>
+    router.post(`/lodges/${props.lodge.id}/website/pages/${page.id}/publish`);
 const remove = (page: any) =>
     router.delete(`/lodges/${props.lodge.id}/website/pages/${page.id}`);
 const restore = (page: any) =>
@@ -229,6 +231,18 @@ const sendUpload = () =>
                         v-tooltip.top="{ value: 'Edit page', showDelay: 2000 }"
                         ><Pencil class="size-4"
                     /></Link>
+                    <button
+                        v-if="canPublish && page.draft"
+                        aria-label="Publish page"
+                        class="icon-button"
+                        v-tooltip.top="{
+                            value: 'Publish page',
+                            showDelay: 2000,
+                        }"
+                        @click="publish(page)"
+                    >
+                        <Rocket class="size-4" />
+                    </button>
                     <button
                         v-if="
                             canPublish &&

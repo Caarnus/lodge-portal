@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Directory\DirectoryAccess;
+use App\Domain\Newsletters\NewsletterAccess;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
 use App\Enums\LodgeStatus;
@@ -14,11 +16,17 @@ use App\Models\OfficerAssignment;
 use App\Models\PastMasterTerm;
 use App\Models\WebsitePage;
 use App\Models\WebsitePageVersion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PublicWebsiteController extends Controller
 {
+    public function __construct(
+        private readonly DirectoryAccess $directory,
+        private readonly NewsletterAccess $newsletters,
+    ) {}
+
     public function home(Lodge $lodge)
     {
         $this->allowPublic($lodge);
@@ -47,9 +55,15 @@ class PublicWebsiteController extends Controller
     private function render(Lodge $lodge, WebsitePageVersion $version, bool $preview = false)
     {
         $version->loadMissing('sections');
-        $version->sections->where('type', 'newsletter_placeholder')->each(function ($section) {
-            $section->configuration = ['heading' => 'Member newsletters', 'body' => 'Sign in to view member newsletters.', 'member_only' => true];
-        });
+        $user = request()->user();
+        $memberContent = [
+            'directory' => $user instanceof User && $this->directory->canBrowse($user, $lodge),
+            'newsletters' => $user instanceof User && $this->newsletters->canRead($user, $lodge),
+        ];
+        $version->setRelation('sections', $version->sections->reject(
+            fn ($section) => ($section->type === 'directory_placeholder' && ! $memberContent['directory'])
+                || ($section->type === 'newsletter_placeholder' && ! $memberContent['newsletters']),
+        )->values());
         $versions = $this->published($lodge)->where('show_in_navigation', true)->orderBy('navigation_order')->orderBy('title')->get();
         $mediaIds = $version->sections->flatMap(function ($section) {
             $ids = [];
@@ -108,6 +122,7 @@ class PublicWebsiteController extends Controller
             'pastMasters' => $pastMasters,
             'events' => $events,
             'galleries' => $galleries,
+            'memberContent' => $memberContent,
         ]);
     }
 

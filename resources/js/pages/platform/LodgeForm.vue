@@ -23,6 +23,7 @@ const form = useForm({
     date_display_format: l.date_display_format ?? "month_year",
     public_email: l.public_email ?? "",
     public_phone: l.public_phone ?? "",
+    contact_email: l.contact_email ?? "",
     status: l.status ?? "active",
     primary_color: l.primary_color ?? "#1E3A5F",
     secondary_color: l.secondary_color ?? "#D4AF37",
@@ -87,6 +88,17 @@ function submit() {
                 /><small class="text-red-600">{{
                     form.errors[f]
                 }}</small></label
+            ><label class="field-label"
+                >Contact form recipient email<input
+                    v-model="form.contact_email"
+                    type="email"
+                    class="field-input"
+                /><small class="text-red-600">{{
+                    form.errors.contact_email
+                }}</small
+                ><small class="text-muted-foreground"
+                    >Leave blank to use the public email address.</small
+                ></label
             ><label class="field-label"
                 >Status<select v-model="form.status" class="field-input">
                     <option value="active">Active</option>
@@ -189,5 +201,6 @@ function submit() {
                 </button>
             </form>
         </section>
+        <slot />
     </main>
 </template>

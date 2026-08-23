@@ -35,6 +35,7 @@ use App\Http\Controllers\Platform\EventCategoryController as PlatformEventCatego
 use App\Http\Controllers\Platform\LodgeController;
 use App\Http\Controllers\Platform\PersonMergeController;
 use App\Http\Controllers\PublicCommunicationUnsubscribeController;
+use App\Http\Controllers\PublicContactFormController;
 use App\Http\Controllers\PublicEventCalendarController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\PublicEventReminderController;
@@ -100,6 +101,7 @@ Route::get('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNew
 Route::post('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'confirm'])->middleware('throttle:10,1')->name('public.newsletters.request.verify');
 Route::get('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'show'])->middleware('throttle:10,1')->name('public.communications.unsubscribe.show');
 Route::post('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.communications.unsubscribe');
+Route::post('l/{lodge:slug}/contact', [PublicContactFormController::class, 'store'])->middleware('throttle:10,1')->name('public.contact.store');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
     Route::prefix('lodges/{lodge}/communications/manage')->name('lodges.communications.')->group(function () {

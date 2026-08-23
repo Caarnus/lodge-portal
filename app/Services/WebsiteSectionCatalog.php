@@ -14,7 +14,7 @@ class WebsiteSectionCatalog
         'hero', 'rich_text', 'image', 'image_text', 'link_list', 'call_to_action',
         'meeting_information', 'contact_information', 'officers_placeholder',
         'past_masters_placeholder', 'events_placeholder', 'newsletter_placeholder',
-        'gallery_placeholder', 'custom_html',
+        'directory_placeholder', 'gallery_placeholder', 'custom_html',
     ];
 
     public function __construct(private readonly WebsiteHtmlSanitizer $sanitizer)
@@ -30,6 +30,7 @@ class WebsiteSectionCatalog
             'contact_information' => 'Contact information', 'officers_placeholder' => 'Officers',
             'past_masters_placeholder' => 'Past Masters',
             'events_placeholder' => 'Upcoming events', 'newsletter_placeholder' => 'Newsletter',
+            'directory_placeholder' => 'Member directory',
             'gallery_placeholder' => 'Gallery', 'custom_html' => 'Custom HTML',
         ];
     }
@@ -48,11 +49,12 @@ class WebsiteSectionCatalog
             'link_list' => ['heading' => '', 'links' => []],
             'call_to_action' => ['heading' => '', 'body' => '', 'label' => '', 'url' => ''],
             'meeting_information' => ['heading' => 'Meeting Information', 'body' => ''],
-            'contact_information' => ['heading' => 'Contact Us', 'body' => ''],
+            'contact_information' => ['heading' => 'Contact Us', 'body' => '', 'show_contact_form' => false],
             'officers_placeholder' => ['heading' => 'Lodge Officers', 'body' => 'Officer information will be available soon.'],
             'past_masters_placeholder' => ['heading' => 'Past Masters', 'body' => 'Our lodge is grateful for the service of these Past Masters.'],
             'events_placeholder' => ['heading' => 'Upcoming Events', 'body' => 'Event listings are coming soon.', 'event_category_id' => null, 'maximum_items' => 6, 'show_all_link' => true],
             'newsletter_placeholder' => ['heading' => 'Newsletter', 'body' => 'Newsletters will be available soon.'],
+            'directory_placeholder' => ['heading' => 'Member Directory', 'body' => 'Search the member directory.'],
             'gallery_placeholder' => ['heading' => 'Gallery', 'body' => 'Photos will be available soon.'],
         };
     }
@@ -71,7 +73,8 @@ class WebsiteSectionCatalog
             'link_list' => ['heading' => 'nullable|string|max:150', 'links' => 'required|array|max:20', 'links.*.label' => 'required|string|max:100', 'links.*.url' => ['required', 'string', 'max:2048', $this->safeUrlRule()]],
             'call_to_action' => ['heading' => 'required|string|max:150', 'body' => 'nullable|string|max:1000', 'label' => 'required|string|max:100', 'url' => ['required', 'string', 'max:2048', $this->safeUrlRule()]],
             'events_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000', 'event_category_id' => ['nullable', 'integer', Rule::exists('event_category_lodge', 'event_category_id')->where('lodge_id', $lodge->id)], 'maximum_items' => ['nullable', 'integer', 'min:1', 'max:20'], 'show_all_link' => ['nullable', 'boolean']],
-            'meeting_information', 'contact_information', 'officers_placeholder', 'past_masters_placeholder', 'newsletter_placeholder', 'gallery_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000'],
+            'contact_information' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000', 'show_contact_form' => ['nullable', 'boolean']],
+            'meeting_information', 'officers_placeholder', 'past_masters_placeholder', 'newsletter_placeholder', 'directory_placeholder', 'gallery_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000'],
         };
 
         $data = Validator::make($input, $rules)->validate();

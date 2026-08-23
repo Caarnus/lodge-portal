@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useForm } from "@inertiajs/vue3";
+
 const props = defineProps<{
     section: any;
     lodge: any;
@@ -7,11 +9,23 @@ const props = defineProps<{
     pastMasters: any[];
     events: any[];
     galleries: any[];
+    memberContent: { directory: boolean; newsletters: boolean };
     primaryForeground: string;
     secondaryForeground: string;
 }>();
 const asset = (id: number | null | undefined) =>
     id ? props.media[String(id)] : null;
+const contactForm = useForm({
+    name: "",
+    email: "",
+    message: "",
+    website: "",
+});
+const sendContact = () =>
+    contactForm.post(`/l/${props.lodge.slug}/contact`, {
+        preserveScroll: true,
+        onSuccess: () => contactForm.reset(),
+    });
 </script>
 
 <template>
@@ -156,6 +170,74 @@ const asset = (id: number | null | undefined) =>
                 }}</a>
             </p>
         </address>
+        <form
+            v-if="section.configuration.show_contact_form"
+            class="mt-8 grid max-w-2xl gap-4 rounded-xl border p-5"
+            @submit.prevent="sendContact"
+        >
+            <h3 class="text-xl font-semibold">Send us a message</h3>
+            <label class="grid gap-1 text-sm font-medium"
+                >Name<input
+                    v-model="contactForm.name"
+                    autocomplete="name"
+                    required
+                    class="rounded-md border px-3 py-2"
+                /><span
+                    v-if="contactForm.errors.name"
+                    class="text-sm text-red-700"
+                    >{{ contactForm.errors.name }}</span
+                ></label
+            >
+            <label class="grid gap-1 text-sm font-medium"
+                >Email<input
+                    v-model="contactForm.email"
+                    type="email"
+                    autocomplete="email"
+                    required
+                    class="rounded-md border px-3 py-2"
+                /><span
+                    v-if="contactForm.errors.email"
+                    class="text-sm text-red-700"
+                    >{{ contactForm.errors.email }}</span
+                ></label
+            >
+            <label class="grid gap-1 text-sm font-medium"
+                >Message<textarea
+                    v-model="contactForm.message"
+                    required
+                    rows="5"
+                    class="rounded-md border px-3 py-2"
+                ></textarea
+                ><span
+                    v-if="contactForm.errors.message"
+                    class="text-sm text-red-700"
+                    >{{ contactForm.errors.message }}</span
+                ></label
+            >
+            <input
+                v-model="contactForm.website"
+                aria-hidden="true"
+                autocomplete="off"
+                tabindex="-1"
+                class="hidden"
+            />
+            <p
+                v-if="contactForm.recentlySuccessful"
+                class="text-sm text-emerald-700"
+            >
+                Thank you. Your message has been sent.
+            </p>
+            <button
+                :disabled="contactForm.processing"
+                class="w-fit rounded-md px-4 py-2 font-medium"
+                :style="{
+                    backgroundColor: lodge.primary_color,
+                    color: primaryForeground,
+                }"
+            >
+                Send message
+            </button>
+        </form>
     </section>
     <section
         v-else-if="section.type === 'meeting_information'"
@@ -306,12 +388,41 @@ const asset = (id: number | null | undefined) =>
         <div
             class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
         >
-            <h2 class="text-2xl font-bold">Member newsletters</h2>
+            <h2 class="text-2xl font-bold">
+                {{ section.configuration.heading || "Member newsletters" }}
+            </h2>
             <p class="mt-3 text-slate-600">
-                Sign in to view member newsletters.
+                {{
+                    section.configuration.body ||
+                    "Read the latest member newsletters."
+                }}
             </p>
-            <a href="/login" class="mt-5 inline-block font-medium underline"
-                >Sign in</a
+            <a
+                :href="`/lodges/${lodge.id}/newsletters`"
+                class="mt-5 inline-block font-medium underline"
+                >View newsletters</a
+            >
+        </div>
+    </section>
+    <section
+        v-else-if="section.type === 'directory_placeholder'"
+        class="mx-auto max-w-4xl px-5 py-10"
+    >
+        <div
+            class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
+        >
+            <h2 class="text-2xl font-bold">
+                {{ section.configuration.heading || "Member directory" }}
+            </h2>
+            <p class="mt-3 text-slate-600">
+                {{
+                    section.configuration.body || "Search the member directory."
+                }}
+            </p>
+            <a
+                :href="`/lodges/${lodge.id}/directory`"
+                class="mt-5 inline-block font-medium underline"
+                >Open directory</a
             >
         </div>
     </section>

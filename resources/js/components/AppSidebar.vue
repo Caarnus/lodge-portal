@@ -14,9 +14,14 @@ import { type AuthenticatedSharedData, type NavItem } from "@/types";
 import { Link, router, usePage } from "@inertiajs/vue3";
 import {
     Building2,
-    CalendarDays,
+    CalendarCog,
     ClipboardCheck,
-    Globe2,
+    ContactRound,
+    ExternalLink,
+    Image,
+    Mail,
+    Newspaper,
+    PanelsTopLeft,
     LayoutGrid,
     Settings,
     ShieldCheck,
@@ -78,69 +83,46 @@ const lodgeNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [];
     if (lodge.can_view_lodge_site)
         items.push({
-            title: "Lodge site",
+            title: "Lodge Website",
             href: `/l/${lodge.slug}`,
-            icon: Globe2,
-        });
-    if (lodge.can_view_member_events)
-        items.push({
-            title: "Events",
-            href: `/l/${lodge.slug}/events`,
-            icon: CalendarDays,
-        });
-    if (lodge.can_view_member_newsletters)
-        items.push({
-            title: "Newsletter",
-            href: `/lodges/${lodge.id}/newsletters`,
-            icon: Globe2,
-        });
-    if (lodge.can_manage_lodge)
-        items.push({
-            title: "Settings",
-            href: `/lodges/${lodge.id}/settings`,
-            icon: Settings,
+            icon: ExternalLink,
+            external: true,
         });
     if (lodge.can_manage_website)
         items.push({
-            title: "Website",
+            title: "Content management",
             href: `/lodges/${lodge.id}/website`,
-            icon: Globe2,
+            icon: PanelsTopLeft,
         });
-    if (lodge.can_manage_newsletters)
+    if (lodge.can_manage_events)
         items.push({
-            title: "Newsletter management",
-            href: `/lodges/${lodge.id}/newsletters/manage`,
-            icon: Globe2,
+            title: "Events",
+            href: `/lodges/${lodge.id}/events`,
+            icon: CalendarCog,
         });
     if (lodge.can_manage_galleries)
         items.push({
-            title: "Galleries",
+            title: "Media Galleries",
             href: `/lodges/${lodge.id}/galleries/manage`,
-            icon: Globe2,
+            icon: Image,
         });
     if (lodge.can_manage_communications)
         items.push({
             title: "Communications",
             href: `/lodges/${lodge.id}/communications/manage`,
-            icon: CalendarDays,
+            icon: Mail,
         });
-    if (lodge.can_manage_recipients)
+    if (lodge.can_manage_newsletters)
         items.push({
-            title: "Newsletter recipients",
-            href: `/lodges/${lodge.id}/newsletter-recipients`,
-            icon: Users,
+            title: "Newsletters",
+            href: `/lodges/${lodge.id}/newsletters/manage`,
+            icon: Newspaper,
         });
     if (lodge.can_view_people)
         items.push({
             title: "People",
             href: `/lodges/${lodge.id}/people`,
-            icon: Users,
-        });
-    if (lodge.can_view_directory)
-        items.push({
-            title: "Directory",
-            href: `/lodges/${lodge.id}/directory`,
-            icon: Users,
+            icon: ContactRound,
         });
     if (lodge.can_manage_officers)
         items.push({
@@ -151,14 +133,14 @@ const lodgeNavItems = computed<NavItem[]>(() => {
     if (lodge.can_manage_roles)
         items.push({
             title: "Roles",
-            href: `/lodges/${lodge.id}/roles`,
+            href: `/lodges/${lodge.id}/role-assignments`,
             icon: ShieldCheck,
         });
-    if (lodge.can_manage_events)
+    if (lodge.can_manage_lodge)
         items.push({
-            title: "Event management",
-            href: `/lodges/${lodge.id}/events`,
-            icon: CalendarDays,
+            title: "Lodge settings",
+            href: `/lodges/${lodge.id}/settings`,
+            icon: Settings,
         });
     return items;
 });
