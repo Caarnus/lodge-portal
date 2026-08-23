@@ -41,6 +41,7 @@ class DashboardService
                 'directory_url' => $this->directory->canBrowse($user, $m->lodge)
                     ? route('lodges.directory.index', $m->lodge)
                     : null,
+                'newsletters_url' => route('lodges.newsletters.archive', $m->lodge),
             ])->values(),
             'upcomingEvents' => EventOccurrence::query()->with(['event', 'lodge'])->whereIn('lodge_id', $lodgeIds)
                 ->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now())

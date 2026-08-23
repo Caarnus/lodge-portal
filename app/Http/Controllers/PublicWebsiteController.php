@@ -46,6 +46,9 @@ class PublicWebsiteController extends Controller
     private function render(Lodge $lodge, WebsitePageVersion $version, bool $preview = false)
     {
         $version->loadMissing('sections');
+        $version->sections->where('type', 'newsletter_placeholder')->each(function ($section) {
+            $section->configuration = ['heading' => 'Member newsletters', 'body' => 'Sign in to view member newsletters.', 'member_only' => true];
+        });
         $versions = $this->published($lodge)->where('show_in_navigation', true)->orderBy('navigation_order')->orderBy('title')->get();
         $mediaIds = $version->sections->flatMap(function ($section) {
             $ids = [];

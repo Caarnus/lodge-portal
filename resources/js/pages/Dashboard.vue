@@ -20,7 +20,7 @@ type VolunteerCommitment = {
 };
 
 defineProps<{
-    memberships: Array<{ id: number; lodge: string; number: string; type: string | null; degree: string | null; site_url: string; directory_url: string | null }>;
+    memberships: Array<{ id: number; lodge: string; number: string; type: string | null; degree: string | null; site_url: string; directory_url: string | null; newsletters_url: string }>;
     upcomingEvents: Array<{ id: number; event: string; lodge: string; url: string }>;
     reservations: Array<{ id: number; event: string; lodge: string }>;
     reminders: Array<{ id: number; event: string; lodge: string }>;
@@ -38,7 +38,7 @@ const withdraw = (commitment: VolunteerCommitment) =>
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto grid w-full max-w-6xl gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
-            <section class="rounded-xl border p-5"><h2 class="font-semibold">Memberships</h2><p v-if="!memberships.length" class="mt-2 text-sm text-muted-foreground">No active memberships.</p><ul v-else class="mt-2 space-y-3 text-sm"><li v-for="item in memberships" :key="item.id"><strong>{{ item.lodge }} · {{ item.number }}</strong><br />{{ [item.type, item.degree].filter(Boolean).join(' · ') }}<div class="mt-1 flex gap-3"><Link :href="item.site_url" class="underline">Lodge site</Link><Link v-if="item.directory_url" :href="item.directory_url" class="underline">Directory</Link></div></li></ul></section>
+            <section class="rounded-xl border p-5"><h2 class="font-semibold">Memberships</h2><p v-if="!memberships.length" class="mt-2 text-sm text-muted-foreground">No active memberships.</p><ul v-else class="mt-2 space-y-3 text-sm"><li v-for="item in memberships" :key="item.id"><strong>{{ item.lodge }} · {{ item.number }}</strong><br />{{ [item.type, item.degree].filter(Boolean).join(' · ') }}<div class="mt-1 flex gap-3"><Link :href="item.site_url" class="underline">Lodge site</Link><Link v-if="item.directory_url" :href="item.directory_url" class="underline">Directory</Link><Link :href="item.newsletters_url" class="underline">Newsletters</Link></div></li></ul></section>
             <section class="rounded-xl border p-5"><h2 class="font-semibold">Upcoming events</h2><p v-if="!upcomingEvents.length" class="mt-2 text-sm text-muted-foreground">No upcoming events.</p><ul v-else class="mt-2 text-sm"><li v-for="item in upcomingEvents" :key="item.id"><Link :href="item.url" class="underline">{{ item.event }}</Link> · {{ item.lodge }}</li></ul></section>
             <section class="rounded-xl border p-5"><h2 class="font-semibold">Profile</h2><p class="mt-2 text-sm text-muted-foreground">{{ profile.linked ? `Directory: ${profile.directory_scope ?? 'own lodge'}` : 'Your account is not linked to a member profile.' }}</p><Link :href="profile.settings_url" class="mt-2 inline-block text-sm underline">Profile and privacy settings</Link></section>
             <section class="rounded-xl border p-5"><h2 class="font-semibold">Reservations</h2><p v-if="!reservations.length" class="mt-2 text-sm text-muted-foreground">No active reservations.</p><ul v-else class="mt-2 text-sm"><li v-for="item in reservations" :key="item.id">{{ item.event }} · {{ item.lodge }}</li></ul></section>

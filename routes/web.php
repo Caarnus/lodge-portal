@@ -15,7 +15,10 @@ use App\Http\Controllers\EventVolunteerReminderDeliveryController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
+use App\Http\Controllers\MemberNewsletterController;
 use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\NewsletterDocumentController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\PersonAccountController;
 use App\Http\Controllers\PersonController;
@@ -54,6 +57,13 @@ Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->n
     Route::get('directory/{person}', [DirectoryController::class, 'show'])->name('show');
 });
 
+Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.newsletters.')->group(function () {
+    Route::get('newsletters', [MemberNewsletterController::class, 'index'])->name('archive');
+    Route::get('newsletters/{issue:slug}', [MemberNewsletterController::class, 'show'])->name('show');
+    Route::get('newsletters/{issue:slug}/cover', [MemberNewsletterController::class, 'cover'])->name('cover');
+    Route::get('newsletters/{issue:slug}/document', [MemberNewsletterController::class, 'document'])->name('document');
+});
+
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
 Route::get('l/{lodge:slug}/events', [PublicEventController::class, 'index'])->name('public.events.index');
@@ -71,6 +81,19 @@ Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderContr
 Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 'show'])->name('public.events.show');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
+    Route::prefix('lodges/{lodge}/newsletters/manage')->name('lodges.newsletters.')->group(function () {
+        Route::get('/', [NewsletterController::class, 'index'])->name('index');
+        Route::post('/', [NewsletterController::class, 'store'])->name('store');
+        Route::get('{issue}/edit', [NewsletterController::class, 'edit'])->name('edit');
+        Route::put('{issue}', [NewsletterController::class, 'update'])->name('update');
+        Route::get('{issue}/preview', [NewsletterController::class, 'preview'])->name('preview');
+        Route::post('{issue}/publish', [NewsletterController::class, 'publish'])->name('publish');
+        Route::post('{issue}/unpublish', [NewsletterController::class, 'unpublish'])->name('unpublish');
+        Route::delete('{issue}', [NewsletterController::class, 'destroy'])->name('destroy');
+        Route::post('deleted/{issueId}/restore', [NewsletterController::class, 'restore'])->name('restore');
+        Route::post('documents', [NewsletterDocumentController::class, 'store'])->name('documents.store');
+        Route::delete('documents/{document}', [NewsletterDocumentController::class, 'destroy'])->name('documents.destroy');
+    });
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
     Route::get('platform/accounts', [AccountController::class, 'index'])->name('platform.accounts.index')->middleware('platform-admin');
     Route::delete('platform/accounts/{user}', [AccountController::class, 'destroy'])->name('platform.accounts.destroy')->middleware('platform-admin');

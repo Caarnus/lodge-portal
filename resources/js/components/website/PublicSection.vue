@@ -298,6 +298,16 @@ const asset = (id: number | null | undefined) =>
             >View all events</a
         >
     </section>
+    <section
+        v-else-if="section.type === 'newsletter_placeholder'"
+        class="mx-auto max-w-4xl px-5 py-10"
+    >
+        <div class="rounded-xl border border-dashed bg-slate-50 p-8 text-center">
+            <h2 class="text-2xl font-bold">Member newsletters</h2>
+            <p class="mt-3 text-slate-600">Sign in to view member newsletters.</p>
+            <a href="/login" class="mt-5 inline-block font-medium underline">Sign in</a>
+        </div>
+    </section>
     <section v-else class="mx-auto max-w-4xl px-5 py-10">
         <div
             class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
