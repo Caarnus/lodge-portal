@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         Route::get('/', [LodgeCommunicationController::class, 'index'])->name('index');
         Route::post('/', [LodgeCommunicationController::class, 'store'])->name('store');
         Route::put('{communication}', [LodgeCommunicationController::class, 'update'])->name('update');
+        Route::delete('{communication}', [LodgeCommunicationController::class, 'destroy'])->name('destroy');
         Route::post('{communication}/send', [LodgeCommunicationController::class, 'send'])->name('send');
         Route::post('{communication}/duplicate', [LodgeCommunicationController::class, 'duplicate'])->name('duplicate');
     });

@@ -20,10 +20,24 @@ class LodgeCommunicationController extends Controller
     {
         $this->allowLodge($lodge, 'communications.send');
 
+        $filters = $request->validate(['search' => 'nullable|string|max:255', 'status' => 'nullable|in:draft,sending,sent,cancelled', 'sort' => 'nullable|in:subject,recipient_count,status,created_at,sent_at', 'direction' => 'nullable|in:asc,desc']);
+        $sort = $filters['sort'] ?? 'sent_at';
+        $direction = $filters['direction'] ?? 'desc';
+        $communications = $lodge->communications()->withSum('distributionRuns as recipient_count', 'email_recipient_count')
+            ->when($filters['search'] ?? null, fn ($query, $search) => $query->where('subject', 'ilike', "%{$search}%"))
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status));
+        if ($sort === 'sent_at' && $direction === 'desc') {
+            $communications->orderByRaw('sent_at DESC NULLS LAST')->orderByDesc('created_at');
+        } else {
+            $communications->orderBy($sort, $direction)->orderByDesc('created_at');
+        }
+
         return Inertia::render('communications/Index', [
             'lodge' => $lodge,
-            'communications' => $lodge->communications()->with('distributionRuns')->latest()->get(),
+            'communications' => $communications->get(),
+            'filters' => ['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? '', 'sort' => $sort, 'direction' => $direction],
             ...$this->recipientOptions($lodge),
+            'editCommunicationId' => $request->integer('edit') ?: null,
         ]);
     }
 
@@ -72,6 +86,16 @@ class LodgeCommunicationController extends Controller
         $copy->created_by = $request->user()->id;
         $copy->last_edited_by = $request->user()->id;
         $copy->save();
+
+        return redirect()->route('lodges.communications.index', ['lodge' => $lodge, 'edit' => $copy->id]);
+    }
+
+    public function destroy(Lodge $lodge, LodgeCommunication $communication)
+    {
+        $this->allow($lodge, $communication);
+        abort_unless($communication->status === LodgeCommunicationStatus::Draft, 422);
+        $communication->delete();
+        Audit::record('lodge_communication.deleted', $communication, $lodge);
 
         return redirect()->route('lodges.communications.index', $lodge);
     }
