@@ -24,6 +24,7 @@ use App\Http\Controllers\MembershipCommunicationPreferenceController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterDocumentController;
+use App\Http\Controllers\NewsletterPostalController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\PersonAccountController;
 use App\Http\Controllers\PersonController;
@@ -138,6 +139,9 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         Route::post('{issue}/publish', [NewsletterController::class, 'publish'])->name('publish');
         Route::post('{issue}/unpublish', [NewsletterController::class, 'unpublish'])->name('unpublish');
         Route::post('{issue}/distribute', [NewsletterController::class, 'distribute'])->name('distribute');
+        Route::get('{issue}/postal.csv', [NewsletterPostalController::class, 'export'])->name('postal.export');
+        Route::post('{issue}/postal/mailed', [NewsletterPostalController::class, 'mailed'])->name('postal.mailed');
+        Route::get('{issue}/print', [NewsletterPostalController::class, 'print'])->name('print');
         Route::delete('{issue}', [NewsletterController::class, 'destroy'])->name('destroy');
         Route::post('deleted/{issueId}/restore', [NewsletterController::class, 'restore'])->name('restore');
         Route::post('documents', [NewsletterDocumentController::class, 'store'])->name('documents.store');
