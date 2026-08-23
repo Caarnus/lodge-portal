@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\CommunicationDeliveryStatus;
 use App\Enums\DistributionRunStatus;
+use App\Enums\LodgeCommunicationStatus;
 use App\Models\CommunicationDelivery;
 use App\Services\CommunicationDistributionService;
 use App\Services\EffectiveLodgeCommunicationSettings;
@@ -62,6 +63,9 @@ class SendCommunicationDelivery implements ShouldQueue
         $open = $run->deliveries()->whereIn('status', [CommunicationDeliveryStatus::Pending, CommunicationDeliveryStatus::Claimed])->exists();
         if (!$open) {
             $run->update(['status' => $failed ? DistributionRunStatus::CompletedWithFailures : DistributionRunStatus::Completed, 'sent_count' => $run->deliveries()->where('status', CommunicationDeliveryStatus::Sent)->count(), 'failed_count' => $run->deliveries()->where('status', CommunicationDeliveryStatus::Failed)->count(), 'skipped_count' => $run->deliveries()->where('status', CommunicationDeliveryStatus::Skipped)->count()]);
+            if ($run->lodge_communication_id) {
+                $run->lodgeCommunication()->update(['status' => LodgeCommunicationStatus::Sent, 'sent_at' => now()]);
+            }
         }
     }
 }

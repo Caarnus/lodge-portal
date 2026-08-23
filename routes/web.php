@@ -14,6 +14,7 @@ use App\Http\Controllers\EventVolunteerPositionController;
 use App\Http\Controllers\EventVolunteerReminderDeliveryController;
 use App\Http\Controllers\FamilyNewsletterSubscriptionController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\LodgeCommunicationController;
 use App\Http\Controllers\LodgeCommunicationSettingController;
 use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
@@ -69,6 +70,10 @@ Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->n
     Route::get('newsletters/{issue:slug}/cover', [MemberNewsletterController::class, 'cover'])->name('cover');
     Route::get('newsletters/{issue:slug}/document', [MemberNewsletterController::class, 'document'])->name('document');
 });
+Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.communications.')->group(function () {
+    Route::get('communications', [LodgeCommunicationController::class, 'archive'])->name('archive');
+    Route::get('communications/{communication}', [LodgeCommunicationController::class, 'show'])->name('show');
+});
 
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
@@ -96,6 +101,14 @@ Route::get('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunica
 Route::post('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.communications.unsubscribe');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
+    Route::prefix('lodges/{lodge}/communications/manage')->name('lodges.communications.')->group(function () {
+        Route::get('/', [LodgeCommunicationController::class, 'index'])->name('index');
+        Route::post('/', [LodgeCommunicationController::class, 'store'])->name('store');
+        Route::get('{communication}/edit', [LodgeCommunicationController::class, 'edit'])->name('edit');
+        Route::put('{communication}', [LodgeCommunicationController::class, 'update'])->name('update');
+        Route::post('{communication}/send', [LodgeCommunicationController::class, 'send'])->name('send');
+        Route::post('{communication}/duplicate', [LodgeCommunicationController::class, 'duplicate'])->name('duplicate');
+    });
     Route::prefix('lodges/{lodge}/newsletter-recipients')->name('lodges.newsletter-recipients.')->group(function () {
         Route::get('/', [FamilyNewsletterSubscriptionController::class, 'index'])->name('index');
         Route::post('requests/{familyRequest}/approve', [FamilyNewsletterSubscriptionController::class, 'approve'])->name('requests.approve');
