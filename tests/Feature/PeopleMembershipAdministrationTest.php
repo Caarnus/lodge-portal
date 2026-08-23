@@ -50,8 +50,6 @@ class PeopleMembershipAdministrationTest extends TestCase
 
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people")->assertOk()->assertInertia(fn (Assert $page) => $page
             ->has('people', 2)->where('people.0.id', fn ($id) => in_array($id, [$member->person_id, $relative->id], true)));
-        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people/{$relative->id}/edit")->assertOk();
-        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people/{$unrelated->id}/edit")->assertNotFound();
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=related")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('people.0.id', $relative->id)->where('people.0.can_manage', true));
     }
@@ -75,6 +73,27 @@ class PeopleMembershipAdministrationTest extends TestCase
 
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=related")
             ->assertOk()->assertInertia(fn (Assert $page) => $page->has('people', 1)->where('people.0.id', $relative->id));
+    }
+
+    public function test_petitioner_status_is_available_and_visible_in_the_people_workspace(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $admin = $this->userFor($lodge, ['people.view', 'people.manage']);
+        $petitioner = Person::factory()->create();
+        Membership::factory()->create([
+            'lodge_id' => $lodge->id,
+            'person_id' => $petitioner->id,
+            'membership_status_id' => MembershipStatus::query()->where('key', 'petitioner')->sole()->id,
+            'primary_lodge_number' => $lodge->number,
+        ]);
+
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=members")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('membershipStatuses', 6)
+                ->where('people.0.id', $petitioner->id)
+                ->where('people.0.memberships.0.status.name', 'Petitioner')
+                ->where('people.0.can_manage', true));
     }
 
     public function test_people_list_sorting_and_phone_formatting_support_domestic_and_international_numbers(): void
@@ -106,6 +125,11 @@ class PeopleMembershipAdministrationTest extends TestCase
         $this->actingAs($admin)->put("/lodges/{$lodge->id}/people/{$person->id}", array_merge($payload, ['phone' => '+44 20 7946 0958']))
             ->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame('+44 20 7946 0958', $person->fresh()->phone);
+
+        $this->actingAs($admin)->put("/lodges/{$lodge->id}/people/{$person->id}", array_merge($payload, ['is_deceased' => true, 'death_date' => null]))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertTrue($person->fresh()->is_deceased);
+        $this->assertNull($person->fresh()->death_date);
 
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?sort=membership")->assertOk();
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?sort=location")->assertOk();

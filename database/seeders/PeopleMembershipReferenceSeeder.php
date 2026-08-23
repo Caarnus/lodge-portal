@@ -21,6 +21,7 @@ class PeopleMembershipReferenceSeeder extends Seeder
             ['key' => 'honorary', 'name' => 'Honorary'],
         ]);
         $this->seedReferences(fn (array $attributes, array $values) => MembershipStatus::updateOrCreate($attributes, $values), [
+            ['key' => 'petitioner', 'name' => 'Petitioner'],
             ['key' => 'active', 'name' => 'Active', 'is_default' => true],
             ['key' => 'demitted', 'name' => 'Demitted'],
             ['key' => 'suspended', 'name' => 'Suspended'],

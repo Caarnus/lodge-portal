@@ -12,6 +12,8 @@ use Illuminate\Support\Collection;
 
 class PersonAccess
 {
+    private const LODGE_REACHABLE_STATUS_KEYS = ['active', 'petitioner'];
+
     public function visibleQuery(Lodge $lodge): Builder
     {
         return Person::query()->where(function (Builder $query) use ($lodge) {
@@ -57,13 +59,13 @@ class PersonAccess
         }
 
         $directIds = Membership::query()->whereIn('person_id', $candidateIds)->where('lodge_id', $lodge->id)
-            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->where('key', 'active'))->pluck('person_id');
+            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->pluck('person_id');
         if (!$user->hasLodgePermission($lodge, 'relationships.manage')) {
             return $directIds;
         }
 
         $primaryIds = Membership::query()->where('lodge_id', $lodge->id)->where('primary_lodge_number', $lodge->number)
-            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->where('key', 'active'))->pluck('person_id');
+            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->pluck('person_id');
         $relatedIds = PersonRelationship::query()
             ->where(fn(Builder $query) => $query->whereIn('person_one_id', $candidateIds)->orWhereIn('person_two_id', $candidateIds))
             ->where(fn(Builder $query) => $query->whereIn('person_one_id', $primaryIds)->orWhereIn('person_two_id', $primaryIds))
@@ -84,7 +86,7 @@ class PersonAccess
         return $user->hasLodgePermission($lodge, 'relationships.view')
             && Membership::query()->where('lodge_id', $lodge->id)
                 ->whereIn('person_id', [$relationship->person_one_id, $relationship->person_two_id])
-                ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->where('key', 'active'))->exists();
+                ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->exists();
     }
 
     public function canManageRelationship(User $user, Lodge $lodge, PersonRelationship $relationship): bool
@@ -97,18 +99,18 @@ class PersonAccess
             && Membership::query()->where('lodge_id', $lodge->id)
                 ->whereIn('person_id', [$relationship->person_one_id, $relationship->person_two_id])
                 ->where('primary_lodge_number', $lodge->number)->whereNull('end_date')
-                ->whereHas('status', fn(Builder $query) => $query->where('key', 'active'))->exists();
+                ->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->exists();
     }
 
     public function hasActiveMembership(Lodge $lodge, Person $person): bool
     {
         return Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $person->id)
-            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->where('key', 'active'))->exists();
+            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->exists();
     }
 
     private function activeMembershipQuery(Builder $query, Lodge $lodge): Builder
     {
         return $query->where('lodge_id', $lodge->id)->whereNull('end_date')
-            ->whereHas('status', fn(Builder $statuses) => $statuses->where('key', 'active'));
+            ->whereHas('status', fn(Builder $statuses) => $statuses->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS));
     }
 }

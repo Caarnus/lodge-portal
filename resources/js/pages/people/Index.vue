@@ -2,16 +2,19 @@
 import PersonModal from "@/components/people/PersonModal.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { formatPhone } from "@/lib/phone";
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import {
     ArrowDown,
     ArrowUp,
     ArrowUpDown,
+    ChevronDown,
+    Cross,
     Eye,
     Link2,
     Link2Off,
     Pencil,
     Plus,
+    SlidersHorizontal,
     X,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
@@ -37,13 +40,18 @@ const props = defineProps<{
     membershipTypes: any[];
     membershipStatuses: any[];
     degrees: any[];
+    relationshipTypes: any[];
+    availablePeople: any[];
     canManage: boolean;
     canManageMemberships: boolean;
+    canManageRoles: boolean;
+    canManageCommunicationPreferences: boolean;
 }>();
 const filters = reactive<Filters>({ ...props.filters });
 const selectedPerson = ref<any | null>(null);
 const modalOpen = ref(false);
 const modalMode = ref<"view" | "edit">("view");
+const filtersOpen = ref(false);
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 let suspendAutoApply = false;
 
@@ -130,20 +138,19 @@ const memberRelationships = (person: any) =>
 
 <template>
     <Head :title="`${lodge.name} people`" />
-    <main class="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+    <main class="mx-auto w-full max-w-7xl p-4 md:p-6">
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold">People</h1>
                 <p class="text-sm text-slate-600">{{ lodge.name }}</p>
             </div>
-            <Link
+            <button
                 v-if="canManage"
-                :href="`/lodges/${lodge.id}/people/create`"
-                aria-label="Add person"
-                class="inline-flex size-10 items-center justify-center rounded-md bg-slate-900 text-white"
-                v-tooltip.left="{ value: 'Add person', showDelay: 2000 }"
-                ><Plus class="size-5"
-            /></Link>
+                class="primary-button shrink-0"
+                @click="openPerson(null, 'edit')"
+            >
+                <Plus class="mr-1 size-4" /> Add person
+            </button>
         </div>
 
         <p
@@ -155,85 +162,95 @@ const memberRelationships = (person: any) =>
             member may change their privacy choices in Profile settings.
         </p>
 
-        <form
-            class="mt-6 grid gap-3 rounded-lg border bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_repeat(3,minmax(8rem,1fr))_minmax(13rem,1.4fr)_auto]"
-            @submit.prevent
-        >
-            <label class="min-w-0"
-                ><span class="text-sm font-medium">Search</span
-                ><input
-                    v-model="filters.search"
-                    class="mt-1 w-full rounded-md border bg-white px-3 py-2"
-                    placeholder="Name, email, phone, city, or member no."
-            /></label>
-            <label
-                ><span class="text-sm font-medium">Status</span
-                ><select
-                    v-model="filters.status"
-                    class="mt-1 w-full rounded-md border bg-white p-2"
-                >
-                    <option :value="null">All statuses</option>
-                    <option
-                        v-for="item in membershipStatuses"
-                        :key="item.id"
-                        :value="item.id"
-                    >
-                        {{ item.name }}{{ item.is_active ? "" : " (inactive)" }}
-                    </option>
-                </select></label
-            >
-            <label
-                ><span class="text-sm font-medium">Degree</span
-                ><select
-                    v-model="filters.degree"
-                    class="mt-1 w-full rounded-md border bg-white p-2"
-                >
-                    <option :value="null">All degrees</option>
-                    <option
-                        v-for="item in degrees"
-                        :key="item.id"
-                        :value="item.id"
-                    >
-                        {{ item.name }}{{ item.is_active ? "" : " (inactive)" }}
-                    </option>
-                </select></label
-            >
-            <label
-                ><span class="text-sm font-medium">Account</span
-                ><select
-                    v-model="filters.account"
-                    class="mt-1 w-full rounded-md border bg-white p-2"
-                >
-                    <option value="all">Any account</option>
-                    <option value="linked">Linked</option>
-                    <option value="unlinked">Not linked</option>
-                </select></label
-            >
-            <label
-                ><span class="text-sm font-medium">Record type</span
-                ><select
-                    v-model="filters.scope"
-                    class="mt-1 w-full rounded-md border bg-white p-2"
-                >
-                    <option value="all">Members and relatives</option>
-                    <option value="members">Members only</option>
-                    <option value="related">Related people only</option>
-                </select></label
-            >
+        <section class="mt-6 rounded-lg border bg-slate-50">
             <button
                 type="button"
-                class="mt-6 inline-flex size-10 items-center justify-center rounded-md border bg-white"
-                aria-label="Clear filters"
-                v-tooltip.top="{ value: 'Clear filters', showDelay: 2000 }"
-                @click="resetFilters"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
+                :aria-expanded="filtersOpen"
+                aria-controls="people-filters"
+                @click="filtersOpen = !filtersOpen"
             >
-                <X class="size-4" />
+                <span class="inline-flex items-center gap-2"
+                    ><SlidersHorizontal class="size-4" /> Search and
+                    filters</span
+                >
+                <ChevronDown
+                    class="size-4 transition-transform"
+                    :class="filtersOpen && 'rotate-180'"
+                />
             </button>
-        </form>
+            <form
+                v-show="filtersOpen"
+                id="people-filters"
+                class="grid gap-3 border-t p-4 md:grid-cols-3"
+                @submit.prevent
+            >
+                <label class="min-w-0"
+                    ><span class="text-sm font-medium">Search</span
+                    ><input
+                        v-model="filters.search"
+                        class="field-input mt-1"
+                        placeholder="Name, email, phone, city, or member no."
+                /></label>
+                <label
+                    ><span class="text-sm font-medium">Status</span
+                    ><select v-model="filters.status" class="field-input mt-1">
+                        <option :value="null">All statuses</option>
+                        <option
+                            v-for="item in membershipStatuses"
+                            :key="item.id"
+                            :value="item.id"
+                        >
+                            {{ item.name
+                            }}{{ item.is_active ? "" : " (inactive)" }}
+                        </option>
+                    </select></label
+                >
+                <label
+                    ><span class="text-sm font-medium">Degree</span
+                    ><select v-model="filters.degree" class="field-input mt-1">
+                        <option :value="null">All degrees</option>
+                        <option
+                            v-for="item in degrees"
+                            :key="item.id"
+                            :value="item.id"
+                        >
+                            {{ item.name
+                            }}{{ item.is_active ? "" : " (inactive)" }}
+                        </option>
+                    </select></label
+                >
+                <label
+                    ><span class="text-sm font-medium">Account</span
+                    ><select v-model="filters.account" class="field-input mt-1">
+                        <option value="all">Any account</option>
+                        <option value="linked">Linked</option>
+                        <option value="unlinked">Not linked</option>
+                    </select></label
+                >
+                <label
+                    ><span class="text-sm font-medium">Record type</span
+                    ><select v-model="filters.scope" class="field-input mt-1">
+                        <option value="all">Members and relatives</option>
+                        <option value="members">Members only</option>
+                        <option value="related">Related people only</option>
+                    </select></label
+                >
+                <button
+                    type="button"
+                    class="icon-button mt-6"
+                    aria-label="Clear filters"
+                    v-tooltip.top="{ value: 'Clear filters', showDelay: 2000 }"
+                    @click="resetFilters"
+                >
+                    <X class="size-4" />
+                </button>
+            </form>
+        </section>
 
-        <div class="mt-4 overflow-x-auto rounded-lg border">
+        <div class="mt-4 rounded-lg border">
             <div
-                class="hidden min-w-[70rem] grid-cols-[minmax(12rem,1.5fr)_minmax(10rem,1fr)_minmax(9rem,1fr)_minmax(13rem,1.3fr)_minmax(9rem,1fr)_9rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 lg:grid"
+                class="hidden grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_8rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
             >
                 <button
                     class="flex items-center gap-1 text-left"
@@ -267,36 +284,6 @@ const memberRelationships = (person: any) =>
                 </button>
                 <button
                     class="flex items-center gap-1 text-left"
-                    @click="sortBy('phone')"
-                >
-                    Phone<ArrowUp
-                        v-if="
-                            filters.sort === 'phone' &&
-                            filters.direction === 'asc'
-                        "
-                        class="size-3.5"
-                    /><ArrowDown
-                        v-else-if="filters.sort === 'phone'"
-                        class="size-3.5"
-                    /><ArrowUpDown v-else class="size-3.5 text-slate-400" />
-                </button>
-                <button
-                    class="flex items-center gap-1 text-left"
-                    @click="sortBy('email')"
-                >
-                    Email<ArrowUp
-                        v-if="
-                            filters.sort === 'email' &&
-                            filters.direction === 'asc'
-                        "
-                        class="size-3.5"
-                    /><ArrowDown
-                        v-else-if="filters.sort === 'email'"
-                        class="size-3.5"
-                    /><ArrowUpDown v-else class="size-3.5 text-slate-400" />
-                </button>
-                <button
-                    class="flex items-center gap-1 text-left"
                     @click="sortBy('location')"
                 >
                     City / State<ArrowUp
@@ -315,17 +302,22 @@ const memberRelationships = (person: any) =>
             <div
                 v-for="person in people"
                 :key="person.id"
-                class="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-t p-4 first:border-t-0 lg:min-w-[70rem] lg:grid-cols-[minmax(12rem,1.5fr)_minmax(10rem,1fr)_minmax(9rem,1fr)_minmax(13rem,1.3fr)_minmax(9rem,1fr)_9rem] lg:items-center lg:gap-4 lg:first:border-t"
+                class="grid gap-3 border-t p-4 first:border-t-0 md:grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_8rem] md:items-center md:gap-4 md:first:border-t"
             >
                 <div class="min-w-0">
                     <p class="break-words font-medium">
                         {{ person.display_name }}
                     </p>
                     <p
-                        v-if="membership(person)?.member_number"
-                        class="text-xs text-slate-500"
+                        class="mt-1 hidden truncate text-xs text-slate-500 md:block"
                     >
-                        Member {{ membership(person).member_number }}
+                        {{ formatPhone(person.phone) || "No phone" }}
+                    </p>
+                    <p
+                        class="hidden truncate text-xs text-slate-500 md:block"
+                        :title="person.email || 'No email'"
+                    >
+                        {{ person.email || "No email" }}
                     </p>
                     <p
                         v-for="relationship in memberRelationships(person)"
@@ -336,9 +328,9 @@ const memberRelationships = (person: any) =>
                         {{ relationship.related_person.display_name }}
                     </p>
                 </div>
-                <div class="col-span-2 min-w-0 text-sm lg:col-span-1">
+                <div class="min-w-0 text-sm">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 lg:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
                         >Membership</span
                     >
                     <p>
@@ -351,6 +343,12 @@ const memberRelationships = (person: any) =>
                         {{
                             membership(person)?.status?.name || "Related person"
                         }}
+                    </p>
+                    <p
+                        v-if="membership(person)?.member_number"
+                        class="text-xs text-slate-500"
+                    >
+                        Member {{ membership(person).member_number }}
                     </p>
                     <div
                         v-if="membership(person)"
@@ -372,34 +370,55 @@ const memberRelationships = (person: any) =>
                         >
                     </div>
                 </div>
-                <div class="col-span-2 min-w-0 text-sm lg:col-span-1">
-                    <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 lg:hidden"
-                        >Phone</span
-                    >
-                    <p class="break-words">
-                        {{ formatPhone(person.phone) || "—" }}
-                    </p>
+                <div class="grid grid-cols-2 gap-3 md:hidden">
+                    <div class="min-w-0 text-sm">
+                        <span
+                            class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500"
+                            >Phone</span
+                        >
+                        <p class="break-words">
+                            {{ formatPhone(person.phone) || "—" }}
+                        </p>
+                    </div>
+                    <div class="min-w-0 text-sm">
+                        <span
+                            class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500"
+                            >City / State</span
+                        >
+                        <p class="break-words">{{ location(person) || "—" }}</p>
+                    </div>
                 </div>
-                <div class="col-span-2 min-w-0 text-sm lg:col-span-1">
+                <div class="min-w-0 text-sm md:hidden">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 lg:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500"
                         >Email</span
                     >
                     <p class="break-all">{{ person.email || "—" }}</p>
                 </div>
-                <div class="col-span-2 min-w-0 text-sm lg:col-span-1">
+                <div class="hidden min-w-0 text-sm md:block">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 lg:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
                         >City / State</span
                     >
                     <p class="break-words">{{ location(person) || "—" }}</p>
                 </div>
                 <div
-                    class="col-start-2 row-start-1 flex items-center justify-end lg:col-start-6"
+                    class="flex items-center justify-end gap-1 md:col-start-4 md:row-start-1"
                 >
                     <span
-                        class="inline-flex size-10 items-center justify-center rounded-md"
+                        v-if="person.is_deceased"
+                        class="inline-flex size-10 items-center justify-center text-slate-500"
+                        role="img"
+                        aria-label="Deceased"
+                        v-tooltip.left="{
+                            value: 'Deceased',
+                            showDelay: 2000,
+                        }"
+                    >
+                        <Cross class="size-5" />
+                    </span>
+                    <span
+                        class="inline-flex size-10 items-center justify-center"
                         role="img"
                         :aria-label="
                             person.user ? 'Account linked' : 'No linked account'
@@ -419,7 +438,7 @@ const memberRelationships = (person: any) =>
                     <button
                         type="button"
                         :aria-label="`View ${person.display_name}`"
-                        class="inline-flex size-10 items-center justify-center rounded-md hover:bg-slate-100"
+                        class="icon-button"
                         v-tooltip.left="{
                             value: `View ${person.display_name}`,
                             showDelay: 2000,
@@ -432,7 +451,7 @@ const memberRelationships = (person: any) =>
                         v-if="person.can_manage"
                         type="button"
                         :aria-label="`Edit ${person.display_name}`"
-                        class="inline-flex size-10 items-center justify-center rounded-md hover:bg-slate-100"
+                        class="icon-button"
                         v-tooltip.left="{
                             value: `Edit ${person.display_name}`,
                             showDelay: 2000,
@@ -441,6 +460,7 @@ const memberRelationships = (person: any) =>
                     >
                         <Pencil class="size-4" />
                     </button>
+                    <span v-else class="inline-block size-10" />
                 </div>
             </div>
             <p
@@ -460,6 +480,12 @@ const memberRelationships = (person: any) =>
         :membership-types="membershipTypes"
         :membership-statuses="membershipStatuses"
         :degrees="degrees"
+        :relationship-types="relationshipTypes"
+        :available-people="availablePeople"
         :can-manage-memberships="canManageMemberships"
+        :can-manage-roles="canManageRoles"
+        :can-manage-communication-preferences="
+            canManageCommunicationPreferences
+        "
     />
 </template>

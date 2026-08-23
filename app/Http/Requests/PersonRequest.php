@@ -44,7 +44,7 @@ class PersonRequest extends FormRequest
             'mailing_postal_code' => 'nullable|string|max:16',
             'birth_date' => 'nullable|date|before_or_equal:today',
             'is_deceased' => 'required|boolean',
-            'death_date' => 'nullable|required_if:is_deceased,true|date|before_or_equal:today|after_or_equal:birth_date',
+            'death_date' => 'nullable|date|before_or_equal:today|after_or_equal:birth_date',
         ];
     }
 

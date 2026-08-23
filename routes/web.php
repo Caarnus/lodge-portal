@@ -201,7 +201,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         return back();
     })->name('lodges.activate');
 
-    Route::resource('lodges.people', PersonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::resource('lodges.people', PersonController::class)->only(['index', 'store', 'update']);
     Route::put('lodges/{lodge}/memberships/{membership}', [MembershipController::class, 'update'])->name('lodges.memberships.update');
     Route::patch('lodges/{lodge}/memberships/{membership}/end', [MembershipController::class, 'end'])->name('lodges.memberships.end');
     Route::post('lodges/{lodge}/memberships/{membership}/past-master-terms', [MembershipController::class, 'addPastMasterTerm'])->name('lodges.memberships.past-master-terms.store');
