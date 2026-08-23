@@ -20,7 +20,7 @@ const form = useForm({
     mailing_address: l.mailing_address ?? "",
     meeting_location: l.meeting_location ?? "",
     timezone: l.timezone ?? "America/Chicago",
-    date_display_format: l.date_display_format ?? "month_year",
+    date_display_format: l.date_display_format ?? "day_month_year",
     public_email: l.public_email ?? "",
     public_phone: l.public_phone ?? "",
     contact_email: l.contact_email ?? "",

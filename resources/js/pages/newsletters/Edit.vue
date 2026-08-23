@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
+import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
 const props = defineProps<{
@@ -10,6 +11,7 @@ const props = defineProps<{
     documents: any[];
     media: any[];
     canPublish: boolean;
+    embedded?: boolean;
 }>();
 const form = useForm({
     title: props.draft.title,
@@ -23,10 +25,17 @@ const upload = useForm<{ file: File | null }>({ file: null });
 </script>
 <template>
     <Head :title="`Edit ${draft.title}`" />
-    <main class="mx-auto max-w-4xl space-y-6 p-6">
+    <main
+        :class="
+            embedded
+                ? 'w-full min-w-0 space-y-6'
+                : 'mx-auto w-full min-w-0 max-w-4xl space-y-6 p-6'
+        "
+    >
         <header class="flex justify-between">
             <div>
                 <Link
+                    v-if="!embedded"
                     :href="`/lodges/${lodge.id}/newsletters/manage`"
                     class="text-sm underline"
                     >← Newsletters</Link
@@ -54,7 +63,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
         </header>
         <section class="rounded border p-5">
             <form
-                class="grid gap-4"
+                class="grid w-full min-w-0 gap-4"
                 @submit.prevent="
                     form.put(
                         `/lodges/${lodge.id}/newsletters/manage/${issue.id}`,
@@ -69,6 +78,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 ><label
                     >Slug<input
                         v-model="form.slug"
+                        @input="form.slug = normalizeSlug(form.slug)"
                         required
                         class="field-input" /></label
                 ><label
@@ -104,9 +114,8 @@ const upload = useForm<{ file: File | null }>({ file: null });
                             {{ item.original_name }}
                         </option>
                     </select></label
-                ><label
-                    >Rich content<RichTextField v-model="form.body_html"
-                /></label>
+                >
+                <RichTextField v-model="form.body_html" class="min-w-0" />
                 <p v-if="Object.keys(form.errors).length" class="text-red-700">
                     {{ Object.values(form.errors)[0] }}
                 </p>

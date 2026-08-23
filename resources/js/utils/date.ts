@@ -3,7 +3,7 @@ export type DateDisplayFormat =
 
 export function formatLodgeDate(
     value: string | null | undefined,
-    format: DateDisplayFormat = "month_year",
+    format: DateDisplayFormat = "day_month_year",
 ): string {
     if (!value) return "";
 

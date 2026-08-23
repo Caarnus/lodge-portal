@@ -56,7 +56,7 @@ class GalleryController extends Controller
         $this->allowLodge($lodge, 'galleries.manage');
         $album = $publisher->create($lodge, $request->user(), $this->validateAlbum($request, $lodge));
 
-        return redirect()->route('lodges.galleries.edit', [$lodge, $album]);
+        return redirect()->route('lodges.galleries.manage', $lodge);
     }
 
     public function edit(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryPublisher $publisher)

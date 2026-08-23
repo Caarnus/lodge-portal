@@ -99,6 +99,7 @@ Route::get('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestC
 Route::post('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'store'])->middleware('throttle:10,1')->name('public.newsletters.request.store');
 Route::get('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'verify'])->middleware('throttle:10,1')->name('public.newsletters.request.verify.show');
 Route::post('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'confirm'])->middleware('throttle:10,1')->name('public.newsletters.request.verify');
+Route::get('l/{lodge:slug}/newsletters/{issue:slug}', [PublicWebsiteController::class, 'newsletter'])->middleware(['auth', 'verified', 'approved'])->withoutScopedBindings()->name('public.newsletters.show');
 Route::get('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'show'])->middleware('throttle:10,1')->name('public.communications.unsubscribe.show');
 Route::post('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.communications.unsubscribe');
 Route::post('l/{lodge:slug}/contact', [PublicContactFormController::class, 'store'])->middleware('throttle:10,1')->name('public.contact.store');

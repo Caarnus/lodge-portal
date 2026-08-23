@@ -21,6 +21,8 @@ class NewsletterController extends Controller
             'lodge' => $lodge,
             'issues' => $lodge->newsletterIssues()->with(['draft', 'published'])->orderByDesc('id')->get(),
             'deletedIssues' => $lodge->newsletterIssues()->onlyTrashed()->with('versions')->orderByDesc('deleted_at')->get(),
+            'documents' => $lodge->newsletterDocuments()->orderByDesc('id')->get(),
+            'media' => $lodge->mediaAssets()->where('processing_status', 'ready')->orderByDesc('id')->get(),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'newsletters.publish'),
         ]);
     }
@@ -30,7 +32,7 @@ class NewsletterController extends Controller
         $this->allowLodge($lodge, 'newsletters.manage');
         $issue = $publisher->create($lodge, $request->user(), $this->validateIssue($request, $lodge));
 
-        return redirect()->route('lodges.newsletters.edit', [$lodge, $issue]);
+        return redirect()->route('lodges.newsletters.index', $lodge);
     }
 
     public function edit(Request $request, Lodge $lodge, NewsletterIssue $issue, NewsletterPublisher $publisher)

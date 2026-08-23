@@ -3,6 +3,7 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import RecurrenceBuilder from "@/components/events/RecurrenceBuilder.vue";
 import InputError from "@/components/InputError.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
+import { normalizeSlug } from "@/utils/slug";
 import {
     Dialog,
     DialogScrollContent,
@@ -190,7 +191,9 @@ const deactivateVolunteerPosition = (id: number) =>
 <template>
     <main
         :class="
-            embedded ? 'space-y-5' : 'mx-auto max-w-5xl space-y-5 p-4 md:p-6'
+            embedded
+                ? 'w-full min-w-0 space-y-5'
+                : 'mx-auto w-full min-w-0 max-w-5xl space-y-5 p-4 md:p-6'
         "
     >
         <div
@@ -245,7 +248,7 @@ const deactivateVolunteerPosition = (id: number) =>
                 </button>
             </div>
         </div>
-        <form class="space-y-6" @submit.prevent="submit">
+        <form class="w-full min-w-0 space-y-6" @submit.prevent="submit">
             <div
                 v-if="Object.keys(form.errors).length"
                 class="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
@@ -274,6 +277,7 @@ const deactivateVolunteerPosition = (id: number) =>
                 <label class="field-label"
                     >Slug<input
                         v-model="form.slug"
+                        @input="form.slug = normalizeSlug(form.slug)"
                         class="field-input"
                         required
                     />
@@ -295,9 +299,10 @@ const deactivateVolunteerPosition = (id: number) =>
                     </select>
                     <InputError :message="form.errors.event_category_id" />
                 </label>
-                <label class="field-label md:col-span-2"
-                    >Description<RichTextField v-model="form.description" />
-                </label>
+                <RichTextField
+                    v-model="form.description"
+                    class="min-w-0 md:col-span-2"
+                />
                 <div class="md:col-span-2 border-t border-border pt-4">
                     <h3 class="text-sm font-medium">Location</h3>
                 </div>

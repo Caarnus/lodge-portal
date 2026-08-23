@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SectionFields from "@/components/website/SectionFields.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
+import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
     ArrowDown,
@@ -144,6 +145,7 @@ const deleteMedia = (asset: any) =>
                 ><label class="field-label"
                     >Slug<input
                         v-model="metadata.slug"
+                        @input="metadata.slug = normalizeSlug(metadata.slug)"
                         required
                         class="field-input" /></label
                 ><label class="field-label"

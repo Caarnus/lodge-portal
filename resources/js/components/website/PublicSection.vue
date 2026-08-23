@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
+import { formatLodgeDate } from "@/utils/date";
 
 const props = defineProps<{
     section: any;
@@ -9,12 +10,15 @@ const props = defineProps<{
     pastMasters: any[];
     events: any[];
     galleries: any[];
+    newsletters: any[];
     memberContent: { directory: boolean; newsletters: boolean };
     primaryForeground: string;
     secondaryForeground: string;
 }>();
 const asset = (id: number | null | undefined) =>
     id ? props.media[String(id)] : null;
+const formatDate = (value: string | null) =>
+    formatLodgeDate(value, props.lodge.date_display_format);
 const contactForm = useForm({
     name: "",
     email: "",
@@ -383,11 +387,9 @@ const sendContact = () =>
     </section>
     <section
         v-else-if="section.type === 'newsletter_placeholder'"
-        class="mx-auto max-w-4xl px-5 py-10"
+        class="mx-auto max-w-6xl px-5 py-10"
     >
-        <div
-            class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
-        >
+        <div class="text-center">
             <h2 class="text-2xl font-bold">
                 {{ section.configuration.heading || "Member newsletters" }}
             </h2>
@@ -397,12 +399,39 @@ const sendContact = () =>
                     "Read the latest member newsletters."
                 }}
             </p>
-            <a
-                :href="`/lodges/${lodge.id}/newsletters`"
-                class="mt-5 inline-block font-medium underline"
-                >View newsletters</a
-            >
         </div>
+        <div
+            v-if="newsletters.length"
+            class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+            <a
+                v-for="newsletter in newsletters"
+                :key="newsletter.slug"
+                :href="`/l/${lodge.slug}/newsletters/${newsletter.slug}`"
+                class="group overflow-hidden rounded-xl border bg-card text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+                <img
+                    v-if="newsletter.has_cover"
+                    :src="`/lodges/${lodge.id}/newsletters/${newsletter.slug}/cover`"
+                    alt=""
+                    class="aspect-[16/9] w-full object-cover"
+                />
+                <div class="p-5">
+                    <h3 class="font-semibold group-hover:underline">
+                        {{ newsletter.title }}
+                    </h3>
+                    <p
+                        v-if="newsletter.publication_date"
+                        class="mt-1 text-sm text-muted-foreground"
+                    >
+                        {{ formatDate(newsletter.publication_date) }}
+                    </p>
+                </div>
+            </a>
+        </div>
+        <p v-else class="mt-6 text-center text-muted-foreground">
+            No newsletters have been published yet.
+        </p>
     </section>
     <section
         v-else-if="section.type === 'directory_placeholder'"

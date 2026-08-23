@@ -1,8 +1,27 @@
 <script setup lang="ts">
+import {
+    Dialog,
+    DialogHeader,
+    DialogScrollContent,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import GalleryEditor from "@/pages/galleries/Edit.vue";
+import { normalizeSlug } from "@/utils/slug";
+import { Head, router, useForm } from "@inertiajs/vue3";
+import { Eye, Pencil, Plus, Rocket, Search, Trash2 } from "lucide-vue-next";
+import { computed, ref } from "vue";
+
 defineOptions({ layout: AppLayout });
-const props = defineProps<{ lodge: any; albums: any[]; canPublish: boolean }>();
+const props = defineProps<{
+    lodge: any;
+    albums: any[];
+    media: any[];
+    canPublish: boolean;
+}>();
+const query = ref("");
+const creating = ref(false);
+const editing = ref<any | null>(null);
 const form = useForm({
     title: "",
     slug: "",
@@ -10,71 +29,263 @@ const form = useForm({
     visibility: "public",
     cover_photo_id: null as number | null,
 });
+const albums = computed(() =>
+    props.albums.filter((album) =>
+        (album.draft?.title ?? album.published?.title ?? "")
+            .toLowerCase()
+            .includes(query.value.toLowerCase()),
+    ),
+);
+const create = () =>
+    form.post(`/lodges/${props.lodge.id}/galleries/manage`, {
+        onSuccess: () => {
+            creating.value = false;
+            form.reset();
+        },
+    });
+const publish = (album: any) =>
+    router.post(
+        `/lodges/${props.lodge.id}/galleries/manage/${album.id}/publish`,
+    );
+const unpublish = (album: any) =>
+    router.post(
+        `/lodges/${props.lodge.id}/galleries/manage/${album.id}/unpublish`,
+    );
+const remove = (album: any) =>
+    router.delete(`/lodges/${props.lodge.id}/galleries/manage/${album.id}`);
 </script>
+
 <template>
     <Head title="Galleries" />
-    <main class="mx-auto max-w-5xl space-y-6 p-6">
-        <h1 class="text-3xl font-bold">Galleries</h1>
-        <div class="divide-y rounded border">
+    <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
+        <header class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-semibold">Media Galleries</h1>
+                <p class="text-sm text-muted-foreground">
+                    Draft galleries stay private until published.
+                </p>
+            </div>
+            <button class="primary-button" @click="creating = true">
+                <Plus class="mr-1 size-4" /> New gallery
+            </button>
+        </header>
+        <div class="rounded-lg border p-4">
+            <label class="relative block"
+                ><Search
+                    class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
+                    v-model="query"
+                    type="search"
+                    class="field-input pl-9"
+                    placeholder="Search galleries"
+            /></label>
+        </div>
+        <div class="hidden overflow-hidden rounded-lg border md:block">
+            <table class="w-full table-fixed text-left text-sm">
+                <colgroup>
+                    <col />
+                    <col class="w-16" />
+                    <col class="w-24" />
+                    <col class="w-20" />
+                    <col class="w-40" />
+                </colgroup>
+                <thead class="border-b bg-muted/40">
+                    <tr>
+                        <th class="p-3">Title</th>
+                        <th class="p-3 text-right">Images</th>
+                        <th class="p-3">Visibility</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">
+                            <span class="sr-only">Actions</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        v-for="album in albums"
+                        :key="album.id"
+                        class="border-b last:border-0"
+                    >
+                        <td class="min-w-0 p-3 font-medium">
+                            <span
+                                class="block truncate"
+                                :title="
+                                    album.draft?.title ?? album.published?.title
+                                "
+                            >
+                                {{
+                                    album.draft?.title ?? album.published?.title
+                                }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            {{
+                                album.draft?.photos?.length ??
+                                album.published?.photos?.length ??
+                                0
+                            }}
+                        </td>
+                        <td class="p-3 capitalize">
+                            {{
+                                album.draft?.visibility ??
+                                album.published?.visibility
+                            }}
+                        </td>
+                        <td class="p-3">
+                            {{ album.draft ? "Draft" : ""
+                            }}{{ album.draft && album.published ? " + " : ""
+                            }}{{ album.published ? "Published" : "" }}
+                        </td>
+                        <td class="px-2 py-3 text-right">
+                            <span
+                                class="inline-flex min-w-32 items-center justify-end gap-1"
+                                ><a
+                                    v-if="album.published"
+                                    :href="`/l/${lodge.slug}/galleries/${album.slug}`"
+                                    target="_blank"
+                                    class="icon-button"
+                                    title="View gallery"
+                                    ><Eye class="size-4" /></a
+                                ><button
+                                    v-else
+                                    class="icon-button text-destructive"
+                                    title="Delete gallery"
+                                    @click="remove(album)"
+                                >
+                                    <Trash2 class="size-4" /></button
+                                ><button
+                                    class="icon-button"
+                                    title="Edit gallery"
+                                    @click="editing = album"
+                                >
+                                    <Pencil class="size-4" /></button
+                                ><button
+                                    v-if="canPublish && album.draft"
+                                    class="icon-button"
+                                    title="Publish gallery"
+                                    @click="publish(album)"
+                                >
+                                    <Rocket class="size-4" /></button
+                                ><button
+                                    v-else-if="canPublish && album.published"
+                                    class="icon-button"
+                                    title="Unpublish gallery"
+                                    @click="unpublish(album)"
+                                >
+                                    <Rocket class="size-4 rotate-180" /></button
+                                ><span v-else class="inline-block size-10"
+                            /></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="space-y-3 md:hidden">
             <article
                 v-for="album in albums"
                 :key="album.id"
-                class="flex gap-3 p-4"
+                class="rounded-lg border p-4"
             >
-                <div class="flex-1">
-                    <strong>{{
-                        album.draft?.title ?? album.published?.title
-                    }}</strong>
-                    <p class="text-sm">
-                        {{ album.draft ? "Draft" : "" }}
-                        {{ album.published ? "Published" : "" }}
-                    </p>
+                <h2 class="font-medium">
+                    {{ album.draft?.title ?? album.published?.title }}
+                </h2>
+                <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                        <dt class="text-muted-foreground">Visibility</dt>
+                        <dd class="capitalize">
+                            {{
+                                album.draft?.visibility ??
+                                album.published?.visibility
+                            }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">Status</dt>
+                        <dd>{{ album.draft ? "Draft" : "Published" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">Images</dt>
+                        <dd>
+                            {{
+                                album.draft?.photos?.length ??
+                                album.published?.photos?.length ??
+                                0
+                            }}
+                        </dd>
+                    </div>
+                </dl>
+                <div class="mt-4 flex justify-end gap-1">
+                    <button
+                        class="icon-button"
+                        title="Edit gallery"
+                        @click="editing = album"
+                    >
+                        <Pencil class="size-4" /></button
+                    ><button
+                        v-if="canPublish && album.draft"
+                        class="icon-button"
+                        title="Publish gallery"
+                        @click="publish(album)"
+                    >
+                        <Rocket class="size-4" /></button
+                    ><button
+                        v-if="!album.published"
+                        class="icon-button text-destructive"
+                        title="Delete gallery"
+                        @click="remove(album)"
+                    >
+                        <Trash2 class="size-4" />
+                    </button>
                 </div>
-                <Link
-                    :href="`/lodges/${lodge.id}/galleries/manage/${album.id}/edit`"
-                    class="underline"
-                    >Edit</Link
-                ><button
-                    v-if="canPublish && album.published"
-                    class="underline"
-                    @click="
-                        router.post(
-                            `/lodges/${lodge.id}/galleries/manage/${album.id}/unpublish`,
-                        )
-                    "
-                >
-                    Unpublish
-                </button>
             </article>
         </div>
-        <section class="rounded border p-5">
-            <h2 class="text-xl font-semibold">Create album</h2>
-            <form
-                class="mt-3 grid gap-3"
-                @submit.prevent="
-                    form.post(`/lodges/${lodge.id}/galleries/manage`)
-                "
-            >
-                <input
-                    v-model="form.title"
-                    required
-                    placeholder="Title"
-                    class="field-input"
-                /><input
-                    v-model="form.slug"
-                    required
-                    placeholder="Slug"
-                    class="field-input"
-                /><select v-model="form.visibility" class="field-input">
-                    <option value="public">Public</option>
-                    <option value="masons">All Masons</option>
-                    <option value="lodge">Lodge members</option></select
-                ><button
-                    class="w-fit rounded bg-slate-900 px-4 py-2 text-white"
-                >
-                    Create draft
-                </button>
-            </form>
-        </section>
     </main>
+    <Dialog :open="creating" @update:open="creating = $event"
+        ><DialogScrollContent class="max-w-xl"
+            ><DialogHeader><DialogTitle>New gallery</DialogTitle></DialogHeader>
+            <form class="grid gap-4" @submit.prevent="create">
+                <label class="field-label"
+                    >Title<input
+                        v-model="form.title"
+                        required
+                        class="field-input" /></label
+                ><label class="field-label"
+                    >Slug<input
+                        v-model="form.slug"
+                        @input="form.slug = normalizeSlug(form.slug)"
+                        required
+                        class="field-input" /></label
+                ><label class="field-label"
+                    >Description<textarea
+                        v-model="form.description"
+                        class="field-input min-h-24"
+                    /></label
+                ><label class="field-label"
+                    >Visibility<select
+                        v-model="form.visibility"
+                        class="field-input"
+                    >
+                        <option value="public">Public</option>
+                        <option value="masons">All Masons</option>
+                        <option value="lodge">Lodge members</option>
+                    </select></label
+                >
+                <div class="flex justify-end">
+                    <button class="primary-button">Create gallery</button>
+                </div>
+            </form></DialogScrollContent
+        ></Dialog
+    >
+    <Dialog :open="!!editing" @update:open="!$event && (editing = null)"
+        ><DialogScrollContent class="max-w-5xl"
+            ><GalleryEditor
+                v-if="editing"
+                embedded
+                :lodge="lodge"
+                :album="editing"
+                :draft="editing.draft ?? editing.published"
+                :media="media"
+                :can-publish="
+                    canPublish && !!editing.draft
+                " /></DialogScrollContent
+    ></Dialog>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
 const props = defineProps<{
@@ -8,6 +9,7 @@ const props = defineProps<{
     draft: any;
     media: any[];
     canPublish: boolean;
+    embedded?: boolean;
 }>();
 const form = useForm({
     title: props.draft.title,
@@ -28,6 +30,7 @@ const upload = useForm<{ file: File | null; alt_text: string }>({
         <header class="flex justify-between">
             <div>
                 <Link
+                    v-if="!embedded"
                     :href="`/lodges/${lodge.id}/galleries/manage`"
                     class="underline"
                     >← Galleries</Link
@@ -54,6 +57,7 @@ const upload = useForm<{ file: File | null; alt_text: string }>({
         >
             <input v-model="form.title" class="field-input" /><input
                 v-model="form.slug"
+                @input="form.slug = normalizeSlug(form.slug)"
                 class="field-input"
             /><textarea v-model="form.description" class="field-input" /><select
                 v-model="form.visibility"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
     Eye,
@@ -325,6 +326,9 @@ const sendUpload = () =>
                 <label class="text-sm font-medium"
                     >Slug<input
                         v-model="createForm.slug"
+                        @input="
+                            createForm.slug = normalizeSlug(createForm.slug)
+                        "
                         required
                         pattern="[A-Za-z0-9_-]+"
                         class="mt-1 w-full rounded-md border px-3 py-2"

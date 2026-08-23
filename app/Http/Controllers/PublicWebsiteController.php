@@ -12,11 +12,12 @@ use App\Models\EventOccurrence;
 use App\Models\GalleryAlbum;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
+use App\Models\NewsletterIssue;
 use App\Models\OfficerAssignment;
 use App\Models\PastMasterTerm;
+use App\Models\User;
 use App\Models\WebsitePage;
 use App\Models\WebsitePageVersion;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -52,6 +53,35 @@ class PublicWebsiteController extends Controller
         return $this->render($lodge, $version, true);
     }
 
+    public function newsletter(Request $request, Lodge $lodge, NewsletterIssue $issue)
+    {
+        $this->allowPublic($lodge);
+        abort_unless($this->newsletters->canRead($request->user(), $lodge), 403);
+        abort_unless($issue->lodge_id === $lodge->id, 404);
+
+        $version = $issue->published()->firstOrFail();
+        $navigation = $this->published($lodge)
+            ->where('show_in_navigation', true)
+            ->orderBy('navigation_order')
+            ->orderBy('title')
+            ->get();
+        $newsletterIndex = $this->published($lodge)
+            ->whereHas('sections', fn ($query) => $query->where('type', 'newsletter_placeholder'))
+            ->orderByDesc('is_home')
+            ->orderBy('navigation_order')
+            ->first();
+
+        return Inertia::render('public/Newsletter', [
+            'lodge' => $lodge,
+            'issue' => $issue,
+            'version' => $version,
+            'navigation' => $this->navigationTree($navigation),
+            'newsletterIndexUrl' => $newsletterIndex && ! $newsletterIndex->is_home
+                ? "/l/{$lodge->slug}/{$newsletterIndex->slug}"
+                : "/l/{$lodge->slug}",
+        ]);
+    }
+
     private function render(Lodge $lodge, WebsitePageVersion $version, bool $preview = false)
     {
         $version->loadMissing('sections');
@@ -69,8 +99,8 @@ class PublicWebsiteController extends Controller
             $ids = [];
             $configuration = $section->configuration;
             array_walk_recursive($configuration, function ($value, $key) use (&$ids) {
-                if (($key === 'media_id' || str_ends_with((string)$key, '_media_id')) && is_numeric($value)) {
-                    $ids[] = (int)$value;
+                if (($key === 'media_id' || str_ends_with((string) $key, '_media_id')) && is_numeric($value)) {
+                    $ids[] = (int) $value;
                 }
             });
 
@@ -79,7 +109,7 @@ class PublicWebsiteController extends Controller
         $officers = collect();
         if ($version->sections->contains('type', 'officers_placeholder')) {
             $officers = OfficerAssignment::query()->where('lodge_id', $lodge->id)->where('is_public', true)
-                ->with(['position', 'membership.person'])->get()->sortBy('position.sort_order')->values()->map(fn($assignment) => [
+                ->with(['position', 'membership.person'])->get()->sortBy('position.sort_order')->values()->map(fn ($assignment) => [
                     'position' => $assignment->position->name,
                     'name' => $assignment->membership->person->display_name,
                     'email' => $assignment->show_email ? $assignment->membership->person->email : null,
@@ -89,8 +119,9 @@ class PublicWebsiteController extends Controller
         $pastMasters = collect();
         $events = collect();
         $galleries = collect();
+        $newsletters = collect();
         if ($version->sections->contains('type', 'events_placeholder')) {
-            $events = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn($query) => $query->where('status', EventStatus::Published)->where('visibility', 'public'))->orderBy('starts_at')->limit(20)->get()->map(fn($occurrence) => ['id' => $occurrence->id, 'title' => $occurrence->title_override ?: $occurrence->event->title, 'starts_at' => $occurrence->starts_at, 'event_category_id' => $occurrence->event->event_category_id]);
+            $events = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('visibility', 'public'))->orderBy('starts_at')->limit(20)->get()->map(fn ($occurrence) => ['id' => $occurrence->id, 'title' => $occurrence->title_override ?: $occurrence->event->title, 'starts_at' => $occurrence->starts_at, 'event_category_id' => $occurrence->event->event_category_id]);
         }
         if ($version->sections->contains('type', 'past_masters_placeholder')) {
             $pastMasters = PastMasterTerm::query()
@@ -99,16 +130,30 @@ class PublicWebsiteController extends Controller
                 ->orderByDesc('year')
                 ->orderBy('id')
                 ->get()
-                ->map(fn(PastMasterTerm $term) => [
+                ->map(fn (PastMasterTerm $term) => [
                     'year' => $term->year,
                     'name' => $term->person->display_name,
                 ]);
         }
         if ($version->sections->contains('type', 'gallery_placeholder')) {
-            $galleries = GalleryAlbum::query()->where('lodge_id', $lodge->id)->whereHas('published', fn($query) => $query->where('visibility', 'public'))
-                ->with(['published.photos.mediaAsset'])->orderByDesc('id')->limit(12)->get()->map(fn(GalleryAlbum $album) => [
+            $galleries = GalleryAlbum::query()->where('lodge_id', $lodge->id)->whereHas('published', fn ($query) => $query->where('visibility', 'public'))
+                ->with(['published.photos.mediaAsset'])->orderByDesc('id')->limit(12)->get()->map(fn (GalleryAlbum $album) => [
                     'slug' => $album->slug, 'title' => $album->published->title,
                     'cover_photo_id' => $album->published->cover_photo_id ?: $album->published->photos->first()?->id,
+                ]);
+        }
+        if ($memberContent['newsletters'] && $version->sections->contains('type', 'newsletter_placeholder')) {
+            $newsletters = NewsletterIssue::query()
+                ->where('lodge_id', $lodge->id)
+                ->whereHas('published')
+                ->with('published')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn (NewsletterIssue $issue) => [
+                    'slug' => $issue->slug,
+                    'title' => $issue->published->title,
+                    'publication_date' => $issue->published->publication_date?->toDateString(),
+                    'has_cover' => $issue->published->cover_media_asset_id !== null,
                 ]);
         }
 
@@ -122,6 +167,7 @@ class PublicWebsiteController extends Controller
             'pastMasters' => $pastMasters,
             'events' => $events,
             'galleries' => $galleries,
+            'newsletters' => $newsletters,
             'memberContent' => $memberContent,
         ]);
     }
@@ -129,13 +175,13 @@ class PublicWebsiteController extends Controller
     private function published(Lodge $lodge)
     {
         return WebsitePageVersion::query()->with('page')->where('lodge_id', $lodge->id)
-            ->where('status', WebsitePageStatus::Published)->whereHas('page', fn($query) => $query->whereNull('deleted_at'));
+            ->where('status', WebsitePageStatus::Published)->whereHas('page', fn ($query) => $query->whereNull('deleted_at'));
     }
 
     private function navigationTree($versions, ?int $parentId = null): array
     {
-        return $versions->filter(fn($version) => $version->navigation_parent_page_id === $parentId)
-            ->map(fn($version) => [
+        return $versions->filter(fn ($version) => $version->navigation_parent_page_id === $parentId)
+            ->map(fn ($version) => [
                 'title' => $version->title,
                 'slug' => $version->slug,
                 'is_home' => $version->is_home,

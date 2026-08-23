@@ -1,45 +1,24 @@
 <script setup lang="ts">
-import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import PublicSection from "@/components/website/PublicSection.vue";
 import AppearanceTabs from "@/components/AppearanceTabs.vue";
+import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
+import { formatLodgeDate } from "@/utils/date";
 import { Head } from "@inertiajs/vue3";
-import { computed } from "vue";
 
 const props = defineProps<{
     lodge: any;
-    page: any;
+    issue: any;
+    version: any;
     navigation: any[];
-    media: Record<string, any>;
-    preview: boolean;
-    officers: any[];
-    pastMasters: any[];
-    events: any[];
-    galleries: any[];
-    newsletters: any[];
-    memberContent: { directory: boolean; newsletters: boolean };
+    newsletterIndexUrl: string;
 }>();
-const contrast = (hex: string) => {
-    const value = hex.replace("#", "");
-    const [r, g, b] = [0, 2, 4].map((index) =>
-        parseInt(value.slice(index, index + 2), 16),
-    );
-    return (r * 299 + g * 587 + b * 114) / 1000 > 145 ? "#0f172a" : "#ffffff";
-};
-const primaryForeground = computed(() => contrast(props.lodge.primary_color));
-const secondaryForeground = computed(() =>
-    contrast(props.lodge.secondary_color),
-);
+
+const formatDate = (value: string | null) =>
+    formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 
 <template>
-    <Head :title="`${page.title} — ${lodge.name}`" />
+    <Head :title="`${version.title} — ${lodge.name}`" />
     <div class="min-h-screen bg-background text-foreground">
-        <div
-            v-if="preview"
-            class="bg-amber-300 px-4 py-2 text-center text-sm font-semibold text-amber-950"
-        >
-            Draft preview — public visitors cannot see these changes.
-        </div>
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
@@ -50,13 +29,15 @@ const secondaryForeground = computed(() =>
                 <a
                     :href="`/l/${lodge.slug}`"
                     class="flex min-w-0 items-center gap-3 font-bold"
-                    ><img
+                >
+                    <img
                         v-if="lodge.seal_path || lodge.logo_path"
                         :src="`/storage/${lodge.seal_path || lodge.logo_path}`"
                         alt=""
                         class="size-12 object-contain"
-                    /><span class="truncate text-xl">{{ lodge.name }}</span></a
-                >
+                    />
+                    <span class="truncate text-xl">{{ lodge.name }}</span>
+                </a>
                 <div
                     class="ml-auto flex flex-wrap items-center justify-end gap-3"
                 >
@@ -79,23 +60,37 @@ const secondaryForeground = computed(() =>
                 </div>
             </div>
         </header>
-        <main>
-            <PublicSection
-                v-for="section in page.sections"
-                :key="section.id"
-                :section="section"
-                :lodge="lodge"
-                :media="media"
-                :officers="officers"
-                :past-masters="pastMasters"
-                :events="events"
-                :galleries="galleries"
-                :newsletters="newsletters"
-                :member-content="memberContent"
-                :primary-foreground="primaryForeground"
-                :secondary-foreground="secondaryForeground"
+
+        <main class="mx-auto max-w-4xl px-5 py-10">
+            <a :href="newsletterIndexUrl" class="text-sm font-medium underline"
+                >← All newsletters</a
+            >
+            <h1 class="mt-4 text-3xl font-bold">{{ version.title }}</h1>
+            <p
+                v-if="version.publication_date"
+                class="mt-1 text-muted-foreground"
+            >
+                {{ formatDate(version.publication_date) }}
+            </p>
+            <img
+                v-if="version.cover_media_asset_id"
+                :src="`/lodges/${lodge.id}/newsletters/${issue.slug}/cover`"
+                class="mt-6 max-h-96 rounded-lg"
+                alt="Newsletter cover"
+            />
+            <a
+                v-if="version.newsletter_document_id"
+                :href="`/lodges/${lodge.id}/newsletters/${issue.slug}/document`"
+                class="mt-6 inline-block font-medium underline"
+                >Download PDF</a
+            >
+            <article
+                v-if="version.body_html"
+                class="public-rich-text mt-8"
+                v-html="version.body_html"
             />
         </main>
+
         <footer
             class="mt-12 border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
         >

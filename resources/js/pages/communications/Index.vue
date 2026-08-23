@@ -435,7 +435,7 @@ onMounted(() => {
             </article>
         </div>
         <Dialog :open="creating" @update:open="creating = $event">
-            <DialogContent class="max-w-3xl">
+            <DialogContent class="w-[calc(100vw-2rem)] max-w-3xl">
                 <DialogHeader
                     ><DialogTitle>{{
                         editingId ? "Edit message" : "New message"
@@ -443,7 +443,7 @@ onMounted(() => {
                 >
                 <form
                     v-if="!editingSent"
-                    class="grid gap-3"
+                    class="grid w-full min-w-0 gap-3"
                     @submit.prevent="submit(false)"
                 >
                     <input

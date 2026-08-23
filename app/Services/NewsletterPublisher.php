@@ -113,7 +113,7 @@ class NewsletterPublisher
             'publication_date' => $data['publication_date'] ?? null, 'cover_media_asset_id' => $coverId,
             'body_html' => filled($data['body_html'] ?? null) ? $this->sanitizer->sanitize($data['body_html']) : null,
             'newsletter_document_id' => $documentId, 'created_by' => $creating ? $user->id : null,
-        ], fn($value, $key) => $creating || $key !== 'created_by' || $value !== null);
+        ], fn ($value, $key) => $creating || $key !== 'created_by' || $value !== null, ARRAY_FILTER_USE_BOTH);
     }
 
     private function validatePublishable(NewsletterIssueVersion $draft): void

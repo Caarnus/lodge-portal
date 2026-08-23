@@ -600,7 +600,7 @@ const retryReminder = (id: number) => {
             </DialogScrollContent>
         </Dialog>
         <Dialog :open="editorOpen" @update:open="!$event && closeEditor()">
-            <DialogScrollContent class="max-w-5xl">
+            <DialogScrollContent class="w-[calc(100vw-2rem)] max-w-5xl">
                 <DialogHeader>
                     <DialogTitle>
                         {{
