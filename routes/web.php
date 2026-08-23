@@ -67,13 +67,13 @@ Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->n
 
 Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.newsletters.')->group(function () {
     Route::get('newsletters', [MemberNewsletterController::class, 'index'])->name('archive');
-    Route::get('newsletters/{issue:slug}', [MemberNewsletterController::class, 'show'])->name('show');
-    Route::get('newsletters/{issue:slug}/cover', [MemberNewsletterController::class, 'cover'])->name('cover');
-    Route::get('newsletters/{issue:slug}/document', [MemberNewsletterController::class, 'document'])->name('document');
+    Route::get('newsletters/{issue:slug}', [MemberNewsletterController::class, 'show'])->withoutScopedBindings()->where('issue', '^(?!manage$)[A-Za-z0-9-]+$')->name('show');
+    Route::get('newsletters/{issue:slug}/cover', [MemberNewsletterController::class, 'cover'])->withoutScopedBindings()->name('cover');
+    Route::get('newsletters/{issue:slug}/document', [MemberNewsletterController::class, 'document'])->withoutScopedBindings()->name('document');
 });
 Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.communications.')->group(function () {
     Route::get('communications', [LodgeCommunicationController::class, 'archive'])->name('archive');
-    Route::get('communications/{communication}', [LodgeCommunicationController::class, 'show'])->name('show');
+    Route::get('communications/{communication}', [LodgeCommunicationController::class, 'show'])->whereNumber('communication')->name('show');
 });
 
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
@@ -105,7 +105,6 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::prefix('lodges/{lodge}/communications/manage')->name('lodges.communications.')->group(function () {
         Route::get('/', [LodgeCommunicationController::class, 'index'])->name('index');
         Route::post('/', [LodgeCommunicationController::class, 'store'])->name('store');
-        Route::get('{communication}/edit', [LodgeCommunicationController::class, 'edit'])->name('edit');
         Route::put('{communication}', [LodgeCommunicationController::class, 'update'])->name('update');
         Route::post('{communication}/send', [LodgeCommunicationController::class, 'send'])->name('send');
         Route::post('{communication}/duplicate', [LodgeCommunicationController::class, 'duplicate'])->name('duplicate');

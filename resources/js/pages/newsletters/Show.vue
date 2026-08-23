@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import { formatLodgeDate } from "@/utils/date";
 import { Head, Link } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
 const props = defineProps<{ lodge: any; issue: any; version: any }>();
+const formatDate = (value: string | null) =>
+    formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 <template>
     <Head :title="version.title" />
@@ -11,7 +14,9 @@ const props = defineProps<{ lodge: any; issue: any; version: any }>();
             >← Archive</Link
         >
         <h1 class="mt-4 text-3xl font-bold">{{ version.title }}</h1>
-        <p class="mt-1 text-slate-600">{{ version.publication_date }}</p>
+        <p class="mt-1 text-slate-600">
+            {{ formatDate(version.publication_date) }}
+        </p>
         <img
             v-if="version.cover_media_asset_id"
             :src="`/lodges/${lodge.id}/newsletters/${issue.slug}/cover`"

@@ -20,6 +20,7 @@ const form = useForm({
     mailing_address: l.mailing_address ?? "",
     meeting_location: l.meeting_location ?? "",
     timezone: l.timezone ?? "America/Chicago",
+    date_display_format: l.date_display_format ?? "month_year",
     public_email: l.public_email ?? "",
     public_phone: l.public_phone ?? "",
     status: l.status ?? "active",
@@ -91,6 +92,15 @@ function submit() {
                     <option value="active">Active</option>
                     <option value="disabled">Disabled</option>
                     <option value="disabled_locked">Disabled and locked</option>
+                </select></label
+            ><label class="field-label"
+                >Date display<select
+                    v-model="form.date_display_format"
+                    class="field-input"
+                >
+                    <option value="month_year">Month, YYYY</option>
+                    <option value="month_day_year">Month D, YYYY</option>
+                    <option value="day_month_year">D Month YYYY</option>
                 </select></label
             ><label class="field-label"
                 >Logo<input

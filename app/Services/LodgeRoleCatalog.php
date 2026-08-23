@@ -42,12 +42,12 @@ class LodgeRoleCatalog
     {
         $this->seedPermissions();
         $all = Permission::query()->whereIn('key', array_keys(self::PERMISSIONS))->pluck('id');
-        $officer = Permission::query()->whereIn('key', ['directory.view', 'people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage', 'communications.send'])->pluck('id');
+        $officer = Permission::query()->whereIn('key', ['directory.view', 'people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage', 'galleries.manage', 'communications.send'])->pluck('id');
         $member = Permission::query()->where('key', 'directory.view')->pluck('id');
 
         foreach (['Administrator', 'Officer', 'Member', 'Non-member'] as $name) {
             $role = Role::query()->where('lodge_id', $lodge->id)->where('name', $name)->first();
-            if ($role && !$role->is_system) {
+            if ($role && ! $role->is_system) {
                 continue;
             }
             $role ??= Role::create(['lodge_id' => $lodge->id, 'name' => $name, 'is_system' => true]);

@@ -17,7 +17,7 @@ class LodgeCommunication extends Model
 
     protected function casts(): array
     {
-        return ['status' => LodgeCommunicationStatus::class, 'send_requested_at' => 'datetime', 'sent_at' => 'datetime'];
+        return ['status' => LodgeCommunicationStatus::class, 'degree_keys' => 'array', 'membership_status_keys' => 'array', 'membership_ids' => 'array', 'relation_person_ids' => 'array', 'send_requested_at' => 'datetime', 'sent_at' => 'datetime'];
     }
 
     public function lodge()

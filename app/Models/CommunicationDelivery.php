@@ -39,4 +39,9 @@ class CommunicationDelivery extends Model
     {
         return $this->belongsTo(FamilyNewsletterSubscription::class);
     }
+
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
 }

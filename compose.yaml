@@ -8,7 +8,6 @@ x-app: &app
   extra_hosts: ["host.docker.internal:host-gateway"]
   depends_on:
     postgres: { condition: service_healthy }
-    redis: { condition: service_healthy }
 services:
   app:
     <<: *app
@@ -87,12 +86,8 @@ services:
     environment: { POSTGRES_DB: lodge_portal, POSTGRES_USER: lodge_portal, POSTGRES_PASSWORD: local-development }
     volumes: ["postgres:/var/lib/postgresql/data"]
     healthcheck: { test: ["CMD-SHELL", "pg_isready -U lodge_portal -d lodge_portal"], interval: 5s, timeout: 5s, retries: 10 }
-  redis:
-    image: redis:7-alpine
-    volumes: ["redis:/data"]
-    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 10 }
   mailpit:
     image: axllent/mailpit:v1.27
     ports: ["8025:8025"]
     healthcheck: { test: ["CMD", "/mailpit", "readyz"], interval: 10s, timeout: 5s, retries: 5 }
-volumes: { postgres: {}, redis: {}, media: {}, browser_node_modules: {} }
+volumes: { postgres: {}, media: {}, browser_node_modules: {} }

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import { formatLodgeDate } from "@/utils/date";
 import { Head, Link } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
-defineProps<{ lodge: any; issues: any[] }>();
+const props = defineProps<{ lodge: any; issues: any[] }>();
+const formatDate = (value: string | null) =>
+    formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 <template>
     <Head title="Newsletters" />
@@ -16,7 +19,7 @@ defineProps<{ lodge: any; issues: any[] }>();
                 class="block p-4 hover:bg-slate-50"
                 ><strong>{{ issue.published.title }}</strong>
                 <p class="text-sm text-slate-600">
-                    {{ issue.published.publication_date }}
+                    {{ formatDate(issue.published.publication_date) }}
                 </p></Link
             >
         </div>

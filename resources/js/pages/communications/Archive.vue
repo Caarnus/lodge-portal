@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import { formatLodgeDate } from "@/utils/date";
 import { Head, Link } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
-defineProps<{ lodge: any; communications: any[] }>();
+const props = defineProps<{ lodge: any; communications: any[] }>();
+const formatDate = (value: string | null) =>
+    formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 <template>
     <Head title="Communications" />
@@ -15,7 +18,7 @@ defineProps<{ lodge: any; communications: any[] }>();
                 :href="`/lodges/${lodge.id}/communications/${item.id}`"
                 class="block p-4 hover:bg-slate-50"
                 ><strong>{{ item.subject }}</strong>
-                <p class="text-sm">{{ item.sent_at }}</p></Link
+                <p class="text-sm">{{ formatDate(item.sent_at) }}</p></Link
             >
         </div>
     </main>
