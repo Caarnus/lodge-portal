@@ -46,25 +46,29 @@ class HandleInertiaRequests extends Middleware
         $lodges = collect();
         if ($user instanceof User) {
             $lodgeQuery = Lodge::query();
-            if (!$user->is_platform_admin) {
-                $lodgeQuery->whereHas('users', fn(Builder $users) => $users->where('users.id', $user->id));
+            if (! $user->is_platform_admin) {
+                $lodgeQuery->whereHas('users', fn (Builder $users) => $users->where('users.id', $user->id));
             }
             $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug'])
-                ->map(fn(Lodge $lodge) => $lodge
+                ->map(fn (Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
                     ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))
                     ->setAttribute('can_view_people', $user->hasLodgePermission($lodge, 'people.view'))
                     ->setAttribute('can_manage_officers', $user->hasLodgePermission($lodge, 'officers.manage'))
                     ->setAttribute('can_manage_roles', $user->hasLodgePermission($lodge, 'roles.manage'))
-                    ->setAttribute('can_manage_events', $user->hasLodgePermission($lodge, 'events.manage')));
+                    ->setAttribute('can_manage_events', $user->hasLodgePermission($lodge, 'events.manage'))
+                    ->setAttribute('can_manage_newsletters', $user->hasLodgePermission($lodge, 'newsletters.manage'))
+                    ->setAttribute('can_manage_galleries', $user->hasLodgePermission($lodge, 'galleries.manage'))
+                    ->setAttribute('can_manage_communications', $user->hasLodgePermission($lodge, 'communications.send'))
+                    ->setAttribute('can_manage_recipients', $user->hasLodgePermission($lodge, 'communications.recipients')));
         }
         $canReviewRegistrations = $user && ($user->is_platform_admin || DB::table('lodge_user_roles')
-                    ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
-                    ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
-                    ->where('lodge_user_roles.user_id', $user->id)
-                    ->where('permissions.key', 'registration.review')
-                    ->exists());
+            ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
+            ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
+            ->where('lodge_user_roles.user_id', $user->id)
+            ->where('permissions.key', 'registration.review')
+            ->exists());
 
         return array_merge(parent::share($request), [
             'name' => config('app.name'),
@@ -72,11 +76,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
                 'lodges' => $lodges,
-                'can_review_registrations' => (bool)$canReviewRegistrations,
+                'can_review_registrations' => (bool) $canReviewRegistrations,
             ],
             'flash' => [
-                'notice' => fn() => $request->session()->get('notice'),
-                'officer_role_prompt' => fn() => $request->session()->get('officer_role_prompt'),
+                'notice' => fn () => $request->session()->get('notice'),
+                'officer_role_prompt' => fn () => $request->session()->get('officer_role_prompt'),
             ],
         ]);
     }

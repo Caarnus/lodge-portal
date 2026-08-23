@@ -18,6 +18,10 @@ export interface LodgeSummary {
     can_manage_officers: boolean;
     can_manage_roles: boolean;
     can_manage_events: boolean;
+    can_manage_newsletters: boolean;
+    can_manage_galleries: boolean;
+    can_manage_communications: boolean;
+    can_manage_recipients: boolean;
 }
 
 export interface BreadcrumbItem {

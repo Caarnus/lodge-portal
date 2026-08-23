@@ -88,6 +88,30 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: `/lodges/${lodge.id}/website`,
             icon: Globe2,
         });
+    if (lodge.can_manage_newsletters)
+        items.push({
+            title: "Newsletters",
+            href: `/lodges/${lodge.id}/newsletters/manage`,
+            icon: Globe2,
+        });
+    if (lodge.can_manage_galleries)
+        items.push({
+            title: "Galleries",
+            href: `/lodges/${lodge.id}/galleries/manage`,
+            icon: Globe2,
+        });
+    if (lodge.can_manage_communications)
+        items.push({
+            title: "Communications",
+            href: `/lodges/${lodge.id}/communications/manage`,
+            icon: CalendarDays,
+        });
+    if (lodge.can_manage_recipients)
+        items.push({
+            title: "Newsletter recipients",
+            href: `/lodges/${lodge.id}/newsletter-recipients`,
+            icon: Users,
+        });
     if (lodge.can_view_people)
         items.push({
             title: "People",

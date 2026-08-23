@@ -4,7 +4,11 @@ A multi-tenant platform for Masonic lodges to manage their public websites, memb
 
 ## Project Status
 
-The platform foundation, public lodge website CMS, people/membership administration, member profile settings, privacy-filtered directory, dashboard, and lodge events are implemented. Events support materialized recurring occurrences, reservations, reminder subscriptions and delivery, volunteer staffing positions and commitments, ICS calendar output, event-category configuration, and tenant-scoped event management.
+The platform includes public lodge websites, people/membership administration, member profile settings, privacy-filtered directory, events, newsletter delivery preferences, family newsletter requests, newsletter archives, galleries, and lodge communications. Newsletter/communication portal content is restricted to active members of its explicit lodge; family newsletter delivery never grants portal access.
+
+## Communications operations
+
+Run `php artisan communications:dispatch` every minute (already scheduled) to claim and send electronic delivery rows. Run `php artisan newsletters:purge-family-requests` daily to expire unverified family requests and purge aged rejected/expired request contact data. Postal exports are prepared manually; no postage vendor integration is included.
 
 ## Member privacy and directory
 
