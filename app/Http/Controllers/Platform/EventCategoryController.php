@@ -30,7 +30,7 @@ class EventCategoryController extends Controller
             'name' => $data['name'],
             'key' => $data['key'] ?: Str::slug($data['name']),
             'description' => $data['description'] ?? null,
-            'sort_order' => ((int) EventCategory::query()->max('sort_order')) + 10,
+            'sort_order' => ((int)EventCategory::query()->max('sort_order')) + 10,
             'is_active' => true,
         ]);
         Audit::record('event.category_created', $category, after: $category->toArray());

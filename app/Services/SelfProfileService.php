@@ -18,7 +18,7 @@ class SelfProfileService
             ? Person::withTrashed()->find($user->person_id)
             : null;
 
-        if (! $person || $person->trashed() || $person->merged_at || $person->is_deceased) {
+        if (!$person || $person->trashed() || $person->merged_at || $person->is_deceased) {
             throw new AuthorizationException('Your account is not linked to an active person profile.');
         }
 
@@ -28,7 +28,7 @@ class SelfProfileService
     public function update(User $actor, array $data): User
     {
         $expectedPersonId = $actor->person_id;
-        if (! $expectedPersonId) {
+        if (!$expectedPersonId) {
             throw new AuthorizationException('Your account is not linked to an active person profile.');
         }
 
@@ -40,7 +40,7 @@ class SelfProfileService
                 }
 
                 $person = Person::withTrashed()->lockForUpdate()->find($expectedPersonId);
-                if (! $person || $person->trashed() || $person->merged_at || $person->is_deceased) {
+                if (!$person || $person->trashed() || $person->merged_at || $person->is_deceased) {
                     throw new AuthorizationException('Your account is not linked to an active person profile.');
                 }
 
@@ -56,7 +56,7 @@ class SelfProfileService
                     'mailing_state',
                     'mailing_postal_code',
                 ]);
-                $changedFields = collect($personData)->filter(fn ($value, string $field) => $person->getAttribute($field) !== $value)
+                $changedFields = collect($personData)->filter(fn($value, string $field) => $person->getAttribute($field) !== $value)
                     ->keys()->all();
                 $emailChanged = $user->email !== $email;
 

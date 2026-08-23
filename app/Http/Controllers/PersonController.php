@@ -23,8 +23,8 @@ class PersonController extends Controller
     public function index(Request $request, Lodge $lodge, PersonAccess $access)
     {
         $this->allowLodge($lodge, 'people.view');
-        $search = trim((string) $request->query('search'));
-        $searchPattern = '%'.strtolower($search).'%';
+        $search = trim((string)$request->query('search'));
+        $searchPattern = '%' . strtolower($search) . '%';
         $searchDigits = preg_replace('/\D/', '', $search);
         $statusId = $request->integer('status') ?: null;
         $degreeId = $request->integer('degree') ?: null;
@@ -34,8 +34,8 @@ class PersonController extends Controller
         $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
         $peopleQuery = $access->visibleQuery($lodge)
             ->with([
-                'memberships' => fn ($query) => $query->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree']),
-                'pastMasterTerms' => fn ($query) => $query->where('lodge_id', $lodge->id)->orderBy('year'),
+                'memberships' => fn($query) => $query->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree']),
+                'pastMasterTerms' => fn($query) => $query->where('lodge_id', $lodge->id)->orderBy('year'),
                 'user:id,person_id',
             ]);
         if ($search !== '') {
@@ -44,18 +44,18 @@ class PersonController extends Controller
                     $searchQuery->orWhereRaw("LOWER({$column}) LIKE ?", [$searchPattern]);
                 }
                 if (strlen($searchDigits) >= 4) {
-                    $searchQuery->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone, '(', ''), ')', ''), '-', ''), ' ', ''), '+', '') LIKE ?", ['%'.$searchDigits.'%']);
+                    $searchQuery->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone, '(', ''), ')', ''), '-', ''), ' ', ''), '+', '') LIKE ?", ['%' . $searchDigits . '%']);
                 }
-                $searchQuery->orWhereHas('memberships', fn ($memberships) => $memberships
+                $searchQuery->orWhereHas('memberships', fn($memberships) => $memberships
                     ->where('lodge_id', $lodge->id)->whereRaw('LOWER(member_number) LIKE ?', [$searchPattern]));
             });
         }
         if ($statusId) {
-            $peopleQuery->whereHas('memberships', fn (Builder $memberships) => $memberships
+            $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships
                 ->where('lodge_id', $lodge->id)->where('membership_status_id', $statusId));
         }
         if ($degreeId) {
-            $peopleQuery->whereHas('memberships', fn (Builder $memberships) => $memberships
+            $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships
                 ->where('lodge_id', $lodge->id)->where('masonic_degree_id', $degreeId));
         }
         if ($account === 'linked') {
@@ -65,10 +65,10 @@ class PersonController extends Controller
             $peopleQuery->whereDoesntHave('user');
         }
         if ($scope === 'members') {
-            $peopleQuery->whereHas('memberships', fn (Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
+            $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
         }
         if ($scope === 'related') {
-            $peopleQuery->whereDoesntHave('memberships', fn (Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
+            $peopleQuery->whereDoesntHave('memberships', fn(Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
         }
 
         if ($sort === 'membership') {
@@ -86,12 +86,12 @@ class PersonController extends Controller
             $peopleQuery->orderByRaw("LOWER(legal_last_name) {$direction}")
                 ->orderByRaw("LOWER(legal_first_name) {$direction}");
         } else {
-            $peopleQuery->orderByRaw('LOWER(COALESCE('.$sort.", '')) {$direction}");
+            $peopleQuery->orderByRaw('LOWER(COALESCE(' . $sort . ", '')) {$direction}");
         }
 
         $people = $peopleQuery->orderBy('legal_last_name')->orderBy('legal_first_name')->orderBy('id')->limit(200)->get();
         $manageablePersonIds = $access->manageablePersonIds($request->user(), $lodge, $people->pluck('id')->all());
-        $people->each(fn (Person $person) => $person->setAttribute(
+        $people->each(fn(Person $person) => $person->setAttribute(
             'can_manage',
             $manageablePersonIds->contains($person->id),
         ));
@@ -131,7 +131,7 @@ class PersonController extends Controller
                 throw ValidationException::withMessages(['email' => 'This person already has a membership in this lodge.']);
             }
             $statusId = MembershipStatus::query()->where('is_default', true)->value('id');
-            if (! $statusId) {
+            if (!$statusId) {
                 throw ValidationException::withMessages(['membership' => 'No default membership status is configured.']);
             }
             $membership = $person->memberships()->create([
@@ -154,11 +154,11 @@ class PersonController extends Controller
     public function edit(Request $request, Lodge $lodge, Person $person, PersonAccess $access)
     {
         abort_unless($access->canView($request->user(), $lodge, $person), 404);
-        $person->load(['pastMasterTerms' => fn ($query) => $query->where('lodge_id', $lodge->id)->orderBy('year')]);
+        $person->load(['pastMasterTerms' => fn($query) => $query->where('lodge_id', $lodge->id)->orderBy('year')]);
         $membership = $person->memberships()->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree', 'communicationPreference'])->first();
         $relationships = $person->relationshipsFrom()->with(['personTwo', 'type', 'owningLodge'])->get()
             ->concat($person->relationshipsTo()->with(['personOne', 'type', 'owningLodge'])->get()->all())
-            ->filter(fn ($relationship) => $access->canViewRelationship($request->user(), $lodge, $relationship))
+            ->filter(fn($relationship) => $access->canViewRelationship($request->user(), $lodge, $relationship))
             ->map(function ($relationship) use ($person, $access, $request, $lodge) {
                 $fromPersonOne = $relationship->person_one_id === $person->id;
                 $related = $fromPersonOne ? $relationship->personTwo : $relationship->personOne;
@@ -167,7 +167,7 @@ class PersonController extends Controller
                     'id' => $relationship->id,
                     'related_person' => $related,
                     'relationship_name' => $fromPersonOne ? $relationship->type->name : $relationship->type->inverse_name,
-                    'relationship_statement' => $person->display_name.' is '.lcfirst($fromPersonOne ? $relationship->type->name : $relationship->type->inverse_name).' of '.$related->display_name,
+                    'relationship_statement' => $person->display_name . ' is ' . lcfirst($fromPersonOne ? $relationship->type->name : $relationship->type->inverse_name) . ' of ' . $related->display_name,
                     'relationship_type_id' => $fromPersonOne ? $relationship->relationship_type_id : RelationshipType::query()
                         ->where('key', $relationship->type->inverse_key)->value('id'),
                     'owning_lodge' => $relationship->owningLodge,
@@ -176,15 +176,15 @@ class PersonController extends Controller
             })->values();
 
         return Inertia::render('people/Edit', $this->props($lodge) + [
-            'person' => $person,
-            'membership' => $membership,
-            'relationships' => $relationships,
-            'account' => $person->user()->first(['id', 'name', 'email']),
-            'canManagePerson' => $access->canManagePerson($request->user(), $lodge, $person),
-            'canManageRoles' => $request->user()->hasLodgePermission($lodge, 'roles.manage'),
-            'canManageCommunicationPreferences' => $request->user()->hasLodgePermission($lodge, 'communications.recipients'),
-            'availablePeople' => $access->visibleQuery($lodge)->whereKeyNot($person->id)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
-        ]);
+                'person' => $person,
+                'membership' => $membership,
+                'relationships' => $relationships,
+                'account' => $person->user()->first(['id', 'name', 'email']),
+                'canManagePerson' => $access->canManagePerson($request->user(), $lodge, $person),
+                'canManageRoles' => $request->user()->hasLodgePermission($lodge, 'roles.manage'),
+                'canManageCommunicationPreferences' => $request->user()->hasLodgePermission($lodge, 'communications.recipients'),
+                'availablePeople' => $access->visibleQuery($lodge)->whereKeyNot($person->id)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
+            ]);
     }
 
     public function update(PersonRequest $request, Lodge $lodge, Person $person, PersonAccess $access)
@@ -210,32 +210,32 @@ class PersonController extends Controller
 
     private function attachRelationshipSummaries(Request $request, Lodge $lodge, $people): void
     {
-        $summaries = $people->mapWithKeys(fn (Person $person) => [$person->id => []])->all();
-        if (! $request->user()->hasLodgePermission($lodge, 'relationships.view')) {
-            $people->each(fn (Person $person) => $person->setAttribute('relationship_summaries', []));
+        $summaries = $people->mapWithKeys(fn(Person $person) => [$person->id => []])->all();
+        if (!$request->user()->hasLodgePermission($lodge, 'relationships.view')) {
+            $people->each(fn(Person $person) => $person->setAttribute('relationship_summaries', []));
 
             return;
         }
 
         $personIds = $people->modelKeys();
         $relationships = PersonRelationship::query()
-            ->where(fn ($query) => $query->whereIn('person_one_id', $personIds)->orWhereIn('person_two_id', $personIds))
-            ->where(fn ($query) => $query
-                ->whereHas('personOne.memberships', fn ($memberships) => $memberships->where('lodge_id', $lodge->id)
-                    ->whereNull('end_date')->whereHas('status', fn ($statuses) => $statuses->where('key', 'active')))
-                ->orWhereHas('personTwo.memberships', fn ($memberships) => $memberships->where('lodge_id', $lodge->id)
-                    ->whereNull('end_date')->whereHas('status', fn ($statuses) => $statuses->where('key', 'active'))))
+            ->where(fn($query) => $query->whereIn('person_one_id', $personIds)->orWhereIn('person_two_id', $personIds))
+            ->where(fn($query) => $query
+                ->whereHas('personOne.memberships', fn($memberships) => $memberships->where('lodge_id', $lodge->id)
+                    ->whereNull('end_date')->whereHas('status', fn($statuses) => $statuses->where('key', 'active')))
+                ->orWhereHas('personTwo.memberships', fn($memberships) => $memberships->where('lodge_id', $lodge->id)
+                    ->whereNull('end_date')->whereHas('status', fn($statuses) => $statuses->where('key', 'active'))))
             ->with([
                 'type',
-                'personOne.memberships' => fn ($query) => $query->where('lodge_id', $lodge->id)->whereNull('end_date')
-                    ->whereHas('status', fn ($statuses) => $statuses->where('key', 'active')),
-                'personTwo.memberships' => fn ($query) => $query->where('lodge_id', $lodge->id)->whereNull('end_date')
-                    ->whereHas('status', fn ($statuses) => $statuses->where('key', 'active')),
+                'personOne.memberships' => fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('end_date')
+                    ->whereHas('status', fn($statuses) => $statuses->where('key', 'active')),
+                'personTwo.memberships' => fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('end_date')
+                    ->whereHas('status', fn($statuses) => $statuses->where('key', 'active')),
             ])->get();
 
         foreach ($relationships as $relationship) {
             foreach ([$relationship->person_one_id, $relationship->person_two_id] as $subjectId) {
-                if (! array_key_exists($subjectId, $summaries)) {
+                if (!array_key_exists($subjectId, $summaries)) {
                     continue;
                 }
                 $fromPersonOne = $subjectId === $relationship->person_one_id;
@@ -245,13 +245,13 @@ class PersonController extends Controller
                 $summaries[$subjectId][] = [
                     'id' => $relationship->id,
                     'relationship_name' => $relationshipName,
-                    'statement' => $subject->display_name.' is '.lcfirst($relationshipName).' of '.$related->display_name,
+                    'statement' => $subject->display_name . ' is ' . lcfirst($relationshipName) . ' of ' . $related->display_name,
                     'related_person' => ['id' => $related->id, 'display_name' => $related->display_name],
                     'related_is_lodge_member' => $related->memberships->isNotEmpty(),
                 ];
             }
         }
 
-        $people->each(fn (Person $person) => $person->setAttribute('relationship_summaries', $summaries[$person->id]));
+        $people->each(fn(Person $person) => $person->setAttribute('relationship_summaries', $summaries[$person->id]));
     }
 }

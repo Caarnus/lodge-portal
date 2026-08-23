@@ -79,7 +79,7 @@ class GalleryController extends Controller
         $this->allowAlbum($lodge, $album, 'galleries.manage');
         $asset = MediaAsset::query()->whereKey($request->validate(['media_asset_id' => 'required|integer'])['media_asset_id'])->where('lodge_id', $lodge->id)->firstOrFail();
         $draft = $publisher->draftFor($album, $request->user());
-        GalleryAlbumPhoto::firstOrCreate(['gallery_album_version_id' => $draft->id, 'media_asset_id' => $asset->id], ['lodge_id' => $lodge->id, 'caption' => '', 'sort_order' => ((int) $draft->photos()->max('sort_order')) + 1]);
+        GalleryAlbumPhoto::firstOrCreate(['gallery_album_version_id' => $draft->id, 'media_asset_id' => $asset->id], ['lodge_id' => $lodge->id, 'caption' => '', 'sort_order' => ((int)$draft->photos()->max('sort_order')) + 1]);
 
         return back();
     }
@@ -141,7 +141,7 @@ class GalleryController extends Controller
 
     private function validateAlbum(Request $request, Lodge $lodge, ?GalleryAlbum $album = null): array
     {
-        return $request->validate(['title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('gallery_albums')->where(fn ($q) => $q->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($album?->id)], 'description' => 'nullable|string|max:10000', 'visibility' => ['required', Rule::in(['public', 'masons', 'lodge'])], 'cover_photo_id' => 'nullable|integer']);
+        return $request->validate(['title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('gallery_albums')->where(fn($q) => $q->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($album?->id)], 'description' => 'nullable|string|max:10000', 'visibility' => ['required', Rule::in(['public', 'masons', 'lodge'])], 'cover_photo_id' => 'nullable|integer']);
     }
 
     private function allowAlbum(Lodge $lodge, GalleryAlbum $album, string $permission): void

@@ -13,11 +13,11 @@ class ProfilePhotoService
 {
     public function store(Person $person, UploadedFile $file, ?Lodge $lodge = null): void
     {
-        if (! in_array($file->getMimeType(), config('website.allowed_mime_types'), true)) {
+        if (!in_array($file->getMimeType(), config('website.allowed_mime_types'), true)) {
             throw ValidationException::withMessages(['photo' => 'Upload a JPEG, PNG, WebP, HEIC, or HEIF image.']);
         }
-        $path = $file->store('profile-originals/'.$person->id, 'local');
-        if (! $path) {
+        $path = $file->store('profile-originals/' . $person->id, 'local');
+        if (!$path) {
             throw ValidationException::withMessages(['photo' => 'The profile photo could not be stored.']);
         }
 

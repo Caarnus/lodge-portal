@@ -15,9 +15,9 @@ class RruleRecurrenceExpander implements RecurrenceExpander
         $rfc = $this->rule($rule, $startsAt, $timeZone)->rfcString(false);
 
         $ruleLine = collect(preg_split('/\R/', $rfc) ?: [])
-            ->first(fn (string $line) => str_starts_with($line, 'RRULE:'));
+            ->first(fn(string $line) => str_starts_with($line, 'RRULE:'));
 
-        if (! is_string($ruleLine)) {
+        if (!is_string($ruleLine)) {
             throw new InvalidArgumentException('The recurrence rule is invalid.');
         }
 
@@ -45,7 +45,7 @@ class RruleRecurrenceExpander implements RecurrenceExpander
         }
 
         return array_map(
-            fn ($occurrence) => $this->candidate(
+            fn($occurrence) => $this->candidate(
                 CarbonImmutable::createFromFormat('Y-m-d H:i:s', $occurrence->format('Y-m-d H:i:s'), $event->time_zone),
                 $duration,
             ),
@@ -72,8 +72,8 @@ class RruleRecurrenceExpander implements RecurrenceExpander
     {
         $normalized = trim($rule);
         $isFullRfcRule = str_starts_with($normalized, 'DTSTART:') || str_contains($normalized, "\nRRULE:");
-        if (! $isFullRfcRule && ! str_starts_with($normalized, 'RRULE:')) {
-            $normalized = 'RRULE:'.$normalized;
+        if (!$isFullRfcRule && !str_starts_with($normalized, 'RRULE:')) {
+            $normalized = 'RRULE:' . $normalized;
         }
 
         try {

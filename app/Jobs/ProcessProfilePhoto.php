@@ -14,20 +14,22 @@ class ProcessProfilePhoto implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public readonly int $personId, public readonly string $sourcePath) {}
+    public function __construct(public readonly int $personId, public readonly string $sourcePath)
+    {
+    }
 
     public function handle(): void
     {
         $person = Person::query()->find($this->personId);
-        if (! $person || $person->merged_at || $person->is_deceased || $person->profile_photo_path !== $this->sourcePath) {
+        if (!$person || $person->merged_at || $person->is_deceased || $person->profile_photo_path !== $this->sourcePath) {
             return;
         }
         $person->update(['profile_photo_status' => 'processing', 'profile_photo_error' => null]);
         try {
             $source = Storage::disk('local')->path($this->sourcePath);
-            $target = 'profile-photos/'.$person->id.'/'.Str::uuid().'.jpg';
+            $target = 'profile-photos/' . $person->id . '/' . Str::uuid() . '.jpg';
             $bytes = class_exists(\Imagick::class) ? $this->imagick($source) : $this->gd($source);
-            if (! Storage::disk('local')->put($target, $bytes)) {
+            if (!Storage::disk('local')->put($target, $bytes)) {
                 throw new \RuntimeException('The private profile derivative could not be stored.');
             }
             $person->refresh();
@@ -64,24 +66,24 @@ class ProcessProfilePhoto implements ShouldQueue
     private function gd(string $source): string
     {
         $details = @getimagesize($source);
-        if (! $details) {
+        if (!$details) {
             throw new \RuntimeException('Server image decoder does not support this file.');
         }
         [$width, $height] = $details;
         $this->assertPixels($width, $height);
-        $image = @imagecreatefromstring((string) file_get_contents($source));
-        if (! $image) {
+        $image = @imagecreatefromstring((string)file_get_contents($source));
+        if (!$image) {
             throw new \RuntimeException('Image could not be decoded.');
         }
         $scale = min(1, 800 / max($width, $height));
-        $newWidth = max(1, (int) round($width * $scale));
-        $newHeight = max(1, (int) round($height * $scale));
+        $newWidth = max(1, (int)round($width * $scale));
+        $newHeight = max(1, (int)round($height * $scale));
         $output = imagecreatetruecolor($newWidth, $newHeight);
         imagefill($output, 0, 0, imagecolorallocate($output, 255, 255, 255));
         imagecopyresampled($output, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
         ob_start();
         imagejpeg($output, null, 85);
-        $bytes = (string) ob_get_clean();
+        $bytes = (string)ob_get_clean();
         imagedestroy($image);
         imagedestroy($output);
 
@@ -90,7 +92,7 @@ class ProcessProfilePhoto implements ShouldQueue
 
     private function assertPixels(int $width, int $height): void
     {
-        if ($width < 1 || $height < 1 || $width * $height > (int) config('website.max_pixels', 60_000_000)) {
+        if ($width < 1 || $height < 1 || $width * $height > (int)config('website.max_pixels', 60_000_000)) {
             throw new \RuntimeException('Image exceeds the 60-megapixel decoded image limit.');
         }
     }

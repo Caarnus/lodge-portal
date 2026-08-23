@@ -58,9 +58,9 @@ class DirectoryController extends Controller
         $visible = $directory->findVisible($lodge, $person, $audience);
         abort_unless(
             $visible && $visible->directoryPrivacySetting?->show_profile_photo
-                && $visible->profile_photo_status === 'ready'
-                && $visible->profile_photo_derivative_path
-                && Storage::disk('local')->exists($visible->profile_photo_derivative_path),
+            && $visible->profile_photo_status === 'ready'
+            && $visible->profile_photo_derivative_path
+            && Storage::disk('local')->exists($visible->profile_photo_derivative_path),
             404,
         );
 

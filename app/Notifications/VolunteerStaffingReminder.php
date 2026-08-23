@@ -11,7 +11,9 @@ class VolunteerStaffingReminder extends Notification
 {
     use Queueable;
 
-    public function __construct(private readonly EventVolunteerReminderDelivery $delivery) {}
+    public function __construct(private readonly EventVolunteerReminderDelivery $delivery)
+    {
+    }
 
     public function via(object $notifiable): array
     {

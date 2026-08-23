@@ -79,6 +79,6 @@ class OfficerController extends Controller
         $otherCurrent = $otherAssignments->exists();
 
         return ['action' => $action, 'person_name' => $membership->person->display_name, 'user_id' => $user?->id,
-            'has_linked_user' => (bool) $user, 'has_other_current_assignment' => $otherCurrent];
+            'has_linked_user' => (bool)$user, 'has_other_current_assignment' => $otherCurrent];
     }
 }

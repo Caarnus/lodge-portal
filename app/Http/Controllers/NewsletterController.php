@@ -99,7 +99,7 @@ class NewsletterController extends Controller
     private function validateIssue(Request $request, Lodge $lodge, ?NewsletterIssue $issue = null): array
     {
         return $request->validate([
-            'title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('newsletter_issues')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($issue?->id)],
+            'title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('newsletter_issues')->where(fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($issue?->id)],
             'publication_date' => 'nullable|date', 'body_html' => 'nullable|string|max:100000',
             'cover_media_asset_id' => 'nullable|integer', 'newsletter_document_id' => 'nullable|integer',
         ]);

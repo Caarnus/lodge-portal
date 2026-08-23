@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class EventOccurrenceMaterializer
 {
-    public function __construct(private readonly RecurrenceExpander $recurrence) {}
+    public function __construct(private readonly RecurrenceExpander $recurrence)
+    {
+    }
 
     /** @return list<EventOccurrence> */
     public function materialize(Event $event, CarbonImmutable $from, CarbonImmutable $through): array
@@ -24,7 +26,7 @@ class EventOccurrenceMaterializer
                     'recurrence_key' => $candidate->recurrenceKey,
                 ]);
 
-                if (! $occurrence->exists) {
+                if (!$occurrence->exists) {
                     $occurrence->fill([
                         'lodge_id' => $event->lodge_id,
                         'original_starts_at' => $candidate->originalStartsAt,

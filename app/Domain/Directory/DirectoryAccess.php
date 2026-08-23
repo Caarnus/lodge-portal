@@ -17,12 +17,12 @@ class DirectoryAccess
 {
     public function canBrowse(User $user, Lodge $lodge): bool
     {
-        if ($lodge->status !== LodgeStatus::Active || $user->approval_status !== 'approved' || ! $user->hasVerifiedEmail()) {
+        if ($lodge->status !== LodgeStatus::Active || $user->approval_status !== 'approved' || !$user->hasVerifiedEmail()) {
             return false;
         }
 
         $person = $user->person;
-        if (! $person || $person->trashed() || $person->merged_at || $person->is_deceased) {
+        if (!$person || $person->trashed() || $person->merged_at || $person->is_deceased) {
             return false;
         }
 
@@ -39,10 +39,10 @@ class DirectoryAccess
     public function ownLodgeQuery(Lodge $lodge): Builder
     {
         return $this->baseSubjectQuery()
-            ->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships, $lodge))
+            ->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships, $lodge))
             ->where(function (Builder $privacy) {
                 $privacy->whereDoesntHave('directoryPrivacySetting')
-                    ->orWhereHas('directoryPrivacySetting', fn (Builder $setting) => $setting
+                    ->orWhereHas('directoryPrivacySetting', fn(Builder $setting) => $setting
                         ->whereIn('scope', [DirectoryVisibilityScope::OwnLodge, DirectoryVisibilityScope::ParticipatingLodges]));
             });
     }
@@ -50,7 +50,7 @@ class DirectoryAccess
     public function participatingLodgesQuery(): Builder
     {
         return $this->baseSubjectQuery()
-            ->whereHas('directoryPrivacySetting', fn (Builder $setting) => $setting
+            ->whereHas('directoryPrivacySetting', fn(Builder $setting) => $setting
                 ->where('scope', DirectoryVisibilityScope::ParticipatingLodges));
     }
 
@@ -71,13 +71,14 @@ class DirectoryAccess
     }
 
     public function search(
-        Lodge $lodge,
+        Lodge             $lodge,
         DirectoryAudience $audience,
-        ?string $query = null,
-        ?int $degreeId = null,
-        int $perPage = 25,
-    ): LengthAwarePaginator {
-        $query = trim((string) $query);
+        ?string           $query = null,
+        ?int              $degreeId = null,
+        int               $perPage = 25,
+    ): LengthAwarePaginator
+    {
+        $query = trim((string)$query);
         $perPage = min(max($perPage, 1), 25);
         $people = $this->visibleQuery($lodge, $audience);
 
@@ -92,16 +93,16 @@ class DirectoryAccess
             ->orderByRaw("LOWER(COALESCE(preferred_name, legal_first_name, name, ''))")
             ->orderBy('id')
             ->paginate($perPage)
-            ->through(fn (Person $person) => $this->project($person, $lodge, $audience));
+            ->through(fn(Person $person) => $this->project($person, $lodge, $audience));
     }
 
     public function project(Person $person, Lodge $lodge, DirectoryAudience $audience): array
     {
         $privacy = $person->directoryPrivacySetting;
-        $showEmail = (bool) $privacy?->show_email;
-        $showPhone = (bool) $privacy?->show_phone;
-        $showAddress = (bool) $privacy?->show_address;
-        $showDegree = (bool) $privacy?->show_degree;
+        $showEmail = (bool)$privacy?->show_email;
+        $showPhone = (bool)$privacy?->show_phone;
+        $showAddress = (bool)$privacy?->show_address;
+        $showDegree = (bool)$privacy?->show_degree;
 
         return [
             'id' => $person->id,
@@ -117,8 +118,8 @@ class DirectoryAccess
             ] : null,
             'degree' => $showDegree ? $this->degreeName($person, $lodge, $audience) : null,
             'profile_photo_url' => $privacy?->show_profile_photo
-                && $person->profile_photo_status === 'ready'
-                && $person->profile_photo_derivative_path
+            && $person->profile_photo_status === 'ready'
+            && $person->profile_photo_derivative_path
                 ? route('lodges.directory.photo', ['lodge' => $lodge, 'person' => $person, 'audience' => $audience->value])
                 : null,
         ];
@@ -129,15 +130,15 @@ class DirectoryAccess
         return Person::query()
             ->whereNull('merged_at')
             ->where('is_deceased', false)
-            ->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships));
+            ->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships));
     }
 
     private function activeMembershipQuery(Builder|Relation $query, ?Lodge $lodge = null): Builder|Relation
     {
         return $query->whereNull('end_date')
-            ->whereHas('status', fn (Builder $status) => $status->where('key', 'active'))
-            ->whereHas('lodge', fn (Builder $membershipLodge) => $membershipLodge->where('status', LodgeStatus::Active))
-            ->when($lodge, fn (Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
+            ->whereHas('status', fn(Builder $status) => $status->where('key', 'active'))
+            ->whereHas('lodge', fn(Builder $membershipLodge) => $membershipLodge->where('status', LodgeStatus::Active))
+            ->when($lodge, fn(Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
     }
 
     private function withProjectionRelationships(Builder $query, Lodge $lodge, DirectoryAudience $audience): Builder
@@ -155,7 +156,7 @@ class DirectoryAccess
 
     private function applySearch(Builder $people, string $query): void
     {
-        $pattern = '%'.mb_strtolower($query).'%';
+        $pattern = '%' . mb_strtolower($query) . '%';
         $digits = preg_replace('/\D/', '', $query);
 
         $people->where(function (Builder $matches) use ($pattern, $digits) {
@@ -164,14 +165,14 @@ class DirectoryAccess
                     $name->orWhereRaw("LOWER({$column}) LIKE ?", [$pattern]);
                 }
             })->orWhere(function (Builder $email) use ($pattern) {
-                $email->whereHas('directoryPrivacySetting', fn (Builder $privacy) => $privacy->where('show_email', true))
+                $email->whereHas('directoryPrivacySetting', fn(Builder $privacy) => $privacy->where('show_email', true))
                     ->whereRaw('LOWER(email) LIKE ?', [$pattern]);
             });
 
             if (strlen($digits) >= 4) {
                 $matches->orWhere(function (Builder $phone) use ($digits) {
-                    $phone->whereHas('directoryPrivacySetting', fn (Builder $privacy) => $privacy->where('show_phone', true))
-                        ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone, '(', ''), ')', ''), '-', ''), ' ', ''), '+', '') LIKE ?", ['%'.$digits.'%']);
+                    $phone->whereHas('directoryPrivacySetting', fn(Builder $privacy) => $privacy->where('show_phone', true))
+                        ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone, '(', ''), ')', ''), '-', ''), ' ', ''), '+', '') LIKE ?", ['%' . $digits . '%']);
                 });
             }
         });
@@ -179,10 +180,10 @@ class DirectoryAccess
 
     private function applyDegreeFilter(Builder $people, Lodge $lodge, DirectoryAudience $audience, int $degreeId): void
     {
-        $people->whereHas('directoryPrivacySetting', fn (Builder $privacy) => $privacy->where('show_degree', true));
+        $people->whereHas('directoryPrivacySetting', fn(Builder $privacy) => $privacy->where('show_degree', true));
 
         if ($audience === DirectoryAudience::OwnLodge) {
-            $people->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships, $lodge)
+            $people->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships, $lodge)
                 ->where('masonic_degree_id', $degreeId));
 
             return;
@@ -213,7 +214,7 @@ class DirectoryAccess
             return $memberships->firstWhere('lodge_id', $lodge->id)?->degree?->name;
         }
 
-        return $memberships->sortByDesc(fn (Membership $membership) => [
+        return $memberships->sortByDesc(fn(Membership $membership) => [
             $membership->degree?->sort_order ?? -1,
             $membership->masonic_degree_id ?? -1,
         ])->first()?->degree?->name;

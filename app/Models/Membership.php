@@ -73,7 +73,7 @@ class Membership extends Model
 
     protected static function booted(): void
     {
-        static::created(fn (Membership $membership) => $membership->communicationPreference()->firstOrCreate([
+        static::created(fn(Membership $membership) => $membership->communicationPreference()->firstOrCreate([
             'lodge_id' => $membership->lodge_id,
         ]));
     }

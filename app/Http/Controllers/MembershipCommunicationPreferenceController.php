@@ -16,7 +16,7 @@ class MembershipCommunicationPreferenceController extends Controller
         abort_unless($membership->lodge_id === $lodge->id, 404);
         $data = $request->validate(['receives_lodge_email' => ['required', 'boolean'], 'receives_print_newsletter' => ['required', 'boolean']]);
         $person = $membership->person;
-        if ($data['receives_print_newsletter'] && (! filled($person?->mailing_address_line_1) || ! filled($person?->mailing_city) || ! filled($person?->mailing_state) || ! filled($person?->mailing_postal_code))) {
+        if ($data['receives_print_newsletter'] && (!filled($person?->mailing_address_line_1) || !filled($person?->mailing_city) || !filled($person?->mailing_state) || !filled($person?->mailing_postal_code))) {
             throw ValidationException::withMessages(['receives_print_newsletter' => 'A complete mailing address is required for a mailed newsletter.']);
         }
         $preference = $membership->communicationPreference()->firstOrCreate(['lodge_id' => $lodge->id]);

@@ -18,7 +18,7 @@ class PersonAccountController extends Controller
     public function store(Request $request, Lodge $lodge, Person $person, PersonAccess $access)
     {
         abort_unless($access->canManagePerson($request->user(), $lodge, $person), 403);
-        if (! $person->email) {
+        if (!$person->email) {
             throw ValidationException::withMessages(['email' => 'Add an email address before inviting this person.']);
         }
 

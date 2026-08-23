@@ -42,7 +42,7 @@ class Person extends Model
         ])->filter()->implode(' ');
 
         if ($this->preferred_name && $this->legal_last_name) {
-            return trim($this->preferred_name.' '.$this->legal_last_name);
+            return trim($this->preferred_name . ' ' . $this->legal_last_name);
         }
 
         return $legal ?: $this->name;
@@ -100,8 +100,8 @@ class Person extends Model
 
     protected static function booted(): void
     {
-        static::created(fn (Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
-        static::deleting(fn (Person $person) => $person->directoryPrivacySetting()->delete());
-        static::restored(fn (Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
+        static::created(fn(Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
+        static::deleting(fn(Person $person) => $person->directoryPrivacySetting()->delete());
+        static::restored(fn(Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
     }
 }

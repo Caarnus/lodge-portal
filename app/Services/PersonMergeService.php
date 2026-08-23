@@ -26,7 +26,7 @@ class PersonMergeService
             $survivor = Person::query()->lockForUpdate()->findOrFail($survivor->id);
             $sourcePrivacy = PersonDirectoryPrivacySetting::query()->where('person_id', $source->id)->lockForUpdate()->first();
             $survivorPrivacy = PersonDirectoryPrivacySetting::query()->where('person_id', $survivor->id)->lockForUpdate()->first();
-            if (! $survivorPrivacy) {
+            if (!$survivorPrivacy) {
                 $survivorPrivacy = $survivor->directoryPrivacySetting()->create();
             }
             if ($source->user && $survivor->user) {
@@ -37,7 +37,7 @@ class PersonMergeService
                 throw ValidationException::withMessages(['survivor_person_id' => 'Both people have a membership in the same lodge. Resolve that conflict first.']);
             }
             $hasVolunteerConflict = EventVolunteerCommitment::query()->where('person_id', $survivor->id)->where('status', VolunteerCommitmentStatus::Committed)
-                ->whereExists(fn ($query) => $query->selectRaw('1')->from('event_volunteer_commitments as source_commitments')->where('source_commitments.person_id', $source->id)->where('source_commitments.status', VolunteerCommitmentStatus::Committed->value)->whereColumn('source_commitments.event_volunteer_position_id', 'event_volunteer_commitments.event_volunteer_position_id')->whereColumn('source_commitments.event_occurrence_id', 'event_volunteer_commitments.event_occurrence_id'))->exists();
+                ->whereExists(fn($query) => $query->selectRaw('1')->from('event_volunteer_commitments as source_commitments')->where('source_commitments.person_id', $source->id)->where('source_commitments.status', VolunteerCommitmentStatus::Committed->value)->whereColumn('source_commitments.event_volunteer_position_id', 'event_volunteer_commitments.event_volunteer_position_id')->whereColumn('source_commitments.event_occurrence_id', 'event_volunteer_commitments.event_occurrence_id'))->exists();
             if ($hasVolunteerConflict) {
                 throw ValidationException::withMessages(['survivor_person_id' => 'Both people have an active commitment to the same volunteer position and occurrence. Resolve that conflict first.']);
             }
@@ -54,7 +54,7 @@ class PersonMergeService
                 $survivor->pastMasterTerms()->firstOrCreate(['lodge_id' => $term->lodge_id, 'year' => $term->year]);
                 $term->delete();
             }
-            if ($source->user && ! $survivor->user) {
+            if ($source->user && !$survivor->user) {
                 $source->user->update(['person_id' => $survivor->id]);
             }
             $relationships = PersonRelationship::query()->where('person_one_id', $source->id)->orWhere('person_two_id', $source->id)->get();
@@ -107,11 +107,11 @@ class PersonMergeService
                 throw ValidationException::withMessages(['survivor_person_id' => 'A family newsletter subscription cannot name the same person as recipient and sponsor. Resolve that subscription first.']);
             }
             if ($subscription->status === 'active' && FamilyNewsletterSubscription::query()
-                ->where('lodge_id', $subscription->lodge_id)
-                ->where('recipient_person_id', $recipientId)
-                ->where('status', 'active')
-                ->whereKeyNot($subscription->id)
-                ->exists()) {
+                    ->where('lodge_id', $subscription->lodge_id)
+                    ->where('recipient_person_id', $recipientId)
+                    ->where('status', 'active')
+                    ->whereKeyNot($subscription->id)
+                    ->exists()) {
                 throw ValidationException::withMessages(['survivor_person_id' => 'Both people have an active family newsletter subscription for the same lodge. Resolve that conflict first.']);
             }
         }
@@ -123,12 +123,12 @@ class PersonMergeService
         $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
 
         return PersonRelationship::query()->whereKeyNot($current->id)->where(function ($query) use ($one, $two, $current, $type, $inverseId) {
-            $query->where(fn ($direct) => $direct->where('person_one_id', $one)->where('person_two_id', $two)->where('relationship_type_id', $current->relationship_type_id));
+            $query->where(fn($direct) => $direct->where('person_one_id', $one)->where('person_two_id', $two)->where('relationship_type_id', $current->relationship_type_id));
             if ($inverseId) {
-                $query->orWhere(fn ($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $inverseId));
+                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $inverseId));
             }
             if ($type->is_symmetric) {
-                $query->orWhere(fn ($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $current->relationship_type_id));
+                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $current->relationship_type_id));
             }
         })->first();
     }

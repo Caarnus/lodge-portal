@@ -16,7 +16,9 @@ use Illuminate\Validation\ValidationException;
 
 class VolunteerCommitmentService
 {
-    public function __construct(private readonly VolunteerEligibility $eligibility) {}
+    public function __construct(private readonly VolunteerEligibility $eligibility)
+    {
+    }
 
     public function commit(EventOccurrence $occurrence, EventVolunteerPosition $position, User $target, User $actor): EventVolunteerCommitment
     {
@@ -27,10 +29,10 @@ class VolunteerCommitmentService
             if ($position->event_id !== $event->id || $position->lodge_id !== $event->lodge_id || ($position->event_occurrence_id !== null && $position->event_occurrence_id !== $occurrence->id)) {
                 abort(404);
             }
-            if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || ! $occurrence->starts_at->isFuture() || ! $position->is_active) {
+            if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || !$occurrence->starts_at->isFuture() || !$position->is_active) {
                 throw ValidationException::withMessages(['position' => 'Volunteer staffing is unavailable for this occurrence.']);
             }
-            if (! $this->eligibility->canVolunteer($target, $event)) {
+            if (!$this->eligibility->canVolunteer($target, $event)) {
                 abort(403);
             }
             $active = EventVolunteerCommitment::query()->where('event_volunteer_position_id', $position->id)->where('event_occurrence_id', $occurrence->id)->where('status', VolunteerCommitmentStatus::Committed);
@@ -55,7 +57,7 @@ class VolunteerCommitmentService
             if ($commitment->status !== VolunteerCommitmentStatus::Committed) {
                 throw ValidationException::withMessages(['commitment' => 'This commitment is already inactive.']);
             }
-            if (! $manager && ($commitment->user_id !== $actor->id || $commitment->person_id !== $actor->person_id || ! $commitment->occurrence->starts_at->isFuture())) {
+            if (!$manager && ($commitment->user_id !== $actor->id || $commitment->person_id !== $actor->person_id || !$commitment->occurrence->starts_at->isFuture())) {
                 abort(403);
             }
             $values = $manager ? ['status' => VolunteerCommitmentStatus::AdministrativelyRemoved, 'administratively_removed_at' => now(), 'removed_by' => $actor->id] : ['status' => VolunteerCommitmentStatus::Withdrawn, 'withdrawn_at' => now()];

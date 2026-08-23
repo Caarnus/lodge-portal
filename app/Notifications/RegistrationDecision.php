@@ -12,10 +12,12 @@ class RegistrationDecision extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public readonly string $decision,
+        public readonly string  $decision,
         public readonly ?string $lodgeName,
         public readonly ?string $reason = null,
-    ) {}
+    )
+    {
+    }
 
     public function via(object $notifiable): array
     {
@@ -26,12 +28,12 @@ class RegistrationDecision extends Notification implements ShouldQueue
     {
         $approved = $this->decision === 'approved';
         $message = (new MailMessage)
-            ->subject('Registration '.($approved ? 'approved' : 'rejected'))
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('Your registration'.($this->lodgeName ? ' for '.$this->lodgeName : '').' has been '.$this->decision.'.');
+            ->subject('Registration ' . ($approved ? 'approved' : 'rejected'))
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line('Your registration' . ($this->lodgeName ? ' for ' . $this->lodgeName : '') . ' has been ' . $this->decision . '.');
 
-        if (! $approved && $this->reason) {
-            $message->line('Reason: '.$this->reason);
+        if (!$approved && $this->reason) {
+            $message->line('Reason: ' . $this->reason);
         }
 
         return $approved

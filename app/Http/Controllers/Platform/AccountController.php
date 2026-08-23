@@ -15,11 +15,11 @@ class AccountController extends Controller
 {
     public function index(Request $request)
     {
-        $search = trim((string) $request->query('search'));
+        $search = trim((string)$request->query('search'));
         $accounts = User::query()
-            ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $filter) => $filter
-                ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($search).'%'])
-                ->orWhereRaw('LOWER(email) LIKE ?', ['%'.strtolower($search).'%'])))
+            ->when($search !== '', fn(Builder $query) => $query->where(fn(Builder $filter) => $filter
+                ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                ->orWhereRaw('LOWER(email) LIKE ?', ['%' . strtolower($search) . '%'])))
             ->orderBy('name')
             ->paginate(50, ['id', 'name', 'email', 'approval_status', 'is_platform_admin', 'created_at'])
             ->withQueryString();

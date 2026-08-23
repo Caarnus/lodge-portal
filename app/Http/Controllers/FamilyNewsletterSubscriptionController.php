@@ -19,7 +19,7 @@ class FamilyNewsletterSubscriptionController extends Controller
     {
         $this->allowLodge($lodge, 'communications.recipients');
 
-        return Inertia::render('communications/Recipients', ['lodge' => $lodge, 'requests' => $lodge->familyNewsletterRequests()->whereIn('status', ['pending_verification', 'pending_review'])->latest()->get(), 'subscriptions' => $lodge->familyNewsletterSubscriptions()->with(['recipient', 'sponsor', 'relationship.type'])->latest()->get(), 'people' => Person::query()->whereHas('memberships', fn ($q) => $q->where('lodge_id', $lodge->id))->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name']), 'relationships' => PersonRelationship::query()->where('owning_lodge_id', $lodge->id)->with('type')->get()]);
+        return Inertia::render('communications/Recipients', ['lodge' => $lodge, 'requests' => $lodge->familyNewsletterRequests()->whereIn('status', ['pending_verification', 'pending_review'])->latest()->get(), 'subscriptions' => $lodge->familyNewsletterSubscriptions()->with(['recipient', 'sponsor', 'relationship.type'])->latest()->get(), 'people' => Person::query()->whereHas('memberships', fn($q) => $q->where('lodge_id', $lodge->id))->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name']), 'relationships' => PersonRelationship::query()->where('owning_lodge_id', $lodge->id)->with('type')->get()]);
     }
 
     public function approve(Request $request, Lodge $lodge, FamilyNewsletterRequest $familyRequest, FamilyNewsletterEligibility $eligibility)

@@ -31,19 +31,19 @@ class PublicEventController extends Controller
             ->where('status', EventStatus::Published)
             ->whereNotNull('rrule')
             ->where('first_starts_at', '<=', $through)
-            ->where(fn ($query) => $query->whereNull('occurrences_generated_through')->orWhere('occurrences_generated_through', '<', $through))
-            ->each(fn (Event $event) => $materializer->materialize($event, $now->toImmutable(), $through->toImmutable()));
+            ->where(fn($query) => $query->whereNull('occurrences_generated_through')->orWhere('occurrences_generated_through', '<', $through))
+            ->each(fn(Event $event) => $materializer->materialize($event, $now->toImmutable(), $through->toImmutable()));
 
         $occurrences = EventOccurrence::query()->with(['event.category', 'event.coverMediaAsset'])
             ->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)
-            ->whereBetween('starts_at', [$now, $through])->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published))
-            ->orderBy('starts_at')->get()->filter(fn (EventOccurrence $occurrence) => $occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event))
+            ->whereBetween('starts_at', [$now, $through])->whereHas('event', fn($query) => $query->where('status', EventStatus::Published))
+            ->orderBy('starts_at')->get()->filter(fn(EventOccurrence $occurrence) => $occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event))
             ->take(20)->values();
 
         return Inertia::render('public/Events', [
             'lodge' => $lodge,
             'navigation' => $this->navigation($lodge),
-            'occurrences' => ['data' => $occurrences->map(fn (EventOccurrence $occurrence) => $this->eventData($occurrence))->all()],
+            'occurrences' => ['data' => $occurrences->map(fn(EventOccurrence $occurrence) => $this->eventData($occurrence))->all()],
             'range' => $range['key'],
             'rangeOptions' => $this->rangeOptions(),
         ]);
@@ -64,12 +64,12 @@ class PublicEventController extends Controller
             'viewer' => $request->user()?->only('name', 'email'),
         ];
         if ($volunteerEligibility->canVolunteer($request->user(), $occurrence->event) && $occurrence->starts_at->isFuture()) {
-            $positions = $occurrence->event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get();
+            $positions = $occurrence->event->volunteerPositions()->where('is_active', true)->where(fn($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get();
             $counts = EventVolunteerCommitment::query()->selectRaw('event_volunteer_position_id, count(*) as filled')->where('event_occurrence_id', $occurrence->id)->where('status', 'committed')->groupBy('event_volunteer_position_id')->pluck('filled', 'event_volunteer_position_id');
             $own = EventVolunteerCommitment::query()->where('event_occurrence_id', $occurrence->id)->where('user_id', $request->user()->id)->where('person_id', $request->user()->person_id)->where('status', 'committed')->get()->keyBy('event_volunteer_position_id');
             $props['staffing'] = $positions->map(function ($position) use ($counts, $own) {
                 $commitment = $own->get($position->id);
-                $filledCount = (int) ($counts->get($position->id, 0));
+                $filledCount = (int)($counts->get($position->id, 0));
 
                 return [
                     'id' => $position->id,
@@ -112,7 +112,7 @@ class PublicEventController extends Controller
             'is_recurring' => $event->rrule !== null,
             'reminders_enabled' => $event->reminders_enabled,
             'guest_reminders_enabled' => $event->guest_reminders_enabled,
-            'reservation_fields' => $event->relationLoaded('reservationFields') ? $event->reservationFields->where('is_active', true)->map(fn ($field) => [
+            'reservation_fields' => $event->relationLoaded('reservationFields') ? $event->reservationFields->where('is_active', true)->map(fn($field) => [
                 'key' => $field->key, 'label' => $field->label, 'help_text' => $field->help_text, 'type' => $field->type->value, 'is_required' => $field->is_required, 'options' => $field->options,
             ])->values() : [],
         ];
@@ -121,8 +121,8 @@ class PublicEventController extends Controller
     private function navigation(Lodge $lodge): array
     {
         return WebsitePageVersion::query()->with('page')->where('lodge_id', $lodge->id)->where('status', 'published')
-            ->where('show_in_navigation', true)->whereHas('page', fn ($query) => $query->whereNull('deleted_at'))
-            ->orderBy('navigation_order')->orderBy('title')->get()->map(fn (WebsitePageVersion $version) => [
+            ->where('show_in_navigation', true)->whereHas('page', fn($query) => $query->whereNull('deleted_at'))
+            ->orderBy('navigation_order')->orderBy('title')->get()->map(fn(WebsitePageVersion $version) => [
                 'title' => $version->title, 'slug' => $version->slug, 'is_home' => $version->is_home, 'children' => [],
             ])->all();
     }

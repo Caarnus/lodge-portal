@@ -25,7 +25,7 @@ class LodgeSettingsController extends Controller
     public function update(LodgeRequest $r, Lodge $lodge)
     {
         $this->allow($lodge);
-        if ($lodge->status === LodgeStatus::DisabledLocked && $r->status === 'active' && ! $r->user()->is_platform_admin) {
+        if ($lodge->status === LodgeStatus::DisabledLocked && $r->status === 'active' && !$r->user()->is_platform_admin) {
             abort(403);
         }
         $before = $lodge->toArray();

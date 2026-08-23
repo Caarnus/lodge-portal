@@ -16,7 +16,9 @@ class ProcessMediaAsset implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public readonly int $lodgeId, public readonly int $mediaAssetId) {}
+    public function __construct(public readonly int $lodgeId, public readonly int $mediaAssetId)
+    {
+    }
 
     public function handle(MediaExposureService $exposure): void
     {
@@ -25,7 +27,7 @@ class ProcessMediaAsset implements ShouldQueue
 
         try {
             $source = Storage::disk('local')->path($asset->original_path);
-            $privateTargetPath = 'website-private/'.$asset->lodge_id.'/'.Str::uuid().'.jpg';
+            $privateTargetPath = 'website-private/' . $asset->lodge_id . '/' . Str::uuid() . '.jpg';
             [$bytes, $width, $height] = class_exists(\Imagick::class)
                 ? $this->withImagick($source)
                 : $this->withGd($source);
@@ -64,7 +66,7 @@ class ProcessMediaAsset implements ShouldQueue
         $width = $image->getImageWidth();
         $height = $image->getImageHeight();
         $this->assertPixels($width, $height);
-        $max = (int) config('website.max_derivative_dimension');
+        $max = (int)config('website.max_derivative_dimension');
         if ($width > $max || $height > $max) {
             $image->thumbnailImage($max, $max, true);
         }
@@ -80,25 +82,25 @@ class ProcessMediaAsset implements ShouldQueue
     private function withGd(string $source): array
     {
         $details = @getimagesize($source);
-        if (! $details) {
+        if (!$details) {
             throw new \RuntimeException('Server image decoder does not support this file.');
         }
         [$width, $height] = $details;
         $this->assertPixels($width, $height);
-        $image = @imagecreatefromstring((string) file_get_contents($source));
-        if (! $image) {
+        $image = @imagecreatefromstring((string)file_get_contents($source));
+        if (!$image) {
             throw new \RuntimeException('Image could not be decoded.');
         }
-        $max = (int) config('website.max_derivative_dimension');
+        $max = (int)config('website.max_derivative_dimension');
         $scale = min(1, $max / max($width, $height));
-        $newWidth = max(1, (int) round($width * $scale));
-        $newHeight = max(1, (int) round($height * $scale));
+        $newWidth = max(1, (int)round($width * $scale));
+        $newHeight = max(1, (int)round($height * $scale));
         $output = imagecreatetruecolor($newWidth, $newHeight);
         imagefill($output, 0, 0, imagecolorallocate($output, 255, 255, 255));
         imagecopyresampled($output, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
         ob_start();
         imagejpeg($output, null, 85);
-        $bytes = (string) ob_get_clean();
+        $bytes = (string)ob_get_clean();
         imagedestroy($image);
         imagedestroy($output);
 
@@ -107,7 +109,7 @@ class ProcessMediaAsset implements ShouldQueue
 
     private function assertPixels(int $width, int $height): void
     {
-        $maxPixels = (int) config('website.max_pixels', 60_000_000);
+        $maxPixels = (int)config('website.max_pixels', 60_000_000);
         if ($maxPixels < 1) {
             throw new \RuntimeException('Media pixel limit is not configured correctly.');
         }

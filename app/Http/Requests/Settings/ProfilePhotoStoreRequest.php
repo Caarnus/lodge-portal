@@ -8,6 +8,6 @@ class ProfilePhotoStoreRequest extends FormRequest
 {
     public function rules(): array
     {
-        return ['photo' => ['required', 'file', 'max:'.config('website.max_upload_kb')]];
+        return ['photo' => ['required', 'file', 'max:' . config('website.max_upload_kb')]];
     }
 }

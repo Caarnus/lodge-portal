@@ -31,12 +31,12 @@ class LodgeRoleController extends Controller
     public function assignments(Request $request, Lodge $lodge, PersonAccess $access)
     {
         $this->allowLodge($lodge, 'roles.manage');
-        $search = trim((string) $request->query('search'));
+        $search = trim((string)$request->query('search'));
         $usersQuery = User::query()->whereIn('person_id', $access->visibleQuery($lodge)->select('people.id'));
         if ($search !== '') {
-            $usersQuery->where(fn (Builder $filter) => $filter
-                ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($search).'%'])
-                ->orWhereRaw('LOWER(email) LIKE ?', ['%'.strtolower($search).'%']));
+            $usersQuery->where(fn(Builder $filter) => $filter
+                ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                ->orWhereRaw('LOWER(email) LIKE ?', ['%' . strtolower($search) . '%']));
         }
         $users = $usersQuery->orderBy('name')->paginate(50, ['id', 'name', 'email'])->withQueryString();
 
@@ -87,8 +87,8 @@ class LodgeRoleController extends Controller
         $role = Role::query()->where('lodge_id', $lodge->id)->findOrFail($data['role_id']);
         $user = User::findOrFail($data['user_id']);
         abort_unless($user->person && $access->visibleQuery($lodge)->whereKey($user->person_id)->exists(), 403);
-        if ($role->name === 'Administrator' && ! $request->user()->is_platform_admin
-            && ! $request->user()->lodges()->where('lodges.id', $lodge->id)->wherePivot('role_id', $role->id)->exists()) {
+        if ($role->name === 'Administrator' && !$request->user()->is_platform_admin
+            && !$request->user()->lodges()->where('lodges.id', $lodge->id)->wherePivot('role_id', $role->id)->exists()) {
             throw ValidationException::withMessages(['role_id' => 'Only an existing lodge Administrator can grant that role.']);
         }
         DB::table('lodge_user_roles')->insertOrIgnore(['lodge_id' => $lodge->id, 'user_id' => $user->id, 'role_id' => $role->id, 'created_at' => now(), 'updated_at' => now()]);
@@ -120,7 +120,7 @@ class LodgeRoleController extends Controller
             return Permission::query()->orderBy('name')->get();
         }
 
-        return Permission::query()->whereHas('roles', fn ($query) => $query->whereHas('users', fn ($users) => $users
+        return Permission::query()->whereHas('roles', fn($query) => $query->whereHas('users', fn($users) => $users
             ->where('users.id', $request->user()->id)->where('lodge_user_roles.lodge_id', $lodge->id)))->orderBy('name')->get();
     }
 

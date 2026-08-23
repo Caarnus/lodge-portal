@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class EventScheduleReconciler
 {
-    public function __construct(private readonly EventOccurrenceMaterializer $materializer) {}
+    public function __construct(private readonly EventOccurrenceMaterializer $materializer)
+    {
+    }
 
     /** @return list<EventOccurrence> */
     public function reconcile(Event $event, CarbonImmutable $from, CarbonImmutable $through): array

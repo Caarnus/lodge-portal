@@ -41,12 +41,12 @@ class ProfileUpdateRequest extends FormRequest
     {
         $this->merge([
             'preferred_name' => $this->trimmedOrNull($this->preferred_name),
-            'email' => strtolower((string) $this->trimmedOrNull($this->email)),
+            'email' => strtolower((string)$this->trimmedOrNull($this->email)),
             'phone' => $this->formatPhone($this->phone),
             'mailing_address_line_1' => $this->trimmedOrNull($this->mailing_address_line_1),
             'mailing_address_line_2' => $this->trimmedOrNull($this->mailing_address_line_2),
             'mailing_city' => $this->trimmedOrNull($this->mailing_city),
-            'mailing_state' => strtoupper((string) $this->trimmedOrNull($this->mailing_state)),
+            'mailing_state' => strtoupper((string)$this->trimmedOrNull($this->mailing_state)),
             'mailing_postal_code' => $this->trimmedOrNull($this->mailing_postal_code),
         ]);
     }
@@ -61,12 +61,12 @@ class ProfileUpdateRequest extends FormRequest
     private function formatPhone(mixed $phone): ?string
     {
         $phone = $this->trimmedOrNull($phone);
-        if (! $phone) {
+        if (!$phone) {
             return null;
         }
 
         $digits = preg_replace('/\D/', '', $phone);
-        if (! str_starts_with($phone, '+') && strlen($digits) === 10) {
+        if (!str_starts_with($phone, '+') && strlen($digits) === 10) {
             return sprintf('(%s)%s-%s', substr($digits, 0, 3), substr($digits, 3, 3), substr($digits, 6));
         }
         if (str_starts_with($phone, '+') && strlen($digits) === 11 && str_starts_with($digits, '1')) {

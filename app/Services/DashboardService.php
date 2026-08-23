@@ -18,20 +18,22 @@ use App\Models\User;
 
 class DashboardService
 {
-    public function __construct(private readonly DirectoryAccess $directory) {}
+    public function __construct(private readonly DirectoryAccess $directory)
+    {
+    }
 
     public function read(User $user): array
     {
         $personId = $user->person_id;
         $memberships = $personId ? Membership::query()->with(['lodge', 'type', 'status', 'degree'])
             ->where('person_id', $personId)->whereNull('end_date')
-            ->whereHas('status', fn ($q) => $q->where('key', 'active'))
-            ->whereHas('lodge', fn ($q) => $q->where('status', LodgeStatus::Active))
+            ->whereHas('status', fn($q) => $q->where('key', 'active'))
+            ->whereHas('lodge', fn($q) => $q->where('status', LodgeStatus::Active))
             ->orderBy('lodge_id')->limit(12)->get() : collect();
         $lodgeIds = $memberships->pluck('lodge_id');
 
         return [
-            'memberships' => $memberships->map(fn (Membership $m) => [
+            'memberships' => $memberships->map(fn(Membership $m) => [
                 'id' => $m->id,
                 'lodge' => $m->lodge->name,
                 'number' => $m->lodge->number,
@@ -45,17 +47,17 @@ class DashboardService
             ])->values(),
             'upcomingEvents' => EventOccurrence::query()->with(['event', 'lodge'])->whereIn('lodge_id', $lodgeIds)
                 ->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', now())
-                ->whereHas('event', fn ($q) => $q->where('status', EventStatus::Published))->orderBy('starts_at')->limit(5)->get()
-                ->map(fn ($o) => $this->occurrence($o))->values(),
+                ->whereHas('event', fn($q) => $q->where('status', EventStatus::Published))->orderBy('starts_at')->limit(5)->get()
+                ->map(fn($o) => $this->occurrence($o))->values(),
             'reservations' => $this->owned(EventReservation::query()->with(['occurrence.event', 'lodge']), $user, $personId)
-                ->where('status', EventReservationStatus::Confirmed)->whereHas('occurrence', fn ($q) => $q->where('starts_at', '>', now())->where('status', EventOccurrenceStatus::Scheduled))
-                ->orderByDesc('id')->limit(5)->get()->map(fn ($r) => ['id' => $r->id, 'event' => $r->event?->title, 'lodge' => $r->lodge?->name])->values(),
+                ->where('status', EventReservationStatus::Confirmed)->whereHas('occurrence', fn($q) => $q->where('starts_at', '>', now())->where('status', EventOccurrenceStatus::Scheduled))
+                ->orderByDesc('id')->limit(5)->get()->map(fn($r) => ['id' => $r->id, 'event' => $r->event?->title, 'lodge' => $r->lodge?->name])->values(),
             'reminders' => $this->owned(EventReminderSubscription::query()->with(['event', 'lodge']), $user, $personId)
-                ->where('status', ReminderSubscriptionStatus::Active)->orderByDesc('id')->limit(5)->get()->map(fn ($r) => ['id' => $r->id, 'event' => $r->event?->title, 'lodge' => $r->lodge?->name])->values(),
+                ->where('status', ReminderSubscriptionStatus::Active)->orderByDesc('id')->limit(5)->get()->map(fn($r) => ['id' => $r->id, 'event' => $r->event?->title, 'lodge' => $r->lodge?->name])->values(),
             'volunteerCommitments' => $this->owned(EventVolunteerCommitment::query()->with(['position', 'occurrence.event', 'lodge']), $user, $personId)
-                ->where('status', VolunteerCommitmentStatus::Committed)->whereHas('occurrence', fn ($q) => $q->where('starts_at', '>', now())->where('status', EventOccurrenceStatus::Scheduled))
-                ->orderByDesc('id')->limit(5)->get()->map(fn ($c) => ['id' => $c->id, 'position' => $c->position?->name, 'event' => $c->event?->title, 'lodge' => $c->lodge?->name, 'lodge_slug' => $c->lodge?->slug, 'occurrence_id' => $c->event_occurrence_id])->values(),
-            'profile' => ['linked' => (bool) $personId, 'directory_scope' => $user->person?->directoryPrivacySetting?->scope?->value, 'settings_url' => route('profile.edit')],
+                ->where('status', VolunteerCommitmentStatus::Committed)->whereHas('occurrence', fn($q) => $q->where('starts_at', '>', now())->where('status', EventOccurrenceStatus::Scheduled))
+                ->orderByDesc('id')->limit(5)->get()->map(fn($c) => ['id' => $c->id, 'position' => $c->position?->name, 'event' => $c->event?->title, 'lodge' => $c->lodge?->name, 'lodge_slug' => $c->lodge?->slug, 'occurrence_id' => $c->event_occurrence_id])->values(),
+            'profile' => ['linked' => (bool)$personId, 'directory_scope' => $user->person?->directoryPrivacySetting?->scope?->value, 'settings_url' => route('profile.edit')],
         ];
     }
 

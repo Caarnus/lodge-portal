@@ -20,18 +20,20 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaExposureService
 {
-    public function __construct(private readonly WebsiteSectionCatalog $sections) {}
+    public function __construct(private readonly WebsiteSectionCatalog $sections)
+    {
+    }
 
     public function syncPublicCopy(MediaAsset $asset): void
     {
         $asset = $asset->fresh();
-        if (! $asset || $asset->processing_status !== MediaProcessingStatus::Ready || ! $asset->private_derivative_path) {
+        if (!$asset || $asset->processing_status !== MediaProcessingStatus::Ready || !$asset->private_derivative_path) {
             return;
         }
 
         if ($asset->visibility === 'public') {
-            if (! $asset->derivative_path || ! Storage::disk('public')->exists($asset->derivative_path)) {
-                $target = 'website-media/'.$asset->lodge_id.'/'.Str::uuid().'.jpg';
+            if (!$asset->derivative_path || !Storage::disk('public')->exists($asset->derivative_path)) {
+                $target = 'website-media/' . $asset->lodge_id . '/' . Str::uuid() . '.jpg';
                 Storage::disk('public')->put($target, Storage::disk('local')->get($asset->private_derivative_path), ['visibility' => 'public']);
                 $asset->update(['derivative_path' => $target]);
             }
@@ -63,7 +65,7 @@ class MediaExposureService
         return $this->websiteReferenceExists($asset, [ContentVersionStatus::Draft, ContentVersionStatus::Published])
             || Event::query()->where('lodge_id', $asset->lodge_id)->where('cover_media_asset_id', $asset->id)->whereNull('deleted_at')->exists()
             || NewsletterIssueVersion::query()->where('lodge_id', $asset->lodge_id)->where('cover_media_asset_id', $asset->id)->whereIn('status', [ContentVersionStatus::Draft, ContentVersionStatus::Published])->exists()
-            || GalleryAlbumPhoto::query()->where('lodge_id', $asset->lodge_id)->where('media_asset_id', $asset->id)->whereHas('version', fn ($query) => $query->whereIn('status', [ContentVersionStatus::Draft, ContentVersionStatus::Published]))->exists()
+            || GalleryAlbumPhoto::query()->where('lodge_id', $asset->lodge_id)->where('media_asset_id', $asset->id)->whereHas('version', fn($query) => $query->whereIn('status', [ContentVersionStatus::Draft, ContentVersionStatus::Published]))->exists()
             || $this->brandingReferenceExists($asset);
     }
 
@@ -71,7 +73,7 @@ class MediaExposureService
     {
         return $this->websiteReferenceExists($asset, [ContentVersionStatus::Published])
             || Event::query()->where('lodge_id', $asset->lodge_id)->where('cover_media_asset_id', $asset->id)->where('status', EventStatus::Published)->where('visibility', EventVisibility::Public)->whereNull('deleted_at')->exists()
-            || GalleryAlbumPhoto::query()->where('lodge_id', $asset->lodge_id)->where('media_asset_id', $asset->id)->whereHas('version', fn ($query) => $query->where('status', ContentVersionStatus::Published)->where('visibility', GalleryVisibility::Public))->exists()
+            || GalleryAlbumPhoto::query()->where('lodge_id', $asset->lodge_id)->where('media_asset_id', $asset->id)->whereHas('version', fn($query) => $query->where('status', ContentVersionStatus::Published)->where('visibility', GalleryVisibility::Public))->exists()
             || $this->brandingReferenceExists($asset);
     }
 
@@ -98,19 +100,19 @@ class MediaExposureService
     private function websiteReferenceExists(MediaAsset $asset, array $statuses): bool
     {
         return WebsiteSection::query()->where('lodge_id', $asset->lodge_id)
-            ->whereHas('version', fn ($query) => $query->whereIn('status', $statuses))
+            ->whereHas('version', fn($query) => $query->whereIn('status', $statuses))
             ->get()
-            ->contains(fn (WebsiteSection $section) => in_array($asset->id, $this->sections->mediaIds($section->configuration), true));
+            ->contains(fn(WebsiteSection $section) => in_array($asset->id, $this->sections->mediaIds($section->configuration), true));
     }
 
     private function brandingReferenceExists(MediaAsset $asset): bool
     {
-        if (! $asset->derivative_path) {
+        if (!$asset->derivative_path) {
             return false;
         }
 
         return Lodge::query()->whereKey($asset->lodge_id)
-            ->where(fn ($query) => $query->where('logo_path', $asset->derivative_path)->orWhere('seal_path', $asset->derivative_path))
+            ->where(fn($query) => $query->where('logo_path', $asset->derivative_path)->orWhere('seal_path', $asset->derivative_path))
             ->exists();
     }
 }

@@ -6,5 +6,7 @@ use App\Models\EventReservation;
 
 readonly class ReservationResult
 {
-    public function __construct(public EventReservation $reservation, public string $cancellationToken) {}
+    public function __construct(public EventReservation $reservation, public string $cancellationToken)
+    {
+    }
 }

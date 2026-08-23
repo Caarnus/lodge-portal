@@ -21,14 +21,14 @@ class WebsiteSectionController extends Controller
             'type' => ['required', Rule::in(WebsiteSectionCatalog::TYPES)],
             'configuration' => 'sometimes|required|array',
         ]);
-        $platformAdmin = (bool) $request->user()->is_platform_admin;
+        $platformAdmin = (bool)$request->user()->is_platform_admin;
         $configuration = array_key_exists('configuration', $input)
             ? $catalog->validate($input['type'], $input['configuration'], $lodge, $platformAdmin)
             : $catalog->defaultConfiguration($input['type'], $platformAdmin);
         $section = $draft->sections()->create([
             'lodge_id' => $lodge->id,
             'type' => $input['type'],
-            'sort_order' => ((int) $draft->sections()->max('sort_order')) + 1,
+            'sort_order' => ((int)$draft->sections()->max('sort_order')) + 1,
             'configuration' => $configuration,
         ]);
         Audit::record('website.section_created', $section, $lodge, null, $section->toArray());
@@ -41,7 +41,7 @@ class WebsiteSectionController extends Controller
         $this->allow($lodge, $page, $section);
         $input = $request->validate(['configuration' => 'required|array']);
         $before = $section->toArray();
-        $section->update(['configuration' => $catalog->validate($section->type, $input['configuration'], $lodge, (bool) $request->user()->is_platform_admin)]);
+        $section->update(['configuration' => $catalog->validate($section->type, $input['configuration'], $lodge, (bool)$request->user()->is_platform_admin)]);
         Audit::record('website.section_updated', $section, $lodge, $before, $section->fresh()->toArray());
 
         return back();

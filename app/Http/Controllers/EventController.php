@@ -34,7 +34,7 @@ class EventController extends Controller
             'occurrences.volunteerCommitments.position',
             'occurrences.volunteerCommitments.person',
             'occurrences.volunteerCommitments.reminderDelivery',
-        ])->when($request->string('search')->toString(), fn ($query, string $search) => $query->where('title', 'like', "%{$search}%"))
+        ])->when($request->string('search')->toString(), fn($query, string $search) => $query->where('title', 'like', "%{$search}%"))
             ->orderByDesc('first_starts_at')->paginate(20)->withQueryString();
         $events->through(function (Event $event) {
             $occurrence = $event->occurrences->count() === 1 ? $event->occurrences->first() : null;
@@ -48,15 +48,15 @@ class EventController extends Controller
                 'occurrence' => $event->occurrences->count() === 1 ? [
                     'id' => $occurrence->id,
                     'reservation_count' => $event->reservations_enabled ? $reservations->count() : null,
-                    'reservation_roster' => $reservations->map(fn ($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values(),
+                    'reservation_roster' => $reservations->map(fn($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values(),
                     'volunteer_filled' => $commitments->count(),
-                    'volunteer_needed' => $event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->sum('needed_count'),
-                    'volunteer_positions' => $event->volunteerPositions()->where('is_active', true)->where(fn ($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get()->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn ($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
+                    'volunteer_needed' => $event->volunteerPositions()->where('is_active', true)->where(fn($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->sum('needed_count'),
+                    'volunteer_positions' => $event->volunteerPositions()->where('is_active', true)->where(fn($query) => $query->whereNull('event_occurrence_id')->orWhere('event_occurrence_id', $occurrence->id))->orderBy('sort_order')->orderBy('name')->get()->map(fn($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
                 ] : null,
             ];
         });
 
-        return Inertia::render('events/Index', ['lodge' => $lodge->only('id', 'name'), 'events' => $events, 'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->get()->map(fn (Membership $membership) => $membership->person)->filter(fn (?Person $person) => $person?->user)->unique('id')->map(fn (Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values()]);
+        return Inertia::render('events/Index', ['lodge' => $lodge->only('id', 'name'), 'events' => $events, 'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn($query) => $query->where('key', 'active'))->get()->map(fn(Membership $membership) => $membership->person)->filter(fn(?Person $person) => $person?->user)->unique('id')->map(fn(Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values()]);
     }
 
     public function create(Lodge $lodge)
@@ -102,8 +102,8 @@ class EventController extends Controller
         $before = $event->toArray();
         $data = $this->data($request, $lodge, $recurrence, $sanitizer);
         $scheduleChanged = $this->scheduleChanged($event, $data);
-        if ($scheduleChanged && ! $request->boolean('confirm_schedule_change')) {
-            $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn ($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries')->orWhereHas('volunteerPositions')->orWhereHas('volunteerCommitments')->orWhereHas('volunteerReminderDeliveries'))->count();
+        if ($scheduleChanged && !$request->boolean('confirm_schedule_change')) {
+            $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries')->orWhereHas('volunteerPositions')->orWhereHas('volunteerCommitments')->orWhereHas('volunteerReminderDeliveries'))->count();
             throw ValidationException::withMessages(['confirm_schedule_change' => "Schedule change requires confirmation. {$protected} protected future occurrence(s) will be preserved."]);
         }
         if (filled($data['capacity'] ?? null)) {
@@ -152,9 +152,9 @@ class EventController extends Controller
             $futureOccurrences = $event->occurrences()->where('starts_at', '>=', now())->pluck('id');
             $event->reservations()->whereIn('event_occurrence_id', $futureOccurrences)->where('status', 'confirmed')
                 ->update(['status' => 'event_cancelled', 'cancelled_at' => now()]);
-            $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn ($occurrence) => $occurrence->reminderDeliveries()
+            $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn($occurrence) => $occurrence->reminderDeliveries()
                 ->whereIn('status', ['pending', 'claimed'])->update(['status' => 'skipped', 'skipped_at' => now()]));
-            $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn ($occurrence) => $occurrence->volunteerReminderDeliveries()
+            $event->occurrences()->whereIn('id', $futureOccurrences)->each(fn($occurrence) => $occurrence->volunteerReminderDeliveries()
                 ->whereIn('status', ['pending', 'claimed'])->update(['status' => 'skipped', 'skip_reason' => 'event_inactive', 'skipped_at' => now()]));
         });
         Audit::record('event.cancelled', $event, $lodge, $before, $event->fresh()->toArray());
@@ -221,7 +221,7 @@ class EventController extends Controller
         $data['rrule'] = filled($data['rrule'] ?? null) ? $recurrence->canonicalize($data['rrule'], $data['first_starts_at'], $data['time_zone']) : null;
         if ($data['cover_media_asset_id'] ?? null) {
             $asset = MediaAsset::query()->whereKey($data['cover_media_asset_id'])->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->first();
-            if (! $asset) {
+            if (!$asset) {
                 throw ValidationException::withMessages(['cover_media_asset_id' => 'Selected media is unavailable.']);
             }
         }
@@ -236,7 +236,7 @@ class EventController extends Controller
 
     private function scheduleChanged(Event $event, array $data): bool
     {
-        return collect(['first_starts_at', 'duration_minutes', 'time_zone', 'rrule'])->contains(fn (string $key) => (string) $event->getAttribute($key) !== (string) ($data[$key] ?? null));
+        return collect(['first_starts_at', 'duration_minutes', 'time_zone', 'rrule'])->contains(fn(string $key) => (string)$event->getAttribute($key) !== (string)($data[$key] ?? null));
     }
 
     private function allow(Lodge $lodge): void

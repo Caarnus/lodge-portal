@@ -14,7 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class EventReminderSubscriptionService
 {
-    public function __construct(private readonly EventEligibility $eligibility) {}
+    public function __construct(private readonly EventEligibility $eligibility)
+    {
+    }
 
     public function subscribe(Event $event, ?EventOccurrence $occurrence, ?User $user, array $data): ReminderSubscriptionResult
     {
@@ -44,24 +46,24 @@ class EventReminderSubscriptionService
 
     private function ensurePermitted(Event $event, ?EventOccurrence $occurrence, ?User $user): void
     {
-        if ($event->status !== EventStatus::Published || ! $event->reminders_enabled) {
+        if ($event->status !== EventStatus::Published || !$event->reminders_enabled) {
             throw ValidationException::withMessages(['event' => 'Reminder subscriptions are unavailable for this event.']);
         }
         if ($occurrence && $occurrence->status !== EventOccurrenceStatus::Scheduled) {
             throw ValidationException::withMessages(['occurrence' => 'Reminder subscriptions are unavailable for this occurrence.']);
         }
-        if (! $occurrence && ! EventOccurrence::query()
-            ->where('event_id', $event->id)
-            ->where('lodge_id', $event->lodge_id)
-            ->where('status', EventOccurrenceStatus::Scheduled)
-            ->where('starts_at', '>=', now())
-            ->exists()) {
+        if (!$occurrence && !EventOccurrence::query()
+                ->where('event_id', $event->id)
+                ->where('lodge_id', $event->lodge_id)
+                ->where('status', EventOccurrenceStatus::Scheduled)
+                ->where('starts_at', '>=', now())
+                ->exists()) {
             throw ValidationException::withMessages(['event' => 'Reminder subscriptions are unavailable for this event.']);
         }
-        if ($user && ! $this->eligibility->canView($user, $event)) {
+        if ($user && !$this->eligibility->canView($user, $event)) {
             abort(403);
         }
-        if (! $user && (! $event->guest_reminders_enabled || ! $this->eligibility->canView(null, $event))) {
+        if (!$user && (!$event->guest_reminders_enabled || !$this->eligibility->canView(null, $event))) {
             abort(403);
         }
     }

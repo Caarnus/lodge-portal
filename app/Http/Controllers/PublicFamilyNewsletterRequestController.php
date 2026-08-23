@@ -22,19 +22,19 @@ class PublicFamilyNewsletterRequestController extends Controller
     {
         $data = $request->validate(['requester_name' => 'required|string|max:255', 'requester_email' => 'nullable|email|max:255', 'receives_email' => 'required|boolean', 'receives_print' => 'required|boolean', 'mailing_address_line_1' => 'nullable|string|max:255', 'mailing_address_line_2' => 'nullable|string|max:255', 'mailing_city' => 'nullable|string|max:100', 'mailing_state' => 'nullable|string|size:2', 'mailing_postal_code' => 'nullable|string|max:16', 'claimed_relationship' => 'nullable|string|max:120', 'claimed_related_member_name' => 'nullable|string|max:255', 'website' => 'nullable|max:0']);
         unset($data['website']);
-        if (! $data['receives_email'] && ! $data['receives_print']) {
+        if (!$data['receives_email'] && !$data['receives_print']) {
             return back()->withErrors(['channels' => 'Choose a delivery method.']);
         }
-        if ($data['receives_email'] && ! $data['requester_email']) {
+        if ($data['receives_email'] && !$data['requester_email']) {
             return back()->withErrors(['requester_email' => 'Email is required for electronic delivery.']);
         }
-        if ($data['receives_print'] && (! filled($data['mailing_address_line_1']) || ! filled($data['mailing_city']) || ! filled($data['mailing_state']) || ! filled($data['mailing_postal_code']))) {
+        if ($data['receives_print'] && (!filled($data['mailing_address_line_1']) || !filled($data['mailing_city']) || !filled($data['mailing_state']) || !filled($data['mailing_postal_code']))) {
             return back()->withErrors(['mailing_address_line_1' => 'A complete mailing address is required for mailed delivery.']);
         }
         $token = $data['receives_email'] ? Str::random(48) : null;
-        $record = FamilyNewsletterRequest::create(array_merge($data, ['lodge_id' => $lodge->id, 'status' => $token ? DistributionRequestStatus::PendingVerification : DistributionRequestStatus::PendingReview, 'email_verification_token_hash' => $token ? hash('sha256', $token) : null, 'email_verification_expires_at' => $token ? now()->addHours(48) : null, 'request_ip' => $request->ip(), 'request_user_agent' => Str::limit((string) $request->userAgent(), 1000)]));
+        $record = FamilyNewsletterRequest::create(array_merge($data, ['lodge_id' => $lodge->id, 'status' => $token ? DistributionRequestStatus::PendingVerification : DistributionRequestStatus::PendingReview, 'email_verification_token_hash' => $token ? hash('sha256', $token) : null, 'email_verification_expires_at' => $token ? now()->addHours(48) : null, 'request_ip' => $request->ip(), 'request_user_agent' => Str::limit((string)$request->userAgent(), 1000)]));
         if ($token) {
-            Mail::raw('Verify your newsletter request: '.route('public.newsletters.request.verify.show', [$lodge, $token]), fn ($mail) => $mail->to($record->requester_email)->subject('Verify newsletter request'));
+            Mail::raw('Verify your newsletter request: ' . route('public.newsletters.request.verify.show', [$lodge, $token]), fn($mail) => $mail->to($record->requester_email)->subject('Verify newsletter request'));
         }
         Audit::record('family_newsletter_request.created', $record, $lodge, null, ['id' => $record->id]);
 

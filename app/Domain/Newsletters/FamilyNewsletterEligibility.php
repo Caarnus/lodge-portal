@@ -15,25 +15,25 @@ class FamilyNewsletterEligibility
 
     public function assertEligible(Lodge $lodge, Person $recipient, Person $sponsor, PersonRelationship $relationship, bool $email, bool $print): void
     {
-        if (! $email && ! $print) {
+        if (!$email && !$print) {
             throw ValidationException::withMessages(['channels' => 'Choose email, mailed newsletter, or both.']);
         }
         if ($recipient->id === $sponsor->id || $recipient->trashed() || $recipient->merged_at || $recipient->is_deceased) {
             throw ValidationException::withMessages(['recipient_person_id' => 'Recipient is not eligible.']);
         }
-        if (! $this->relationshipConnects($relationship, $recipient, $sponsor) || ! $relationship->type?->is_active || ! in_array($relationship->type->key, self::RELATIONSHIP_KEYS, true)) {
+        if (!$this->relationshipConnects($relationship, $recipient, $sponsor) || !$relationship->type?->is_active || !in_array($relationship->type->key, self::RELATIONSHIP_KEYS, true)) {
             throw ValidationException::withMessages(['person_relationship_id' => 'Relationship is not eligible for a family subscription.']);
         }
-        if (! $this->sponsorHasQualifyingMembership($lodge, $sponsor)) {
+        if (!$this->sponsorHasQualifyingMembership($lodge, $sponsor)) {
             throw ValidationException::withMessages(['sponsoring_person_id' => 'Sponsor has no qualifying lodge membership.']);
         }
-        if (Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $recipient->id)->whereNull('end_date')->whereHas('status', fn ($q) => $q->where('key', 'active'))->exists()) {
+        if (Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $recipient->id)->whereNull('end_date')->whereHas('status', fn($q) => $q->where('key', 'active'))->exists()) {
             throw ValidationException::withMessages(['recipient_person_id' => 'Current lodge members use membership preferences.']);
         }
-        if ($email && ! filter_var($recipient->email, FILTER_VALIDATE_EMAIL)) {
+        if ($email && !filter_var($recipient->email, FILTER_VALIDATE_EMAIL)) {
             throw ValidationException::withMessages(['receives_email' => 'Recipient needs a valid email address.']);
         }
-        if ($print && (! filled($recipient->mailing_address_line_1) || ! filled($recipient->mailing_city) || ! filled($recipient->mailing_state) || ! filled($recipient->mailing_postal_code))) {
+        if ($print && (!filled($recipient->mailing_address_line_1) || !filled($recipient->mailing_city) || !filled($recipient->mailing_state) || !filled($recipient->mailing_postal_code))) {
             throw ValidationException::withMessages(['receives_print' => 'Recipient needs a complete mailing address.']);
         }
     }
@@ -56,8 +56,8 @@ class FamilyNewsletterEligibility
 
     private function sponsorHasQualifyingMembership(Lodge $lodge, Person $sponsor): bool
     {
-        return Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $sponsor->id)->whereHas('status', fn ($q) => $q->where(function ($s) {
-            $s->where('key', 'deceased')->orWhere(fn ($a) => $a->where('key', 'active')->whereNull('end_date'));
+        return Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $sponsor->id)->whereHas('status', fn($q) => $q->where(function ($s) {
+            $s->where('key', 'deceased')->orWhere(fn($a) => $a->where('key', 'active')->whereNull('end_date'));
         }))->exists();
     }
 }

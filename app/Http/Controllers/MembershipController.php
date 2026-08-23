@@ -35,7 +35,7 @@ class MembershipController extends Controller
     public function addPastMasterTerm(Request $request, Lodge $lodge, Membership $membership)
     {
         $this->allow($lodge, $membership);
-        $data = $request->validate(['year' => 'required|integer|min:1700|max:'.now()->year]);
+        $data = $request->validate(['year' => 'required|integer|min:1700|max:' . now()->year]);
         $term = PastMasterTerm::firstOrCreate([
             'lodge_id' => $lodge->id,
             'person_id' => $membership->person_id,

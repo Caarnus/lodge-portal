@@ -19,15 +19,17 @@ class SendEventReminderDelivery implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public readonly int $deliveryId) {}
+    public function __construct(public readonly int $deliveryId)
+    {
+    }
 
     public function handle(): void
     {
         $delivery = EventReminderDelivery::query()->with(['subscription', 'rule', 'occurrence', 'event', 'lodge'])->find($this->deliveryId);
-        if (! $delivery || $delivery->status !== ReminderDeliveryStatus::Claimed) {
+        if (!$delivery || $delivery->status !== ReminderDeliveryStatus::Claimed) {
             return;
         }
-        if (! $this->isDeliverable($delivery)) {
+        if (!$this->isDeliverable($delivery)) {
             $delivery->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
 
             return;

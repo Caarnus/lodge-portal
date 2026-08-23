@@ -16,7 +16,7 @@ class EventCategoryController extends Controller
 
         return Inertia::render('events/Categories', [
             'lodge' => $lodge->only('id', 'name'),
-            'categories' => EventCategory::query()->orderBy('sort_order')->get()->map(fn (EventCategory $category) => [
+            'categories' => EventCategory::query()->orderBy('sort_order')->get()->map(fn(EventCategory $category) => [
                 'id' => $category->id,
                 'key' => $category->key,
                 'name' => $category->name,

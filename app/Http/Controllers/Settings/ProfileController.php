@@ -39,8 +39,8 @@ class ProfileController extends Controller
                 'scope', 'show_email', 'show_phone', 'show_address', 'show_profile_photo', 'show_degree',
             ]),
             'communicationPreferences' => $person->memberships()->with(['lodge', 'communicationPreference', 'status'])
-                ->get()->filter(fn ($membership) => $membership->isActive() && $membership->lodge?->status === LodgeStatus::Active)
-                ->map(fn ($membership) => [
+                ->get()->filter(fn($membership) => $membership->isActive() && $membership->lodge?->status === LodgeStatus::Active)
+                ->map(fn($membership) => [
                     'membership_id' => $membership->id,
                     'lodge_name' => $membership->lodge->name,
                     'lodge_number' => $membership->lodge->number,

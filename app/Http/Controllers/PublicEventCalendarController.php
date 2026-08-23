@@ -27,7 +27,7 @@ class PublicEventCalendarController extends Controller
     public function feed(Lodge $lodge, ICalendarBuilder $calendar)
     {
         abort_unless($lodge->status === LodgeStatus::Active, 404);
-        $occurrences = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('visibility', EventVisibility::Public))->orderBy('starts_at')->get();
+        $occurrences = EventOccurrence::query()->with('event')->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>=', now())->whereHas('event', fn($query) => $query->where('status', EventStatus::Published)->where('visibility', EventVisibility::Public))->orderBy('starts_at')->get();
 
         return response($calendar->build($occurrences), 200, ['Content-Type' => 'text/calendar; charset=utf-8']);
     }

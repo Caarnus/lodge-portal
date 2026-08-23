@@ -15,7 +15,7 @@ class UpsertPlatformAdmin extends Command
     public function handle(): int
     {
         $password = $this->option('password') ?: $this->secret('Password');
-        if (! $password || strlen($password) < 12) {
+        if (!$password || strlen($password) < 12) {
             $this->error('A password of at least 12 characters is required.');
 
             return self::FAILURE;

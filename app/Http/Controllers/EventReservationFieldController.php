@@ -14,7 +14,7 @@ class EventReservationFieldController extends Controller
     {
         $this->allow($lodge, $event);
         $data = $request->validate(['key' => ['required', 'alpha_dash', 'max:100', Rule::unique('event_reservation_fields')->where('event_id', $event->id)], 'label' => ['required', 'string', 'max:255'], 'type' => ['required', Rule::in(['short_text', 'long_text', 'select', 'checkbox'])], 'is_required' => ['boolean'], 'options' => ['nullable', 'array']]);
-        $event->reservationFields()->create($data + ['lodge_id' => $lodge->id, 'sort_order' => ((int) $event->reservationFields()->max('sort_order')) + 1, 'is_active' => true]);
+        $event->reservationFields()->create($data + ['lodge_id' => $lodge->id, 'sort_order' => ((int)$event->reservationFields()->max('sort_order')) + 1, 'is_active' => true]);
 
         return back();
     }

@@ -27,7 +27,7 @@ class EventOccurrenceController extends Controller
         $this->allow($lodge, $event);
 
         $occurrences = $event->occurrences()->with([
-            'reservations' => fn ($query) => $query->where('status', EventReservationStatus::Confirmed),
+            'reservations' => fn($query) => $query->where('status', EventReservationStatus::Confirmed),
             'volunteerCommitments.position',
             'volunteerCommitments.person',
             'volunteerCommitments.reminderDelivery',
@@ -35,7 +35,7 @@ class EventOccurrenceController extends Controller
         $positions = $event->volunteerPositions()->where('is_active', true)->get();
         $commitments = $event->volunteerCommitments()->whereIn('event_occurrence_id', $occurrences->pluck('id'))->where('status', VolunteerCommitmentStatus::Committed)->get()->groupBy('event_occurrence_id');
         $occurrences->setCollection($occurrences->getCollection()->map(function (EventOccurrence $occurrence) use ($event, $positions, $commitments) {
-            $applicable = $positions->filter(fn ($position) => $position->event_occurrence_id === null || $position->event_occurrence_id === $occurrence->id);
+            $applicable = $positions->filter(fn($position) => $position->event_occurrence_id === null || $position->event_occurrence_id === $occurrence->id);
             $filled = $commitments->get($occurrence->id, collect());
 
             return [
@@ -43,10 +43,10 @@ class EventOccurrenceController extends Controller
                 'starts_at' => $occurrence->starts_at,
                 'status' => $occurrence->status,
                 'reservation_count' => $event->reservations_enabled ? $occurrence->reservations->count() : null,
-                'reservation_roster' => $event->reservations_enabled ? $occurrence->reservations->map(fn ($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values() : [],
+                'reservation_roster' => $event->reservations_enabled ? $occurrence->reservations->map(fn($reservation) => ['name' => $reservation->name, 'email' => $reservation->email, 'phone' => $reservation->phone, 'party_size' => $reservation->party_size, 'status' => $reservation->status->value])->values() : [],
                 'volunteer_filled' => $filled->count(),
                 'volunteer_needed' => $applicable->sum('needed_count'),
-                'volunteer_positions' => $applicable->map(fn ($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn ($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
+                'volunteer_positions' => $applicable->map(fn($position) => ['id' => $position->id, 'name' => $position->name, 'needed_count' => $position->needed_count, 'is_active' => $position->is_active, 'commitments' => $occurrence->volunteerCommitments->where('event_volunteer_position_id', $position->id)->map(fn($commitment) => ['id' => $commitment->id, 'status' => $commitment->status->value, 'name' => $commitment->person?->display_name, 'reminder' => $commitment->reminderDelivery ? ['id' => $commitment->reminderDelivery->id, 'status' => $commitment->reminderDelivery->status->value, 'last_error' => $commitment->reminderDelivery->last_error] : null])->values()])->values(),
             ];
         }));
 
@@ -54,7 +54,7 @@ class EventOccurrenceController extends Controller
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event->only('id', 'title'),
             'occurrences' => $occurrences,
-            'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->get()->map(fn (Membership $membership) => $membership->person)->filter(fn (?Person $person) => $person?->user)->unique('id')->map(fn (Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values(),
+            'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn($query) => $query->where('key', 'active'))->get()->map(fn(Membership $membership) => $membership->person)->filter(fn(?Person $person) => $person?->user)->unique('id')->map(fn(Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values(),
         ]);
     }
 
@@ -78,7 +78,7 @@ class EventOccurrenceController extends Controller
         $before = $occurrence->toArray();
         $occurrence->fill($data + ['overridden_at' => now()])->save();
         if (array_key_exists('starts_at', $data)) {
-            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Pending)->update(['due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int) config('events.volunteer_reminder_offset_minutes', 1440)))]);
+            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Pending)->update(['due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int)config('events.volunteer_reminder_offset_minutes', 1440)))]);
         }
         Audit::record('event_occurrence.updated', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 
@@ -105,7 +105,7 @@ class EventOccurrenceController extends Controller
         $before = $occurrence->toArray();
         $occurrence->update(['status' => EventOccurrenceStatus::Scheduled, 'cancelled_at' => null]);
         if ($occurrence->starts_at->isFuture()) {
-            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Skipped)->where('skip_reason', 'occurrence_cancelled')->whereHas('commitment', fn ($query) => $query->where('status', 'committed'))->whereHas('position', fn ($query) => $query->where('is_active', true))->update(['status' => VolunteerReminderDeliveryStatus::Pending, 'skip_reason' => null, 'skipped_at' => null, 'due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int) config('events.volunteer_reminder_offset_minutes', 1440)))]);
+            $occurrence->volunteerReminderDeliveries()->where('status', VolunteerReminderDeliveryStatus::Skipped)->where('skip_reason', 'occurrence_cancelled')->whereHas('commitment', fn($query) => $query->where('status', 'committed'))->whereHas('position', fn($query) => $query->where('is_active', true))->update(['status' => VolunteerReminderDeliveryStatus::Pending, 'skip_reason' => null, 'skipped_at' => null, 'due_at' => $occurrence->starts_at->copy()->subMinutes(max(1, (int)config('events.volunteer_reminder_offset_minutes', 1440)))]);
         }
         Audit::record('event_occurrence.restored', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 

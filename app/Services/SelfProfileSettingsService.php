@@ -14,7 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class SelfProfileSettingsService
 {
-    public function __construct(private readonly SelfProfileService $profiles) {}
+    public function __construct(private readonly SelfProfileService $profiles)
+    {
+    }
 
     public function updateDirectoryPrivacy(User $actor, array $data): PersonDirectoryPrivacySetting
     {
@@ -41,10 +43,10 @@ class SelfProfileSettingsService
         return DB::transaction(function () use ($actor, $person, $membershipId, $receivesLodgeEmail, $receivesPrintNewsletter) {
             $membership = Membership::query()->with('lodge')->lockForUpdate()
                 ->whereKey($membershipId)->where('person_id', $person->id)->first();
-            if (! $membership || ! $membership->isActive() || $membership->lodge?->status !== LodgeStatus::Active) {
+            if (!$membership || !$membership->isActive() || $membership->lodge?->status !== LodgeStatus::Active) {
                 throw new AuthorizationException('That active membership is not available for your communication settings.');
             }
-            if ($receivesPrintNewsletter && (! filled($person->mailing_address_line_1) || ! filled($person->mailing_city) || ! filled($person->mailing_state) || ! filled($person->mailing_postal_code))) {
+            if ($receivesPrintNewsletter && (!filled($person->mailing_address_line_1) || !filled($person->mailing_city) || !filled($person->mailing_state) || !filled($person->mailing_postal_code))) {
                 throw ValidationException::withMessages(['receives_print_newsletter' => 'A complete mailing address is required for a mailed newsletter.']);
             }
 

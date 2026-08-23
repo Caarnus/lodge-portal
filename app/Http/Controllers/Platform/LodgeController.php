@@ -23,8 +23,8 @@ class LodgeController extends Controller
     public function index()
     {
         $lodges = Lodge::query()
-            ->withExists(['websitePages as has_published_home_page' => fn ($query) => $query
-                ->whereHas('published', fn ($version) => $version->where('is_home', true))])
+            ->withExists(['websitePages as has_published_home_page' => fn($query) => $query
+                ->whereHas('published', fn($version) => $version->where('is_home', true))])
             ->orderBy('name')
             ->get()
             ->each(function (Lodge $lodge) {
@@ -71,7 +71,7 @@ class LodgeController extends Controller
         return Inertia::render('platform/LodgeForm', [
             'lodge' => $lodge,
             'admins' => $admins,
-            'features' => Feature::orderBy('name')->get()->map(fn ($f) => $f->setAttribute('enabled', $lodge->features()->where('features.id', $f->id)->wherePivot('enabled', true)->exists())),
+            'features' => Feature::orderBy('name')->get()->map(fn($f) => $f->setAttribute('enabled', $lodge->features()->where('features.id', $f->id)->wherePivot('enabled', true)->exists())),
         ]);
     }
 

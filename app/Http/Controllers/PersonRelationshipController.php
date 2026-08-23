@@ -36,10 +36,10 @@ class PersonRelationshipController extends Controller
             throw ValidationException::withMessages(['related_person_id' => 'A person cannot be related to themselves.']);
         }
         $relationship = DB::transaction(function () use ($data, $relatedPerson, $person, $lodge, $access, $request) {
-            if (! $relatedPerson) {
+            if (!$relatedPerson) {
                 $related = $data['related_person'];
                 $related['email'] = filled($related['email'] ?? null) ? strtolower(trim($related['email'])) : null;
-                $related['name'] = trim($related['legal_first_name'].' '.$related['legal_last_name']);
+                $related['name'] = trim($related['legal_first_name'] . ' ' . $related['legal_last_name']);
                 $relatedPerson = Person::create($related);
             }
             $selectedType = RelationshipType::findOrFail($data['relationship_type_id']);
@@ -78,7 +78,7 @@ class PersonRelationshipController extends Controller
         ]);
         $before = $relationship->toArray();
         $selectedType = RelationshipType::findOrFail($data['relationship_type_id']);
-        $relationship->relationship_type_id = (int) $data['subject_person_id'] === $relationship->person_one_id
+        $relationship->relationship_type_id = (int)$data['subject_person_id'] === $relationship->person_one_id
             ? $selectedType->id
             : RelationshipType::query()->where('key', $selectedType->inverse_key)->value('id');
         $this->rejectDuplicate($relationship);
@@ -92,20 +92,20 @@ class PersonRelationshipController extends Controller
     {
         $type = RelationshipType::findOrFail($candidate->relationship_type_id);
         $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
-        $duplicate = PersonRelationship::query()->when($candidate->exists, fn (Builder $query) => $query->whereKeyNot($candidate->id))
+        $duplicate = PersonRelationship::query()->when($candidate->exists, fn(Builder $query) => $query->whereKeyNot($candidate->id))
             ->where(function (Builder $query) use ($candidate, $type, $inverseId) {
-                $query->where(fn (Builder $direct) => $direct
+                $query->where(fn(Builder $direct) => $direct
                     ->where('person_one_id', $candidate->person_one_id)
                     ->where('person_two_id', $candidate->person_two_id)
                     ->where('relationship_type_id', $candidate->relationship_type_id));
                 if ($inverseId) {
-                    $query->orWhere(fn (Builder $reverse) => $reverse
+                    $query->orWhere(fn(Builder $reverse) => $reverse
                         ->where('person_one_id', $candidate->person_two_id)
                         ->where('person_two_id', $candidate->person_one_id)
                         ->where('relationship_type_id', $inverseId));
                 }
                 if ($type->is_symmetric) {
-                    $query->orWhere(fn (Builder $reverse) => $reverse
+                    $query->orWhere(fn(Builder $reverse) => $reverse
                         ->where('person_one_id', $candidate->person_two_id)
                         ->where('person_two_id', $candidate->person_one_id)
                         ->where('relationship_type_id', $candidate->relationship_type_id));

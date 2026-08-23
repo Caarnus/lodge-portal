@@ -18,7 +18,7 @@ class ExtendEventOccurrenceHorizon extends Command
         $from = now()->subMonths(3)->toImmutable();
         $through = now()->addMonths(18)->toImmutable();
         Event::query()->where('status', EventStatus::Published)->orderBy('id')->each(
-            fn (Event $event) => $materializer->materialize($event, $from, $through),
+            fn(Event $event) => $materializer->materialize($event, $from, $through),
         );
         $this->info('Event occurrence horizon extended.');
 

@@ -17,10 +17,10 @@ class GalleryAudience
         if ($lodge->status !== LodgeStatus::Active) {
             return $query->whereRaw('1 = 0');
         }
-        if (! $this->activeMason($user)) {
+        if (!$this->activeMason($user)) {
             return $query->where('visibility', GalleryVisibility::Public);
         }
-        if (! $this->activeMembership($user, $lodge)) {
+        if (!$this->activeMembership($user, $lodge)) {
             return $query->whereIn('visibility', [GalleryVisibility::Public, GalleryVisibility::Masons]);
         }
 
@@ -36,13 +36,13 @@ class GalleryAudience
     {
         $person = $user?->person;
 
-        return $user && $user->approval_status === 'approved' && $user->hasVerifiedEmail() && $person && ! $person->trashed() && ! $person->merged_at && ! $person->is_deceased
-            && Membership::query()->where('person_id', $person->id)->whereNull('end_date')->whereHas('status', fn ($q) => $q->where('key', 'active'))
-                ->whereHas('degree', fn ($q) => $q->where('key', 'master_mason'))->exists();
+        return $user && $user->approval_status === 'approved' && $user->hasVerifiedEmail() && $person && !$person->trashed() && !$person->merged_at && !$person->is_deceased
+            && Membership::query()->where('person_id', $person->id)->whereNull('end_date')->whereHas('status', fn($q) => $q->where('key', 'active'))
+                ->whereHas('degree', fn($q) => $q->where('key', 'master_mason'))->exists();
     }
 
     private function activeMembership(?User $user, Lodge $lodge): bool
     {
-        return $user?->person && Membership::query()->where('person_id', $user->person_id)->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($q) => $q->where('key', 'active'))->exists();
+        return $user?->person && Membership::query()->where('person_id', $user->person_id)->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn($q) => $q->where('key', 'active'))->exists();
     }
 }

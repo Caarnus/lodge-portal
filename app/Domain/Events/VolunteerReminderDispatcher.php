@@ -16,8 +16,8 @@ class VolunteerReminderDispatcher
 {
     public function dispatchDue(CarbonImmutable $now): int
     {
-        $offset = max(1, (int) config('events.volunteer_reminder_offset_minutes', 1440));
-        EventVolunteerCommitment::query()->with(['user', 'position', 'occurrence.event'])->where('status', VolunteerCommitmentStatus::Committed)->whereHas('position', fn ($query) => $query->where('is_active', true))->whereHas('occurrence', fn ($query) => $query->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', $now))->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published))->orderBy('id')->each(function (EventVolunteerCommitment $commitment) use ($offset, $now): void {
+        $offset = max(1, (int)config('events.volunteer_reminder_offset_minutes', 1440));
+        EventVolunteerCommitment::query()->with(['user', 'position', 'occurrence.event'])->where('status', VolunteerCommitmentStatus::Committed)->whereHas('position', fn($query) => $query->where('is_active', true))->whereHas('occurrence', fn($query) => $query->where('status', EventOccurrenceStatus::Scheduled)->where('starts_at', '>', $now))->whereHas('event', fn($query) => $query->where('status', EventStatus::Published))->orderBy('id')->each(function (EventVolunteerCommitment $commitment) use ($offset, $now): void {
             if ($commitment->position->event_occurrence_id !== null && $commitment->position->event_occurrence_id !== $commitment->event_occurrence_id) {
                 return;
             }

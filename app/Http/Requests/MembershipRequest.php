@@ -36,7 +36,7 @@ class MembershipRequest extends FormRequest
     {
         return [function (Validator $validator) {
             $dates = collect(['entered_apprentice_date', 'fellow_craft_date', 'master_mason_date'])
-                ->map(fn ($field) => [$field, $this->date($field)?->getTimestamp()])->filter(fn ($item) => $item[1] !== null)->values();
+                ->map(fn($field) => [$field, $this->date($field)?->getTimestamp()])->filter(fn($item) => $item[1] !== null)->values();
             for ($index = 1; $index < $dates->count(); $index++) {
                 if ($dates[$index][1] < $dates[$index - 1][1]) {
                     $validator->errors()->add($dates[$index][0], 'Degree dates must be in chronological order.');

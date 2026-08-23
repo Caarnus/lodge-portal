@@ -14,7 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class EventReservationService
 {
-    public function __construct(private readonly EventEligibility $eligibility) {}
+    public function __construct(private readonly EventEligibility $eligibility)
+    {
+    }
 
     public function reserve(EventOccurrence $occurrence, ?User $user, array $data): ReservationResult
     {
@@ -27,8 +29,8 @@ class EventReservationService
             if (EventReservation::query()->where('event_occurrence_id', $occurrence->id)->where('normalized_email', $normalizedEmail)->where('status', EventReservationStatus::Confirmed)->exists()) {
                 throw ValidationException::withMessages(['email' => 'An active reservation already exists for this email address.']);
             }
-            $partySize = (int) ($data['party_size'] ?? 1);
-            $reserved = (int) EventReservation::query()->where('event_occurrence_id', $occurrence->id)->where('status', EventReservationStatus::Confirmed)->sum('party_size');
+            $partySize = (int)($data['party_size'] ?? 1);
+            $reserved = (int)EventReservation::query()->where('event_occurrence_id', $occurrence->id)->where('status', EventReservationStatus::Confirmed)->sum('party_size');
             if ($reserved + $partySize > $event->capacity) {
                 throw ValidationException::withMessages(['party_size' => 'There is not enough remaining capacity for this reservation.']);
             }
@@ -47,7 +49,7 @@ class EventReservationService
 
     private function validatedResponses(int $eventId, mixed $responses): array
     {
-        if (! is_array($responses)) {
+        if (!is_array($responses)) {
             throw ValidationException::withMessages(['responses' => 'Reservation responses are invalid.']);
         }
 
@@ -70,7 +72,7 @@ class EventReservationService
                 'select' => is_string($value) && in_array($value, $field->options ?? [], true),
                 'checkbox' => is_bool($value),
             };
-            if (! $valid) {
+            if (!$valid) {
                 throw ValidationException::withMessages(["responses.{$key}" => "{$field->label} is invalid."]);
             }
         }
@@ -81,16 +83,16 @@ class EventReservationService
     private function ensurePermitted(EventOccurrence $occurrence, ?User $user, array $data): void
     {
         $event = $occurrence->event;
-        if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || ! $event->reservations_enabled || ! $event->capacity) {
+        if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || !$event->reservations_enabled || !$event->capacity) {
             throw ValidationException::withMessages(['event' => 'Reservations are unavailable for this occurrence.']);
         }
-        if ($user && ! $this->eligibility->canReserve($user, $event)) {
+        if ($user && !$this->eligibility->canReserve($user, $event)) {
             abort(403);
         }
-        if (! $user && (! $event->guest_reservations_enabled || ! $this->eligibility->canView(null, $event))) {
+        if (!$user && (!$event->guest_reservations_enabled || !$this->eligibility->canView(null, $event))) {
             abort(403);
         }
-        if (($event->maximum_party_size ?? PHP_INT_MAX) < (int) ($data['party_size'] ?? 1)) {
+        if (($event->maximum_party_size ?? PHP_INT_MAX) < (int)($data['party_size'] ?? 1)) {
             throw ValidationException::withMessages(['party_size' => 'This party size exceeds the event limit.']);
         }
     }

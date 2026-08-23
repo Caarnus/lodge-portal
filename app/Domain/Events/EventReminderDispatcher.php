@@ -48,15 +48,15 @@ class EventReminderDispatcher
             ->with(['event.reminderRules', 'event.reminderSubscriptions'])
             ->where('status', EventOccurrenceStatus::Scheduled)
             ->where('starts_at', '>=', $now)
-            ->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published)->where('reminders_enabled', true))
+            ->whereHas('event', fn($query) => $query->where('status', EventStatus::Published)->where('reminders_enabled', true))
             ->orderBy('id')
             ->each(function (EventOccurrence $occurrence): void {
                 $event = $occurrence->event;
                 $subscriptions = $event->reminderSubscriptions
                     ->where('status', ReminderSubscriptionStatus::Active)
-                    ->filter(fn (EventReminderSubscription $subscription) => $subscription->event_occurrence_id === null || $subscription->event_occurrence_id === $occurrence->id)
+                    ->filter(fn(EventReminderSubscription $subscription) => $subscription->event_occurrence_id === null || $subscription->event_occurrence_id === $occurrence->id)
                     ->groupBy('normalized_email')
-                    ->map(fn ($subscriptions) => $subscriptions->first(fn (EventReminderSubscription $subscription) => $subscription->event_occurrence_id === $occurrence->id) ?? $subscriptions->first());
+                    ->map(fn($subscriptions) => $subscriptions->first(fn(EventReminderSubscription $subscription) => $subscription->event_occurrence_id === $occurrence->id) ?? $subscriptions->first());
 
                 foreach ($subscriptions as $subscription) {
                     foreach ($event->reminderRules as $rule) {

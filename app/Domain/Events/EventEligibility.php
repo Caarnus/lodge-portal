@@ -16,7 +16,7 @@ class EventEligibility
         if ($event->visibility === EventVisibility::Public) {
             return true;
         }
-        if (! $user?->person_id) {
+        if (!$user?->person_id) {
             return false;
         }
 
@@ -28,7 +28,7 @@ class EventEligibility
         if ($event->visibility === EventVisibility::Public) {
             return true;
         }
-        if (! $user?->person_id) {
+        if (!$user?->person_id) {
             return false;
         }
 
@@ -39,12 +39,12 @@ class EventEligibility
     {
         /** @var Builder<Membership> $membershipsQuery */
         $membershipsQuery = Membership::query()->with(['status', 'degree'])->where('person_id', $user->person_id)->whereNull('end_date')
-            ->whereHas('status', fn (Builder $query) => $query->where('key', 'active'));
-        if ($event->visibility === EventVisibility::Lodge || ($forReservation && ! $event->allows_cross_lodge_reservations)) {
+            ->whereHas('status', fn(Builder $query) => $query->where('key', 'active'));
+        if ($event->visibility === EventVisibility::Lodge || ($forReservation && !$event->allows_cross_lodge_reservations)) {
             $membershipsQuery->where('lodge_id', $event->lodge_id);
         }
         $memberships = $membershipsQuery->get();
-        $membership = $memberships->first(fn (Membership $candidate) => $this->meetsQualification($candidate, $event->required_qualification, $user));
+        $membership = $memberships->first(fn(Membership $candidate) => $this->meetsQualification($candidate, $event->required_qualification, $user));
 
         return $membership instanceof Membership ? $membership : null;
     }

@@ -11,7 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class WebsitePublisher
 {
-    public function __construct(private readonly WebsiteSectionCatalog $catalog) {}
+    public function __construct(private readonly WebsiteSectionCatalog $catalog)
+    {
+    }
 
     public function publish(WebsitePage $page, User $user): WebsitePageVersion
     {
@@ -85,14 +87,14 @@ class WebsitePublisher
             }
             $seen[] = $parentId;
             $parent = WebsitePage::query()->whereKey($parentId)->where('lodge_id', $draft->lodge_id)->first();
-            if (! $parent) {
+            if (!$parent) {
                 throw ValidationException::withMessages(['navigation_parent_page_id' => 'Navigation parent is unavailable.']);
             }
             $parentVersion = $parent->published()->first();
-            if (! $parentVersion) {
+            if (!$parentVersion) {
                 throw ValidationException::withMessages(['navigation_parent_page_id' => 'Publish the navigation parent before this page.']);
             }
-            if ($draft->show_in_navigation && ! $parentVersion->show_in_navigation) {
+            if ($draft->show_in_navigation && !$parentVersion->show_in_navigation) {
                 throw ValidationException::withMessages(['navigation_parent_page_id' => 'A visible page cannot be nested below a hidden navigation parent.']);
             }
             $parentId = $parentVersion?->navigation_parent_page_id;

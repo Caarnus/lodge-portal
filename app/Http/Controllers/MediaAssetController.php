@@ -18,16 +18,16 @@ class MediaAssetController extends Controller
     {
         abort_unless($request->user()->hasLodgePermission($lodge, 'website.manage') || $request->user()->hasLodgePermission($lodge, 'galleries.manage'), 403);
         $data = $request->validate([
-            'file' => ['required', 'file', 'max:'.config('website.max_upload_kb')],
+            'file' => ['required', 'file', 'max:' . config('website.max_upload_kb')],
             'alt_text' => 'required|string|max:500',
         ]);
         $file = $data['file'];
         $mime = $file->getMimeType();
-        if (! in_array($mime, config('website.allowed_mime_types'), true)) {
+        if (!in_array($mime, config('website.allowed_mime_types'), true)) {
             throw ValidationException::withMessages(['file' => 'Upload a JPEG, PNG, WebP, HEIC, or HEIF image.']);
         }
 
-        $path = $file->store('website-originals/'.$lodge->id, 'local');
+        $path = $file->store('website-originals/' . $lodge->id, 'local');
         $asset = MediaAsset::create([
             'lodge_id' => $lodge->id,
             'uploaded_by' => $request->user()->id,

@@ -42,7 +42,7 @@ class EventVolunteerPositionController extends Controller
             $blocking = $counts->first();
             if ($blocking && $data['needed_count'] < $blocking->committed) {
                 $when = EventOccurrence::query()->whereKey($blocking->event_occurrence_id)->value('starts_at');
-                throw ValidationException::withMessages(['needed_count' => "Needed count cannot be below {$blocking->committed} active commitments".($when ? " on {$when}." : '.')]);
+                throw ValidationException::withMessages(['needed_count' => "Needed count cannot be below {$blocking->committed} active commitments" . ($when ? " on {$when}." : '.')]);
             }
             $position->update($data + ['updated_by' => $request->user()->id]);
             Audit::record('volunteer_position.updated', $position, $lodge, $before, $position->fresh()->toArray());
@@ -66,7 +66,7 @@ class EventVolunteerPositionController extends Controller
     {
         $this->authorizeEvent($request, $lodge, $event);
         abort_unless($position->event_id === $event->id && $position->lodge_id === $lodge->id, 404);
-        abort_unless($event->status->value === 'draft' && ! $position->commitments()->exists(), 422);
+        abort_unless($event->status->value === 'draft' && !$position->commitments()->exists(), 422);
         $before = $position->toArray();
         $position->delete();
         Audit::record('volunteer_position.deleted', $position, $lodge, $before, null);

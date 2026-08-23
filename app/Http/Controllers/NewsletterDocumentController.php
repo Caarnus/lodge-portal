@@ -18,7 +18,7 @@ class NewsletterDocumentController extends Controller
         if (strtolower($file->getClientOriginalExtension()) !== 'pdf' || $file->getMimeType() !== 'application/pdf' || file_get_contents($file->getRealPath(), false, null, 0, 5) !== '%PDF-') {
             throw ValidationException::withMessages(['file' => 'Upload a valid PDF document.']);
         }
-        $path = $file->storeAs('newsletter-documents/'.$lodge->id, Str::uuid().'.pdf', 'local');
+        $path = $file->storeAs('newsletter-documents/' . $lodge->id, Str::uuid() . '.pdf', 'local');
         $document = NewsletterDocument::create(['lodge_id' => $lodge->id, 'uploaded_by' => $request->user()->id, 'original_name' => $file->getClientOriginalName(), 'storage_path' => $path, 'mime_type' => 'application/pdf', 'size' => $file->getSize(), 'sha256' => hash_file('sha256', $file->getRealPath())]);
         Audit::record('newsletter.document_uploaded', $document, $lodge);
 

@@ -16,7 +16,7 @@ class PersonRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'email' => filled($this->email) ? strtolower(trim((string) $this->email)) : null,
+            'email' => filled($this->email) ? strtolower(trim((string)$this->email)) : null,
             'phone' => $this->formatPhone($this->phone),
         ]);
     }
@@ -58,13 +58,13 @@ class PersonRequest extends FormRequest
 
     private function formatPhone(mixed $phone): ?string
     {
-        if (! filled($phone)) {
+        if (!filled($phone)) {
             return null;
         }
 
-        $phone = trim((string) $phone);
+        $phone = trim((string)$phone);
         $digits = preg_replace('/\D/', '', $phone);
-        if (! str_starts_with($phone, '+') && strlen($digits) === 10) {
+        if (!str_starts_with($phone, '+') && strlen($digits) === 10) {
             return sprintf('(%s)%s-%s', substr($digits, 0, 3), substr($digits, 3, 3), substr($digits, 6));
         }
         if (str_starts_with($phone, '+') && strlen($digits) === 11 && str_starts_with($digits, '1')) {
