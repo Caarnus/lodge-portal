@@ -76,6 +76,24 @@ const lodgeNavItems = computed<NavItem[]>(() => {
     const lodge = activeLodge.value;
     if (!lodge) return [];
     const items: NavItem[] = [];
+    if (lodge.can_view_lodge_site)
+        items.push({
+            title: "Lodge site",
+            href: `/l/${lodge.slug}`,
+            icon: Globe2,
+        });
+    if (lodge.can_view_member_events)
+        items.push({
+            title: "Events",
+            href: `/l/${lodge.slug}/events`,
+            icon: CalendarDays,
+        });
+    if (lodge.can_view_member_newsletters)
+        items.push({
+            title: "Newsletter",
+            href: `/lodges/${lodge.id}/newsletters`,
+            icon: Globe2,
+        });
     if (lodge.can_manage_lodge)
         items.push({
             title: "Settings",
@@ -90,7 +108,7 @@ const lodgeNavItems = computed<NavItem[]>(() => {
         });
     if (lodge.can_manage_newsletters)
         items.push({
-            title: "Newsletters",
+            title: "Newsletter management",
             href: `/lodges/${lodge.id}/newsletters/manage`,
             icon: Globe2,
         });
@@ -138,7 +156,7 @@ const lodgeNavItems = computed<NavItem[]>(() => {
         });
     if (lodge.can_manage_events)
         items.push({
-            title: "Events",
+            title: "Event management",
             href: `/lodges/${lodge.id}/events`,
             icon: CalendarDays,
         });

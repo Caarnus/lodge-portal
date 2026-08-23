@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Domain\Directory\DirectoryAccess;
+use App\Domain\Newsletters\NewsletterAccess;
+use App\Enums\LodgeStatus;
 use App\Models\Lodge;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,10 +51,13 @@ class HandleInertiaRequests extends Middleware
             if (! $user->is_platform_admin) {
                 $lodgeQuery->whereHas('users', fn (Builder $users) => $users->where('users.id', $user->id));
             }
-            $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug'])
+            $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug', 'status'])
                 ->map(fn (Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
                     ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
+                    ->setAttribute('can_view_lodge_site', $lodge->status === LodgeStatus::Active)
+                    ->setAttribute('can_view_member_events', app(NewsletterAccess::class)->canRead($user, $lodge))
+                    ->setAttribute('can_view_member_newsletters', app(NewsletterAccess::class)->canRead($user, $lodge))
                     ->setAttribute('can_manage_website', $user->hasLodgePermission($lodge, 'website.manage'))
                     ->setAttribute('can_view_people', $user->hasLodgePermission($lodge, 'people.view'))
                     ->setAttribute('can_manage_officers', $user->hasLodgePermission($lodge, 'officers.manage'))
