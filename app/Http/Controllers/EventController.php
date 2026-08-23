@@ -28,21 +28,41 @@ class EventController extends Controller
     public function index(Request $request, Lodge $lodge)
     {
         $this->allow($lodge);
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'in:draft,published,cancelled,archived'],
+            'visibility' => ['nullable', 'in:public,masons,lodge'],
+            'category' => ['nullable', 'integer'],
+            'sort' => ['nullable', 'in:title,first_starts_at,status,visibility'],
+            'direction' => ['nullable', 'in:asc,desc'],
+        ]);
+        $search = trim((string) ($filters['search'] ?? ''));
+        $sort = $filters['sort'] ?? 'first_starts_at';
+        $direction = $filters['direction'] ?? 'desc';
+        $modal = $request->string('modal')->toString();
+        $editorEvent = match ($modal) {
+            'create' => $this->newEvent($lodge),
+            '' => null,
+            default => $lodge->events()->findOrFail($modal),
+        };
         $events = $lodge->events()->with([
             'category',
             'occurrences.reservations',
             'occurrences.volunteerCommitments.position',
             'occurrences.volunteerCommitments.person',
             'occurrences.volunteerCommitments.reminderDelivery',
-        ])->when($request->string('search')->toString(), fn($query, string $search) => $query->where('title', 'like', "%{$search}%"))
-            ->orderByDesc('first_starts_at')->paginate(20)->withQueryString();
+        ])->when($search !== '', fn($query) => $query->where('title', 'like', "%{$search}%"))
+            ->when($filters['status'] ?? null, fn($query, string $status) => $query->where('status', $status))
+            ->when($filters['visibility'] ?? null, fn($query, string $visibility) => $query->where('visibility', $visibility))
+            ->when($filters['category'] ?? null, fn($query, int $category) => $query->where('event_category_id', $category))
+            ->orderBy($sort, $direction)->orderByDesc('id')->paginate(20)->withQueryString();
         $events->through(function (Event $event) {
             $occurrence = $event->occurrences->count() === 1 ? $event->occurrences->first() : null;
             $reservations = $occurrence?->reservations->where('status', EventReservationStatus::Confirmed) ?? collect();
             $commitments = $occurrence?->volunteerCommitments->where('status', VolunteerCommitmentStatus::Committed) ?? collect();
 
             return [
-                'id' => $event->id, 'title' => $event->title, 'slug' => $event->slug, 'status' => $event->status,
+                'id' => $event->id, 'title' => $event->title, 'slug' => $event->slug, 'status' => $event->status, 'visibility' => $event->visibility,
                 'first_starts_at' => $event->first_starts_at, 'category' => $event->category,
                 'occurrence_count' => $event->occurrences->count(),
                 'occurrence' => $event->occurrences->count() === 1 ? [
@@ -56,20 +76,21 @@ class EventController extends Controller
             ];
         });
 
-        return Inertia::render('events/Index', ['lodge' => $lodge->only('id', 'name'), 'events' => $events, 'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn($query) => $query->where('key', 'active'))->get()->map(fn(Membership $membership) => $membership->person)->filter(fn(?Person $person) => $person?->user)->unique('id')->map(fn(Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values()]);
+        return Inertia::render('events/Index', [
+            'lodge' => $lodge->only('id', 'name'),
+            'events' => $events,
+            'filters' => ['search' => $search, 'status' => $filters['status'] ?? '', 'visibility' => $filters['visibility'] ?? '', 'category' => $filters['category'] ?? null, 'sort' => $sort, 'direction' => $direction],
+            'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
+            'members' => Membership::query()->with('person.user')->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn($query) => $query->where('key', 'active'))->get()->map(fn(Membership $membership) => $membership->person)->filter(fn(?Person $person) => $person?->user)->unique('id')->map(fn(Person $person) => ['id' => $person->id, 'display_name' => $person->display_name])->values(),
+            'eventEditor' => $editorEvent ? $this->editorData($lodge, $editorEvent) : null,
+        ]);
     }
 
     public function create(Lodge $lodge)
     {
         $this->allow($lodge);
 
-        return $this->editor($lodge, new Event([
-            'time_zone' => $lodge->timezone,
-            'first_starts_at' => now()->addHour()->startOfHour(),
-            'visibility' => EventVisibility::Public->value,
-            'reminders_enabled' => true,
-            'guest_reminders_enabled' => true,
-        ]));
+        return redirect()->route('lodges.events.index', [$lodge, 'modal' => 'create']);
     }
 
     public function store(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, WebsiteHtmlSanitizer $sanitizer)
@@ -86,14 +107,14 @@ class EventController extends Controller
         $this->materialize($event, $materializer);
         Audit::record('event.created', $event, $lodge, null, $event->fresh()->toArray());
 
-        return redirect()->route('lodges.events.edit', [$lodge, $event]);
+        return redirect()->route('lodges.events.index', $lodge);
     }
 
     public function edit(Lodge $lodge, Event $event)
     {
         $this->allowEvent($lodge, $event);
 
-        return $this->editor($lodge, $event);
+        return redirect()->route('lodges.events.index', [$lodge, 'modal' => $event->id]);
     }
 
     public function update(EventRequest $request, Lodge $lodge, Event $event, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, EventScheduleReconciler $reconciler, WebsiteHtmlSanitizer $sanitizer)
@@ -102,7 +123,11 @@ class EventController extends Controller
         $before = $event->toArray();
         $data = $this->data($request, $lodge, $recurrence, $sanitizer);
         $scheduleChanged = $this->scheduleChanged($event, $data);
-        if ($scheduleChanged && !$request->boolean('confirm_schedule_change')) {
+        $futureOccurrenceCount = $event->occurrences()
+            ->where('starts_at', '>=', now())
+            ->where('status', 'scheduled')
+            ->count();
+        if ($scheduleChanged && $futureOccurrenceCount > 1 && !$request->boolean('confirm_schedule_change')) {
             $protected = $event->occurrences()->where('starts_at', '>=', now())->where(fn($query) => $query->whereNotNull('overridden_at')->orWhere('status', 'cancelled')->orWhereHas('reservations')->orWhereHas('reminderSubscriptions')->orWhereHas('reminderDeliveries')->orWhereHas('volunteerPositions')->orWhereHas('volunteerCommitments')->orWhereHas('volunteerReminderDeliveries'))->count();
             throw ValidationException::withMessages(['confirm_schedule_change' => "Schedule change requires confirmation. {$protected} protected future occurrence(s) will be preserved."]);
         }
@@ -175,9 +200,20 @@ class EventController extends Controller
         return back()->with('notice', 'Event archived.');
     }
 
-    private function editor(Lodge $lodge, Event $event)
+    private function newEvent(Lodge $lodge): Event
     {
-        return Inertia::render('events/Edit', [
+        return new Event([
+            'time_zone' => $lodge->timezone,
+            'first_starts_at' => now()->addHour()->startOfHour(),
+            'visibility' => EventVisibility::Public->value,
+            'reminders_enabled' => true,
+            'guest_reminders_enabled' => true,
+        ]);
+    }
+
+    private function editorData(Lodge $lodge, Event $event): array
+    {
+        return [
             'lodge' => $lodge->only('id', 'name', 'timezone'),
             'event' => $event,
             'reservationFields' => $event->exists ? $event->reservationFields()->get() : [],
@@ -187,7 +223,7 @@ class EventController extends Controller
             'occurrences' => $event->exists ? $event->occurrences()->where('starts_at', '>=', now())->orderBy('starts_at')->limit(50)->get(['id', 'starts_at', 'status']) : [],
             'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
-        ]);
+        ];
     }
 
     private function data(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, WebsiteHtmlSanitizer $sanitizer): array

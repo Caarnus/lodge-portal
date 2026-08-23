@@ -1,14 +1,26 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import EventEditor from "@/pages/events/Edit.vue";
 import {
     Dialog,
-    DialogContent,
     DialogHeader,
+    DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Link, router, useForm } from "@inertiajs/vue3";
-import { Pencil } from "lucide-vue-next";
-import { ref } from "vue";
+import { formatLocalTimestamp } from "@/utils/date";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
+    CalendarDays,
+    Pencil,
+    Plus,
+    Search,
+    SlidersHorizontal,
+    X,
+} from "lucide-vue-next";
+import { nextTick, reactive, ref, watch } from "vue";
 
 defineOptions({ layout: AppLayout });
 const props = defineProps<{
@@ -19,6 +31,7 @@ const props = defineProps<{
             title: string;
             slug: string;
             status: string;
+            visibility: string;
             first_starts_at: string;
             category: { name: string } | null;
             occurrence_count: number;
@@ -38,8 +51,81 @@ const props = defineProps<{
             };
         }>;
     };
+    filters: {
+        search: string;
+        status: string;
+        visibility: string;
+        category: number | null;
+        sort: string;
+        direction: string;
+    };
+    categories: Array<{ id: number; name: string }>;
     members: Array<{ id: number; display_name: string }>;
+    eventEditor: any | null;
 }>();
+const filters = reactive({ ...props.filters });
+const filtersOpen = ref(false);
+let filterTimer: ReturnType<typeof setTimeout> | undefined;
+const applyFilters = () =>
+    router.get(
+        `/lodges/${props.lodge.id}/events`,
+        {
+            search: filters.search || undefined,
+            status: filters.status || undefined,
+            visibility: filters.visibility || undefined,
+            category: filters.category || undefined,
+            sort: filters.sort === "first_starts_at" ? undefined : filters.sort,
+            direction:
+                filters.direction === "desc" ? undefined : filters.direction,
+        },
+        { preserveState: true, preserveScroll: true, replace: true },
+    );
+watch(
+    () => filters.search,
+    () => {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(applyFilters, 350);
+    },
+);
+watch(
+    () => [filters.status, filters.visibility, filters.category],
+    applyFilters,
+);
+const sortBy = (column: string) => {
+    filters.direction =
+        filters.sort === column && filters.direction === "asc" ? "desc" : "asc";
+    filters.sort = column;
+    applyFilters();
+};
+const sortIcon = (column: string) =>
+    filters.sort !== column
+        ? ArrowUpDown
+        : filters.direction === "asc"
+          ? ArrowUp
+          : ArrowDown;
+const resetFilters = () => {
+    Object.assign(filters, {
+        search: "",
+        status: "",
+        visibility: "",
+        category: null,
+        sort: "first_starts_at",
+        direction: "desc",
+    });
+    nextTick(applyFilters);
+};
+const timestamp = formatLocalTimestamp;
+const occurrencesUrl = (event: { id: number }) =>
+    "/lodges/" + props.lodge.id + "/events/" + event.id + "/occurrences";
+const editorOpen = ref(Boolean(props.eventEditor));
+const editorUrl = (modal?: string | number) =>
+    "/lodges/" +
+    props.lodge.id +
+    "/events" +
+    (modal === undefined ? "" : "?modal=" + encodeURIComponent(String(modal)));
+const openEditor = (modal: "create" | number) =>
+    router.get(editorUrl(modal), {}, { preserveScroll: true });
+const closeEditor = () => router.get(editorUrl(), {}, { preserveScroll: true });
 const rosterEvent = ref<any>(null);
 const rosterType = ref<"reservations" | "volunteers">("reservations");
 const showRoster = (event: any, type: "reservations" | "volunteers") => {
@@ -80,7 +166,8 @@ const retryReminder = (id: number) => {
 </script>
 
 <template>
-    <main class="mx-auto max-w-6xl space-y-6 p-6">
+    <Head title="Events" />
+    <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-semibold">Events</h1>
@@ -91,25 +178,138 @@ const retryReminder = (id: number) => {
             <div class="flex gap-2">
                 <Link
                     :href="`/lodges/${lodge.id}/event-categories`"
-                    class="rounded-md border px-3 py-2 text-sm"
+                    class="rounded border border-border bg-card px-3 py-2 text-sm hover:bg-accent"
                     >Categories</Link
-                ><Link
-                    :href="`/lodges/${lodge.id}/events/create`"
-                    class="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-                    >Create event</Link
+                ><button
+                    type="button"
+                    class="primary-button"
+                    @click="openEditor('create')"
                 >
+                    <Plus class="mr-1 size-4" /> Create event
+                </button>
             </div>
         </div>
+        <section class="rounded-lg border bg-slate-50">
+            <button
+                type="button"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
+                :aria-expanded="filtersOpen"
+                aria-controls="event-filters"
+                @click="filtersOpen = !filtersOpen"
+            >
+                <span class="inline-flex items-center gap-2"
+                    ><SlidersHorizontal class="size-4" /> Search and
+                    filters</span
+                >
+                <span
+                    v-if="
+                        filters.search ||
+                        filters.status ||
+                        filters.visibility ||
+                        filters.category
+                    "
+                    class="text-sm text-muted-foreground"
+                    >Filters applied</span
+                >
+            </button>
+            <form
+                v-show="filtersOpen"
+                id="event-filters"
+                class="grid gap-3 border-t p-4 md:grid-cols-[minmax(14rem,2fr)_repeat(3,minmax(8rem,1fr))_auto]"
+                @submit.prevent
+            >
+                <label class="relative"
+                    ><Search
+                        class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
+                        v-model="filters.search"
+                        type="search"
+                        class="field-input pl-9"
+                        placeholder="Search events"
+                /></label>
+                <select v-model="filters.status" class="field-input">
+                    <option value="">All statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <select v-model="filters.visibility" class="field-input">
+                    <option value="">All visibility</option>
+                    <option value="public">Public</option>
+                    <option value="masons">Masons only</option>
+                    <option value="lodge">Lodge only</option>
+                </select>
+                <select v-model="filters.category" class="field-input">
+                    <option :value="null">All categories</option>
+                    <option
+                        v-for="category in categories"
+                        :key="category.id"
+                        :value="category.id"
+                    >
+                        {{ category.name }}
+                    </option>
+                </select>
+                <button
+                    type="button"
+                    class="icon-button"
+                    title="Clear filters"
+                    @click="resetFilters"
+                >
+                    <X class="size-4" />
+                </button>
+            </form>
+        </section>
         <div
             v-if="events.data.length"
-            class="overflow-hidden rounded-lg border"
+            class="hidden overflow-hidden rounded-lg border md:block"
         >
-            <table class="w-full text-left text-sm">
+            <table class="w-full table-fixed text-left text-sm">
+                <colgroup>
+                    <col />
+                    <col class="w-36" />
+                    <col class="w-24" />
+                    <col class="w-28" />
+                    <col class="w-40" />
+                    <col class="w-24" />
+                </colgroup>
                 <thead class="bg-muted/50 text-muted-foreground">
                     <tr>
-                        <th class="px-4 py-3">Event</th>
-                        <th class="px-4 py-3">Starts</th>
-                        <th class="px-4 py-3">Status</th>
+                        <th class="p-3">
+                            <button
+                                class="inline-flex items-center gap-1 whitespace-nowrap"
+                                @click="sortBy('title')"
+                            >
+                                Event
+                                <component
+                                    :is="sortIcon('title')"
+                                    class="size-3"
+                                />
+                            </button>
+                        </th>
+                        <th class="p-3">
+                            <button
+                                class="inline-flex items-center gap-1 whitespace-nowrap"
+                                @click="sortBy('first_starts_at')"
+                            >
+                                Starts
+                                <component
+                                    :is="sortIcon('first_starts_at')"
+                                    class="size-3"
+                                />
+                            </button>
+                        </th>
+                        <th class="p-3">
+                            <button
+                                class="inline-flex items-center gap-1 whitespace-nowrap"
+                                @click="sortBy('status')"
+                            >
+                                Status
+                                <component
+                                    :is="sortIcon('status')"
+                                    class="size-3"
+                                />
+                            </button>
+                        </th>
                         <th class="px-4 py-3">Occurrences</th>
                         <th class="px-4 py-3">Single occurrence</th>
                         <th class="px-4 py-3"></th>
@@ -121,18 +321,21 @@ const retryReminder = (id: number) => {
                         :key="event.id"
                         class="border-t"
                     >
-                        <td class="px-4 py-3">
-                            <p class="font-medium">{{ event.title }}</p>
-                            <p class="text-xs text-muted-foreground">
+                        <td class="p-3">
+                            <p
+                                class="truncate font-medium"
+                                :title="event.title"
+                            >
+                                {{ event.title }}
+                            </p>
+                            <p class="truncate text-xs text-muted-foreground">
                                 {{ event.category?.name ?? "Uncategorized" }}
                             </p>
                         </td>
-                        <td class="px-4 py-3">
-                            {{
-                                new Date(event.first_starts_at).toLocaleString()
-                            }}
+                        <td class="p-3">
+                            {{ timestamp(event.first_starts_at) }}
                         </td>
-                        <td class="px-4 py-3 capitalize">{{ event.status }}</td>
+                        <td class="p-3 capitalize">{{ event.status }}</td>
                         <td class="px-4 py-3">
                             <Link
                                 :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
@@ -177,30 +380,103 @@ const retryReminder = (id: number) => {
                             </template>
                             <span v-else class="text-muted-foreground">—</span>
                         </td>
-                        <td class="px-4 py-3 text-right">
-                            <Link
-                                :href="`/lodges/${lodge.id}/events/${event.id}/edit`"
+                        <td class="w-24 px-1 py-3 text-right">
+                            <button
+                                type="button"
                                 title="Edit event"
                                 aria-label="Edit event"
-                                class="inline-flex rounded p-1 text-primary hover:bg-muted"
-                                ><Pencil class="size-4" aria-hidden="true"
-                            /></Link>
+                                class="icon-button"
+                                @click="openEditor(event.id)"
+                            >
+                                <Pencil class="size-4" aria-hidden="true" />
+                            </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <div v-if="events.data.length" class="space-y-3 md:hidden">
+            <article
+                v-for="event in events.data"
+                :key="event.id"
+                class="rounded-lg border p-4"
+            >
+                <strong class="block">{{ event.title }}</strong>
+                <p class="mt-1 text-sm text-muted-foreground">
+                    {{ event.category?.name ?? "Uncategorized" }}
+                </p>
+                <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <dt class="text-muted-foreground">Starts</dt>
+                        <dd>{{ timestamp(event.first_starts_at) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">Status</dt>
+                        <dd class="capitalize">{{ event.status }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">Visibility</dt>
+                        <dd class="capitalize">
+                            {{
+                                event.visibility === "masons"
+                                    ? "Masons only"
+                                    : event.visibility
+                            }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">Occurrences</dt>
+                        <dd>{{ event.occurrence_count }}</dd>
+                    </div>
+                </dl>
+                <div v-if="event.occurrence" class="mt-3 text-sm">
+                    <button
+                        v-if="event.occurrence.reservation_count !== null"
+                        type="button"
+                        class="mr-3 text-primary underline"
+                        @click="showRoster(event, 'reservations')"
+                    >
+                        Reservations: {{ event.occurrence.reservation_count }}
+                    </button>
+                    <button
+                        type="button"
+                        class="text-primary underline"
+                        @click="showRoster(event, 'volunteers')"
+                    >
+                        Staffing: {{ event.occurrence.volunteer_filled }}/{{
+                            event.occurrence.volunteer_needed
+                        }}
+                    </button>
+                </div>
+                <div class="mt-4 flex justify-end gap-1">
+                    <Link
+                        :href="occurrencesUrl(event)"
+                        class="icon-button"
+                        title="Manage occurrences"
+                        ><CalendarDays class="size-4"
+                    /></Link>
+                    <button
+                        type="button"
+                        class="icon-button"
+                        title="Edit event"
+                        @click="openEditor(event.id)"
+                    >
+                        <Pencil class="size-4" />
+                    </button>
+                </div>
+            </article>
+        </div>
         <div
-            v-else
+            v-if="!events.data.length"
             class="rounded-lg border border-dashed p-10 text-center text-muted-foreground"
         >
-            No events have been created yet.
+            No events match these filters.
         </div>
         <Dialog
             :open="rosterEvent !== null"
             @update:open="!$event && (rosterEvent = null)"
         >
-            <DialogContent class="max-w-xl">
+            <DialogScrollContent class="max-w-xl">
                 <DialogHeader
                     ><DialogTitle>{{
                         rosterType === "reservations"
@@ -325,7 +601,36 @@ const retryReminder = (id: number) => {
                         </div>
                     </section>
                 </div>
-            </DialogContent>
+            </DialogScrollContent>
+        </Dialog>
+        <Dialog :open="editorOpen" @update:open="!$event && closeEditor()">
+            <DialogScrollContent class="max-w-5xl">
+                <DialogHeader>
+                    <DialogTitle>
+                        {{
+                            eventEditor?.event?.id
+                                ? "Edit event"
+                                : "Create event"
+                        }}
+                    </DialogTitle>
+                </DialogHeader>
+                <EventEditor
+                    v-if="eventEditor"
+                    :lodge="eventEditor.lodge"
+                    :event="eventEditor.event"
+                    :categories="eventEditor.categories"
+                    :media="eventEditor.media"
+                    :reservation-fields="eventEditor.reservationFields"
+                    :reminder-rules="eventEditor.reminderRules"
+                    :reminder-subscription-count="
+                        eventEditor.reminderSubscriptionCount
+                    "
+                    :volunteer-positions="eventEditor.volunteerPositions"
+                    :occurrences="eventEditor.occurrences"
+                    embedded
+                    @saved="closeEditor"
+                />
+            </DialogScrollContent>
         </Dialog>
     </main>
 </template>

@@ -140,7 +140,13 @@ html.dark .public-rich-text p {
         @apply grid gap-1 text-sm font-medium;
     }
     .field-input {
-        @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-900;
+        @apply w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
+    }
+    .field-toggle {
+        @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground md:mt-6;
+    }
+    input[type="checkbox"] {
+        @apply size-4 shrink-0 rounded border-input bg-background accent-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:accent-blue-400;
     }
     .primary-button {
         @apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
