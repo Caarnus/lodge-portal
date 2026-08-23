@@ -27,6 +27,8 @@ People remain canonical shared identity records. Members manage their own direct
 
 ## Local Development
 
+For a repeatable manual-test database, run `php artisan manual:reset`. It destroys all data, runs migrations from scratch, and loads three lodges (including a disabled lodge), platform/lodge admins, officer/member accounts, event data, a published newsletter, gallery, and communication draft. Use `--force` only in non-interactive automation.
+
 The backend services run in Docker Compose, while Node.js and Vite run directly on the host for faster file watching and frontend builds. Install Node.js 24 and npm on the host before starting.
 
 Copy `.env.example` to `.env`, then run:
