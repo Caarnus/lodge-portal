@@ -96,6 +96,38 @@ class PeopleMembershipAdministrationTest extends TestCase
                 ->where('people.0.can_manage', true));
     }
 
+    public function test_people_workspace_includes_deceased_and_inactive_members_when_status_is_not_filtered(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $admin = $this->userFor($lodge, ['people.view', 'people.manage']);
+        $former = Person::factory()->create([
+            'legal_first_name' => 'Former',
+            'legal_last_name' => 'Member',
+            'is_deceased' => true,
+        ]);
+        $formerStatus = MembershipStatus::query()->where('key', 'demitted')->sole();
+        Membership::factory()->create([
+            'lodge_id' => $lodge->id,
+            'person_id' => $former->id,
+            'membership_status_id' => $formerStatus->id,
+            'primary_lodge_number' => $lodge->number,
+        ]);
+
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?search=former")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('people', 1)
+                ->where('people.0.id', $former->id)
+                ->where('people.0.is_deceased', true)
+                ->where('people.0.can_manage', true));
+
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?status={$formerStatus->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('people', 1)
+                ->where('people.0.id', $former->id));
+    }
+
     public function test_people_list_sorting_and_phone_formatting_support_domestic_and_international_numbers(): void
     {
         $lodge = Lodge::factory()->create();

@@ -7,8 +7,10 @@ import {
     ArrowDown,
     ArrowUp,
     ArrowUpDown,
+    Award,
     ChevronDown,
-    Cross,
+    Church,
+    DraftingCompass,
     Eye,
     Link2,
     Link2Off,
@@ -250,7 +252,7 @@ const memberRelationships = (person: any) =>
 
         <div class="mt-4 rounded-lg border">
             <div
-                class="hidden grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_8rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
+                class="hidden grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_16rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
             >
                 <button
                     class="flex items-center gap-1 text-left"
@@ -302,7 +304,7 @@ const memberRelationships = (person: any) =>
             <div
                 v-for="person in people"
                 :key="person.id"
-                class="grid gap-3 border-t p-4 first:border-t-0 md:grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_8rem] md:items-center md:gap-4 md:first:border-t"
+                class="grid gap-3 border-t p-4 first:border-t-0 md:grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_16rem] md:items-center md:gap-4 md:first:border-t"
             >
                 <div class="min-w-0">
                     <p class="break-words font-medium">
@@ -363,10 +365,6 @@ const memberRelationships = (person: any) =>
                                     .map((term: any) => term.year)
                                     .join(", ")
                             }}</span
-                        ><span
-                            v-if="membership(person).is_award_of_gold"
-                            class="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900"
-                            >Award of Gold</span
                         >
                     </div>
                 </div>
@@ -403,38 +401,68 @@ const memberRelationships = (person: any) =>
                     <p class="break-words">{{ location(person) || "—" }}</p>
                 </div>
                 <div
-                    class="flex items-center justify-end gap-1 md:col-start-4 md:row-start-1"
+                    class="flex items-center justify-end gap-2 md:col-start-4 md:row-start-1"
                 >
-                    <span
-                        v-if="person.is_deceased"
-                        class="inline-flex size-10 items-center justify-center text-slate-500"
-                        role="img"
-                        aria-label="Deceased"
-                        v-tooltip.left="{
-                            value: 'Deceased',
-                            showDelay: 2000,
-                        }"
+                    <div
+                        class="flex min-w-[9.5rem] items-center justify-end gap-2"
                     >
-                        <Cross class="size-5" />
-                    </span>
-                    <span
-                        class="inline-flex size-10 items-center justify-center"
-                        role="img"
-                        :aria-label="
-                            person.user ? 'Account linked' : 'No linked account'
-                        "
-                        v-tooltip.left="{
-                            value: person.user
-                                ? 'Account linked'
-                                : 'No linked account',
-                            showDelay: 2000,
-                        }"
-                        ><Link2
-                            v-if="person.user"
-                            class="size-5 text-green-700" /><Link2Off
-                            v-else
-                            class="size-5 text-slate-400"
-                    /></span>
+                        <span
+                            v-if="person.is_deceased"
+                            class="inline-flex size-8 items-center justify-center text-slate-600 dark:text-white"
+                            role="img"
+                            aria-label="Deceased"
+                            v-tooltip.left="{
+                                value: 'Deceased',
+                                showDelay: 2000,
+                            }"
+                        >
+                            <Church class="size-4" />
+                        </span>
+                        <span
+                            v-if="membership(person)?.is_award_of_gold"
+                            class="inline-flex size-8 items-center justify-center text-amber-500 dark:text-amber-300"
+                            role="img"
+                            aria-label="Award of Gold"
+                            v-tooltip.left="{
+                                value: 'Award of Gold',
+                                showDelay: 2000,
+                            }"
+                        >
+                            <Award class="size-4" />
+                        </span>
+                        <span
+                            v-if="person.past_master_terms?.length"
+                            class="inline-flex size-8 items-center justify-center text-slate-600 dark:text-white"
+                            role="img"
+                            aria-label="Past Master"
+                            v-tooltip.left="{
+                                value: 'Past Master',
+                                showDelay: 2000,
+                            }"
+                        >
+                            <DraftingCompass class="size-4" />
+                        </span>
+                        <span
+                            class="inline-flex size-8 items-center justify-center"
+                            role="img"
+                            :aria-label="
+                                person.user
+                                    ? 'Account linked'
+                                    : 'No linked account'
+                            "
+                            v-tooltip.left="{
+                                value: person.user
+                                    ? 'Account linked'
+                                    : 'No linked account',
+                                showDelay: 2000,
+                            }"
+                            ><Link2
+                                v-if="person.user"
+                                class="size-4 text-green-700 dark:text-green-400" /><Link2Off
+                                v-else
+                                class="size-4 text-slate-400 dark:text-slate-500"
+                        /></span>
+                    </div>
                     <button
                         type="button"
                         :aria-label="`View ${person.display_name}`"

@@ -32,7 +32,7 @@ class PersonController extends Controller
         $scope = in_array($request->query('scope'), ['members', 'related'], true) ? $request->query('scope') : 'all';
         $sort = in_array($request->query('sort'), ['name', 'membership', 'phone', 'email', 'location'], true) ? $request->query('sort') : 'name';
         $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
-        $peopleQuery = $access->visibleQuery($lodge)
+        $peopleQuery = $access->workspaceQuery($lodge)
             ->with([
                 'memberships' => fn($query) => $query->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree', 'communicationPreference']),
                 'pastMasterTerms' => fn($query) => $query->where('lodge_id', $lodge->id)->orderBy('year'),
@@ -106,7 +106,7 @@ class PersonController extends Controller
             'membershipStatuses' => MembershipStatus::query()->orderBy('sort_order')->get(['id', 'name', 'is_active']),
             'degrees' => MasonicDegree::query()->orderBy('sort_order')->get(['id', 'name', 'is_active']),
             'relationshipTypes' => RelationshipType::query()->where('is_active', true)->orderBy('sort_order')->get(),
-            'availablePeople' => $access->visibleQuery($lodge)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
+            'availablePeople' => $access->workspaceQuery($lodge)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
             'canManage' => $request->user()->hasLodgePermission($lodge, 'people.manage'),
             'canManageMemberships' => $request->user()->hasLodgePermission($lodge, 'memberships.manage'),
             'canManageRoles' => $request->user()->hasLodgePermission($lodge, 'roles.manage'),

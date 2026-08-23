@@ -23,6 +23,18 @@ class PersonAccess
         });
     }
 
+    public function workspaceQuery(Lodge $lodge): Builder
+    {
+        return Person::query()->where(function (Builder $query) use ($lodge) {
+            $query->whereHas('memberships', fn(Builder $memberships) => $memberships
+                ->where('lodge_id', $lodge->id))
+                ->orWhereHas('relationshipsFrom.personTwo.memberships', fn(Builder $memberships) => $memberships
+                    ->where('lodge_id', $lodge->id))
+                ->orWhereHas('relationshipsTo.personOne.memberships', fn(Builder $memberships) => $memberships
+                    ->where('lodge_id', $lodge->id));
+        });
+    }
+
     public function canView(User $user, Lodge $lodge, Person $person): bool
     {
         return $user->is_platform_admin || ($user->hasLodgePermission($lodge, 'people.view')
@@ -39,7 +51,7 @@ class PersonAccess
             return false;
         }
 
-        if ($this->hasActiveMembership($lodge, $person)) {
+        if ($this->hasLodgeMembership($lodge, $person)) {
             return true;
         }
 
@@ -58,14 +70,16 @@ class PersonAccess
             return collect();
         }
 
-        $directIds = Membership::query()->whereIn('person_id', $candidateIds)->where('lodge_id', $lodge->id)
-            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->pluck('person_id');
+        $directIds = Membership::query()->whereIn('person_id', $candidateIds)
+            ->where('lodge_id', $lodge->id)
+            ->pluck('person_id');
         if (!$user->hasLodgePermission($lodge, 'relationships.manage')) {
             return $directIds;
         }
 
-        $primaryIds = Membership::query()->where('lodge_id', $lodge->id)->where('primary_lodge_number', $lodge->number)
-            ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->pluck('person_id');
+        $primaryIds = Membership::query()->where('lodge_id', $lodge->id)
+            ->where('primary_lodge_number', $lodge->number)
+            ->pluck('person_id');
         $relatedIds = PersonRelationship::query()
             ->where(fn(Builder $query) => $query->whereIn('person_one_id', $candidateIds)->orWhereIn('person_two_id', $candidateIds))
             ->where(fn(Builder $query) => $query->whereIn('person_one_id', $primaryIds)->orWhereIn('person_two_id', $primaryIds))
@@ -106,6 +120,13 @@ class PersonAccess
     {
         return Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $person->id)
             ->whereNull('end_date')->whereHas('status', fn(Builder $query) => $query->whereIn('key', self::LODGE_REACHABLE_STATUS_KEYS))->exists();
+    }
+
+    private function hasLodgeMembership(Lodge $lodge, Person $person): bool
+    {
+        return Membership::query()->where('lodge_id', $lodge->id)
+            ->where('person_id', $person->id)
+            ->exists();
     }
 
     private function activeMembershipQuery(Builder $query, Lodge $lodge): Builder
