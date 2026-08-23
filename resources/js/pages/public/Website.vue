@@ -33,7 +33,7 @@ const secondaryForeground = computed(() =>
 
 <template>
     <Head :title="`${page.title} — ${lodge.name}`" />
-    <div class="min-h-screen bg-background text-foreground">
+    <div class="flex min-h-screen flex-col bg-background text-foreground">
         <div
             v-if="preview"
             class="bg-amber-300 px-4 py-2 text-center text-sm font-semibold text-amber-950"
@@ -79,7 +79,7 @@ const secondaryForeground = computed(() =>
                 </div>
             </div>
         </header>
-        <main>
+        <main class="flex-1">
             <PublicSection
                 v-for="section in page.sections"
                 :key="section.id"

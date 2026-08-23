@@ -18,7 +18,7 @@ const formatDate = (value: string | null) =>
 
 <template>
     <Head :title="`${version.title} — ${lodge.name}`" />
-    <div class="min-h-screen bg-background text-foreground">
+    <div class="flex min-h-screen flex-col bg-background text-foreground">
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
@@ -61,7 +61,7 @@ const formatDate = (value: string | null) =>
             </div>
         </header>
 
-        <main class="mx-auto max-w-4xl px-5 py-10">
+        <main class="mx-auto w-full max-w-4xl flex-1 px-5 py-10">
             <a :href="newsletterIndexUrl" class="text-sm font-medium underline"
                 >← All newsletters</a
             >
