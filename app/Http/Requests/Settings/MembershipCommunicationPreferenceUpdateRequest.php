@@ -8,6 +8,6 @@ class MembershipCommunicationPreferenceUpdateRequest extends FormRequest
 {
     public function rules(): array
     {
-        return ['receives_lodge_email' => ['required', 'boolean']];
+        return ['receives_lodge_email' => ['required', 'boolean'], 'receives_print_newsletter' => ['sometimes', 'boolean']];
     }
 }

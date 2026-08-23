@@ -45,6 +45,8 @@ class ProfileController extends Controller
                     'lodge_name' => $membership->lodge->name,
                     'lodge_number' => $membership->lodge->number,
                     'receives_lodge_email' => $membership->communicationPreference?->receives_lodge_email ?? true,
+                    'receives_print_newsletter' => $membership->communicationPreference?->receives_print_newsletter ?? false,
+                    'has_complete_mailing_address' => filled($person->mailing_address_line_1) && filled($person->mailing_city) && filled($person->mailing_state) && filled($person->mailing_postal_code),
                 ])->values(),
             'photo' => [
                 'status' => $person->profile_photo_status,

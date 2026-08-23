@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SelfProfileSettingsService
 {
@@ -33,15 +34,18 @@ class SelfProfileSettingsService
         });
     }
 
-    public function updateCommunicationPreference(User $actor, int $membershipId, bool $receivesLodgeEmail): MembershipCommunicationPreference
+    public function updateCommunicationPreference(User $actor, int $membershipId, bool $receivesLodgeEmail, bool $receivesPrintNewsletter): MembershipCommunicationPreference
     {
         $person = $this->profiles->personFor($actor);
 
-        return DB::transaction(function () use ($actor, $person, $membershipId, $receivesLodgeEmail) {
+        return DB::transaction(function () use ($actor, $person, $membershipId, $receivesLodgeEmail, $receivesPrintNewsletter) {
             $membership = Membership::query()->with('lodge')->lockForUpdate()
                 ->whereKey($membershipId)->where('person_id', $person->id)->first();
             if (! $membership || ! $membership->isActive() || $membership->lodge?->status !== LodgeStatus::Active) {
                 throw new AuthorizationException('That active membership is not available for your communication settings.');
+            }
+            if ($receivesPrintNewsletter && (! filled($person->mailing_address_line_1) || ! filled($person->mailing_city) || ! filled($person->mailing_state) || ! filled($person->mailing_postal_code))) {
+                throw ValidationException::withMessages(['receives_print_newsletter' => 'A complete mailing address is required for a mailed newsletter.']);
             }
 
             $preference = MembershipCommunicationPreference::query()->lockForUpdate()
@@ -50,9 +54,9 @@ class SelfProfileSettingsService
                     'membership_id' => $membership->id,
                     'lodge_id' => $membership->lodge_id,
                 ]);
-            $before = ['receives_lodge_email' => $preference->receives_lodge_email];
-            $preference->update(['receives_lodge_email' => $receivesLodgeEmail, 'updated_by' => $actor->id]);
-            $after = ['receives_lodge_email' => $preference->fresh()->receives_lodge_email];
+            $before = ['receives_lodge_email' => $preference->receives_lodge_email, 'receives_print_newsletter' => $preference->receives_print_newsletter];
+            $preference->update(['receives_lodge_email' => $receivesLodgeEmail, 'receives_print_newsletter' => $receivesPrintNewsletter, 'updated_by' => $actor->id]);
+            $after = $preference->fresh()->only(['receives_lodge_email', 'receives_print_newsletter']);
             Audit::record('membership_communication_preference.updated', $membership, $membership->lodge, [
                 'person_id' => $person->id,
                 'membership_id' => $membership->id,

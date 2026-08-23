@@ -155,7 +155,7 @@ class PersonController extends Controller
     {
         abort_unless($access->canView($request->user(), $lodge, $person), 404);
         $person->load(['pastMasterTerms' => fn ($query) => $query->where('lodge_id', $lodge->id)->orderBy('year')]);
-        $membership = $person->memberships()->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree'])->first();
+        $membership = $person->memberships()->where('lodge_id', $lodge->id)->with(['status', 'type', 'degree', 'communicationPreference'])->first();
         $relationships = $person->relationshipsFrom()->with(['personTwo', 'type', 'owningLodge'])->get()
             ->concat($person->relationshipsTo()->with(['personOne', 'type', 'owningLodge'])->get()->all())
             ->filter(fn ($relationship) => $access->canViewRelationship($request->user(), $lodge, $relationship))
@@ -182,6 +182,7 @@ class PersonController extends Controller
             'account' => $person->user()->first(['id', 'name', 'email']),
             'canManagePerson' => $access->canManagePerson($request->user(), $lodge, $person),
             'canManageRoles' => $request->user()->hasLodgePermission($lodge, 'roles.manage'),
+            'canManageCommunicationPreferences' => $request->user()->hasLodgePermission($lodge, 'communications.recipients'),
             'availablePeople' => $access->visibleQuery($lodge)->whereKeyNot($person->id)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
         ]);
     }

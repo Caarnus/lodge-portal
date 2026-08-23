@@ -38,6 +38,8 @@ interface Props {
         lodge_name: string;
         lodge_number: string | null;
         receives_lodge_email: boolean;
+        receives_print_newsletter: boolean;
+        has_complete_mailing_address: boolean;
     }>;
     photo: { status: string | null; error: string | null; ready: boolean };
 }
@@ -80,8 +82,8 @@ const savePrivacy = () => {
     });
 };
 
-const saveCommunication = (membershipId: number, receivesLodgeEmail: boolean) => {
-    useForm({ receives_lodge_email: receivesLodgeEmail }).put(
+const saveCommunication = (membershipId: number, receivesLodgeEmail: boolean, receivesPrintNewsletter: boolean) => {
+    useForm({ receives_lodge_email: receivesLodgeEmail, receives_print_newsletter: receivesPrintNewsletter }).put(
         route("profile.communication-preference.update", { membership: membershipId }),
         { preserveScroll: true },
     );
@@ -289,7 +291,7 @@ const uploadPhoto = () => {
             </section>
 
             <section class="mt-10 space-y-6 border-t pt-8">
-                <HeadingSmall title="Lodge communications" description="Choose whether each active lodge membership may send lodge email." />
+                <HeadingSmall title="Lodge communications" description="Choose email and mailed-newsletter preferences for each active lodge membership." />
                 <p v-if="communicationPreferences.length === 0" class="text-sm text-muted-foreground">You have no active lodge memberships.</p>
                 <div v-for="preference in communicationPreferences" :key="preference.membership_id" class="flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -297,9 +299,14 @@ const uploadPhoto = () => {
                         <p class="text-sm text-muted-foreground">Lodge email for this membership.</p>
                     </div>
                     <label class="flex items-center gap-2 text-sm">
-                        <input :checked="preference.receives_lodge_email" type="checkbox" @change="saveCommunication(preference.membership_id, ($event.target as HTMLInputElement).checked)" />
+                        <input :checked="preference.receives_lodge_email" type="checkbox" @change="saveCommunication(preference.membership_id, ($event.target as HTMLInputElement).checked, preference.receives_print_newsletter)" />
                         Receive email
                     </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input :checked="preference.receives_print_newsletter" type="checkbox" :disabled="!preference.has_complete_mailing_address" @change="saveCommunication(preference.membership_id, preference.receives_lodge_email, ($event.target as HTMLInputElement).checked)" />
+                        Mailed newsletter
+                    </label>
+                    <p v-if="!preference.has_complete_mailing_address" class="text-sm text-muted-foreground">Add a complete mailing address above to request a mailed copy.</p>
                 </div>
             </section>
 

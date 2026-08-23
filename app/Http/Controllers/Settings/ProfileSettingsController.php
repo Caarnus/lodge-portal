@@ -20,7 +20,7 @@ class ProfileSettingsController extends Controller
 
     public function updateCommunicationPreference(MembershipCommunicationPreferenceUpdateRequest $request, Membership $membership, SelfProfileSettingsService $settings): RedirectResponse
     {
-        $settings->updateCommunicationPreference($request->user(), $membership->id, $request->boolean('receives_lodge_email'));
+        $settings->updateCommunicationPreference($request->user(), $membership->id, $request->boolean('receives_lodge_email'), $request->has('receives_print_newsletter') ? $request->boolean('receives_print_newsletter') : ($membership->communicationPreference?->receives_print_newsletter ?? false));
 
         return to_route('profile.edit');
     }
