@@ -6,6 +6,7 @@ use App\Models\Lodge;
 use App\Models\NewsletterIssue;
 use App\Services\Audit;
 use App\Services\NewsletterPublisher;
+use App\Services\CommunicationDistributionService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -72,6 +73,16 @@ class NewsletterController extends Controller
     {
         $this->allowIssue($lodge, $issue, 'newsletters.publish');
         $publisher->unpublish($issue, $request->user());
+
+        return back();
+    }
+
+    public function distribute(Request $request, Lodge $lodge, NewsletterIssue $issue, CommunicationDistributionService $distributions)
+    {
+        $this->allowIssue($lodge, $issue, 'communications.send');
+        $version = $issue->published()->firstOrFail();
+        $data = $request->validate(['send_email' => ['required', 'boolean'], 'prepare_postal' => ['required', 'boolean']]);
+        $distributions->newsletter($lodge, $version, $request->user(), $data['send_email'], $data['prepare_postal']);
 
         return back();
     }

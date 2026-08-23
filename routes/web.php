@@ -32,6 +32,7 @@ use App\Http\Controllers\Platform\AccountController;
 use App\Http\Controllers\Platform\EventCategoryController as PlatformEventCategoryController;
 use App\Http\Controllers\Platform\LodgeController;
 use App\Http\Controllers\Platform\PersonMergeController;
+use App\Http\Controllers\PublicCommunicationUnsubscribeController;
 use App\Http\Controllers\PublicEventCalendarController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\PublicEventReminderController;
@@ -91,6 +92,8 @@ Route::get('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestC
 Route::post('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'store'])->middleware('throttle:10,1')->name('public.newsletters.request.store');
 Route::get('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'verify'])->middleware('throttle:10,1')->name('public.newsletters.request.verify.show');
 Route::post('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'confirm'])->middleware('throttle:10,1')->name('public.newsletters.request.verify');
+Route::get('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'show'])->middleware('throttle:10,1')->name('public.communications.unsubscribe.show');
+Route::post('l/{lodge:slug}/communications/unsubscribe/{token}', [PublicCommunicationUnsubscribeController::class, 'store'])->middleware('throttle:10,1')->name('public.communications.unsubscribe');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
     Route::prefix('lodges/{lodge}/newsletter-recipients')->name('lodges.newsletter-recipients.')->group(function () {
@@ -121,6 +124,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         Route::get('{issue}/preview', [NewsletterController::class, 'preview'])->name('preview');
         Route::post('{issue}/publish', [NewsletterController::class, 'publish'])->name('publish');
         Route::post('{issue}/unpublish', [NewsletterController::class, 'unpublish'])->name('unpublish');
+        Route::post('{issue}/distribute', [NewsletterController::class, 'distribute'])->name('distribute');
         Route::delete('{issue}', [NewsletterController::class, 'destroy'])->name('destroy');
         Route::post('deleted/{issueId}/restore', [NewsletterController::class, 'restore'])->name('restore');
         Route::post('documents', [NewsletterDocumentController::class, 'store'])->name('documents.store');

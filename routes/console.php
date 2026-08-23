@@ -12,3 +12,4 @@ Schedule::command('events:dispatch-reminders')->everyMinute()->withoutOverlappin
 Schedule::command('events:dispatch-volunteer-reminders')->everyMinute()->withoutOverlapping();
 Schedule::command('events:extend-occurrence-horizon')->daily()->withoutOverlapping();
 Schedule::command('newsletters:purge-family-requests')->daily()->withoutOverlapping();
+Schedule::command('communications:dispatch')->everyMinute()->withoutOverlapping();
