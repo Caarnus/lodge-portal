@@ -303,19 +303,45 @@ const asset = (id: number | null | undefined) =>
         v-else-if="section.type === 'newsletter_placeholder'"
         class="mx-auto max-w-4xl px-5 py-10"
     >
-        <div class="rounded-xl border border-dashed bg-slate-50 p-8 text-center">
+        <div
+            class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
+        >
             <h2 class="text-2xl font-bold">Member newsletters</h2>
-            <p class="mt-3 text-slate-600">Sign in to view member newsletters.</p>
-            <a href="/login" class="mt-5 inline-block font-medium underline">Sign in</a>
+            <p class="mt-3 text-slate-600">
+                Sign in to view member newsletters.
+            </p>
+            <a href="/login" class="mt-5 inline-block font-medium underline"
+                >Sign in</a
+            >
         </div>
     </section>
-    <section v-else-if="section.type === 'gallery_placeholder'" class="mx-auto max-w-5xl px-5 py-10">
-        <h2 class="text-3xl font-bold">{{ section.configuration.heading || 'Gallery' }}</h2>
-        <div v-if="galleries.length" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <a v-for="album in galleries" :key="album.slug" :href="`/l/${lodge.slug}/galleries/${album.slug}`" class="rounded-xl border p-4 hover:bg-slate-50"><strong>{{ album.title }}</strong></a>
+    <section
+        v-else-if="section.type === 'gallery_placeholder'"
+        class="mx-auto max-w-5xl px-5 py-10"
+    >
+        <h2 class="text-3xl font-bold">
+            {{ section.configuration.heading || "Gallery" }}
+        </h2>
+        <div
+            v-if="galleries.length"
+            class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+            <a
+                v-for="album in galleries"
+                :key="album.slug"
+                :href="`/l/${lodge.slug}/galleries/${album.slug}`"
+                class="rounded-xl border p-4 hover:bg-slate-50"
+                ><strong>{{ album.title }}</strong></a
+            >
         </div>
-        <p v-else class="mt-3 text-slate-600">{{ section.configuration.body || 'Photos will be available soon.' }}</p>
-        <a :href="`/l/${lodge.slug}/galleries`" class="mt-5 inline-block underline">View gallery</a>
+        <p v-else class="mt-3 text-slate-600">
+            {{ section.configuration.body || "Photos will be available soon." }}
+        </p>
+        <a
+            :href="`/l/${lodge.slug}/galleries`"
+            class="mt-5 inline-block underline"
+            >View gallery</a
+        >
     </section>
     <section v-else class="mx-auto max-w-4xl px-5 py-10">
         <div

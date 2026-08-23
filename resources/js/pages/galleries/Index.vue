@@ -1,2 +1,25 @@
-<script setup lang="ts">import { Head } from "@inertiajs/vue3"; defineProps<{lodge:any;albums:any[]}>();</script>
-<template><Head title="Gallery"/><main class="mx-auto max-w-6xl p-6"><h1 class="text-3xl font-bold">{{ lodge.name }} gallery</h1><div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><a v-for="album in albums" :key="album.id" :href="`/l/${lodge.slug}/galleries/${album.slug}`" class="rounded-xl border p-5 hover:bg-slate-50"><h2 class="font-semibold">{{ album.published.title }}</h2><p class="mt-2 text-sm text-slate-600">{{ album.published.description }}</p></a><p v-if="!albums.length" class="text-slate-600">No galleries available.</p></div></main></template>
+<script setup lang="ts">
+import { Head } from "@inertiajs/vue3";
+defineProps<{ lodge: any; albums: any[] }>();
+</script>
+<template>
+    <Head title="Gallery" />
+    <main class="mx-auto max-w-6xl p-6">
+        <h1 class="text-3xl font-bold">{{ lodge.name }} gallery</h1>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a
+                v-for="album in albums"
+                :key="album.id"
+                :href="`/l/${lodge.slug}/galleries/${album.slug}`"
+                class="rounded-xl border p-5 hover:bg-slate-50"
+                ><h2 class="font-semibold">{{ album.published.title }}</h2>
+                <p class="mt-2 text-sm text-slate-600">
+                    {{ album.published.description }}
+                </p></a
+            >
+            <p v-if="!albums.length" class="text-slate-600">
+                No galleries available.
+            </p>
+        </div>
+    </main>
+</template>

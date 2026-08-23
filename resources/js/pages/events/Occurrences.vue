@@ -140,7 +140,8 @@ const retryReminder = (id: number) => {
                                 <ArchiveRestore
                                     class="size-4"
                                     aria-hidden="true"
-                                /></button>
+                                />
+                            </button>
                         </td>
                     </tr>
                 </tbody>

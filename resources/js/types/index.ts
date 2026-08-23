@@ -1,5 +1,5 @@
-import type { PageProps } from '@inertiajs/core';
-import type { LucideIcon } from 'lucide-vue-next';
+import type { PageProps } from "@inertiajs/core";
+import type { LucideIcon } from "lucide-vue-next";
 
 export interface Auth {
     user: User | null;
@@ -46,7 +46,7 @@ export interface SharedData extends PageProps {
 }
 
 export interface AuthenticatedSharedData extends SharedData {
-    auth: Omit<Auth, 'user'> & { user: User };
+    auth: Omit<Auth, "user"> & { user: User };
 }
 
 export interface User {

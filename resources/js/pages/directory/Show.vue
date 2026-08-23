@@ -8,18 +8,85 @@ import type { BreadcrumbItem } from "@/types";
 interface Props {
     lodge: { id: number; name: string; number: string | null };
     audience: "own_lodge" | "participating_lodges";
-    person: { display_name: string; email: string | null; phone: string | null; address: { line_1: string | null; line_2: string | null; city: string | null; state: string | null; postal_code: string | null } | null; degree: string | null; profile_photo_url: string | null };
+    person: {
+        display_name: string;
+        email: string | null;
+        phone: string | null;
+        address: {
+            line_1: string | null;
+            line_2: string | null;
+            city: string | null;
+            state: string | null;
+            postal_code: string | null;
+        } | null;
+        degree: string | null;
+        profile_photo_url: string | null;
+    };
 }
 const props = defineProps<Props>();
-const breadcrumbs: BreadcrumbItem[] = [{ title: "Directory", href: `/lodges/${props.lodge.id}/directory` }, { title: props.person.display_name, href: "#" }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Directory", href: `/lodges/${props.lodge.id}/directory` },
+    { title: props.person.display_name, href: "#" },
+];
 </script>
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head :title="`${person.display_name} · Directory`" />
         <main class="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
-            <Link :href="route('lodges.directory.index', { lodge: lodge.id, audience })" class="text-sm underline underline-offset-4">Back to directory</Link>
-            <section class="rounded-lg border p-6"><div class="flex items-center gap-4"><img v-if="person.profile_photo_url" :src="person.profile_photo_url" :alt="`${person.display_name} profile photo`" class="size-20 rounded-full object-cover" /><div><HeadingSmall :title="person.display_name" :description="person.degree ?? 'Directory member'" /></div></div><dl class="mt-6 space-y-4 text-sm"><div v-if="person.email"><dt class="font-medium">Email</dt><dd>{{ person.email }}</dd></div><div v-if="person.phone"><dt class="font-medium">Phone</dt><dd>{{ person.phone }}</dd></div><div v-if="person.address"><dt class="font-medium">Mailing address</dt><dd>{{ [person.address.line_1, person.address.line_2, [person.address.city, person.address.state].filter(Boolean).join(", "), person.address.postal_code].filter(Boolean).join(", ") }}</dd></div></dl></section>
+            <Link
+                :href="
+                    route('lodges.directory.index', {
+                        lodge: lodge.id,
+                        audience,
+                    })
+                "
+                class="text-sm underline underline-offset-4"
+                >Back to directory</Link
+            >
+            <section class="rounded-lg border p-6">
+                <div class="flex items-center gap-4">
+                    <img
+                        v-if="person.profile_photo_url"
+                        :src="person.profile_photo_url"
+                        :alt="`${person.display_name} profile photo`"
+                        class="size-20 rounded-full object-cover"
+                    />
+                    <div>
+                        <HeadingSmall
+                            :title="person.display_name"
+                            :description="person.degree ?? 'Directory member'"
+                        />
+                    </div>
+                </div>
+                <dl class="mt-6 space-y-4 text-sm">
+                    <div v-if="person.email">
+                        <dt class="font-medium">Email</dt>
+                        <dd>{{ person.email }}</dd>
+                    </div>
+                    <div v-if="person.phone">
+                        <dt class="font-medium">Phone</dt>
+                        <dd>{{ person.phone }}</dd>
+                    </div>
+                    <div v-if="person.address">
+                        <dt class="font-medium">Mailing address</dt>
+                        <dd>
+                            {{
+                                [
+                                    person.address.line_1,
+                                    person.address.line_2,
+                                    [person.address.city, person.address.state]
+                                        .filter(Boolean)
+                                        .join(", "),
+                                    person.address.postal_code,
+                                ]
+                                    .filter(Boolean)
+                                    .join(", ")
+                            }}
+                        </dd>
+                    </div>
+                </dl>
+            </section>
         </main>
     </AppLayout>
 </template>

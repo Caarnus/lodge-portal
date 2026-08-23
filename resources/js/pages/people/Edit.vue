@@ -53,8 +53,12 @@ const membershipForm = useForm({
     notes: props.membership?.notes ?? "",
 });
 const communicationPreferenceForm = useForm({
-    receives_lodge_email: props.membership?.communication_preference?.receives_lodge_email ?? true,
-    receives_print_newsletter: props.membership?.communication_preference?.receives_print_newsletter ?? false,
+    receives_lodge_email:
+        props.membership?.communication_preference?.receives_lodge_email ??
+        true,
+    receives_print_newsletter:
+        props.membership?.communication_preference?.receives_print_newsletter ??
+        false,
 });
 const relationshipForm = useForm({
     related_person_id: null as number | null,
@@ -78,7 +82,10 @@ const saveMembership = () =>
     membershipForm.put(
         `/lodges/${props.lodge.id}/memberships/${props.membership.id}`,
     );
-const saveCommunicationPreference = () => communicationPreferenceForm.put(`/lodges/${props.lodge.id}/memberships/${props.membership.id}/communication-preference`);
+const saveCommunicationPreference = () =>
+    communicationPreferenceForm.put(
+        `/lodges/${props.lodge.id}/memberships/${props.membership.id}/communication-preference`,
+    );
 const addRelationship = () =>
     relationshipForm.post(
         `/lodges/${props.lodge.id}/people/${props.person.id}/relationships`,
@@ -427,12 +434,34 @@ const removePastMasterYear = (term: any) =>
             @submit.prevent="saveCommunicationPreference"
         >
             <h2 class="font-semibold">Lodge communication preferences</h2>
-            <p class="mt-1 text-sm text-slate-600">These settings apply only to {{ lodge.name }}. Contact and address changes above may affect other authorized lodge workflows.</p>
+            <p class="mt-1 text-sm text-slate-600">
+                These settings apply only to {{ lodge.name }}. Contact and
+                address changes above may affect other authorized lodge
+                workflows.
+            </p>
             <div class="mt-4 flex flex-wrap gap-5">
-                <label class="flex items-center gap-2"><input v-model="communicationPreferenceForm.receives_lodge_email" type="checkbox" /> Receive lodge email</label>
-                <label class="flex items-center gap-2"><input v-model="communicationPreferenceForm.receives_print_newsletter" type="checkbox" /> Receive mailed newsletter</label>
+                <label class="flex items-center gap-2"
+                    ><input
+                        v-model="
+                            communicationPreferenceForm.receives_lodge_email
+                        "
+                        type="checkbox"
+                    />
+                    Receive lodge email</label
+                >
+                <label class="flex items-center gap-2"
+                    ><input
+                        v-model="
+                            communicationPreferenceForm.receives_print_newsletter
+                        "
+                        type="checkbox"
+                    />
+                    Receive mailed newsletter</label
+                >
             </div>
-            <button class="mt-4 rounded bg-slate-900 px-4 py-2 text-white">Save communication preferences</button>
+            <button class="mt-4 rounded bg-slate-900 px-4 py-2 text-white">
+                Save communication preferences
+            </button>
         </form>
 
         <section v-if="membership" class="mt-6 rounded-lg border p-4">

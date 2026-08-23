@@ -1,2 +1,25 @@
-<script setup lang="ts">import { Head } from "@inertiajs/vue3"; const props=defineProps<{lodge:any;album:any;version:any}>(); const photo=(id:number)=>`/l/${props.lodge.slug}/galleries/${props.album.slug}/photos/${id}`;</script>
-<template><Head :title="version.title"/><main class="mx-auto max-w-6xl p-6"><h1 class="text-3xl font-bold">{{ version.title }}</h1><p class="mt-2 text-slate-600">{{ version.description }}</p><div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><figure v-for="item in version.photos" :key="item.id"><img :src="photo(item.id)" :alt="item.media_asset.alt_text" class="aspect-square w-full rounded object-cover"/><figcaption v-if="item.caption" class="mt-2 text-sm">{{ item.caption }}</figcaption></figure></div></main></template>
+<script setup lang="ts">
+import { Head } from "@inertiajs/vue3";
+const props = defineProps<{ lodge: any; album: any; version: any }>();
+const photo = (id: number) =>
+    `/l/${props.lodge.slug}/galleries/${props.album.slug}/photos/${id}`;
+</script>
+<template>
+    <Head :title="version.title" />
+    <main class="mx-auto max-w-6xl p-6">
+        <h1 class="text-3xl font-bold">{{ version.title }}</h1>
+        <p class="mt-2 text-slate-600">{{ version.description }}</p>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <figure v-for="item in version.photos" :key="item.id">
+                <img
+                    :src="photo(item.id)"
+                    :alt="item.media_asset.alt_text"
+                    class="aspect-square w-full rounded object-cover"
+                />
+                <figcaption v-if="item.caption" class="mt-2 text-sm">
+                    {{ item.caption }}
+                </figcaption>
+            </figure>
+        </div>
+    </main>
+</template>
