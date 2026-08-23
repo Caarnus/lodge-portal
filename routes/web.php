@@ -12,6 +12,7 @@ use App\Http\Controllers\EventReservationFieldController;
 use App\Http\Controllers\EventVolunteerController;
 use App\Http\Controllers\EventVolunteerPositionController;
 use App\Http\Controllers\EventVolunteerReminderDeliveryController;
+use App\Http\Controllers\FamilyNewsletterSubscriptionController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\LodgeCommunicationSettingController;
 use App\Http\Controllers\LodgeRoleController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\PublicEventReminderController;
 use App\Http\Controllers\PublicEventReservationController;
 use App\Http\Controllers\PublicEventVolunteerController;
+use App\Http\Controllers\PublicFamilyNewsletterRequestController;
 use App\Http\Controllers\PublicReminderUnsubscribeController;
 use App\Http\Controllers\PublicReservationCancellationController;
 use App\Http\Controllers\PublicWebsiteController;
@@ -85,8 +87,18 @@ Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 
 Route::get('l/{lodge:slug}/galleries', [GalleryController::class, 'index'])->name('public.galleries.index');
 Route::get('l/{lodge:slug}/galleries/{album:slug}', [GalleryController::class, 'show'])->name('public.galleries.show');
 Route::get('l/{lodge:slug}/galleries/{album:slug}/photos/{photo}', [GalleryController::class, 'photo'])->name('public.galleries.photo');
+Route::get('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'create'])->name('public.newsletters.request.create');
+Route::post('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'store'])->middleware('throttle:10,1')->name('public.newsletters.request.store');
+Route::get('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'verify'])->middleware('throttle:10,1')->name('public.newsletters.request.verify.show');
+Route::post('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'confirm'])->middleware('throttle:10,1')->name('public.newsletters.request.verify');
 Route::get('l/{lodge:slug}/{pageSlug}', [PublicWebsiteController::class, 'page'])->name('public.website.page');
 Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function () {
+    Route::prefix('lodges/{lodge}/newsletter-recipients')->name('lodges.newsletter-recipients.')->group(function () {
+        Route::get('/', [FamilyNewsletterSubscriptionController::class, 'index'])->name('index');
+        Route::post('requests/{familyRequest}/approve', [FamilyNewsletterSubscriptionController::class, 'approve'])->name('requests.approve');
+        Route::post('requests/{familyRequest}/reject', [FamilyNewsletterSubscriptionController::class, 'reject'])->name('requests.reject');
+        Route::put('subscriptions/{subscription}', [FamilyNewsletterSubscriptionController::class, 'update'])->name('subscriptions.update');
+    });
     Route::prefix('lodges/{lodge}/galleries/manage')->name('lodges.galleries.')->group(function () {
         Route::get('/', [GalleryController::class, 'manage'])->name('manage');
         Route::post('/', [GalleryController::class, 'store'])->name('store');

@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('events:dispatch-reminders')->everyMinute()->withoutOverlapping();
 Schedule::command('events:dispatch-volunteer-reminders')->everyMinute()->withoutOverlapping();
 Schedule::command('events:extend-occurrence-horizon')->daily()->withoutOverlapping();
+Schedule::command('newsletters:purge-family-requests')->daily()->withoutOverlapping();
