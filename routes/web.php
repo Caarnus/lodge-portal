@@ -226,6 +226,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::prefix('lodges/{lodge}/website')->name('lodges.website.')->group(function () {
         Route::get('/', [WebsiteController::class, 'index'])->name('index');
         Route::post('pages', [WebsiteController::class, 'store'])->name('pages.store');
+        Route::put('pages/navigation', [WebsiteController::class, 'reorderNavigation'])->name('pages.navigation.reorder');
         Route::get('pages/{page}/edit', [WebsiteController::class, 'edit'])->name('pages.edit');
         Route::put('pages/{page}', [WebsiteController::class, 'update'])->name('pages.update');
         Route::delete('pages/{page}', [WebsiteController::class, 'destroy'])->name('pages.destroy');

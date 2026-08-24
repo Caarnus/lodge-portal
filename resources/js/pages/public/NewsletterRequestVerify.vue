@@ -5,20 +5,28 @@ const form = useForm({});
 </script>
 <template>
     <Head title="Verify newsletter request" />
-    <main class="mx-auto max-w-xl p-6">
-        <h1 class="text-3xl font-bold">Verify request</h1>
-        <p class="mt-3">
-            Confirm email ownership to send this request to lodge review.
-        </p>
-        <button
-            class="mt-5 rounded bg-slate-900 px-4 py-2 text-white"
-            @click="
-                form.post(
-                    `/l/${lodge.slug}/newsletters/request/verify/${token}`,
-                )
-            "
+    <div class="flex min-h-dvh flex-col bg-background text-foreground">
+        <main class="mx-auto w-full max-w-xl flex-1 p-6">
+            <h1 class="text-3xl font-bold">Verify request</h1>
+            <p class="mt-3">
+                Confirm email ownership to send this request to lodge review.
+            </p>
+            <button
+                class="mt-5 rounded bg-slate-900 px-4 py-2 text-white"
+                @click="
+                    form.post(
+                        `/l/${lodge.slug}/newsletters/request/verify/${token}`,
+                    )
+                "
+            >
+                Verify email
+            </button>
+        </main>
+        <footer
+            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
         >
-            Verify email
-        </button>
-    </main>
+            <p class="font-semibold">{{ lodge.name }}</p>
+            <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>
+        </footer>
+    </div>
 </template>

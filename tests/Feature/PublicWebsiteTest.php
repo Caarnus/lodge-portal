@@ -43,6 +43,7 @@ class PublicWebsiteTest extends TestCase
         return array_merge([
             'title' => 'Home', 'slug' => 'home', 'is_home' => true,
             'show_in_navigation' => true, 'navigation_order' => 0,
+            'is_navigation_container' => false,
             'navigation_parent_page_id' => null,
         ], $changes);
     }

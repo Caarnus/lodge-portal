@@ -2,7 +2,7 @@
 import { Head, Link, useForm } from "@inertiajs/vue3";
 
 const props = defineProps<{
-    lodge: { name: string; slug: string };
+    lodge: { name: string; slug: string; city: string; state: string };
     token: string;
     kind: "reservation" | "reminder";
 }>();
@@ -19,30 +19,41 @@ const action =
 
 <template>
     <Head :title="label" />
-    <main class="mx-auto max-w-lg p-6">
-        <Link
-            :href="`/l/${lodge.slug}/events`"
-            class="text-sm text-primary underline"
-            >{{ lodge.name }} events</Link
+    <div class="flex min-h-dvh flex-col bg-background text-foreground">
+        <main class="mx-auto w-full max-w-lg flex-1 p-6">
+            <Link
+                :href="`/l/${lodge.slug}/events`"
+                class="text-sm text-primary underline"
+                >{{ lodge.name }} events</Link
+            >
+            <section class="mt-6 rounded-xl border bg-card p-6">
+                <h1 class="text-2xl font-semibold">{{ label }}</h1>
+                <p class="mt-3 text-muted-foreground">
+                    This action cannot be undone. You can make a new request
+                    later if needed.
+                </p>
+                <form
+                    class="mt-6 flex gap-3"
+                    @submit.prevent="form.post(action)"
+                >
+                    <button
+                        :disabled="form.processing"
+                        class="rounded-md bg-destructive px-4 py-2 font-medium text-destructive-foreground"
+                    >
+                        Confirm</button
+                    ><Link
+                        :href="`/l/${lodge.slug}/events`"
+                        class="rounded-md border px-4 py-2 font-medium"
+                        >Keep current status</Link
+                    >
+                </form>
+            </section>
+        </main>
+        <footer
+            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
         >
-        <section class="mt-6 rounded-xl border bg-card p-6">
-            <h1 class="text-2xl font-semibold">{{ label }}</h1>
-            <p class="mt-3 text-muted-foreground">
-                This action cannot be undone. You can make a new request later
-                if needed.
-            </p>
-            <form class="mt-6 flex gap-3" @submit.prevent="form.post(action)">
-                <button
-                    :disabled="form.processing"
-                    class="rounded-md bg-destructive px-4 py-2 font-medium text-destructive-foreground"
-                >
-                    Confirm</button
-                ><Link
-                    :href="`/l/${lodge.slug}/events`"
-                    class="rounded-md border px-4 py-2 font-medium"
-                    >Keep current status</Link
-                >
-            </form>
-        </section>
-    </main>
+            <p class="font-semibold">{{ lodge.name }}</p>
+            <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>
+        </footer>
+    </div>
 </template>

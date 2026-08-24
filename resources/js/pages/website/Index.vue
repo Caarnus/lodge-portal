@@ -6,6 +6,7 @@ import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
     Eye,
     FilePlus2,
+    GripVertical,
     ImagePlus,
     Pencil,
     RotateCcw,
@@ -13,7 +14,7 @@ import {
     Trash2,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const vTooltip = Tooltip;
 defineOptions({ layout: AppLayout });
@@ -31,6 +32,7 @@ const createForm = useForm({
     slug: "",
     is_home: false,
     show_in_navigation: true,
+    is_navigation_container: false,
     navigation_visibility: "public",
     navigation_order: 0,
     navigation_parent_page_id: null as number | null,
@@ -43,6 +45,163 @@ const branding = useForm({
     seal_media_id: null as number | null,
 });
 const mediaOpen = ref(false);
+const draggingPageId = ref<number | null>(null);
+const dropTarget = ref<string | null>(null);
+const localPages = ref<any[]>([]);
+const clonePages = (pages: any[]) => JSON.parse(JSON.stringify(pages));
+watch(
+    () => props.pages,
+    (pages) => (localPages.value = clonePages(pages)),
+    { immediate: true },
+);
+watch(
+    () => [createForm.is_home, createForm.show_in_navigation],
+    ([isHome, showInNavigation]) => {
+        if (isHome || !showInNavigation) {
+            createForm.is_navigation_container = false;
+        }
+    },
+);
+watch(
+    () => createForm.is_navigation_container,
+    (isContainer) => {
+        if (isContainer) {
+            createForm.slug = "";
+        }
+    },
+);
+const pageVersion = (page: any) => page.draft ?? page.published;
+const siblingPages = (parentId: number | null) =>
+    localPages.value
+        .filter(
+            (page) =>
+                (pageVersion(page)?.navigation_parent_page_id ?? null) ===
+                parentId,
+        )
+        .sort(
+            (left, right) =>
+                (pageVersion(left)?.navigation_order ?? 0) -
+                (pageVersion(right)?.navigation_order ?? 0),
+        );
+const pageRows = computed(() => {
+    const rows: Array<{ page: any; depth: number }> = [];
+    const visit = (
+        parentId: number | null,
+        depth: number,
+        seen = new Set(),
+    ) => {
+        siblingPages(parentId).forEach((page) => {
+            if (seen.has(page.id)) return;
+            seen.add(page.id);
+            rows.push({ page, depth });
+            visit(page.id, depth + 1, seen);
+        });
+    };
+    visit(null, 0);
+    localPages.value.forEach((page) => {
+        if (!rows.some((row) => row.page.id === page.id)) {
+            rows.push({ page, depth: 0 });
+        }
+    });
+
+    return rows;
+});
+const isDescendant = (pageId: number, possibleParentId: number | null) => {
+    let parentId = possibleParentId;
+    while (parentId !== null) {
+        if (parentId === pageId) return true;
+        parentId =
+            pageVersion(localPages.value.find((page) => page.id === parentId))
+                ?.navigation_parent_page_id ?? null;
+    }
+
+    return false;
+};
+const reorderTargetKey = (parentId: number | null, index: number) =>
+    `reorder:${parentId ?? "root"}:${index}`;
+const nestTargetKey = (pageId: number) => `nest:${pageId}`;
+const beginDrag = (pageId: number) => {
+    draggingPageId.value = pageId;
+    dropTarget.value = null;
+};
+const finishDrag = () => {
+    draggingPageId.value = null;
+    dropTarget.value = null;
+};
+const setReorderTarget = (parentId: number | null, index: number) => {
+    if (
+        draggingPageId.value !== null &&
+        !isDescendant(draggingPageId.value, parentId)
+    ) {
+        dropTarget.value = reorderTargetKey(parentId, index);
+    }
+};
+const setNestTarget = (page: any) => {
+    if (
+        draggingPageId.value !== null &&
+        !isDescendant(draggingPageId.value, page.id)
+    ) {
+        dropTarget.value = nestTargetKey(page.id);
+    }
+};
+const movePage = (parentId: number | null, index: number) => {
+    const pageId = draggingPageId.value;
+    if (pageId === null || isDescendant(pageId, parentId)) return;
+    const moved = localPages.value.find((page) => page.id === pageId);
+    if (!moved) return;
+    const sourceParentId = pageVersion(moved).navigation_parent_page_id ?? null;
+    const sourceSiblings = siblingPages(sourceParentId).filter(
+        (page) => page.id !== pageId,
+    );
+    const targetSiblings =
+        sourceParentId === parentId
+            ? sourceSiblings
+            : siblingPages(parentId).filter((page) => page.id !== pageId);
+    targetSiblings.splice(Math.min(index, targetSiblings.length), 0, moved);
+    pageVersion(moved).navigation_parent_page_id = parentId;
+    if (sourceParentId !== parentId) {
+        sourceSiblings.forEach((page, order) => {
+            pageVersion(page).navigation_order = order * 10;
+        });
+    }
+    targetSiblings.forEach((page, order) => {
+        pageVersion(page).navigation_order = order * 10;
+    });
+    finishDrag();
+    router.put(
+        `/lodges/${props.lodge.id}/website/pages/navigation`,
+        {
+            pages: localPages.value.map((page) => ({
+                id: page.id,
+                navigation_parent_page_id:
+                    pageVersion(page).navigation_parent_page_id ?? null,
+                navigation_order: pageVersion(page).navigation_order ?? 0,
+            })),
+        },
+        {
+            preserveScroll: true,
+            onError: () => (localPages.value = clonePages(props.pages)),
+        },
+    );
+};
+const moveIntoPage = (page: any) =>
+    movePage(page.id, siblingPages(page.id).length);
+const parentIdFor = (page: any) =>
+    pageVersion(page).navigation_parent_page_id ?? null;
+const siblingIndex = (page: any) =>
+    siblingPages(parentIdFor(page)).findIndex((item) => item.id === page.id);
+const navigationBadge = (page: any) => {
+    const version = pageVersion(page);
+    if (!version?.show_in_navigation) return "Hidden from menu";
+
+    const labels: Record<string, string> = {
+        public: "Public menu",
+        masons: "Masons menu",
+        lodge: "Lodge menu",
+    };
+
+    return labels[version.navigation_visibility] ?? labels.public;
+};
 const submitPage = () =>
     createForm.post(`/lodges/${props.lodge.id}/website/pages`);
 const applyTemplate = () =>
@@ -154,7 +313,8 @@ const restore = (page: any) =>
                 <div>
                     <h2 class="text-lg font-semibold">Pages</h2>
                     <p class="text-sm text-slate-500">
-                        Draft changes stay private until published.
+                        Drag a page onto another page to nest it. Use the gaps
+                        to reorder. Draft changes stay private until published.
                     </p>
                 </div>
                 <button
@@ -165,89 +325,217 @@ const restore = (page: any) =>
                     Apply default template
                 </button>
             </div>
-            <div class="mt-4 divide-y rounded-md border">
-                <article
-                    v-for="page in pages"
-                    :key="page.id"
-                    class="flex min-w-0 items-center gap-3 p-3"
-                >
-                    <div class="min-w-0 flex-1">
-                        <h3 class="truncate font-medium">
-                            {{ page.draft?.title ?? page.published?.title }}
-                        </h3>
-                        <p class="truncate text-sm text-slate-500">
-                            /{{ page.draft?.slug ?? page.published?.slug }} ·
-                            <span v-if="page.draft">Draft</span
-                            ><span v-if="page.draft && page.published"> + </span
-                            ><span v-if="page.published">Published</span>
-                        </p>
+            <div class="mt-4 overflow-hidden rounded-md border">
+                <template v-for="row in pageRows" :key="row.page.id">
+                    <div
+                        class="flex items-center justify-center overflow-hidden transition-all"
+                        :class="
+                            dropTarget ===
+                            reorderTargetKey(
+                                parentIdFor(row.page),
+                                siblingIndex(row.page),
+                            )
+                                ? 'h-9 bg-primary/15 text-primary ring-1 ring-inset ring-primary/40'
+                                : 'h-2 hover:bg-primary/20'
+                        "
+                        @dragenter.prevent="
+                            setReorderTarget(
+                                parentIdFor(row.page),
+                                siblingIndex(row.page),
+                            )
+                        "
+                        @dragover.prevent
+                        @drop.stop="
+                            movePage(
+                                parentIdFor(row.page),
+                                siblingIndex(row.page),
+                            )
+                        "
+                    >
+                        <span
+                            v-if="
+                                dropTarget ===
+                                reorderTargetKey(
+                                    parentIdFor(row.page),
+                                    siblingIndex(row.page),
+                                )
+                            "
+                            class="text-xs font-semibold"
+                        >
+                            Drop here to reorder
+                        </span>
                     </div>
-                    <a
-                        v-if="page.published"
-                        :href="
-                            page.published.is_home
-                                ? `/l/${lodge.slug}`
-                                : `/l/${lodge.slug}/${page.published.slug}`
-                        "
-                        target="_blank"
-                        aria-label="View published page"
-                        class="icon-button"
-                        v-tooltip.top="{
-                            value: 'View published page',
-                            showDelay: 2000,
+                    <article
+                        draggable="true"
+                        class="flex min-w-0 items-center gap-3 border-y border-transparent p-3 transition-colors"
+                        :class="{
+                            'border-primary/50 bg-primary/5':
+                                draggingPageId === row.page.id,
+                            'border-primary bg-primary/10 ring-1 ring-inset ring-primary/40':
+                                dropTarget === nestTargetKey(row.page.id),
                         }"
-                        ><Eye class="size-4"
-                    /></a>
-                    <Link
-                        :href="`/lodges/${lodge.id}/website/pages/${page.id}/edit`"
-                        aria-label="Edit page"
-                        class="icon-button"
-                        v-tooltip.top="{ value: 'Edit page', showDelay: 2000 }"
-                        ><Pencil class="size-4"
-                    /></Link>
-                    <button
-                        v-if="canPublish && page.draft"
-                        aria-label="Publish page"
-                        class="icon-button"
-                        v-tooltip.top="{
-                            value: 'Publish page',
-                            showDelay: 2000,
-                        }"
-                        @click="publish(page)"
+                        :style="{ paddingLeft: `${0.75 + row.depth * 1.5}rem` }"
+                        @dragstart="beginDrag(row.page.id)"
+                        @dragend="finishDrag"
+                        @dragenter.prevent="setNestTarget(row.page)"
+                        @dragover.prevent
+                        @drop.stop="moveIntoPage(row.page)"
                     >
-                        <Rocket class="size-4" />
-                    </button>
-                    <button
+                        <GripVertical
+                            class="size-4 shrink-0 cursor-grab text-muted-foreground"
+                            aria-hidden="true"
+                        />
+                        <div class="min-w-0 flex-1">
+                            <div
+                                class="flex min-w-0 flex-wrap items-center gap-2"
+                            >
+                                <h3 class="truncate font-medium">
+                                    {{
+                                        row.page.draft?.title ??
+                                        row.page.published?.title
+                                    }}
+                                </h3>
+                                <span
+                                    class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                                >
+                                    {{ navigationBadge(row.page) }}
+                                </span>
+                                <span
+                                    v-if="
+                                        pageVersion(row.page)
+                                            ?.is_navigation_container
+                                    "
+                                    class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                                >
+                                    Container
+                                </span>
+                                <span
+                                    v-if="
+                                        dropTarget ===
+                                        nestTargetKey(row.page.id)
+                                    "
+                                    class="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground"
+                                >
+                                    Drop to nest here
+                                </span>
+                            </div>
+                            <p
+                                v-if="
+                                    !pageVersion(row.page)
+                                        ?.is_navigation_container
+                                "
+                                class="truncate text-sm text-slate-500"
+                            >
+                                /{{
+                                    row.page.draft?.slug ??
+                                    row.page.published?.slug
+                                }}
+                                ·
+                                <span v-if="row.page.draft">Draft</span
+                                ><span
+                                    v-if="row.page.draft && row.page.published"
+                                >
+                                    +
+                                </span>
+                                ><span v-if="row.page.published"
+                                    >Published</span
+                                >
+                            </p>
+                        </div>
+                        <a
+                            v-if="row.page.published"
+                            :href="
+                                row.page.published.is_home
+                                    ? `/l/${lodge.slug}`
+                                    : `/l/${lodge.slug}/${row.page.published.slug}`
+                            "
+                            target="_blank"
+                            aria-label="View published page"
+                            class="icon-button"
+                            v-tooltip.top="{
+                                value: 'View published page',
+                                showDelay: 2000,
+                            }"
+                            ><Eye class="size-4"
+                        /></a>
+                        <Link
+                            :href="`/lodges/${lodge.id}/website/pages/${row.page.id}/edit`"
+                            aria-label="Edit page"
+                            class="icon-button"
+                            v-tooltip.top="{
+                                value: 'Edit page',
+                                showDelay: 2000,
+                            }"
+                            ><Pencil class="size-4"
+                        /></Link>
+                        <button
+                            v-if="canPublish && row.page.draft"
+                            aria-label="Publish page"
+                            class="icon-button"
+                            v-tooltip.top="{
+                                value: 'Publish page',
+                                showDelay: 2000,
+                            }"
+                            @click="publish(row.page)"
+                        >
+                            <Rocket class="size-4" />
+                        </button>
+                        <button
+                            v-if="
+                                canPublish &&
+                                row.page.published &&
+                                !row.page.published.is_home
+                            "
+                            aria-label="Unpublish page"
+                            class="icon-button"
+                            v-tooltip.top="{
+                                value: 'Unpublish page',
+                                showDelay: 2000,
+                            }"
+                            @click="unpublish(row.page)"
+                        >
+                            <Rocket class="size-4 rotate-180" />
+                        </button>
+                        <button
+                            v-if="!row.page.published?.is_home"
+                            aria-label="Delete page"
+                            class="icon-button text-red-600"
+                            v-tooltip.top="{
+                                value: 'Delete page',
+                                showDelay: 2000,
+                            }"
+                            @click="remove(row.page)"
+                        >
+                            <Trash2 class="size-4" />
+                        </button>
+                    </article>
+                </template>
+                <div
+                    class="flex items-center justify-center overflow-hidden transition-all"
+                    :class="
+                        dropTarget ===
+                        reorderTargetKey(null, siblingPages(null).length)
+                            ? 'h-9 bg-primary/15 text-primary ring-1 ring-inset ring-primary/40'
+                            : 'h-2 hover:bg-primary/20'
+                    "
+                    @dragenter.prevent="
+                        setReorderTarget(null, siblingPages(null).length)
+                    "
+                    @dragover.prevent
+                    @drop.stop="movePage(null, siblingPages(null).length)"
+                >
+                    <span
                         v-if="
-                            canPublish &&
-                            page.published &&
-                            !page.published.is_home
+                            dropTarget ===
+                            reorderTargetKey(null, siblingPages(null).length)
                         "
-                        aria-label="Unpublish page"
-                        class="icon-button"
-                        v-tooltip.top="{
-                            value: 'Unpublish page',
-                            showDelay: 2000,
-                        }"
-                        @click="unpublish(page)"
+                        class="text-xs font-semibold"
                     >
-                        <Rocket class="size-4 rotate-180" />
-                    </button>
-                    <button
-                        v-if="!page.published?.is_home"
-                        aria-label="Delete page"
-                        class="icon-button text-red-600"
-                        v-tooltip.top="{
-                            value: 'Delete page',
-                            showDelay: 2000,
-                        }"
-                        @click="remove(page)"
-                    >
-                        <Trash2 class="size-4" />
-                    </button>
-                </article>
+                        Drop here to move to the end
+                    </span>
+                </div>
                 <p
-                    v-if="pages.length === 0"
+                    v-if="localPages.length === 0"
                     class="p-6 text-center text-sm text-slate-500"
                 >
                     No pages yet. Apply template or create one below.
@@ -302,13 +590,14 @@ const restore = (page: any) =>
                         @input="
                             createForm.slug = normalizeSlug(createForm.slug)
                         "
-                        required
+                        :disabled="createForm.is_navigation_container"
+                        :required="!createForm.is_navigation_container"
                         pattern="[A-Za-z0-9_-]+"
                         class="mt-1 w-full rounded-md border px-3 py-2"
                 /></label>
                 <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
                     <div class="grid gap-3">
-                        <div class="flex flex-wrap gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <label class="field-toggle w-fit"
                                 ><input
                                     v-model="createForm.is_home"
@@ -322,6 +611,23 @@ const restore = (page: any) =>
                                     type="checkbox"
                                 />
                                 Show in navigation</label
+                            >
+                            <label
+                                class="field-toggle w-fit"
+                                :class="{
+                                    'opacity-50':
+                                        !createForm.show_in_navigation ||
+                                        createForm.is_home,
+                                }"
+                                ><input
+                                    v-model="createForm.is_navigation_container"
+                                    type="checkbox"
+                                    :disabled="
+                                        !createForm.show_in_navigation ||
+                                        createForm.is_home
+                                    "
+                                />
+                                Nav container</label
                             >
                         </div>
                         <fieldset

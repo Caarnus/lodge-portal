@@ -32,9 +32,10 @@ const props = defineProps<{
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const metadata = useForm({
     title: props.draft.title,
-    slug: props.draft.slug,
+    slug: props.draft.is_navigation_container ? "" : props.draft.slug,
     is_home: props.draft.is_home,
     show_in_navigation: props.draft.show_in_navigation,
+    is_navigation_container: props.draft.is_navigation_container ?? false,
     navigation_visibility: props.draft.navigation_visibility ?? "public",
     navigation_order: props.draft.navigation_order,
     navigation_parent_page_id: props.draft.navigation_parent_page_id,
@@ -43,6 +44,22 @@ const sections = ref<any[]>(clone(props.draft.sections));
 watch(
     () => props.draft.sections,
     (value) => (sections.value = clone(value)),
+);
+watch(
+    () => [metadata.is_home, metadata.show_in_navigation],
+    ([isHome, showInNavigation]) => {
+        if (isHome || !showInNavigation) {
+            metadata.is_navigation_container = false;
+        }
+    },
+);
+watch(
+    () => metadata.is_navigation_container,
+    (isContainer) => {
+        if (isContainer) {
+            metadata.slug = "";
+        }
+    },
 );
 const newSection = ref("rich_text");
 const sectionForm = useForm({ type: newSection.value });
@@ -131,7 +148,8 @@ const publish = () =>
                     >Slug<input
                         v-model="metadata.slug"
                         @input="metadata.slug = normalizeSlug(metadata.slug)"
-                        required
+                        :disabled="metadata.is_navigation_container"
+                        :required="!metadata.is_navigation_container"
                         class="field-input" /></label
                 ><label class="field-label"
                     >Parent page<select
@@ -147,16 +165,10 @@ const publish = () =>
                             {{ parentTitle(parent) }}
                         </option>
                     </select></label
-                ><label class="field-label"
-                    >Navigation order<input
-                        v-model.number="metadata.navigation_order"
-                        type="number"
-                        min="0"
-                        class="field-input"
-                /></label>
+                >
                 <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
                     <div class="grid gap-3">
-                        <div class="flex flex-wrap gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <label class="field-toggle w-fit"
                                 ><input
                                     v-model="metadata.is_home"
@@ -170,6 +182,23 @@ const publish = () =>
                                     type="checkbox"
                                 />
                                 Show in navigation</label
+                            >
+                            <label
+                                class="field-toggle w-fit"
+                                :class="{
+                                    'opacity-50':
+                                        !metadata.show_in_navigation ||
+                                        metadata.is_home,
+                                }"
+                                ><input
+                                    v-model="metadata.is_navigation_container"
+                                    type="checkbox"
+                                    :disabled="
+                                        !metadata.show_in_navigation ||
+                                        metadata.is_home
+                                    "
+                                />
+                                Nav container</label
                             >
                         </div>
                         <fieldset

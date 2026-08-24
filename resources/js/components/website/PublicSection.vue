@@ -54,9 +54,10 @@ const sendContact = () =>
 <template>
     <section
         v-if="section.type === 'hero'"
-        class="relative isolate overflow-hidden px-5 py-20 text-center sm:py-28"
+        class="relative isolate overflow-hidden border-b-4 px-5 py-24 text-center sm:py-32"
         :style="{
             backgroundColor: lodge.primary_color,
+            borderColor: lodge.secondary_color,
             color: asset(section.configuration.media_id)
                 ? '#ffffff'
                 : primaryForeground,
@@ -72,12 +73,14 @@ const sendContact = () =>
             v-if="asset(section.configuration.media_id)"
             class="absolute inset-0 -z-10 bg-black/55"
         ></div>
-        <h1 class="text-4xl font-bold sm:text-6xl">
+        <h1
+            class="font-serif text-4xl font-bold uppercase tracking-[0.08em] sm:text-6xl"
+        >
             {{ section.configuration.heading }}
         </h1>
         <p
             v-if="section.configuration.body"
-            class="mx-auto mt-5 max-w-3xl text-lg"
+            class="mx-auto mt-6 max-w-3xl text-lg leading-relaxed opacity-90"
         >
             {{ section.configuration.body }}
         </p>

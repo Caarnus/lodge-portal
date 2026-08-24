@@ -131,10 +131,21 @@ class PublicEventController extends Controller
             $query->whereIn('navigation_visibility', ['public', 'masons']);
         }
 
-        return $query
-            ->orderBy('navigation_order')->orderBy('title')->get()->map(fn (WebsitePageVersion $version) => [
-                'title' => $version->title, 'slug' => $version->slug, 'is_home' => $version->is_home, 'children' => [],
-            ])->all();
+        return $this->navigationTree(
+            $query->orderBy('navigation_order')->orderBy('title')->get(),
+        );
+    }
+
+    private function navigationTree($versions, ?int $parentId = null): array
+    {
+        return $versions->filter(fn (WebsitePageVersion $version) => $version->navigation_parent_page_id === $parentId)
+            ->map(fn (WebsitePageVersion $version) => [
+                'title' => $version->title,
+                'slug' => $version->slug,
+                'is_home' => $version->is_home,
+                'is_navigation_container' => $version->is_navigation_container,
+                'children' => $this->navigationTree($versions, $version->website_page_id),
+            ])->values()->all();
     }
 
     private function isActiveMember(?User $user): bool

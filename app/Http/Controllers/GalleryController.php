@@ -210,6 +210,7 @@ class GalleryController extends Controller
                 'title' => $version->title,
                 'slug' => $version->slug,
                 'is_home' => $version->is_home,
+                'is_navigation_container' => $version->is_navigation_container,
                 'children' => $this->navigationTree($versions, $version->website_page_id),
             ])->values()->all();
     }

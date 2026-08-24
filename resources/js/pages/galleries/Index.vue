@@ -6,7 +6,7 @@ defineProps<{ lodge: any; albums: any[]; navigation: any[] }>();
 </script>
 <template>
     <Head :title="`Galleries — ${lodge.name}`" />
-    <div class="flex min-h-screen flex-col bg-background text-foreground">
+    <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"

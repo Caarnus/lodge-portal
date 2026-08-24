@@ -18,7 +18,7 @@ const formatDate = (value: string | null) =>
 
 <template>
     <Head :title="`${version.title} — ${lodge.name}`" />
-    <div class="flex min-h-screen flex-col bg-background text-foreground">
+    <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"

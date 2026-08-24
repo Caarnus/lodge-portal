@@ -7,6 +7,7 @@ use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
 use App\Enums\EventVisibility;
 use App\Enums\GalleryVisibility;
+use App\Enums\WebsitePageStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\EventReservation;
@@ -23,6 +24,7 @@ use App\Models\OfficerPosition;
 use App\Models\PastMasterTerm;
 use App\Models\Person;
 use App\Models\User;
+use App\Models\WebsitePage;
 use App\Services\DefaultWebsiteTemplate;
 use App\Services\LodgeRoleCatalog;
 use App\Services\WebsitePublisher;
@@ -37,6 +39,14 @@ class ManualTestingSeeder extends Seeder
         $this->call([PeopleMembershipReferenceSeeder::class, EventReferenceSeeder::class]);
         $a = $this->lodge('Washington Lodge', '101', 'washington-101');
         $b = $this->lodge('Franklin Lodge', '202', 'franklin-202');
+        $newburgh = $this->lodge('Newburgh Lodge No. 174 F. & A.M.', '174', 'newburgh-174', 'active', [
+            'city' => 'Newburgh',
+            'physical_address' => '720 Filmore Street',
+            'public_email' => 'newburgh.lodge.174@gmail.com',
+            'tag_line' => 'Brotherhood, service, and tradition since 1855.',
+            'primary_color' => '#102A43',
+            'secondary_color' => '#C9A227',
+        ]);
         $disabled = $this->lodge('Closed Test Lodge', '303', 'closed-303', 'disabled');
         $admin = $this->member($a, 'Lodge', 'Administrator', 'admin@washington.test', true);
         $officer = $this->member($a, 'Oliver', 'Officer', 'officer@washington.test');
@@ -44,6 +54,22 @@ class ManualTestingSeeder extends Seeder
         $this->assign($a, $officer, 'Officer');
         $this->website($a, $admin);
         $this->website($b, $this->member($b, 'Website', 'Publisher', 'publisher@franklin.test'));
+        $newburghAdmin = $this->member($newburgh, 'Website', 'Administrator', 'admin@newburgh.test');
+        $this->assign($newburgh, $newburghAdmin, 'Administrator');
+        $newburghOfficers = [
+            'worshipful_master' => $this->member($newburgh, 'David', 'Brickey II', 'david.brickey@example.test'),
+            'senior_warden' => $this->member($newburgh, 'Tom', 'Metzger', 'tom.metzger@example.test'),
+            'junior_warden' => $this->member($newburgh, 'Bryan', 'Bodkin', 'bryan.bodkin@example.test'),
+            'treasurer' => $this->member($newburgh, 'Tom', 'Donnelly', 'tom.donnelly@example.test'),
+            'secretary' => $this->member($newburgh, 'Chad', 'Hostetter', 'chad.hostetter@example.test'),
+            'senior_deacon' => $this->member($newburgh, 'Mark', 'Lewellyn', 'mark.lewellyn@example.test'),
+            'junior_deacon' => $this->member($newburgh, 'Casey', 'Garrison', 'casey.garrison@example.test'),
+            'senior_steward' => $this->member($newburgh, 'Brandon', 'Bergner', 'brandon.bergner@example.test'),
+            'junior_steward' => $this->member($newburgh, 'Jeffery', 'McCarroll', 'jeffery.mccarroll@example.test'),
+            'chaplain' => $this->member($newburgh, 'Bob', 'Barnes', 'bob.barnes@example.test'),
+            'trustee1' => $this->member($newburgh, 'Rod', 'McDonald', 'rod.mcdonald@example.test'),
+            'trustee2' => $this->member($newburgh, 'Tim', 'Putnam', 'tim.putnam@example.test'),
+        ];
         foreach (range(1, 12) as $number) {
             $this->member($a, 'Member', sprintf('%02d', $number), "member{$number}@washington.test");
         }
@@ -51,6 +77,7 @@ class ManualTestingSeeder extends Seeder
             $this->member($b, 'Franklin', sprintf('%02d', $number), "member{$number}@franklin.test");
         }
         $this->member($disabled, 'Disabled', 'Member', 'disabled@closed.test');
+        $this->newburghTestSite($newburgh, $newburghAdmin, $newburghOfficers);
         $event = Event::create(['lodge_id' => $a->id, 'slug' => 'monthly-stated-meeting', 'title' => 'Monthly Stated Meeting', 'description' => '<p>Manual testing event.</p>', 'time_zone' => $a->timezone, 'first_starts_at' => now()->addDays(7)->setTime(19, 0), 'duration_minutes' => 120, 'visibility' => EventVisibility::Public, 'status' => EventStatus::Published, 'published_at' => now()]);
         $occurrence = EventOccurrence::create(['lodge_id' => $a->id, 'event_id' => $event->id, 'recurrence_key' => 'manual-meeting', 'original_starts_at' => now()->addDays(7), 'starts_at' => now()->addDays(7), 'ends_at' => now()->addDays(7)->addHours(2), 'status' => EventOccurrenceStatus::Scheduled]);
         $this->event($a, 'masonic-education', 'Masonic Education Night', EventVisibility::Masons, false);
@@ -70,12 +97,12 @@ class ManualTestingSeeder extends Seeder
         $album = GalleryAlbum::create(['lodge_id' => $a->id, 'slug' => 'public-open-house', 'created_by' => $admin->id]);
         $album->versions()->create(['lodge_id' => $a->id, 'status' => ContentVersionStatus::Published, 'title' => 'Open House', 'description' => 'Gallery ready for photo upload testing.', 'visibility' => GalleryVisibility::Public, 'created_by' => $admin->id, 'published_by' => $admin->id, 'published_at' => now()]);
         LodgeCommunication::create(['lodge_id' => $a->id, 'status' => 'draft', 'subject' => 'Manual test announcement', 'body_html' => '<p>Draft communication ready to send.</p>', 'created_by' => $officer->id, 'last_edited_by' => $officer->id]);
-        $this->command?->info('Manual accounts: admin@washington.test, officer@washington.test, member1@washington.test — password: password');
+        $this->command?->info('Manual accounts: admin@washington.test, admin@newburgh.test, officer@washington.test, member1@washington.test — password: password');
     }
 
-    private function lodge(string $name, string $number, string $slug, string $status = 'active'): Lodge
+    private function lodge(string $name, string $number, string $slug, string $status = 'active', array $attributes = []): Lodge
     {
-        $lodge = Lodge::create(['name' => $name, 'number' => $number, 'slug' => $slug, 'city' => 'Evansville', 'state' => 'IN', 'jurisdiction' => 'Indiana', 'physical_address' => '100 Test Street', 'timezone' => 'America/Chicago', 'public_email' => "$slug@example.test", 'status' => $status, 'primary_color' => '#1E3A5F', 'secondary_color' => '#D4AF37']);
+        $lodge = Lodge::create(array_merge(['name' => $name, 'number' => $number, 'slug' => $slug, 'city' => 'Evansville', 'state' => 'IN', 'jurisdiction' => 'Indiana', 'physical_address' => '100 Test Street', 'timezone' => 'America/Chicago', 'public_email' => "$slug@example.test", 'status' => $status, 'primary_color' => '#1E3A5F', 'secondary_color' => '#D4AF37'], $attributes));
         app(LodgeRoleCatalog::class)->ensureFor($lodge);
 
         return $lodge;
@@ -102,6 +129,97 @@ class ManualTestingSeeder extends Seeder
         $websitePublisher = app(WebsitePublisher::class);
         foreach ($lodge->websitePages()->orderBy('id')->get() as $page) {
             $websitePublisher->publish($page, $publisher);
+        }
+    }
+
+    private function newburghTestSite(Lodge $lodge, User $publisher, array $officers): void
+    {
+        $this->newburghOfficers($lodge, $officers);
+        $this->newburghPastMasters($lodge, $officers);
+        $event = $this->event($lodge, 'stated-meeting', 'Stated Meeting and Fellowship Dinner', EventVisibility::Public, false);
+        $event->update([
+            'description' => '<p>Join Newburgh Lodge for fellowship dinner at 6:00 p.m. followed by our stated meeting at 7:00 p.m.</p>',
+            'location_name' => 'Newburgh Masonic Lodge',
+            'location_details' => '720 Filmore Street, Newburgh, Indiana',
+        ]);
+        $issue = $lodge->newsletterIssues()->create(['slug' => 'autumn-trestleboard', 'created_by' => $publisher->id]);
+        $issue->versions()->create(['lodge_id' => $lodge->id, 'status' => ContentVersionStatus::Published, 'title' => 'Newburgh Trestleboard — Autumn Edition', 'publication_date' => today()->subMonth(), 'body_html' => '<h2>From the East</h2><p>Our test trestleboard includes meeting reminders, service opportunities, and news for the brethren.</p>', 'created_by' => $publisher->id, 'published_by' => $publisher->id, 'published_at' => now()]);
+        $album = GalleryAlbum::create(['lodge_id' => $lodge->id, 'slug' => 'lodge-life', 'created_by' => $publisher->id]);
+        $album->versions()->create(['lodge_id' => $lodge->id, 'status' => ContentVersionStatus::Published, 'title' => 'Life at Newburgh Lodge', 'description' => 'A test gallery for fellowship, service, and lodge events.', 'visibility' => GalleryVisibility::Public, 'created_by' => $publisher->id, 'published_by' => $publisher->id, 'published_at' => now()]);
+
+        $pages = [
+            ['title' => 'Home', 'slug' => 'home', 'is_home' => true, 'order' => 0, 'visibility' => 'public', 'sections' => [
+                ['type' => 'hero', 'configuration' => ['heading' => 'WELCOME TO NEWBURGH LODGE No. 174 F. & A.M.', 'body' => 'Stated meetings are held on the third Tuesday of every month. Dinner begins at 6:00 p.m.; lodge opens at 7:00 p.m.', 'media_id' => null]],
+                ['type' => 'rich_text', 'configuration' => ['html' => '<h2>Building Character. Serving Our Community.</h2><p>Freemasonry builds and advances the character of men while placing brotherly love and moral integrity at the center of our work. Newburgh Lodge welcomes members, visiting brethren, and men who would like to learn more.</p><h2>At a Glance</h2><ul><li><strong>Stated meetings:</strong> third Tuesday of every month</li><li><strong>Degrees:</strong> fourth Tuesday</li><li><strong>Community breakfasts:</strong> first Saturday, March through November</li></ul>']],
+                ['type' => 'call_to_action', 'configuration' => ['heading' => 'Visit Newburgh Lodge', 'body' => 'Find us at 720 Filmore Street in Newburgh. Please use P.O. Box 490, Newburgh, IN 47629-0490 for lodge mail.', 'label' => 'Contact / Visit the Lodge', 'url' => '/contact']],
+                ['type' => 'events_placeholder', 'configuration' => ['heading' => 'Upcoming at the Lodge', 'body' => 'Join us for meetings, fellowship, and community service.', 'maximum_items' => 6, 'show_all_link' => true]],
+            ]],
+            ['title' => 'History', 'slug' => 'history', 'is_home' => false, 'order' => 10, 'visibility' => 'public', 'sections' => [
+                ['type' => 'rich_text', 'configuration' => ['html' => '<h1>History of Newburgh Lodge</h1><p>Newburgh Lodge No. 174 received its charter from the Grand Lodge of Indiana on May 29, 1855. The brethren first met under dispensation in June 1854, and the lodge soon made its home on State Street in downtown Newburgh.</p><p>For more than a century, meetings were held in that historic building. In 1962, Indiana Grand Lodge officers laid the cornerstone for a new lodge building at 720 Filmore Street, where Newburgh Lodge continues to meet today. The lodge has endured periods of growth, war, economic hardship, and change while preserving a tradition of fellowship and service.</p>']],
+            ]],
+            ['title' => 'FAQ', 'slug' => 'faq', 'is_home' => false, 'order' => 15, 'visibility' => 'public', 'sections' => [
+                ['type' => 'rich_text', 'configuration' => ['html' => '<h1>Frequently Asked Questions</h1><h2>What is Freemasonry?</h2><p>Freemasonry is a fraternity that encourages members to live with integrity, serve their communities, and support one another.</p><h2>How do I learn more or ask about joining?</h2><p>Contact Newburgh Lodge to arrange a visit or conversation. Membership begins with a candidate expressing his own interest.</p><h2>May I visit a meeting?</h2><p>Visiting brethren are welcome. Prospective members should contact the lodge before attending so we can help plan a visit.</p><h2>When does the lodge meet?</h2><p>Newburgh Lodge normally meets on the third Tuesday, with dinner at 6:00 p.m. and lodge at 7:00 p.m.</p>']],
+            ]],
+            ['title' => 'Events', 'slug' => 'events', 'is_home' => false, 'order' => 20, 'visibility' => 'public', 'sections' => [
+                ['type' => 'events_placeholder', 'configuration' => ['heading' => 'Lodge Calendar', 'body' => 'Find upcoming meetings and community events.', 'maximum_items' => 12, 'show_all_link' => true]],
+            ]],
+            ['title' => 'Officers', 'slug' => 'officers', 'is_home' => false, 'order' => 30, 'visibility' => 'public', 'sections' => [
+                ['type' => 'officers_placeholder', 'configuration' => ['heading' => 'Lodge Officers', 'body' => 'Meet the brethren serving Newburgh Lodge this year.']],
+            ]],
+            ['title' => 'Past Masters', 'slug' => 'past-masters', 'is_home' => false, 'order' => 35, 'visibility' => 'public', 'sections' => [
+                ['type' => 'past_masters_placeholder', 'configuration' => ['heading' => 'Past Masters', 'body' => 'Newburgh Lodge honors the brethren who have served as Worshipful Master.']],
+            ]],
+            ['title' => 'Gallery', 'slug' => 'gallery', 'is_home' => false, 'order' => 40, 'visibility' => 'public', 'sections' => [
+                ['type' => 'gallery_placeholder', 'configuration' => ['heading' => 'Lodge Life', 'body' => 'Photos from fellowship, service, and events.', 'gallery_album_ids' => [$album->id]]],
+            ]],
+            ['title' => 'Links', 'slug' => 'links', 'is_home' => false, 'order' => 45, 'visibility' => 'public', 'sections' => [
+                ['type' => 'link_list', 'configuration' => ['heading' => 'Lodge & Masonic Resources', 'links' => [['label' => 'Newburgh Lodge on Facebook', 'url' => 'https://www.facebook.com/newburghlodge174/'], ['label' => 'Grand Lodge of Indiana', 'url' => 'https://www.indianafreemasons.com/'], ['label' => 'Indiana Freemasons Lodge Directory', 'url' => 'https://www.indianafreemasons.com/indianamap'], ['label' => 'Directions to Newburgh Lodge', 'url' => 'https://www.google.com/maps/search/?api=1&query=720+Filmore+St+Newburgh+IN+47630']]]],
+            ]],
+            ['title' => 'Newsletter', 'slug' => 'newsletter', 'is_home' => false, 'order' => 50, 'visibility' => 'lodge', 'sections' => [
+                ['type' => 'newsletter_placeholder', 'configuration' => ['heading' => 'Member Trestleboard', 'body' => 'Read lodge news and upcoming reminders.']],
+            ]],
+            ['title' => 'Directory', 'slug' => 'directory', 'is_home' => false, 'order' => 55, 'visibility' => 'lodge', 'sections' => [
+                ['type' => 'directory_placeholder', 'configuration' => ['heading' => 'Member Directory', 'body' => 'Search the Newburgh Lodge member directory.']],
+            ]],
+            ['title' => 'Contact', 'slug' => 'contact', 'is_home' => false, 'order' => 60, 'visibility' => 'public', 'sections' => [
+                ['type' => 'contact_information', 'configuration' => ['heading' => 'Contact Newburgh Lodge', 'body' => '720 Filmore Street, Newburgh, IN 47630. Do not mail to the street address; use P.O. Box 490, Newburgh, IN 47629-0490. Email newburgh.lodge.174@gmail.com. We welcome questions from prospective members, visitors, and the community.', 'show_contact_form' => true]],
+                ['type' => 'meeting_information', 'configuration' => ['heading' => 'Meeting Information', 'body' => 'Stated meetings are held on the third Tuesday. Degrees are normally held on the fourth Tuesday. Dinner begins at 6:00 p.m.; lodge opens at 7:00 p.m.']],
+            ]],
+        ];
+        $websitePublisher = app(WebsitePublisher::class);
+        foreach ($pages as $pageData) {
+            $page = WebsitePage::create(['lodge_id' => $lodge->id]);
+            $version = $page->versions()->create(['lodge_id' => $lodge->id, 'status' => WebsitePageStatus::Draft, 'title' => $pageData['title'], 'slug' => $pageData['slug'], 'is_home' => $pageData['is_home'], 'show_in_navigation' => true, 'navigation_visibility' => $pageData['visibility'], 'navigation_order' => $pageData['order'], 'created_by' => $publisher->id]);
+            foreach ($pageData['sections'] as $order => $section) {
+                $version->sections()->create(['lodge_id' => $lodge->id, 'type' => $section['type'], 'sort_order' => $order, 'configuration' => $section['configuration']]);
+            }
+            $websitePublisher->publish($page, $publisher);
+        }
+    }
+
+    private function newburghOfficers(Lodge $lodge, array $officers): void
+    {
+        $officers['trustee3'] = $officers['treasurer'];
+        foreach ($officers as $key => $user) {
+            OfficerAssignment::create(['lodge_id' => $lodge->id, 'membership_id' => Membership::query()->where('lodge_id', $lodge->id)->where('person_id', $user->person_id)->sole()->id, 'officer_position_id' => OfficerPosition::query()->where('key', $key)->sole()->id, 'is_public' => true, 'show_email' => false, 'show_phone' => false]);
+        }
+    }
+
+    private function newburghPastMasters(Lodge $lodge, array $officers): void
+    {
+        $terms = [2026 => $officers['worshipful_master'], 2024 => $officers['secretary'], 2023 => 'Brandon Goodall', 2022 => 'Ken Mitz', 2021 => 'Jason Warren', 2020 => 'Ken Mitz', 2019 => 'Ron Markham', 2018 => 'Paul Rainey', 2017 => 'Chad Steckler', 2016 => $officers['senior_deacon'], 2015 => 'David Hart', 2014 => 'Benjamin Larramore', 2013 => 'Kevin L. Cobb', 2012 => 'Ronald E. Millikan', 2011 => 'Martin R. Helm', 2010 => 'Jacob Heubner', 2009 => 'Charles Milligan', 2008 => 'Frank G. Bolin', 2007 => 'Randall E. Beem', 2006 => 'Garry Bradley', 2005 => 'Paul E. Rainey', 2004 => 'Robert E. Addington', 2003 => 'Dennis T. Bolin', 2002 => 'Terry G. Brown', 2001 => 'Daniel T. Brown', 2000 => 'Harold A. Bloss', 1999 => 'Loren T. Dixon', 1998 => 'Michael E. Cannon', 1997 => 'William C. Peppiatt', 1996 => 'Brian R. Burdette'];
+        foreach ($terms as $year => $member) {
+            if ($member instanceof User) {
+                $person = $member->person;
+            } else {
+                $person = Person::create([
+                    'name' => $member,
+                    'legal_first_name' => (string) str($member)->before(' '),
+                    'legal_last_name' => (string) str($member)->afterLast(' '),
+                    'is_deceased' => $year <= 2004,
+                ]);
+            }
+            PastMasterTerm::create(['lodge_id' => $lodge->id, 'person_id' => $person->id, 'year' => $year]);
         }
     }
 

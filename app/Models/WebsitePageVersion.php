@@ -15,6 +15,7 @@ class WebsitePageVersion extends Model
             'status' => WebsitePageStatus::class,
             'is_home' => 'boolean',
             'show_in_navigation' => 'boolean',
+            'is_navigation_container' => 'boolean',
             'published_at' => 'datetime',
         ];
     }
