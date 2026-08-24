@@ -142,6 +142,9 @@ html.dark .public-rich-text p {
     .field-input {
         @apply w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
     }
+    .file-input {
+        @apply w-full cursor-pointer rounded-md border border-input bg-background text-sm text-foreground file:mr-3 file:border-0 file:border-r file:border-input file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
+    }
     .field-toggle {
         @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground md:mt-6;
     }
@@ -156,6 +159,21 @@ html.dark .public-rich-text p {
     }
     .checkbox-field {
         @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground;
+    }
+    .admin-warning {
+        @apply rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100;
+    }
+    .person-status-icon {
+        @apply text-slate-600 dark:text-white;
+    }
+    .person-award-icon {
+        @apply text-amber-500 dark:text-amber-300;
+    }
+    .person-account-linked-icon {
+        @apply text-green-700 dark:text-green-400;
+    }
+    .person-account-unlinked-icon {
+        @apply text-slate-400 dark:text-slate-500;
     }
     .public-rich-text h1 {
         @apply mb-5 text-4xl font-bold;

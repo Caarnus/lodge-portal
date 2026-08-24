@@ -22,6 +22,7 @@ const props = defineProps<{
 const query = ref("");
 const creating = ref(false);
 const editing = ref<any | null>(null);
+const publishError = ref("");
 const form = useForm({
     title: "",
     slug: "",
@@ -43,10 +44,19 @@ const create = () =>
             form.reset();
         },
     });
-const publish = (album: any) =>
+const publish = (album: any) => {
+    publishError.value = "";
     router.post(
         `/lodges/${props.lodge.id}/galleries/manage/${album.id}/publish`,
+        {},
+        {
+            onError: (errors) => {
+                publishError.value =
+                    errors.photos ?? "Gallery could not be published.";
+            },
+        },
     );
+};
 const unpublish = (album: any) =>
     router.post(
         `/lodges/${props.lodge.id}/galleries/manage/${album.id}/unpublish`,
@@ -69,6 +79,13 @@ const remove = (album: any) =>
                 <Plus class="mr-1 size-4" /> New gallery
             </button>
         </header>
+        <p
+            v-if="publishError"
+            class="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+            role="alert"
+        >
+            {{ publishError }}
+        </p>
         <div class="rounded-lg border p-4">
             <label class="relative block"
                 ><Search
@@ -284,8 +301,7 @@ const remove = (album: any) =>
                 :album="editing"
                 :draft="editing.draft ?? editing.published"
                 :media="media"
-                :can-publish="
-                    canPublish && !!editing.draft
-                " /></DialogScrollContent
+                :can-publish="canPublish && !!editing.draft"
+                @saved="editing = null" /></DialogScrollContent
     ></Dialog>
 </template>

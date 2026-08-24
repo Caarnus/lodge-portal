@@ -90,6 +90,7 @@ const secondaryForeground = computed(() =>
                 :past-masters="pastMasters"
                 :events="events"
                 :galleries="galleries"
+                :gallery-page-slug="page.is_home ? 'home' : page.slug"
                 :newsletters="newsletters"
                 :member-content="memberContent"
                 :primary-foreground="primaryForeground"

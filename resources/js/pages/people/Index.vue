@@ -155,9 +155,7 @@ const memberRelationships = (person: any) =>
             </button>
         </div>
 
-        <p
-            class="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
-        >
+        <p class="admin-warning mt-4">
             This is the administrative People workspace. It can show full
             lodge-reachable records; member directory privacy controls
             presentation in Directory and does not erase lodge records. Only the
@@ -250,7 +248,7 @@ const memberRelationships = (person: any) =>
             </form>
         </section>
 
-        <div class="mt-4 rounded-lg border">
+        <div class="mt-4 rounded-lg border overflow-hidden">
             <div
                 class="hidden grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_16rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
             >
@@ -304,10 +302,10 @@ const memberRelationships = (person: any) =>
             <div
                 v-for="person in people"
                 :key="person.id"
-                class="grid gap-3 border-t p-4 first:border-t-0 md:grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_16rem] md:items-center md:gap-4 md:first:border-t"
+                class="grid gap-3 border-t p-4 max-md:first:border-t-0 md:grid-cols-[minmax(12rem,1.5fr)_minmax(9rem,1fr)_minmax(8rem,0.8fr)_16rem] md:items-center md:gap-4"
             >
                 <div class="min-w-0">
-                    <p class="break-words font-medium">
+                    <p class="wrap-break-word font-medium">
                         {{ person.display_name }}
                     </p>
                     <p
@@ -374,7 +372,7 @@ const memberRelationships = (person: any) =>
                             class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500"
                             >Phone</span
                         >
-                        <p class="break-words">
+                        <p class="wrap-break-word">
                             {{ formatPhone(person.phone) || "—" }}
                         </p>
                     </div>
@@ -383,7 +381,9 @@ const memberRelationships = (person: any) =>
                             class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500"
                             >City / State</span
                         >
-                        <p class="break-words">{{ location(person) || "—" }}</p>
+                        <p class="wrap-break-word">
+                            {{ location(person) || "—" }}
+                        </p>
                     </div>
                 </div>
                 <div class="min-w-0 text-sm md:hidden">
@@ -398,17 +398,15 @@ const memberRelationships = (person: any) =>
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
                         >City / State</span
                     >
-                    <p class="break-words">{{ location(person) || "—" }}</p>
+                    <p class="wrap-break-word">{{ location(person) || "—" }}</p>
                 </div>
                 <div
                     class="flex items-center justify-end gap-2 md:col-start-4 md:row-start-1"
                 >
-                    <div
-                        class="flex min-w-[9.5rem] items-center justify-end gap-2"
-                    >
+                    <div class="flex min-w-38 items-center justify-end gap-2">
                         <span
                             v-if="person.is_deceased"
-                            class="inline-flex size-8 items-center justify-center text-slate-600 dark:text-white"
+                            class="person-status-icon inline-flex size-8 items-center justify-center"
                             role="img"
                             aria-label="Deceased"
                             v-tooltip.left="{
@@ -420,7 +418,7 @@ const memberRelationships = (person: any) =>
                         </span>
                         <span
                             v-if="membership(person)?.is_award_of_gold"
-                            class="inline-flex size-8 items-center justify-center text-amber-500 dark:text-amber-300"
+                            class="person-award-icon inline-flex size-8 items-center justify-center"
                             role="img"
                             aria-label="Award of Gold"
                             v-tooltip.left="{
@@ -432,7 +430,7 @@ const memberRelationships = (person: any) =>
                         </span>
                         <span
                             v-if="person.past_master_terms?.length"
-                            class="inline-flex size-8 items-center justify-center text-slate-600 dark:text-white"
+                            class="person-status-icon inline-flex size-8 items-center justify-center"
                             role="img"
                             aria-label="Past Master"
                             v-tooltip.left="{
@@ -458,9 +456,9 @@ const memberRelationships = (person: any) =>
                             }"
                             ><Link2
                                 v-if="person.user"
-                                class="size-4 text-green-700 dark:text-green-400" /><Link2Off
+                                class="person-account-linked-icon size-4" /><Link2Off
                                 v-else
-                                class="size-4 text-slate-400 dark:text-slate-500"
+                                class="person-account-unlinked-icon size-4"
                         /></span>
                     </div>
                     <button

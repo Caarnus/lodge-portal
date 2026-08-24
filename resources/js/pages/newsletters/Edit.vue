@@ -139,6 +139,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
                     required
                     type="file"
                     accept="application/pdf,.pdf"
+                    class="file-input"
                     @change="
                         upload.file =
                             ($event.target as HTMLInputElement).files?.[0] ??

@@ -470,6 +470,7 @@ const uploadPhoto = () => {
                             id="profile-photo"
                             type="file"
                             accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                            class="file-input"
                             @input="
                                 photoForm.photo =
                                     ($event.target as HTMLInputElement)

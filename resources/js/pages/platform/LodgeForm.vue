@@ -118,7 +118,7 @@ function submit() {
                 >Logo<input
                     type="file"
                     accept="image/*"
-                    class="field-input cursor-pointer"
+                    class="file-input"
                     @change="
                         form.logo =
                             ($event.target as HTMLInputElement).files?.[0] ??

@@ -82,6 +82,8 @@ const relationshipForm = useForm({
 });
 const pastMasterForm = useForm({ year: new Date().getFullYear() });
 const photoForm = useForm<{ photo: File | null }>({ photo: null });
+const availableRelatedPeople = (personId: number) =>
+    props.availablePeople.filter((candidate) => candidate.id !== personId);
 
 const loadForms = () => {
     const person = props.person;
@@ -664,7 +666,7 @@ const address = computed(() =>
                                 type="file"
                                 accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                                 required
-                                class="mt-1 block"
+                                class="file-input"
                                 @change="
                                     photoForm.photo =
                                         ($event.target as HTMLInputElement)
@@ -1043,8 +1045,8 @@ const address = computed(() =>
                                 >
                                     <option :value="null">Select person</option>
                                     <option
-                                        v-for="item in availablePeople.filter(
-                                            (item) => item.id !== person.id,
+                                        v-for="item in availableRelatedPeople(
+                                            person.id,
                                         )"
                                         :key="item.id"
                                         :value="item.id"

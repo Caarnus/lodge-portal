@@ -151,7 +151,7 @@ const deleteMedia = (asset: any) =>
                 ><label class="field-label"
                     >Parent page<select
                         v-model.number="metadata.navigation_parent_page_id"
-                        class="field-input"
+                        class="file-input"
                     >
                         <option :value="null">None</option>
                         <option
@@ -306,7 +306,7 @@ const deleteMedia = (asset: any) =>
                         required
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                        class="field-input"
+                        class="file-input"
                         @change="
                             upload.file =
                                 ($event.target as HTMLInputElement)

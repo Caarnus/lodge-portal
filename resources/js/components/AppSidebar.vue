@@ -49,7 +49,7 @@ const platformNavItems = computed<NavItem[]>(() => {
     ];
     if (auth.value.user.is_platform_admin) {
         items.push({
-            title: "Platform lodges",
+            title: "Platform Lodges",
             href: "/platform/lodges",
             icon: Building2,
         });
@@ -59,12 +59,12 @@ const platformNavItems = computed<NavItem[]>(() => {
             icon: UserCog,
         });
         items.push({
-            title: "Event categories",
+            title: "Event Categories",
             href: "/platform/event-categories",
             icon: Tags,
         });
         items.push({
-            title: "Merge people",
+            title: "Merge People",
             href: "/platform/people/merge",
             icon: Users,
         });
@@ -90,7 +90,7 @@ const lodgeNavItems = computed<NavItem[]>(() => {
         });
     if (lodge.can_manage_website)
         items.push({
-            title: "Content management",
+            title: "Content Management",
             href: `/lodges/${lodge.id}/website`,
             icon: PanelsTopLeft,
         });

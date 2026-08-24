@@ -157,7 +157,7 @@ const sendUpload = () =>
                         required
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                        class="field-input"
+                        class="file-input"
                         @change="
                             upload.file =
                                 ($event.target as HTMLInputElement)

@@ -10,6 +10,7 @@ const props = defineProps<{
     pastMasters: any[];
     events: any[];
     galleries: any[];
+    galleryPageSlug: string;
     newsletters: any[];
     memberContent: { directory: boolean; newsletters: boolean };
     primaryForeground: string;
@@ -19,6 +20,15 @@ const asset = (id: number | null | undefined) =>
     id ? props.media[String(id)] : null;
 const formatDate = (value: string | null) =>
     formatLodgeDate(value, props.lodge.date_display_format);
+const displayedEvents = (section: any) =>
+    props.events
+        .filter(
+            (item) =>
+                !section.configuration.event_category_id ||
+                item.event_category_id ===
+                    section.configuration.event_category_id,
+        )
+        .slice(0, section.configuration.maximum_items ?? 6);
 const contactForm = useForm({
     name: "",
     email: "",
@@ -341,27 +351,11 @@ const sendContact = () =>
             {{ section.configuration.body }}
         </p>
         <ol
-            v-if="
-                events
-                    .filter(
-                        (event) =>
-                            !section.configuration.event_category_id ||
-                            event.event_category_id ===
-                                section.configuration.event_category_id,
-                    )
-                    .slice(0, section.configuration.maximum_items ?? 6).length
-            "
+            v-if="displayedEvents(section).length"
             class="mt-6 divide-y rounded-xl border"
         >
             <li
-                v-for="event in events
-                    .filter(
-                        (event) =>
-                            !section.configuration.event_category_id ||
-                            event.event_category_id ===
-                                section.configuration.event_category_id,
-                    )
-                    .slice(0, section.configuration.maximum_items ?? 6)"
+                v-for="event in displayedEvents(section)"
                 :key="event.id"
                 class="px-5 py-4"
             >
@@ -469,7 +463,7 @@ const sendContact = () =>
             <a
                 v-for="album in galleries"
                 :key="album.slug"
-                :href="`/l/${lodge.slug}/galleries/${album.slug}`"
+                :href="`/l/${lodge.slug}/galleries/${album.slug}?from=${encodeURIComponent(galleryPageSlug)}`"
                 class="rounded-xl border p-4 hover:bg-slate-50"
                 ><strong>{{ album.title }}</strong></a
             >
@@ -477,11 +471,6 @@ const sendContact = () =>
         <p v-else class="mt-3 text-slate-600">
             {{ section.configuration.body || "Photos will be available soon." }}
         </p>
-        <a
-            :href="`/l/${lodge.slug}/galleries`"
-            class="mt-5 inline-block underline"
-            >View gallery</a
-        >
     </section>
     <section v-else class="mx-auto max-w-4xl px-5 py-10">
         <div

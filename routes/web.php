@@ -93,8 +93,8 @@ Route::post('l/{lodge:slug}/reminders/unsubscribe/{token}', [PublicReminderUnsub
 Route::post('l/{lodge:slug}/events/{event}/reminders', [PublicEventReminderController::class, 'store'])->middleware('throttle:10,1')->name('public.events.reminders.store');
 Route::get('l/{lodge:slug}/events/{occurrence}', [PublicEventController::class, 'show'])->name('public.events.show');
 Route::get('l/{lodge:slug}/galleries', [GalleryController::class, 'index'])->name('public.galleries.index');
-Route::get('l/{lodge:slug}/galleries/{album:slug}', [GalleryController::class, 'show'])->name('public.galleries.show');
-Route::get('l/{lodge:slug}/galleries/{album:slug}/photos/{photo}', [GalleryController::class, 'photo'])->name('public.galleries.photo');
+Route::get('l/{lodge:slug}/galleries/{album:slug}', [GalleryController::class, 'show'])->withoutScopedBindings()->name('public.galleries.show');
+Route::get('l/{lodge:slug}/galleries/{album:slug}/photos/{photo}', [GalleryController::class, 'photo'])->withoutScopedBindings()->name('public.galleries.photo');
 Route::get('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'create'])->name('public.newsletters.request.create');
 Route::post('l/{lodge:slug}/newsletters/request', [PublicFamilyNewsletterRequestController::class, 'store'])->middleware('throttle:10,1')->name('public.newsletters.request.store');
 Route::get('l/{lodge:slug}/newsletters/request/verify/{token}', [PublicFamilyNewsletterRequestController::class, 'verify'])->middleware('throttle:10,1')->name('public.newsletters.request.verify.show');
