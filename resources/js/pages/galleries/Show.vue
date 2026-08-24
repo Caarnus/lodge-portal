@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppearanceTabs from "@/components/AppearanceTabs.vue";
+import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
 import { Head } from "@inertiajs/vue3";
@@ -50,12 +50,7 @@ const selectedPhoto = ref<any | null>(null);
                             />
                         </ul>
                     </nav>
-                    <a
-                        href="/login"
-                        class="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
-                        >Access portal</a
-                    >
-                    <AppearanceTabs compact />
+                    <PublicAccountControls />
                 </div>
             </div>
         </header>

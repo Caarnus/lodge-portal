@@ -6,8 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthBase from "@/layouts/AuthLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import type { SharedData } from "@/types";
+import { Head, useForm, usePage } from "@inertiajs/vue3";
 import { LoaderCircle } from "lucide-vue-next";
+import { computed } from "vue";
 
 defineProps<{
     status?: string;
@@ -20,6 +22,9 @@ const form = useForm({
     remember: false,
 });
 
+const page = usePage<SharedData>();
+const lodge = computed(() => page.props.auth_lodge);
+
 const submit = () => {
     form.post(route("login"), {
         onFinish: () => form.reset("password"),
@@ -29,8 +34,12 @@ const submit = () => {
 
 <template>
     <AuthBase
-        title="Log in to your account"
-        description="Enter your email and password below to log in"
+        :title="lodge ? `Log in to ${lodge.name}` : 'Log in to your account'"
+        :description="
+            lodge
+                ? `Use your ${lodge.name} member account.`
+                : 'Enter your email and password below to log in'
+        "
     >
         <Head title="Log in" />
 

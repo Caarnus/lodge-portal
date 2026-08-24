@@ -83,6 +83,9 @@ class HandleInertiaRequests extends Middleware
                 'lodges' => $lodges,
                 'can_review_registrations' => (bool) $canReviewRegistrations,
             ],
+            'auth_lodge' => fn () => Lodge::where('id', $request->session()->get('auth_lodge_id'))
+                ->where('status', LodgeStatus::Active)
+                ->first(['name', 'slug', 'number', 'logo_path', 'seal_path']),
             'flash' => [
                 'notice' => fn () => $request->session()->get('notice'),
                 'officer_role_prompt' => fn () => $request->session()->get('officer_role_prompt'),

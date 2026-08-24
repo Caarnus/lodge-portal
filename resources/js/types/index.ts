@@ -44,6 +44,13 @@ export interface SharedData extends PageProps {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    auth_lodge: {
+        name: string;
+        slug: string;
+        number: string;
+        logo_path: string | null;
+        seal_path: string | null;
+    } | null;
     ziggy: {
         location: string;
         url: string;

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Lodge;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,6 +29,31 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_login_returns_users_to_the_requested_public_page()
+    {
+        $user = User::factory()->create();
+
+        $this->get('/login?return_to=/l/example-lodge/events');
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect('/l/example-lodge/events');
+    }
+
+    public function test_login_uses_the_public_lodge_branding()
+    {
+        $lodge = Lodge::factory()->create();
+
+        $this->get("/login?return_to=/l/{$lodge->slug}/events")
+            ->assertInertia(fn ($page) => $page
+                ->component('auth/Login')
+                ->where('auth_lodge.name', $lodge->name)
+                ->where('auth_lodge.slug', $lodge->slug));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password()

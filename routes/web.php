@@ -55,7 +55,11 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', []);
+    return Inertia::render('Welcome', [
+        'lodges' => Lodge::where('status', 'active')
+            ->orderBy('name')
+            ->get(['name', 'slug', 'number', 'city', 'state', 'logo_path', 'seal_path']),
+    ]);
 })->name('home');
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified', 'approved'])->name('dashboard');

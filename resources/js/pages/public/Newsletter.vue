@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppearanceTabs from "@/components/AppearanceTabs.vue";
+import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
 import { formatLodgeDate } from "@/utils/date";
 import { Head } from "@inertiajs/vue3";
@@ -51,12 +51,7 @@ const formatDate = (value: string | null) =>
                             />
                         </ul>
                     </nav>
-                    <a
-                        href="/login"
-                        class="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
-                        >Access portal</a
-                    >
-                    <AppearanceTabs compact />
+                    <PublicAccountControls />
                 </div>
             </div>
         </header>

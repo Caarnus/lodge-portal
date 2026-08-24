@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppearanceTabs from "@/components/AppearanceTabs.vue";
+import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 
@@ -48,11 +48,7 @@ const changeRange = (event: Event) =>
                             />
                         </ul>
                     </nav>
-                    <a
-                        href="/login"
-                        class="rounded-md border px-3 py-2 text-sm font-medium"
-                        >Access portal</a
-                    ><AppearanceTabs compact />
+                    <PublicAccountControls />
                 </div>
             </div>
         </header>
