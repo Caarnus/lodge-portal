@@ -26,7 +26,7 @@ const changeRange = (event: Event) =>
 
 <template>
     <Head :title="`Events — ${lodge.name}`" />
-    <div class="min-h-screen bg-background text-foreground">
+    <div class="flex min-h-screen flex-col bg-background text-foreground">
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
@@ -56,7 +56,7 @@ const changeRange = (event: Event) =>
                 </div>
             </div>
         </header>
-        <main class="mx-auto max-w-5xl px-5 py-12">
+        <main class="mx-auto w-full max-w-5xl flex-1 px-5 py-12">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <h1 class="text-4xl font-bold">Upcoming events</h1>
@@ -137,5 +137,11 @@ const changeRange = (event: Event) =>
                 There are no upcoming events available to you in this period.
             </p>
         </main>
+        <footer
+            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
+        >
+            <p class="font-semibold">{{ lodge.name }}</p>
+            <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>
+        </footer>
     </div>
 </template>

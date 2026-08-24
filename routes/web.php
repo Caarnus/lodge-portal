@@ -131,7 +131,6 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         Route::post('{album}/unpublish', [GalleryController::class, 'unpublish'])->name('unpublish');
         Route::delete('{album}', [GalleryController::class, 'destroy'])->name('destroy');
         Route::post('deleted/{albumId}/restore', [GalleryController::class, 'restore'])->name('restore');
-        Route::post('media', [MediaAssetController::class, 'store'])->name('media.store');
     });
     Route::prefix('lodges/{lodge}/newsletters/manage')->name('lodges.newsletters.')->group(function () {
         Route::get('/', [NewsletterController::class, 'index'])->name('index');
@@ -239,6 +238,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
         Route::patch('pages/{page}/sections/{section}/move', [WebsiteSectionController::class, 'move'])->name('sections.move');
         Route::delete('pages/{page}/sections/{section}', [WebsiteSectionController::class, 'destroy'])->name('sections.destroy');
         Route::post('media', [MediaAssetController::class, 'store'])->name('media.store');
+        Route::put('media/{media}', [MediaAssetController::class, 'update'])->name('media.update');
         Route::post('media/{media}/retry', [MediaAssetController::class, 'retry'])->name('media.retry');
         Route::get('media/{media}/original', [MediaAssetController::class, 'original'])->name('media.original');
         Route::delete('media/{media}', [MediaAssetController::class, 'destroy'])->name('media.destroy');

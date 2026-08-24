@@ -18,16 +18,16 @@ class MediaAssetController extends Controller
     {
         abort_unless($request->user()->hasLodgePermission($lodge, 'website.manage') || $request->user()->hasLodgePermission($lodge, 'galleries.manage'), 403);
         $data = $request->validate([
-            'file' => ['required', 'file', 'max:' . config('website.max_upload_kb')],
+            'file' => ['required', 'file', 'max:'.config('website.max_upload_kb')],
             'alt_text' => 'required|string|max:500',
         ]);
         $file = $data['file'];
         $mime = $file->getMimeType();
-        if (!in_array($mime, config('website.allowed_mime_types'), true)) {
+        if (! in_array($mime, config('website.allowed_mime_types'), true)) {
             throw ValidationException::withMessages(['file' => 'Upload a JPEG, PNG, WebP, HEIC, or HEIF image.']);
         }
 
-        $path = $file->store('website-originals/' . $lodge->id, 'local');
+        $path = $file->store('website-originals/'.$lodge->id, 'local');
         $asset = MediaAsset::create([
             'lodge_id' => $lodge->id,
             'uploaded_by' => $request->user()->id,
@@ -49,6 +49,17 @@ class MediaAssetController extends Controller
         $this->allowAsset($lodge, $media);
         $media->update(['processing_status' => MediaProcessingStatus::Pending, 'processing_error' => null]);
         ProcessMediaAsset::dispatch($lodge->id, $media->id);
+
+        return back();
+    }
+
+    public function update(Request $request, Lodge $lodge, MediaAsset $media)
+    {
+        $this->allowAsset($lodge, $media);
+        $data = $request->validate(['alt_text' => 'required|string|max:500']);
+        $before = $media->only('alt_text');
+        $media->update($data);
+        Audit::record('website.media_updated', $media, $lodge, $before, $media->only('alt_text'));
 
         return back();
     }
@@ -79,6 +90,6 @@ class MediaAssetController extends Controller
     private function allowAsset(Lodge $lodge, MediaAsset $media): void
     {
         abort_unless($media->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'website.manage');
+        abort_unless(request()->user()->hasLodgePermission($lodge, 'website.manage') || request()->user()->hasLodgePermission($lodge, 'galleries.manage'), 403);
     }
 }

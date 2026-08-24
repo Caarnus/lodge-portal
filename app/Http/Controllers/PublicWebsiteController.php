@@ -12,6 +12,7 @@ use App\Models\EventOccurrence;
 use App\Models\GalleryAlbum;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
+use App\Models\Membership;
 use App\Models\NewsletterIssue;
 use App\Models\OfficerAssignment;
 use App\Models\PastMasterTerm;
@@ -60,11 +61,7 @@ class PublicWebsiteController extends Controller
         abort_unless($issue->lodge_id === $lodge->id, 404);
 
         $version = $issue->published()->firstOrFail();
-        $navigation = $this->published($lodge)
-            ->where('show_in_navigation', true)
-            ->orderBy('navigation_order')
-            ->orderBy('title')
-            ->get();
+        $navigation = $this->navigation($lodge, $request->user());
         $newsletterIndex = $this->published($lodge)
             ->whereHas('sections', fn ($query) => $query->where('type', 'newsletter_placeholder'))
             ->orderByDesc('is_home')
@@ -94,7 +91,7 @@ class PublicWebsiteController extends Controller
             fn ($section) => ($section->type === 'directory_placeholder' && ! $memberContent['directory'])
                 || ($section->type === 'newsletter_placeholder' && ! $memberContent['newsletters']),
         )->values());
-        $versions = $this->published($lodge)->where('show_in_navigation', true)->orderBy('navigation_order')->orderBy('title')->get();
+        $versions = $this->navigation($lodge, $user);
         $mediaIds = $version->sections->flatMap(function ($section) {
             $ids = [];
             $configuration = $section->configuration;
@@ -136,8 +133,16 @@ class PublicWebsiteController extends Controller
                 ]);
         }
         if ($version->sections->contains('type', 'gallery_placeholder')) {
-            $galleries = GalleryAlbum::query()->where('lodge_id', $lodge->id)->whereHas('published', fn ($query) => $query->where('visibility', 'public'))
-                ->with(['published.photos.mediaAsset'])->orderByDesc('id')->limit(12)->get()->map(fn (GalleryAlbum $album) => [
+            $galleryIds = $version->sections
+                ->where('type', 'gallery_placeholder')
+                ->flatMap(fn ($section) => $section->configuration['gallery_album_ids'] ?? [])
+                ->filter(fn ($id) => is_numeric($id))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+            $galleries = GalleryAlbum::query()->where('lodge_id', $lodge->id)->whereKey($galleryIds)->whereHas('published', fn ($query) => $query->where('visibility', 'public'))
+                ->with(['published.photos.mediaAsset'])->get()->map(fn (GalleryAlbum $album) => [
+                    'id' => $album->id,
                     'slug' => $album->slug, 'title' => $album->published->title,
                     'cover_photo_id' => $album->published->cover_photo_id ?: $album->published->photos->first()?->id,
                 ]);
@@ -176,6 +181,37 @@ class PublicWebsiteController extends Controller
     {
         return WebsitePageVersion::query()->with('page')->where('lodge_id', $lodge->id)
             ->where('status', WebsitePageStatus::Published)->whereHas('page', fn ($query) => $query->whereNull('deleted_at'));
+    }
+
+    private function navigation(Lodge $lodge, ?User $user)
+    {
+        $query = $this->published($lodge)
+            ->where('show_in_navigation', true)
+            ->orderBy('navigation_order')
+            ->orderBy('title');
+
+        if (! $this->isActiveMember($user)) {
+            return $query->where('navigation_visibility', 'public')->get();
+        }
+
+        if (! $this->isActiveLodgeMember($user, $lodge)) {
+            return $query->whereIn('navigation_visibility', ['public', 'masons'])->get();
+        }
+
+        return $query->get();
+    }
+
+    private function isActiveMember(?User $user): bool
+    {
+        $person = $user?->person;
+
+        return $user && $user->approval_status === 'approved' && $user->hasVerifiedEmail() && $person && ! $person->trashed() && ! $person->merged_at && ! $person->is_deceased
+            && Membership::query()->where('person_id', $person->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->exists();
+    }
+
+    private function isActiveLodgeMember(?User $user, Lodge $lodge): bool
+    {
+        return $user?->person && Membership::query()->where('person_id', $user->person_id)->where('lodge_id', $lodge->id)->whereNull('end_date')->whereHas('status', fn ($query) => $query->where('key', 'active'))->exists();
     }
 
     private function navigationTree($versions, ?int $parentId = null): array

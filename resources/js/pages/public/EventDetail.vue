@@ -46,7 +46,13 @@ type Occurrence = {
 };
 
 const props = defineProps<{
-    lodge: { name: string; slug: string; secondary_color?: string };
+    lodge: {
+        name: string;
+        slug: string;
+        city?: string | null;
+        state?: string | null;
+        secondary_color?: string;
+    };
     navigation: any[];
     occurrence: Occurrence;
     viewer: Viewer;
@@ -134,7 +140,7 @@ const subscriptionError = computed(() => {
 
 <template>
     <Head :title="`${occurrence.title} — ${lodge.name}`" />
-    <div class="min-h-screen bg-background text-foreground">
+    <div class="flex min-h-screen flex-col bg-background text-foreground">
         <header
             class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
@@ -164,7 +170,7 @@ const subscriptionError = computed(() => {
                 </div>
             </div>
         </header>
-        <main class="mx-auto max-w-4xl px-5 py-12">
+        <main class="mx-auto w-full max-w-4xl flex-1 px-5 py-12">
             <Link
                 :href="`/l/${lodge.slug}/events`"
                 class="text-sm text-primary underline"
@@ -471,5 +477,11 @@ const subscriptionError = computed(() => {
                 </form>
             </section>
         </main>
+        <footer
+            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
+        >
+            <p class="font-semibold">{{ lodge.name }}</p>
+            <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>
+        </footer>
     </div>
 </template>

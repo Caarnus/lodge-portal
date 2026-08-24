@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
@@ -12,6 +13,7 @@ import {
     Trash2,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
+import { ref } from "vue";
 
 const vTooltip = Tooltip;
 defineOptions({ layout: AppLayout });
@@ -29,6 +31,7 @@ const createForm = useForm({
     slug: "",
     is_home: false,
     show_in_navigation: true,
+    navigation_visibility: "public",
     navigation_order: 0,
     navigation_parent_page_id: null as number | null,
 });
@@ -39,10 +42,7 @@ const branding = useForm({
     logo_media_id: null as number | null,
     seal_media_id: null as number | null,
 });
-const upload = useForm<{ file: File | null; alt_text: string }>({
-    file: null,
-    alt_text: "",
-});
+const mediaOpen = ref(false);
 const submitPage = () =>
     createForm.post(`/lodges/${props.lodge.id}/website/pages`);
 const applyTemplate = () =>
@@ -57,12 +57,6 @@ const restore = (page: any) =>
     router.post(
         `/lodges/${props.lodge.id}/website/deleted-pages/${page.id}/restore`,
     );
-const sendUpload = () =>
-    upload.post(`/lodges/${props.lodge.id}/website/media`, {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => upload.reset(),
-    });
 </script>
 
 <template>
@@ -73,12 +67,17 @@ const sendUpload = () =>
                 <p class="text-sm text-slate-500">{{ lodge.name }}</p>
                 <h1 class="text-3xl font-bold">Website</h1>
             </div>
-            <a
-                :href="`/l/${lodge.slug}`"
-                target="_blank"
-                class="rounded-md border px-4 py-2 text-sm font-medium hover:bg-slate-50"
-                >View public site</a
-            >
+            <div class="flex gap-2">
+                <button class="secondary-button" @click="mediaOpen = true">
+                    <ImagePlus class="mr-1 size-4" /> Media library
+                </button>
+                <a
+                    :href="`/l/${lodge.slug}`"
+                    target="_blank"
+                    class="secondary-button"
+                    >View public site</a
+                >
+            </div>
         </header>
 
         <section class="rounded-lg border p-5">
@@ -146,32 +145,6 @@ const sendUpload = () =>
                     :disabled="branding.processing"
                 >
                     Save branding
-                </button>
-            </form>
-            <form
-                class="mt-5 grid gap-3 border-t pt-5 sm:grid-cols-[1fr_1fr_auto]"
-                @submit.prevent="sendUpload"
-            >
-                <label class="field-label"
-                    >Upload branding image<input
-                        required
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                        class="file-input"
-                        @change="
-                            upload.file =
-                                ($event.target as HTMLInputElement)
-                                    .files?.[0] ?? null
-                        " /></label
-                ><label class="field-label"
-                    >Alternative text<input
-                        v-model="upload.alt_text"
-                        required
-                        class="field-input" /></label
-                ><button
-                    class="inline-flex self-end items-center gap-2 rounded-md border px-4 py-2"
-                >
-                    <ImagePlus class="size-4" /> Upload
                 </button>
             </form>
         </section>
@@ -333,30 +306,91 @@ const sendUpload = () =>
                         pattern="[A-Za-z0-9_-]+"
                         class="mt-1 w-full rounded-md border px-3 py-2"
                 /></label>
-                <label class="flex items-center gap-2 text-sm"
-                    ><input v-model="createForm.is_home" type="checkbox" /> Home
-                    page</label
-                >
-                <label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="createForm.show_in_navigation"
-                        type="checkbox"
-                    />
-                    Show in navigation</label
-                >
+                <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+                    <div class="grid gap-3">
+                        <div class="flex flex-wrap gap-3">
+                            <label class="field-toggle w-fit"
+                                ><input
+                                    v-model="createForm.is_home"
+                                    type="checkbox"
+                                />
+                                Home page</label
+                            >
+                            <label class="field-toggle w-fit"
+                                ><input
+                                    v-model="createForm.show_in_navigation"
+                                    type="checkbox"
+                                />
+                                Show in navigation</label
+                            >
+                        </div>
+                        <fieldset
+                            class="rounded-lg border border-border p-3 transition-opacity"
+                            :class="{
+                                'bg-muted/40 opacity-50':
+                                    !createForm.show_in_navigation,
+                            }"
+                            :disabled="!createForm.show_in_navigation"
+                        >
+                            <legend class="px-1 text-sm font-medium">
+                                Navigation visibility
+                            </legend>
+                            <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="
+                                            createForm.navigation_visibility
+                                        "
+                                        type="radio"
+                                        value="public"
+                                    />
+                                    All visitors</label
+                                >
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="
+                                            createForm.navigation_visibility
+                                        "
+                                        type="radio"
+                                        value="masons"
+                                    />
+                                    Masons</label
+                                >
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="
+                                            createForm.navigation_visibility
+                                        "
+                                        type="radio"
+                                        value="lodge"
+                                    />
+                                    Lodge members</label
+                                >
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="flex items-end justify-end">
+                        <button
+                            class="primary-button"
+                            :disabled="createForm.processing"
+                        >
+                            Create page
+                        </button>
+                    </div>
+                </div>
                 <p
                     v-if="Object.keys(createForm.errors).length"
                     class="text-sm text-red-600 sm:col-span-2"
                 >
                     {{ Object.values(createForm.errors)[0] }}
                 </p>
-                <button
-                    class="w-fit rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
-                    :disabled="createForm.processing"
-                >
-                    Create page
-                </button>
             </form>
         </section>
     </main>
+    <MediaLibraryModal
+        :open="mediaOpen"
+        :lodge="lodge"
+        :media="media"
+        @update:open="mediaOpen = $event"
+    />
 </template>

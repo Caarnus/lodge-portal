@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import SectionFields from "@/components/website/SectionFields.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { normalizeSlug } from "@/utils/slug";
@@ -6,11 +7,9 @@ import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
     ArrowDown,
     ArrowUp,
-    Download,
     Eye,
     ImagePlus,
     Plus,
-    RotateCcw,
     Rocket,
     Save,
     Trash2,
@@ -26,6 +25,7 @@ const props = defineProps<{
     draft: any;
     parentPages: any[];
     media: any[];
+    galleries: any[];
     sectionTypes: Record<string, string>;
     canPublish: boolean;
 }>();
@@ -35,6 +35,7 @@ const metadata = useForm({
     slug: props.draft.slug,
     is_home: props.draft.is_home,
     show_in_navigation: props.draft.show_in_navigation,
+    navigation_visibility: props.draft.navigation_visibility ?? "public",
     navigation_order: props.draft.navigation_order,
     navigation_parent_page_id: props.draft.navigation_parent_page_id,
 });
@@ -45,10 +46,7 @@ watch(
 );
 const newSection = ref("rich_text");
 const sectionForm = useForm({ type: newSection.value });
-const upload = useForm<{ file: File | null; alt_text: string }>({
-    file: null,
-    alt_text: "",
-});
+const mediaOpen = ref(false);
 const parentTitle = (page: any) =>
     page.draft?.title ?? page.published?.title ?? `Page ${page.id}`;
 const saveMetadata = () =>
@@ -83,22 +81,6 @@ const publish = () =>
     router.post(
         `/lodges/${props.lodge.id}/website/pages/${props.websitePage.id}/publish`,
     );
-const sendUpload = () =>
-    upload.post(`/lodges/${props.lodge.id}/website/media`, {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => upload.reset(),
-    });
-const retryMedia = (asset: any) =>
-    router.post(
-        `/lodges/${props.lodge.id}/website/media/${asset.id}/retry`,
-        {},
-        { preserveScroll: true },
-    );
-const deleteMedia = (asset: any) =>
-    router.delete(`/lodges/${props.lodge.id}/website/media/${asset.id}`, {
-        preserveScroll: true,
-    });
 </script>
 
 <template>
@@ -114,6 +96,9 @@ const deleteMedia = (asset: any) =>
                 <h1 class="text-3xl font-bold">{{ draft.title }}</h1>
             </div>
             <div class="flex gap-2">
+                <button class="secondary-button" @click="mediaOpen = true">
+                    <ImagePlus class="mr-1 size-4" /> Media library
+                </button>
                 <a
                     :href="`/lodges/${lodge.id}/website/pages/${websitePage.id}/preview`"
                     target="_blank"
@@ -167,28 +152,77 @@ const deleteMedia = (asset: any) =>
                         v-model.number="metadata.navigation_order"
                         type="number"
                         min="0"
-                        class="field-input" /></label
-                ><label class="flex items-center gap-2 text-sm"
-                    ><input v-model="metadata.is_home" type="checkbox" /> Home
-                    page</label
-                ><label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="metadata.show_in_navigation"
-                        type="checkbox"
-                    />
-                    Show in navigation</label
-                >
+                        class="field-input"
+                /></label>
+                <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+                    <div class="grid gap-3">
+                        <div class="flex flex-wrap gap-3">
+                            <label class="field-toggle w-fit"
+                                ><input
+                                    v-model="metadata.is_home"
+                                    type="checkbox"
+                                />
+                                Home page</label
+                            >
+                            <label class="field-toggle w-fit"
+                                ><input
+                                    v-model="metadata.show_in_navigation"
+                                    type="checkbox"
+                                />
+                                Show in navigation</label
+                            >
+                        </div>
+                        <fieldset
+                            class="rounded-lg border border-border p-3 transition-opacity"
+                            :class="{
+                                'bg-muted/40 opacity-50':
+                                    !metadata.show_in_navigation,
+                            }"
+                            :disabled="!metadata.show_in_navigation"
+                        >
+                            <legend class="px-1 text-sm font-medium">
+                                Navigation visibility
+                            </legend>
+                            <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="metadata.navigation_visibility"
+                                        type="radio"
+                                        value="public"
+                                    />
+                                    All visitors</label
+                                >
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="metadata.navigation_visibility"
+                                        type="radio"
+                                        value="masons"
+                                    />
+                                    Masons</label
+                                >
+                                <label class="flex items-center gap-2"
+                                    ><input
+                                        v-model="metadata.navigation_visibility"
+                                        type="radio"
+                                        value="lodge"
+                                    />
+                                    Lodge members</label
+                                >
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="flex items-end justify-end">
+                        <button class="primary-button">
+                            <Save class="size-4" /> Save settings
+                        </button>
+                    </div>
+                </div>
                 <p
                     v-if="Object.keys(metadata.errors).length"
                     class="text-sm text-red-600 sm:col-span-2"
                 >
                     {{ Object.values(metadata.errors)[0] }}
                 </p>
-                <button
-                    class="inline-flex w-fit items-center gap-2 rounded-md border px-4 py-2"
-                >
-                    <Save class="size-4" /> Save settings
-                </button>
             </form>
         </section>
 
@@ -277,12 +311,16 @@ const deleteMedia = (asset: any) =>
                         v-model="section.configuration"
                         :type="section.type"
                         :media="media"
-                    /><button
-                        class="mt-4 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm text-white"
-                        @click="saveSection(section)"
-                    >
-                        <Save class="size-4" /> Save section
-                    </button>
+                        :galleries="galleries"
+                    />
+                    <div class="mt-4 flex justify-end">
+                        <button
+                            class="primary-button"
+                            @click="saveSection(section)"
+                        >
+                            <Save class="size-4" /> Save section
+                        </button>
+                    </div>
                 </article>
                 <p
                     v-if="sections.length === 0"
@@ -292,105 +330,11 @@ const deleteMedia = (asset: any) =>
                 </p>
             </div>
         </section>
-
-        <section class="rounded-lg border p-5">
-            <h2 class="flex items-center gap-2 text-lg font-semibold">
-                <ImagePlus class="size-5" /> Media
-            </h2>
-            <form
-                class="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
-                @submit.prevent="sendUpload"
-            >
-                <label class="field-label"
-                    >Image<input
-                        required
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                        class="file-input"
-                        @change="
-                            upload.file =
-                                ($event.target as HTMLInputElement)
-                                    .files?.[0] ?? null
-                        " /></label
-                ><label class="field-label"
-                    >Alternative text<input
-                        v-model="upload.alt_text"
-                        required
-                        class="field-input" /></label
-                ><button
-                    class="self-end rounded-md bg-slate-900 px-4 py-2 text-white"
-                >
-                    Upload
-                </button>
-                <p
-                    v-if="Object.keys(upload.errors).length"
-                    class="text-sm text-red-600 sm:col-span-3"
-                >
-                    {{ Object.values(upload.errors)[0] }}
-                </p>
-            </form>
-            <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <article
-                    v-for="asset in media"
-                    :key="asset.id"
-                    class="rounded border p-3"
-                >
-                    <img
-                        v-if="asset.url"
-                        :src="asset.url"
-                        :alt="asset.alt_text"
-                        class="aspect-video w-full rounded object-cover"
-                    />
-                    <div
-                        v-else
-                        class="grid aspect-video place-items-center rounded bg-slate-100 text-sm text-slate-500"
-                    >
-                        {{ asset.processing_status }}
-                    </div>
-                    <p class="mt-2 truncate text-sm font-medium">
-                        {{ asset.original_name }}
-                    </p>
-                    <p
-                        v-if="asset.processing_error"
-                        class="mt-1 text-xs text-red-600"
-                    >
-                        {{ asset.processing_error }}
-                    </p>
-                    <div class="mt-2 flex justify-end gap-1">
-                        <a
-                            :href="`/lodges/${lodge.id}/website/media/${asset.id}/original`"
-                            class="icon-button"
-                            aria-label="Download original"
-                            v-tooltip.top="{
-                                value: 'Download original',
-                                showDelay: 2000,
-                            }"
-                            ><Download class="size-4" /></a
-                        ><button
-                            v-if="asset.processing_status === 'failed'"
-                            class="icon-button"
-                            aria-label="Retry processing"
-                            v-tooltip.top="{
-                                value: 'Retry processing',
-                                showDelay: 2000,
-                            }"
-                            @click="retryMedia(asset)"
-                        >
-                            <RotateCcw class="size-4" /></button
-                        ><button
-                            class="icon-button text-red-600"
-                            aria-label="Delete media"
-                            v-tooltip.top="{
-                                value: 'Delete media',
-                                showDelay: 2000,
-                            }"
-                            @click="deleteMedia(asset)"
-                        >
-                            <Trash2 class="size-4" />
-                        </button>
-                    </div>
-                </article>
-            </div>
-        </section>
     </main>
+    <MediaLibraryModal
+        :open="mediaOpen"
+        :lodge="lodge"
+        :media="media"
+        @update:open="mediaOpen = $event"
+    />
 </template>

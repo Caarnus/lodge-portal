@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\WebsitePageStatus;
+use App\Models\GalleryAlbum;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Models\WebsitePage;
@@ -27,10 +28,10 @@ class WebsiteController extends Controller
         return Inertia::render('website/Index', [
             'lodge' => $lodge,
             'pages' => $lodge->websitePages()->with(['draft', 'published'])->orderBy('id')->get(),
-            'deletedPages' => $lodge->websitePages()->onlyTrashed()->with(['versions' => fn($query) => $query->whereIn('status', ['draft', 'published'])])->orderByDesc('deleted_at')->get(),
+            'deletedPages' => $lodge->websitePages()->onlyTrashed()->with(['versions' => fn ($query) => $query->whereIn('status', ['draft', 'published'])])->orderByDesc('deleted_at')->get(),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->orderByDesc('id')->get(),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'website.publish'),
-            'sectionTypes' => $this->sectionTypes($catalog, (bool)$request->user()->is_platform_admin),
+            'sectionTypes' => $this->sectionTypes($catalog, (bool) $request->user()->is_platform_admin),
         ]);
     }
 
@@ -41,10 +42,10 @@ class WebsiteController extends Controller
         $page = DB::transaction(function () use ($data, $lodge, $request) {
             $page = WebsitePage::create(['lodge_id' => $lodge->id]);
             $page->versions()->create($data + [
-                    'lodge_id' => $lodge->id,
-                    'status' => WebsitePageStatus::Draft,
-                    'created_by' => $request->user()->id,
-                ]);
+                'lodge_id' => $lodge->id,
+                'status' => WebsitePageStatus::Draft,
+                'created_by' => $request->user()->id,
+            ]);
             Audit::record('website.page_created', $page, $lodge, null, $data);
 
             return $page;
@@ -63,8 +64,9 @@ class WebsiteController extends Controller
             'websitePage' => $page,
             'draft' => $draft->load('sections'),
             'parentPages' => $lodge->websitePages()->whereKeyNot($page->id)->with(['draft', 'published'])->get(),
-            'media' => MediaAsset::query()->where(fn($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->orderByDesc('id')->get(),
-            'sectionTypes' => $this->sectionTypes($catalog, (bool)$request->user()->is_platform_admin),
+            'media' => MediaAsset::query()->where(fn ($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->orderByDesc('id')->get(),
+            'galleries' => $lodge->galleryAlbums()->whereHas('published')->with('published')->orderByDesc('id')->get()->map(fn (GalleryAlbum $album) => ['id' => $album->id, 'title' => $album->published->title]),
+            'sectionTypes' => $this->sectionTypes($catalog, (bool) $request->user()->is_platform_admin),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'website.publish'),
         ]);
     }
@@ -143,7 +145,7 @@ class WebsiteController extends Controller
         foreach (['logo_media_id' => 'logo_path', 'seal_media_id' => 'seal_path'] as $field => $pathField) {
             if ($data[$field] ?? null) {
                 $asset = MediaAsset::query()->whereKey($data[$field])->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->first();
-                if (!$asset) {
+                if (! $asset) {
                     throw ValidationException::withMessages([$field => 'Selected media is unavailable or still processing.']);
                 }
                 $data[$pathField] = $asset->derivative_path;
@@ -160,15 +162,16 @@ class WebsiteController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:150',
-            'slug' => ['required', 'alpha_dash', 'max:100', Rule::notIn(['events', 'calendar.ics', 'reservations', 'reminders']), Rule::unique('website_page_versions', 'slug')->where(fn($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
+            'slug' => ['required', 'alpha_dash', 'max:100', Rule::notIn(['events', 'calendar.ics', 'reservations', 'reminders']), Rule::unique('website_page_versions', 'slug')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
             'is_home' => ['required', 'boolean', function ($attribute, $value, $fail) use ($lodge, $version) {
-                if ($value && WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('status', 'draft')->where('is_home', true)->when($version, fn($query) => $query->whereKeyNot($version->id))->exists()) {
+                if ($value && WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('status', 'draft')->where('is_home', true)->when($version, fn ($query) => $query->whereKeyNot($version->id))->exists()) {
                     $fail('This lodge already has a draft home page.');
                 }
             }],
             'show_in_navigation' => 'required|boolean',
+            'navigation_visibility' => ['nullable', Rule::in(['public', 'masons', 'lodge'])],
             'navigation_order' => 'required|integer|min:0|max:100000',
-            'navigation_parent_page_id' => ['nullable', 'integer', Rule::exists('website_pages', 'id')->where(fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))],
+            'navigation_parent_page_id' => ['nullable', 'integer', Rule::exists('website_pages', 'id')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))],
         ]);
     }
 
@@ -181,7 +184,7 @@ class WebsiteController extends Controller
     private function sectionTypes(WebsiteSectionCatalog $catalog, bool $platformAdmin): array
     {
         $types = collect($catalog->labels());
-        if (!$platformAdmin) {
+        if (! $platformAdmin) {
             $types = $types->except('custom_html');
         }
 

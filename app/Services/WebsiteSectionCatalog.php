@@ -17,9 +17,7 @@ class WebsiteSectionCatalog
         'directory_placeholder', 'gallery_placeholder', 'custom_html',
     ];
 
-    public function __construct(private readonly WebsiteHtmlSanitizer $sanitizer)
-    {
-    }
+    public function __construct(private readonly WebsiteHtmlSanitizer $sanitizer) {}
 
     public function labels(): array
     {
@@ -37,7 +35,7 @@ class WebsiteSectionCatalog
 
     public function defaultConfiguration(string $type, bool $platformAdmin): array
     {
-        if (!in_array($type, self::TYPES, true) || ($type === 'custom_html' && !$platformAdmin)) {
+        if (! in_array($type, self::TYPES, true) || ($type === 'custom_html' && ! $platformAdmin)) {
             throw ValidationException::withMessages(['type' => 'This section type is not available.']);
         }
 
@@ -55,13 +53,13 @@ class WebsiteSectionCatalog
             'events_placeholder' => ['heading' => 'Upcoming Events', 'body' => 'Event listings are coming soon.', 'event_category_id' => null, 'maximum_items' => 6, 'show_all_link' => true],
             'newsletter_placeholder' => ['heading' => 'Newsletter', 'body' => 'Newsletters will be available soon.'],
             'directory_placeholder' => ['heading' => 'Member Directory', 'body' => 'Search the member directory.'],
-            'gallery_placeholder' => ['heading' => 'Gallery', 'body' => 'Photos will be available soon.'],
+            'gallery_placeholder' => ['heading' => 'Gallery', 'body' => 'Photos will be available soon.', 'gallery_album_ids' => []],
         };
     }
 
     public function validate(string $type, array $input, Lodge $lodge, bool $platformAdmin): array
     {
-        if (!in_array($type, self::TYPES, true) || ($type === 'custom_html' && !$platformAdmin)) {
+        if (! in_array($type, self::TYPES, true) || ($type === 'custom_html' && ! $platformAdmin)) {
             throw ValidationException::withMessages(['type' => 'This section type is not available.']);
         }
 
@@ -74,15 +72,16 @@ class WebsiteSectionCatalog
             'call_to_action' => ['heading' => 'required|string|max:150', 'body' => 'nullable|string|max:1000', 'label' => 'required|string|max:100', 'url' => ['required', 'string', 'max:2048', $this->safeUrlRule()]],
             'events_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000', 'event_category_id' => ['nullable', 'integer', Rule::exists('event_category_lodge', 'event_category_id')->where('lodge_id', $lodge->id)], 'maximum_items' => ['nullable', 'integer', 'min:1', 'max:20'], 'show_all_link' => ['nullable', 'boolean']],
             'contact_information' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000', 'show_contact_form' => ['nullable', 'boolean']],
-            'meeting_information', 'officers_placeholder', 'past_masters_placeholder', 'newsletter_placeholder', 'directory_placeholder', 'gallery_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000'],
+            'meeting_information', 'officers_placeholder', 'past_masters_placeholder', 'newsletter_placeholder', 'directory_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000'],
+            'gallery_placeholder' => ['heading' => 'nullable|string|max:150', 'body' => 'nullable|string|max:1000', 'gallery_album_ids' => ['nullable', 'array', 'max:20'], 'gallery_album_ids.*' => ['integer', Rule::exists('gallery_albums', 'id')->where('lodge_id', $lodge->id)]],
         };
 
         $data = Validator::make($input, $rules)->validate();
         foreach ($this->mediaIds($data) as $mediaId) {
             $valid = MediaAsset::query()->whereKey($mediaId)->where('processing_status', 'ready')
                 ->where('visibility', 'public')
-                ->where(fn($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->exists();
-            if (!$valid) {
+                ->where(fn ($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->exists();
+            if (! $valid) {
                 throw ValidationException::withMessages(['configuration.media_id' => 'Selected media is unavailable or still processing.']);
             }
         }
@@ -98,8 +97,8 @@ class WebsiteSectionCatalog
     {
         $ids = [];
         array_walk_recursive($configuration, function ($value, $key) use (&$ids) {
-            if (($key === 'media_id' || str_ends_with((string)$key, '_media_id')) && is_numeric($value)) {
-                $ids[] = (int)$value;
+            if (($key === 'media_id' || str_ends_with((string) $key, '_media_id')) && is_numeric($value)) {
+                $ids[] = (int) $value;
             }
         });
 
@@ -109,7 +108,7 @@ class WebsiteSectionCatalog
     private function safeUrlRule(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail): void {
-            if (!preg_match('~^(?:/(?!/)|https?://|mailto:|tel:)~i', (string)$value)) {
+            if (! preg_match('~^(?:/(?!/)|https?://|mailto:|tel:)~i', (string) $value)) {
                 $fail("The {$attribute} must be a lodge-relative, HTTP(S), email, or telephone link.");
             }
         };

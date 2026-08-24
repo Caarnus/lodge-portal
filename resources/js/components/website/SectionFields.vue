@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import RichTextField from "./RichTextField.vue";
-defineProps<{ type: string; media: any[] }>();
+defineProps<{ type: string; media: any[]; galleries: any[] }>();
 const config = defineModel<Record<string, any>>({ required: true });
 const placeholders = [
     "meeting_information",
@@ -13,6 +13,14 @@ const placeholders = [
     "gallery_placeholder",
 ];
 const addLink = () => (config.value.links ??= []).push({ label: "", url: "" });
+const galleryAlbumIds = () => (config.value.gallery_album_ids ??= []);
+const gallerySelected = (id: number) => galleryAlbumIds().includes(id);
+const toggleGallery = (id: number, selected: boolean) => {
+    const ids = galleryAlbumIds();
+    config.value.gallery_album_ids = selected
+        ? [...new Set([...ids, id])]
+        : ids.filter((item: number) => item !== id);
+};
 </script>
 
 <template>
@@ -199,6 +207,45 @@ const addLink = () => (config.value.links ??= []).push({ label: "", url: "" });
                 ><input v-model="config.show_contact_form" type="checkbox" />
                 Enable contact form</label
             >
+        </template>
+        <template v-else-if="type === 'gallery_placeholder'">
+            <label class="field-label"
+                >Heading<input v-model="config.heading" class="field-input"
+            /></label>
+            <label class="field-label"
+                >Message<textarea
+                    v-model="config.body"
+                    class="field-input min-h-20"
+                ></textarea>
+            </label>
+            <fieldset class="rounded-lg border border-border p-4">
+                <legend class="px-1 text-sm font-medium">Albums to show</legend>
+                <p class="mb-3 text-sm text-muted-foreground">
+                    Select the published albums displayed in this section.
+                </p>
+                <div v-if="galleries.length" class="grid gap-2 sm:grid-cols-2">
+                    <label
+                        v-for="album in galleries"
+                        :key="album.id"
+                        class="field-toggle"
+                    >
+                        <input
+                            type="checkbox"
+                            :checked="gallerySelected(album.id)"
+                            @change="
+                                toggleGallery(
+                                    album.id,
+                                    ($event.target as HTMLInputElement).checked,
+                                )
+                            "
+                        />
+                        {{ album.title }}
+                    </label>
+                </div>
+                <p v-else class="text-sm text-muted-foreground">
+                    Publish a gallery before adding it to this section.
+                </p>
+            </fieldset>
         </template>
         <template v-else-if="placeholders.includes(type)">
             <label class="field-label"

@@ -2,6 +2,7 @@
 import AppLayout from "@/layouts/AppLayout.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import { ImagePlus } from "lucide-vue-next";
 import { ref } from "vue";
 defineOptions({ layout: AppLayout });
 const props = defineProps<{
@@ -12,7 +13,7 @@ const props = defineProps<{
     canPublish: boolean;
     embedded?: boolean;
 }>();
-const emit = defineEmits<{ saved: [] }>();
+const emit = defineEmits<{ saved: []; openMedia: [] }>();
 const form = useForm({
     title: props.draft.title,
     slug: props.album.slug,
@@ -21,10 +22,6 @@ const form = useForm({
     cover_photo_id: props.draft.cover_photo_id,
 });
 const add = useForm({ media_asset_id: null as number | null });
-const upload = useForm<{ file: File | null; alt_text: string }>({
-    file: null,
-    alt_text: "",
-});
 const publishError = ref("");
 const publish = () => {
     publishError.value = "";
@@ -135,73 +132,47 @@ const save = () =>
             </div>
         </form>
         <section class="rounded-lg border border-border bg-card p-4 md:p-5">
-            <h2 class="text-lg font-medium">Upload photo</h2>
-            <form
-                class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
-                @submit.prevent="
-                    upload.post(`/lodges/${lodge.id}/galleries/manage/media`, {
-                        forceFormData: true,
-                    })
-                "
-            >
-                <label class="field-label">
-                    Image file
-                    <input
-                        required
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                        class="file-input"
-                        @change="
-                            upload.file =
-                                ($event.target as HTMLInputElement)
-                                    .files?.[0] ?? null
-                        "
-                    />
-                </label>
-                <label class="field-label">
-                    Alternative text
-                    <input
-                        v-model="upload.alt_text"
-                        required
-                        class="field-input"
-                    />
-                </label>
-                <button
-                    class="primary-button self-end"
-                    :disabled="upload.processing"
-                >
-                    Upload
-                </button>
-            </form>
-        </section>
-        <section class="rounded-lg border border-border bg-card p-4 md:p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-lg font-medium">Gallery photos</h2>
-                <form
-                    class="flex w-full gap-2 md:w-auto"
-                    @submit.prevent="
-                        add.post(
-                            `/lodges/${lodge.id}/galleries/manage/${album.id}/photos`,
-                        )
-                    "
+                <div
+                    class="flex w-full flex-wrap gap-2 md:w-auto md:flex-nowrap"
                 >
-                    <select
-                        v-model.number="add.media_asset_id"
-                        class="field-input min-w-0"
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        @click="emit('openMedia')"
                     >
-                        <option :value="null">Add existing media</option>
-                        <option
-                            v-for="item in media"
-                            :key="item.id"
-                            :value="item.id"
-                        >
-                            {{ item.original_name }}
-                        </option>
-                    </select>
-                    <button class="secondary-button" :disabled="add.processing">
-                        Add
+                        <ImagePlus class="mr-1 size-4" /> Media library
                     </button>
-                </form>
+                    <form
+                        class="flex min-w-0 flex-1 gap-2 md:flex-none"
+                        @submit.prevent="
+                            add.post(
+                                `/lodges/${lodge.id}/galleries/manage/${album.id}/photos`,
+                            )
+                        "
+                    >
+                        <select
+                            v-model.number="add.media_asset_id"
+                            class="field-input min-w-0"
+                        >
+                            <option :value="null">Add existing media</option>
+                            <option
+                                v-for="item in media"
+                                :key="item.id"
+                                :value="item.id"
+                            >
+                                {{ item.original_name }}
+                            </option>
+                        </select>
+                        <button
+                            class="secondary-button"
+                            :disabled="add.processing"
+                        >
+                            Add
+                        </button>
+                    </form>
+                </div>
             </div>
             <div
                 v-if="draft.photos.length"
@@ -254,7 +225,7 @@ const save = () =>
                 v-else
                 class="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground"
             >
-                Upload a photo, then add it from existing media.
+                Add a ready image from Media library.
             </p>
         </section>
     </main>

@@ -6,10 +6,19 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
+import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import GalleryEditor from "@/pages/galleries/Edit.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, router, useForm } from "@inertiajs/vue3";
-import { Eye, Pencil, Plus, Rocket, Search, Trash2 } from "lucide-vue-next";
+import {
+    Eye,
+    ImagePlus,
+    Pencil,
+    Plus,
+    Rocket,
+    Search,
+    Trash2,
+} from "lucide-vue-next";
 import { computed, ref } from "vue";
 
 defineOptions({ layout: AppLayout });
@@ -22,6 +31,7 @@ const props = defineProps<{
 const query = ref("");
 const creating = ref(false);
 const editing = ref<any | null>(null);
+const mediaOpen = ref(false);
 const publishError = ref("");
 const form = useForm({
     title: "",
@@ -75,9 +85,14 @@ const remove = (album: any) =>
                     Draft galleries stay private until published.
                 </p>
             </div>
-            <button class="primary-button" @click="creating = true">
-                <Plus class="mr-1 size-4" /> New gallery
-            </button>
+            <div class="flex gap-2">
+                <button class="secondary-button" @click="mediaOpen = true">
+                    <ImagePlus class="mr-1 size-4" /> Media library
+                </button>
+                <button class="primary-button" @click="creating = true">
+                    <Plus class="mr-1 size-4" /> New gallery
+                </button>
+            </div>
         </header>
         <p
             v-if="publishError"
@@ -302,6 +317,13 @@ const remove = (album: any) =>
                 :draft="editing.draft ?? editing.published"
                 :media="media"
                 :can-publish="canPublish && !!editing.draft"
-                @saved="editing = null" /></DialogScrollContent
+                @saved="editing = null"
+                @open-media="mediaOpen = true" /></DialogScrollContent
     ></Dialog>
+    <MediaLibraryModal
+        :open="mediaOpen"
+        :lodge="lodge"
+        :media="media"
+        @update:open="mediaOpen = $event"
+    />
 </template>

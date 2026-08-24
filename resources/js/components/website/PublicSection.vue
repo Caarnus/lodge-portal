@@ -29,6 +29,15 @@ const displayedEvents = (section: any) =>
                     section.configuration.event_category_id,
         )
         .slice(0, section.configuration.maximum_items ?? 6);
+const displayedGalleries = (section: any) => {
+    const galleries = new Map(
+        props.galleries.map((gallery) => [gallery.id, gallery]),
+    );
+
+    return (section.configuration.gallery_album_ids ?? [])
+        .map((id: number) => galleries.get(id))
+        .filter(Boolean);
+};
 const contactForm = useForm({
     name: "",
     email: "",
@@ -457,11 +466,11 @@ const sendContact = () =>
             {{ section.configuration.heading || "Gallery" }}
         </h2>
         <div
-            v-if="galleries.length"
+            v-if="displayedGalleries(section).length"
             class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
             <a
-                v-for="album in galleries"
+                v-for="album in displayedGalleries(section)"
                 :key="album.slug"
                 :href="`/l/${lodge.slug}/galleries/${album.slug}?from=${encodeURIComponent(galleryPageSlug)}`"
                 class="rounded-xl border p-4 hover:bg-slate-50"
