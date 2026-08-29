@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import { Head, router, usePage } from "@inertiajs/vue3";
 import { Save, UserMinus } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
@@ -80,6 +81,7 @@ const remove = (position: any) => {
         <p class="text-sm text-slate-600">
             Assign a current member to each position for {{ lodge.name }}.
         </p>
+        <WorkspaceTabs :lodge="lodge" workspace="people" active="officers" class="mt-6" />
 
         <div
             v-if="prompt && promptOpen"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PersonModal from "@/components/people/PersonModal.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { formatPhone } from "@/lib/phone";
 import { Head, router } from "@inertiajs/vue3";
@@ -154,6 +155,8 @@ const memberRelationships = (person: any) =>
                 <Plus class="mr-1 size-4" /> Add person
             </button>
         </div>
+
+        <WorkspaceTabs :lodge="lodge" workspace="people" active="people" class="mt-6" />
 
         <p class="admin-warning mt-4">
             This is the administrative People workspace. It can show full

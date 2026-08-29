@@ -18,19 +18,15 @@ import {
     ClipboardCheck,
     ContactRound,
     ExternalLink,
-    Image,
     Mail,
-    Newspaper,
     PanelsTopLeft,
     LayoutGrid,
     BookOpen,
     HandHelping,
     Settings,
-    ShieldCheck,
     Tags,
     UserCog,
     Users,
-    UserStar,
 } from "lucide-vue-next";
 import { computed } from "vue";
 import AppLogo from "./AppLogo.vue";
@@ -96,10 +92,14 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             icon: ExternalLink,
             external: true,
         });
-    if (lodge.can_manage_website)
+    if (lodge.can_manage_website || lodge.can_manage_galleries || lodge.can_manage_newsletters)
         items.push({
             title: "Content Management",
-            href: `/lodges/${lodge.id}/website`,
+            href: lodge.can_manage_website
+                ? `/lodges/${lodge.id}/website`
+                : lodge.can_manage_galleries
+                  ? `/lodges/${lodge.id}/galleries/manage`
+                  : `/lodges/${lodge.id}/newsletters/manage`,
             icon: PanelsTopLeft,
         });
     if (lodge.can_manage_events)
@@ -108,28 +108,20 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: `/lodges/${lodge.id}/events`,
             icon: CalendarCog,
         });
-    if (lodge.can_manage_galleries)
-        items.push({
-            title: "Media Galleries",
-            href: `/lodges/${lodge.id}/galleries/manage`,
-            icon: Image,
-        });
     if (lodge.can_manage_communications)
         items.push({
             title: "Communications",
             href: `/lodges/${lodge.id}/communications/manage`,
             icon: Mail,
         });
-    if (lodge.can_manage_newsletters)
-        items.push({
-            title: "Newsletters",
-            href: `/lodges/${lodge.id}/newsletters/manage`,
-            icon: Newspaper,
-        });
-    if (lodge.can_view_people)
+    if (lodge.can_view_people || lodge.can_manage_officers || lodge.can_manage_roles)
         items.push({
             title: "People",
-            href: `/lodges/${lodge.id}/people`,
+            href: lodge.can_view_people
+                ? `/lodges/${lodge.id}/people`
+                : lodge.can_manage_officers
+                  ? `/lodges/${lodge.id}/officers`
+                  : `/lodges/${lodge.id}/role-assignments`,
             icon: ContactRound,
         });
     if (lodge.can_search_ritual)
@@ -137,24 +129,6 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             title: "Ritual Assistance",
             href: `/lodges/${lodge.id}/ritual-assistance`,
             icon: HandHelping,
-        });
-    if (lodge.can_manage_officers)
-        items.push({
-            title: "Officers",
-            href: `/lodges/${lodge.id}/officers`,
-            icon: UserStar,
-        });
-    if (lodge.can_manage_officers)
-        items.push({
-            title: "Ritual management",
-            href: `/lodges/${lodge.id}/ritual-management`,
-            icon: HandHelping,
-        });
-    if (lodge.can_manage_roles)
-        items.push({
-            title: "Roles",
-            href: `/lodges/${lodge.id}/role-assignments`,
-            icon: ShieldCheck,
         });
     if (lodge.can_manage_lodge)
         items.push({

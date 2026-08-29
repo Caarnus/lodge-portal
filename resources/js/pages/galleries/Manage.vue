@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import GalleryEditor from "@/pages/galleries/Edit.vue";
 import { normalizeSlug } from "@/utils/slug";
@@ -94,6 +95,7 @@ const remove = (album: any) =>
                 </button>
             </div>
         </header>
+        <WorkspaceTabs :lodge="lodge" workspace="content" active="galleries" />
         <p
             v-if="publishError"
             class="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"

@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import NewsletterEditor from "@/pages/newsletters/Edit.vue";
 import { formatLodgeDate } from "@/utils/date";
 import { normalizeSlug } from "@/utils/slug";
@@ -75,6 +76,7 @@ const publicationDate = (value: string | null) =>
                 <Plus class="mr-1 size-4" /> New newsletter
             </button>
         </header>
+        <WorkspaceTabs :lodge="lodge" workspace="content" active="newsletters" />
         <div class="rounded-lg border p-4">
             <label class="relative block"
                 ><Search

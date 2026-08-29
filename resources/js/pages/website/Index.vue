@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
@@ -238,6 +239,7 @@ const restore = (page: any) =>
                 >
             </div>
         </header>
+        <WorkspaceTabs :lodge="lodge" workspace="content" active="website" />
 
         <section class="rounded-lg border p-5">
             <h2 class="text-lg font-semibold">Branding</h2>

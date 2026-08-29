@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { Plus, Trash2 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
@@ -78,6 +79,7 @@ const remove = (userId: number, roleId: number) =>
                 >Edit role definitions</Link
             >
         </div>
+        <WorkspaceTabs :lodge="lodge" workspace="people" active="roles" class="mt-6" />
         <label class="mt-6 block max-w-xl"
             ><span class="text-sm font-medium">Find a linked account</span
             ><input
