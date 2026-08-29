@@ -201,7 +201,7 @@ const saveAvailability = () =>
                     <option value="hidden">Hidden</option>
                     <option value="own_lodge">Own lodges</option>
                     <option value="participating_lodges">
-                        Participating lodges
+                        WorkingTools lodges
                     </option></select
                 ><textarea
                     v-model="note"

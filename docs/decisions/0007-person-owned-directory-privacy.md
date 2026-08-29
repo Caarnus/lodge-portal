@@ -22,7 +22,7 @@ Store one person-owned directory privacy record per person. It contains the over
 
 Name is the minimum identity shown for a listed directory result. A member who does not want their name listed uses the hidden scope. Field choices apply to ordinary own-lodge and cross-lodge directory views alike.
 
-Treat every active platform lodge as participating in the initial release. Ordinary directory access always has an explicit requesting lodge and requires an approved, verified account linked to an active member of that lodge plus a new `directory.view` permission there. Cross-lodge results may come from people with an active membership in any active participating lodge, but do not disclose the subject's memberships or lodge affiliations.
+Treat every active WorkingTools lodge as eligible for cross-lodge discovery; there is no separate participation enrollment. Ordinary directory access has an explicit requesting lodge and requires an approved, verified account linked to an active member of that lodge plus `directory.view` there. Phase 9 adds a platform-administrator browsing exception without weakening subject privacy. Cross-lodge results may come from people with an active membership in any active WorkingTools lodge and may disclose a bounded list of their active WorkingTools lodge affiliations to authorized directory users.
 
 Resolve visibility and shape output in a dedicated server-side directory access/projection service. Search predicates use the same visibility rules as result projection. A hidden email, phone number, or address must not make a person discoverable by searching that value. Direct detail routes use the same service and return 404 when the subject is not visible in that directory context.
 
@@ -42,6 +42,6 @@ Use database queries for the initial directory. Do not introduce a search index 
 - Own-lodge treatment automatically applies in every lodge where the person currently has an active membership.
 - Ending a membership immediately removes that lodge's own-lodge basis; hidden and cross-lodge rules are reevaluated on every request.
 - Directory and administrative people pages require distinct policies, routes, projections, and tests.
-- Cross-lodge directory results deliberately do not reveal lodge affiliations in the first release.
+- Phase 9 supersedes the first-release affiliation omission: authorized cross-lodge directory results reveal bounded active WorkingTools lodge affiliations, while public users and ordinary lodge-directory outsiders receive no member data.
 - Search remains simple and privacy-correct at pilot scale. A future indexed implementation must preserve identical visibility semantics.
 - Family information remains outside the directory regardless of scope.

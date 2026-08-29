@@ -2,7 +2,7 @@
 
 ## Outcome
 
-An approved, verified member with a linked person can use one personal portal across all active lodge memberships, maintain permitted canonical profile fields, set lodge-email preferences per membership, and control one person-wide directory presentation. Ordinary lodge directories show only server-authorized fields. Cross-lodge discovery is opt-in, never exposes family information or lodge affiliations, and cannot be bypassed through search terms, direct identifiers, cached data, photo URLs, or active-lodge switching.
+An approved, verified member with a linked person can use one personal portal across all active lodge memberships, maintain permitted canonical profile fields, set lodge-email preferences per membership, and control one person-wide directory presentation. Ordinary lodge directories show only server-authorized fields. Cross-lodge discovery is opt-in, never exposes family information, and cannot be bypassed through search terms, direct identifiers, cached data, photo URLs, or active-lodge switching. Phase 9 extends the safe projection to include active WorkingTools lodge affiliations for authorized directory users.
 
 This phase separates two existing concerns:
 
@@ -36,9 +36,9 @@ Before implementation, run existing backend and frontend gates. A failing Phase 
 - Email, phone, full mailing address, profile-photo derivative, and degree are independently opt-in. All optional fields default hidden.
 - Field choices apply to both ordinary own-lodge and cross-lodge views. Phase 6 does not offer separate per-field values for each audience.
 - `own_lodge` means every active lodge membership held by the person, not only primary lodge, current UI lodge, first membership, or account registration lodge.
-- `participating_lodges` includes own-lodge visibility and permits discovery by an authorized directory user from any active platform lodge. The initial release has no separate lodge participation toggle.
-- An ordinary directory requester must be approved, verified, linked to a non-merged person, actively belong to the explicit requesting lodge, and hold `directory.view` there. Platform-administrator status alone does not turn the member directory into an unscoped people browser.
-- Cross-lodge results do not reveal the subject's membership list, lodge names/numbers, primary lodge, member numbers, roles, officer history, or membership dates/statuses.
+- `participating_lodges` is the retained internal value for the user-facing **WorkingTools lodges** scope. It includes own-lodge visibility and permits discovery by an authorized directory user from any active WorkingTools lodge. There is no separate lodge participation toggle.
+- An ordinary directory requester must be approved, verified, linked to a non-merged person, actively belong to the explicit requesting lodge, and hold `directory.view` there. Phase 9 permits a platform administrator to browse the same privacy-filtered directory projection without a lodge membership; this does not grant access to hidden subjects or hidden optional fields.
+- Cross-lodge results may reveal all active WorkingTools lodge names/numbers as a bounded affiliation projection. They do not reveal primary lodge, member numbers, roles, officer history, or membership dates/statuses.
 - An opted-in own-lodge degree comes from the active membership in the requesting lodge. An opted-in cross-lodge degree is the highest current Masonic degree among active memberships. Past Master is not returned as a degree.
 - Family relationships and related-person information are never serialized by directory endpoints, even within the subject's own lodge. Existing administrative relationship tools remain separate.
 - Administrative `people.view` access may show maintained fields needed for lodge recordkeeping regardless of ordinary directory settings, subject to existing lodge reachability. Directory preferences never delete or redact source records.
@@ -129,7 +129,7 @@ An ended, inactive-status, suspended, expelled, demitted, or deceased membership
 
 ### Requester Eligibility
 
-Ordinary list, search, detail, and photo requests require all of:
+Ordinary member list, search, detail, and photo requests require all of:
 
 1. Approved and email-verified user.
 2. Linked person is present, non-merged, non-deleted, and not deceased.
@@ -138,6 +138,8 @@ Ordinary list, search, detail, and photo requests require all of:
 5. Requesting lodge is active.
 
 The route's lodge is the authorization context. `current_lodge_id`, a submitted lodge ID, or membership in another lodge is never substituted.
+
+Phase 9 adds a platform-administrator exception to requester eligibility. A platform administrator may browse the same privacy-filtered cross-lodge projection without an active lodge membership. Subject privacy, active-affiliation, direct-detail, photo, and hidden-field rules still apply.
 
 ### Projection Shapes
 
@@ -150,8 +152,9 @@ List and detail responses use a stable allowlist. At most they contain:
 - Structured mailing address, nullable as a whole by privacy.
 - Degree display label, nullable by privacy or unavailable data.
 - Authorized profile-photo URL, nullable by privacy or readiness.
+- For authorized cross-lodge views after Phase 9, a bounded list of active WorkingTools lodge affiliations containing only lodge identifier, name, number, and safe route slug.
 
-Do not include raw privacy flags for another person. The presence/null state of each output is enough. Do not include legal-name parts, birth/death values, membership objects, account IDs, role IDs, relationship counts, audit fields, media paths, or timestamps.
+Do not include raw privacy flags for another person. The presence/null state of each output is enough. Do not include legal-name parts, birth/death values, raw membership objects, primary-lodge flags, member numbers, membership status/dates, account IDs, role IDs, relationship counts, audit fields, media paths, or timestamps.
 
 Self profile endpoints may return the user's own editable values and privacy controls. They are not directory projections.
 
@@ -159,7 +162,7 @@ Self profile endpoints may return the user's own editable values and privacy con
 
 The directory page supports:
 
-- Audience filter: requesting lodge or participating lodges.
+- Audience filter: requesting lodge or WorkingTools lodges.
 - Trimmed query with a two-character minimum when non-empty and a bounded maximum.
 - Name search over preferred and legal name fields.
 - Email search only for subjects whose `show_email` is true.
@@ -172,7 +175,7 @@ Address is displayed when opted in but is not searchable in Phase 6. This reduce
 
 Participating-lodges search deduplicates a multi-lodge person to one result. Own-lodge results use the requesting membership's degree; cross-lodge results calculate highest active degree in SQL or a bounded, eager-loaded projection without N+1 queries.
 
-Empty queries may list the requester's own-lodge directory. Participating-lodges mode requires a non-empty query to prevent broad cross-platform enumeration.
+Empty queries may list the requester's own-lodge directory. Phase 9 permits empty-query WorkingTools-wide and group-filtered browsing, with the same privacy predicate, stable pagination, bounded page size, private/no-store responses, and rate limiting.
 
 ### Direct Details and Photos
 
@@ -218,7 +221,7 @@ The UI must explain:
 
 - Hidden removes the member from ordinary directories but not authorized lodge records.
 - Own lodge applies to every current active lodge membership.
-- Participating lodges is cross-lodge opt-in.
+- WorkingTools lodges is the user-facing cross-lodge opt-in.
 - Optional fields apply to both audiences.
 - Family information is never shared by the directory.
 
@@ -320,7 +323,7 @@ Changing email must warn that verification is required again. Privacy controls m
 Add `resources/js/pages/directory/Index.vue` and `Show.vue` or equivalent established casing. Directory UI includes:
 
 - Requesting-lodge context.
-- Own lodge / Participating lodges selector.
+- Own lodge / WorkingTools lodges selector.
 - Debounced server search with shareable query parameters.
 - Paginated result cards/list.
 - Explicit placeholders for hidden optional fields; do not imply missing versus private where that distinction leaks data.
@@ -338,7 +341,7 @@ Navigation shows Directory only for lodge contexts where server-shared permissio
 | Edit own permitted profile/privacy   |        No |                   Own linked person |                          Own linked person |                                    Own linked person |
 | Edit own membership email preference |        No |               Own active membership |                      Own active membership |                                Own active membership |
 | Search requesting lodge directory    |        No |               Yes, privacy-filtered | Yes, privacy-filtered when using Directory | Only with active member context and `directory.view` |
-| Search participating lodges          |        No |            Yes, opt-in results only |                   Yes, opt-in results only | Only with active member context and `directory.view` |
+| Search WorkingTools lodges           |        No |            Yes, opt-in results only |                   Yes, opt-in results only | Yes after Phase 9; same privacy-filtered projection, no membership required |
 | View directory detail/photo          |        No |           Same visibility as search |       Same visibility when using Directory |                 Same visibility when using Directory |
 | View administrative person record    |        No |          No by directory permission |        Existing `people.view` reachability |                         Existing platform-admin rule |
 | Edit administrative person fields    |        No |                                  No |      Existing `people.manage` reachability |                         Existing platform-admin rule |
@@ -414,7 +417,7 @@ Playwright must cover:
 1. Member sees all active memberships and distinct event-activity cards.
 2. Member edits preferred/contact fields and sees global-effect messaging.
 3. Member selects own-lodge scope and another lodge cannot find them.
-4. Member opts into participating lodges, enables phone, leaves address hidden, and another lodge sees only name/phone.
+4. Member opts into WorkingTools lodges, enables phone, leaves address hidden, and another lodge sees only name/phone.
 5. Searching hidden address/email does not reveal the result.
 6. Member selects hidden and disappears from list, search, direct detail, and prior photo URL.
 7. Authorized officer still reaches administrative member record through People, with clear administrative context.
@@ -429,7 +432,7 @@ Playwright must cover:
 4. Change preferred name, phone, address, and photo; verify linked canonical Person and account display update.
 5. Change email; confirm both Person/User update atomically and protected app access requires reverification.
 6. Set own-lodge scope; verify Lodges A and B where subject is active can discover them, Lodge C cannot.
-7. Set participating-lodges scope with phone enabled and address/email/photo/degree disabled; verify Lodge C sees exactly name and phone.
+7. Set `participating_lodges` scope with phone enabled and address/email/photo/degree disabled; verify Lodge C sees name, phone, and bounded active WorkingTools lodge affiliations only.
 8. Search using hidden email/address/phone values; verify no match or count difference.
 9. Enable degree; verify own-lodge and cross-lodge derivation without membership/lodge disclosure.
 10. Set hidden; verify list, search, detail, and previously copied derivative route return no data.
@@ -605,7 +608,7 @@ Phase 6 is complete only when:
 - Directory scope and optional fields are enforced identically in list, search, detail, photo, counts, pagination, props, and HTML.
 - Hidden fields cannot influence discoverability.
 - Multi-lodge own-lodge treatment works from membership facts without active-context dependence.
-- Cross-lodge results are opt-in, deduplicated, and reveal no memberships, lodge affiliation, family data, or administrative fields.
+- Cross-lodge results are opt-in and deduplicated. After Phase 9 they reveal only the bounded active WorkingTools affiliation projection, never family data or administrative membership fields.
 - Ordinary Member role uses `directory.view` and cannot reach administrative People/Relationships; authorized administration remains functional.
 - Profile writes are ownership-safe; Person/User email changes are atomic and require reverification.
 - Dashboard shows bounded, correct multi-lodge data while keeping reservations, reminder subscriptions, and volunteer commitments distinct.
@@ -616,7 +619,7 @@ Phase 6 is complete only when:
 ## Non-Goals
 
 - Public directory pages or public member profiles.
-- Lodge affiliation disclosure in cross-lodge results.
+- Public or anonymous member-directory access or lodge-affiliation disclosure.
 - Separate privacy choices per lodge or separate field flags for own-lodge versus cross-lodge audiences.
 - Family directory, household search, relationship sharing, or address search.
 - Regional organization, lodge discovery, or regional event discovery.

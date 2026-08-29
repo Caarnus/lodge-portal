@@ -1,7 +1,7 @@
 # Multi-Lodge Masonic Platform
 ## Phased Implementation Plan
 
-**Status:** Planning Draft  
+**Status:** Implementation in progress — Phases 1–8 implemented in development; Phase 9 is the next planned phase.
 **Initial target region:** Southwest Indiana  
 **Initial migration target:** Newburgh Lodge No. 174  
 **Implementation approach:** Clean-slate application rewrite  
@@ -20,7 +20,7 @@ The platform is intended to:
 - Give each lodge control over its own branding, content, officers, events, and enabled features.
 - Support a single person/user identity across multiple lodges.
 - Strictly isolate lodge-owned private data.
-- Allow selected information and features to be shared across participating lodges.
+- Allow selected information and features to be shared across active WorkingTools lodges according to explicit resource visibility and member privacy rules.
 - Support member-controlled cross-lodge directory visibility.
 - Preserve or improve the useful features currently available on the Newburgh Lodge website.
 - Provide a clean foundation for future regional expansion beyond Southwest Indiana.
@@ -91,7 +91,17 @@ Information must not become cross-lodge simply because it exists in a shared dat
 
 Cross-lodge access must require an explicit visibility or sharing rule.
 
-## 2.6 Testability Is a Phase Requirement
+## 2.6 WorkingTools Lodge and Lodge Group Terminology
+
+For this plan:
+
+- A **WorkingTools lodge** is a lodge hosted as a tenant on the WorkingTools platform. There is no separate regional-participation enrollment required for one WorkingTools lodge to use cross-lodge features with another.
+- A **lodge group** is a configurable collection of WorkingTools lodges used for organization, aggregation, and filtering, such as a district, county, geographic region, or informal association.
+- Membership in a lodge group does not grant access to otherwise hidden lodge, event, member, or ritual data. Existing visibility, privacy, eligibility, and authorization rules remain authoritative.
+- A lodge may belong to multiple groups simultaneously.
+- Because Phases 1–8 are already implemented in development, this terminology clarification does not by itself require renaming existing database values, API fields, routes, or code symbols that use older "participating" terminology when their behavior already matches these rules. User-facing labels and future documentation should use the WorkingTools terminology; internal renames may be handled separately when they are worth the migration risk.
+
+## 2.7 Testability Is a Phase Requirement
 
 Every phase must end with:
 
@@ -128,6 +138,7 @@ Platform
 │   ├── Ritualist Program
 │   └── Lodge-Specific Administration
 ├── Regional / Shared Features
+│   ├── Lodge Groups
 │   ├── Lodge Directory
 │   ├── Shared Event Discovery
 │   ├── Cross-Lodge Member Directory
@@ -149,8 +160,8 @@ Platform
 | 5 | Volunteer Staffing and Commitments | Lodges can define event volunteer positions, members can make explicit volunteer commitments, and authorized managers can track staffing needs, rosters, and volunteer-specific reminders without conflating them with attendance reservations or reminder subscriptions. |
 | 6 | Member Portal and Directory Privacy | Members can manage their profile and control own-lodge versus cross-lodge directory visibility. |
 | 7 | Newsletters, Galleries, and Lodge Communications | Lodges can publish newsletters, photo galleries, and member/public communications. |
-| 8 | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into regional ritual-assistance discovery. |
-| 9 | Regional Discovery and Cross-Lodge Participation | Participating lodges can intentionally share events, lodge listings, member profiles, and eligible regional resources. |
+| 8 | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into cross-lodge ritual-assistance discovery. |
+| 9 | Lodge Groups and Regional Discovery | WorkingTools lodges can be organized into overlapping districts, counties, regions, and informal groups, and users can browse/filter already-authorized lodge, event, member, and ritual data across the platform. |
 | 10 | Scholarship Management | Each lodge can securely run independent scholarship cycles and reviews. |
 | 11 | Games and Shared Content | Lodges can run shared or private Masonic trivia/game content and sessions. |
 | 12 | Newburgh Migration and Production Cutover | Existing Newburgh Lodge data is migrated, validated, and the new platform replaces the existing application. |
@@ -1005,7 +1016,7 @@ This phase does not include:
 
 ## 10.1 Goal
 
-Give authenticated members a personal portal and allow them to control how their profile is visible to their own lodge and to other participating lodges.
+Give authenticated members a personal portal and allow them to control how their profile is visible to their own lodge and to other WorkingTools lodges.
 
 ## 10.2 Assumptions
 
@@ -1048,7 +1059,7 @@ At minimum, support these scopes:
 
 - Hidden.
 - Own lodge only.
-- Participating lodges.
+- WorkingTools lodges.
 
 The default directory visibility for a new member is **Own lodge only**.
 
@@ -1095,9 +1106,9 @@ A tester can:
 3. Update permitted profile information.
 4. Set directory scope to own lodge.
 5. Confirm another lodge cannot discover the member.
-6. Set directory scope to participating lodges.
+6. Set directory scope to WorkingTools lodges.
 7. Allow phone but hide address.
-8. Confirm another participating lodge sees only permitted fields.
+8. Confirm an eligible member of another WorkingTools lodge sees only permitted fields.
 9. Hide the profile entirely.
 10. Confirm all directory searches honor the change.
 
@@ -1351,7 +1362,7 @@ Search/filter criteria should include:
 - Specific ritual part.
 - Self-reported proficiency status.
 - Lodge affiliation.
-- Participating-lodge/regional scope.
+- WorkingTools-wide cross-lodge scope.
 - General day-of-week availability.
 - General time-of-day availability.
 - Willingness to be contacted for the selected part.
@@ -1388,7 +1399,7 @@ The dashboard should make it easy to update proficiency without requiring lodge 
 Authorized lodge officers or other permitted members can:
 
 - Search their own lodge for needed ritual parts.
-- Search participating lodges when regional visibility permits.
+- Search across other WorkingTools lodges when cross-lodge ritual visibility permits.
 - Identify potential brothers who can assist with a particular degree or ritual.
 - Filter candidates using broad availability.
 
@@ -1405,12 +1416,12 @@ The planning view must not assign, schedule, confirm, or book a person.
 - A member must never lose an already achieved ritualist-program rank solely because reference point values later change.
 - Achieved ranks therefore require durable historical achievement records separate from the recalculated current point total.
 - Non-point ritual parts must use the same proficiency/search model as point-bearing parts.
-- Private personal notes must never be included in lodge or regional search results.
+- Private personal notes must never be included in lodge or cross-lodge search results.
 - Ritual visibility must be enforced server-side.
-- Cross-lodge ritual discovery must be independently enabled by the person and must respect the platform's participating-lodge rules.
+- Cross-lodge ritual discovery must be independently enabled by the person and is limited to eligible users and active WorkingTools lodges.
 - A person may appear in ritual-assistance search even when they have chosen not to appear in the general cross-lodge member directory.
 - Search must not expose contact details that the person has hidden through directory privacy settings.
-- Any member of a participating regional lodge may perform regional ritual-assistance searches.
+- Any eligible member of an active WorkingTools lodge may perform cross-lodge ritual-assistance searches.
 - Availability is person-owned preference data and must not be represented as calendar events or reservations.
 - Availability matching should tolerate broad overlap rather than imply exact scheduling.
 - The system must clearly distinguish self-reported proficiency from any official certification, appointment, or Grand Lodge credential.
@@ -1430,11 +1441,11 @@ A tester can:
 7. View a clear breakdown of proficiency and ritualist pin points.
 8. Enter broad availability for selected days and times.
 9. Enable cross-lodge visibility for ritual proficiency.
-10. Search from another participating lodge for a brother proficient in a specific degree part.
+10. Search from another WorkingTools lodge for a brother proficient in a specific degree part.
 11. Filter the search by a day/time that overlaps the brother's stated availability.
 12. See the brother in results with a clear self-reported indication.
 13. Confirm only contact fields allowed by the brother's directory settings are displayed.
-14. Disable cross-lodge ritual visibility and confirm the brother disappears from regional ritual search.
+14. Disable cross-lodge ritual visibility and confirm the brother disappears from cross-lodge ritual search.
 15. Confirm the search workflow provides contact/discovery information but does not create an assignment, reservation, or appointment.
 
 ## 12.6 Automated Test Requirements
@@ -1451,7 +1462,7 @@ Tests must cover:
 - Person ownership of proficiency across multiple lodge memberships.
 - Ritual visibility scopes.
 - Directory privacy interaction with ritual search.
-- Cross-lodge regional search authorization.
+- Cross-lodge search authorization.
 - Willingness-to-assist filtering.
 - Availability storage.
 - Day/time overlap matching.
@@ -1478,117 +1489,237 @@ This phase does not include:
 
 ---
 
-# 13. Phase 9 — Regional Discovery and Cross-Lodge Participation
+# 13. Phase 9 — Lodge Groups and Regional Discovery
 
 ## 13.1 Goal
 
-Turn multiple isolated lodge sites into an intentionally connected Southwest Indiana network without weakening tenant isolation.
+Add a regional and cross-lodge discovery layer on top of the visibility, privacy, eligibility, and authorization rules already implemented in Phases 1–8.
+
+This phase does not make cross-lodge access possible for the first time. Instead, it makes the existing cross-lodge capabilities easier to discover and use by:
+
+- Providing a platform-wide lodge directory.
+- Providing aggregated event/calendar views across WorkingTools lodges.
+- Allowing lodges to be organized into overlapping configurable groups such as districts, counties, geographic regions, and informal associations.
+- Allowing those groups to be used as filters for lodge, event, member-directory, and ritual-assistance discovery.
+- Providing simple generated landing pages for discoverable groups where useful.
 
 ## 13.2 Assumptions
 
-- Participating lodges opt into regional visibility.
-- Public lodge metadata can be shared regionally.
-- Member profile visibility remains member-controlled.
-- Event visibility remains controlled by the event-owning lodge.
-- Regional grouping should not depend on one hard-coded Masonic hierarchy.
+- Phases 1–8 are already implemented in development.
+- A **WorkingTools lodge** is a lodge hosted as a tenant on the WorkingTools platform. There is no separate "participating lodge" opt-in state for ordinary cross-lodge functionality.
+- Existing Phase 4 event visibility and eligibility rules remain authoritative.
+- Existing Phase 6 member directory privacy rules remain authoritative.
+- Existing Phase 8 ritual proficiency, willingness, availability, contact-privacy, and cross-lodge visibility rules remain authoritative.
+- Lodge groups are organizational/filtering constructs and are not authorization boundaries.
+- A lodge may belong to zero, one, or multiple groups.
+- Group structure must not depend on one hard-coded Masonic hierarchy.
 
 ## 13.3 Functional Requirements
 
-### Lodge Directory
+### Lodge Groups
 
-Provide a regional directory containing participating lodges with:
+Platform administrators can create, edit, archive, and manage lodge groups.
+Platform administrators can also create, edit, activate, and deactivate lodge-group type reference values through a CRUD interface.
+
+Each group supports at minimum:
+
+- Name.
+- URL slug.
+- Group type selected from database-configured reference values.
+- Optional description.
+- Active/inactive state.
+- Whether the group has a discoverable landing page.
+- Member lodges.
+
+Initial group-type reference values should include:
+
+- Region.
+- District.
+- County.
+- Informal.
+- Other.
+
+Examples include:
+
+- Southwest Indiana.
+- Warrick County Lodges.
+- A Grand Lodge district.
+- An informal group of lodges that regularly coordinate activities.
+
+A lodge may belong to multiple groups simultaneously. Group type is descriptive and useful for filtering/presentation; it does not change authorization behavior.
+
+For the initial implementation, platform administrators control group creation and lodge membership. The authorization model should leave room for future group-specific administrative roles without requiring them now.
+
+### WorkingTools Lodge Directory
+
+Provide a directory of active WorkingTools lodges with information such as:
 
 - Lodge name/number.
 - City.
+- State/jurisdiction.
 - Meeting location.
-- Meeting schedule.
+- Meeting schedule from a new optional free-text lodge field, such as "First and third Tuesdays at 7:00 PM."
 - Website link.
-- Contact information.
+- Public contact information.
 - Public branding/logo.
+- Group memberships that are appropriate to display.
 
-### Regional Events
+The directory should support filtering by:
 
-Allow events to have visibility such as:
+- Lodge group.
+- Group type where useful.
+- Lodge name/number.
+- City or other available public location data.
 
-- Lodge-private.
-- Own-lodge members.
-- Participating-lodge members.
-- Public.
+A lodge does not need to belong to a group in order to appear in the platform-wide lodge directory.
 
-Members can browse:
+The lodge directory is public. Every active WorkingTools lodge appears even when it has no published public homepage. Its website link points to its WorkingTools public homepage only when that homepage is published; otherwise the link is omitted. Disabled and disabled-and-locked lodges do not appear.
 
-- Their lodge events.
-- Participating lodge events.
-- Public regional events.
+### Regional and Group Event Discovery
 
-### Cross-Lodge Reservations
+Provide an aggregated event/calendar experience across WorkingTools lodges.
 
-Eligible events may accept:
+The discovery experience must use the event visibility and eligibility rules already implemented in Phase 4. Phase 9 does not introduce a new event visibility model.
 
-- Public reservations.
-- Own-lodge members.
-- Participating-lodge members.
+Users can browse events they are already eligible to discover and filter them by criteria such as:
 
-The reservation should retain the attendee's person and lodge affiliation when authenticated. Reminder subscriptions remain separate and retain only the identity/contact snapshot needed for consent and delivery.
+- Lodge group.
+- Lodge.
+- Event category.
+- Date/date range.
+- Public versus Masons-only visibility where appropriate to the viewer.
+- Required Masonic qualification where useful.
 
-### Cross-Lodge Directory
+The regional calendar should support both a calendar-oriented view and a list-oriented view where practical.
 
-Members who opted into participating-lodge visibility may be found by eligible members of other lodges.
+Anonymous users may discover public events. Authenticated users may additionally discover protected events for which they satisfy the existing Phase 4 visibility and qualification rules.
 
-### Regional Grouping
+Cross-lodge reservations and reminder subscriptions continue to use the Phase 4 implementation. Being in the same lodge group does not make a user eligible to reserve, subscribe, or view an event that would otherwise be unavailable to them.
 
-Support configurable generic lodge groups such as:
+### Group-Filtered Cross-Lodge Member Directory
 
-- Southwest Indiana.
-- District grouping.
-- Future regional groups.
+Extend the Phase 6 cross-lodge directory experience so an eligible member may optionally narrow results by lodge group.
 
-A lodge may belong to multiple regional groups.
+A group filter may include a person when that person:
 
-For the initial implementation, platform administrators control creation and membership of regional groups. The authorization model should leave room for future group-specific administrative roles without requiring them now.
+- Has an active membership in at least one lodge belonging to the selected group; and
+- Has enabled the applicable WorkingTools-lodge directory visibility; and
+- Is otherwise visible to the searching user under the Phase 6 rules.
+
+The group filter must not expose fields hidden by the person's directory privacy settings.
+
+Eligible registered members may browse cross-lodge results without entering search text. Results remain paginated and rate limited. Cross-lodge results may show all of the person's active WorkingTools lodge affiliations; this affiliation disclosure is available only to authorized authenticated directory users, never to anonymous visitors.
+
+Platform administrators may browse the member directory without holding a lodge membership. Other users remain subject to the Phase 6 approved-account, verified-email, active-membership, active-requesting-lodge, and `directory.view` requirements.
+
+A person with memberships in multiple lodges must not be duplicated unnecessarily in search results merely because multiple memberships match the selected group.
+
+### Group-Filtered Ritual Assistance Discovery
+
+Extend the Phase 8 ritual-assistance search with an optional lodge-group filter.
+
+The filter narrows candidates based on active lodge affiliation in the selected group while preserving all existing Phase 8 requirements, including:
+
+- Person-controlled cross-lodge ritual visibility.
+- Self-reported proficiency status.
+- Willingness to be contacted for the selected part.
+- Availability matching.
+- Directory contact-field privacy.
+- Eligible-searcher requirements.
+
+Group membership must never cause a brother to appear in ritual search when the Phase 8 rules would otherwise exclude him.
+
+### Group Landing Pages
+
+Groups marked discoverable may have a generated landing page containing appropriate aggregated information such as:
+
+- Group name and description.
+- Group type.
+- Member lodges.
+- Public lodge contact/site links.
+- Upcoming events visible to the current viewer.
+- Links to relevant filtered lodge, member, or ritual searches where the viewer is authorized to use them.
+
+Group landing pages are generated aggregation views, not independent lodge websites or full CMS-managed sites.
+
+Active groups without discoverable landing pages remain available as filters to authorized authenticated users but are omitted from public group listings and public group filters.
 
 ## 13.4 Technical Requirements
 
-- Shared discovery must never bypass the underlying resource visibility rule.
-- Regional queries must intentionally select visible records rather than disabling tenant scopes globally.
-- Membership identity shown at cross-lodge events must follow privacy rules.
-- Lodge groups must be configurable entities, not hard-coded enums.
-- Search/cache layers must respect lodge participation changes.
+- Lodge groups are platform-owned organizational data, not tenant boundaries.
+- The data model must support many-to-many lodge/group membership.
+- Group types must be database-configured reference data rather than hard-coded authorization logic.
+- A group filter must only narrow a result set that the current user is already authorized to discover; it must never expand visibility.
+- Regional queries must intentionally select authorized/visible records rather than disabling tenant or visibility scopes globally.
+- Event discovery must reuse Phase 4 visibility, qualification, and active-membership rules.
+- Shared event eligibility must be hardened so protected discovery requires an approved, verified account linked to an eligible living person with an active membership in an active WorkingTools lodge; disabled event-owning lodges and disabled membership lodges cannot supply eligibility.
+- Member discovery must reuse Phase 6 privacy rules.
+- Ritual discovery must reuse Phase 8 visibility, willingness, availability, and contact-privacy rules.
+- Search and cache layers must respect group-membership changes without exposing stale unauthorized data.
+- Disabling or locking a lodge must remove it and its otherwise-discoverable resources from active platform/group discovery as appropriate without requiring its historical group memberships to be destroyed.
+- Removing a lodge from a group removes it from that group's filtered results but does not by itself change the lodge's platform-wide visibility or any underlying resource visibility settings.
+- People with multiple qualifying memberships must be deduplicated appropriately in cross-lodge member and ritual search results.
+- Public group pages must never expose protected event, member, ritual, or contact information to anonymous users.
 
 ## 13.5 Acceptance Criteria
 
 A tester can:
 
-1. Opt Lodge A and Lodge B into a regional group.
-2. Keep Lodge C private.
-3. Publish a Lodge A public event.
-4. Publish a Lodge B participating-members-only event.
-5. Confirm appropriate visibility from each account type.
-6. Sign a Lodge A member up for a Lodge B event.
-7. Find a member from another lodge only when that member opted in.
-8. Remove a lodge from regional participation and confirm shared discovery stops.
+1. Create groups named Southwest Indiana, Warrick County Lodges, and a district group.
+2. Assign one lodge to multiple groups and confirm the memberships coexist.
+3. View all active WorkingTools lodges in the platform-wide lodge directory, including a lodge that belongs to no group.
+4. Filter the lodge directory to Warrick County Lodges and see only lodges assigned to that group.
+5. View an aggregated public calendar and filter it by group and lodge.
+6. Sign in as an eligible Mason and see additional Masons-only events that Phase 4 already permits while still being unable to see another lodge's lodge-only events.
+7. Use an existing Phase 4 cross-lodge reservation flow for an event that permits it and confirm group membership does not alter reservation eligibility.
+8. Browse the Phase 6 cross-lodge member directory without search text, filter by a lodge group, and see only members who independently opted into the applicable cross-lodge visibility.
+9. See each visible cross-lodge result's bounded active WorkingTools lodge affiliations without seeing private membership fields.
+10. Confirm a member hidden from cross-lodge directory search remains hidden even when their lodge belongs to the selected group.
+11. Browse the same privacy-filtered member directory as a platform administrator who has no lodge membership.
+12. Filter Phase 8 ritual-assistance search to Warrick County Lodges and receive only otherwise-eligible candidates affiliated with lodges in that group.
+13. Confirm a brother who disabled cross-lodge ritual visibility remains absent even when his lodge belongs to the selected group.
+14. Remove a lodge from Warrick County Lodges and confirm it disappears from that group's filtered lodge/event/member/ritual discovery while remaining available in platform-wide discovery where existing rules permit.
+15. Disable a lodge and confirm it no longer appears in active regional/group discovery while its group-membership records can be retained for later reactivation.
+16. Open a discoverable group landing page and confirm it displays only information visible to the current viewer.
 
 ## 13.6 Automated Test Requirements
 
 Tests must cover:
 
-- Lodge participation.
-- Event visibility matrix.
-- Cross-lodge reservation eligibility.
-- Cross-lodge directory privacy.
-- Regional group membership.
-- Removal from group.
-- Direct URL authorization.
-- Shared queries without tenant leakage.
+- Lodge-group creation, editing, activation/deactivation, and archival behavior.
+- Many-to-many lodge/group membership.
+- Multiple simultaneous group memberships for one lodge.
+- Database-configured group-type reference values.
+- Platform-wide lodge discovery independent of group membership.
+- Lodge-directory group filtering.
+- Group filters narrowing but never expanding authorization.
+- Regional event discovery using the Phase 4 visibility/qualification matrix.
+- Cross-lodge reservation regression behavior remaining governed by Phase 4.
+- Cross-lodge directory privacy combined with group filtering.
+- Empty-query cross-lodge member browsing, bounded pagination, and rate limiting.
+- Safe active-affiliation projection with administrative membership fields excluded.
+- Platform-administrator directory browsing without lodge membership and without privacy bypass.
+- Multi-membership person deduplication in directory searches.
+- Ritual-assistance privacy/eligibility combined with group filtering.
+- Lodge removal from a group.
+- Lodge disabled/locked behavior in discovery.
+- Cache/search invalidation after group-membership changes.
+- Direct URL/API attempts to use group identifiers to bypass resource authorization.
+- Public group-page protection against private data leakage.
 
 ## 13.7 Non-Goals
 
 This phase does not include:
 
+- Making group membership an authorization role or access-control boundary.
+- Introducing new event visibility levels, reservation models, or reminder-subscription models.
 - Public member directories.
 - Inter-lodge direct messaging.
-- Automated district governance.
+- Group-specific administrators in the initial release.
+- Automated district governance or Grand Lodge hierarchy management.
 - Grand Lodge data exchange.
+- A full CMS for group landing pages.
+- Automatically assigning lodges to groups based on geography or lodge metadata.
 
 ---
 
@@ -2414,7 +2545,7 @@ Established rules are:
 - Willingness to perform is a separate indicator from proficiency.
 - New members are not included in ritual-assistance search by default.
 - Cross-lodge ritual visibility is independent from general directory visibility.
-- Any member of a participating regional lodge may perform regional ritual-assistance searches.
+- Any eligible member of an active WorkingTools lodge may perform cross-lodge ritual-assistance searches.
 - Availability uses dayparts:
     - Morning.
     - Afternoon.
@@ -2424,12 +2555,24 @@ Established rules are:
 - A member never loses a previously achieved ritualist-program rank solely because point values later change.
 - Members are not periodically prompted to reconfirm proficiency or availability.
 
-## 23.8 Regional Organization
+## 23.8 WorkingTools Cross-Lodge Terminology and Lodge Groups
 
-- Regional structures use generic groups initially.
-- Platform administrators control regional group creation and membership.
-- Future organization-specific administrative roles may be added later.
-- A lodge may belong to multiple regional groups.
+- A **WorkingTools lodge** is a lodge hosted as a tenant on the WorkingTools platform. There is no separate regional-participation opt-in state for ordinary cross-lodge functionality.
+- Cross-lodge event, directory, and ritual behavior remains controlled by the visibility, privacy, eligibility, and authorization rules established in the feature phases.
+- Lodge groups are generic organizational/filtering entities and do not grant access by themselves.
+- Initial group-type reference values are:
+    - Region.
+    - District.
+    - County.
+    - Informal.
+    - Other.
+- Examples may include Southwest Indiana, Warrick County Lodges, Grand Lodge districts, or informal groups of lodges that coordinate activities.
+- Platform administrators initially control lodge-group creation and membership.
+- Future group-specific administrative roles may be added later.
+- A lodge may belong to multiple lodge groups.
+- A lodge does not need to belong to any group to participate in ordinary WorkingTools cross-lodge functionality or platform-wide discovery.
+- Removing a lodge from a group changes group-filtered discovery only; it does not by itself change underlying event, member-directory, or ritual visibility.
+- Discoverable groups may have generated aggregation/landing pages, but those pages are not independent CMS-managed lodge sites.
 
 ## 23.9 Scholarship Module
 

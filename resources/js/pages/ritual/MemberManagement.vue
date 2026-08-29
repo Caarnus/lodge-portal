@@ -34,7 +34,7 @@ const rows = computed(() => props.memberships.filter((member) => {
 }));
 const sortBy = (column: string) => { direction.value = sort.value === column && direction.value === "asc" ? "desc" : "asc"; sort.value = column; };
 const sortIcon = (column: string) => sort.value === column ? (direction.value === "asc" ? "↑" : "↓") : "";
-const visibilityLabel = (scope: string) => ({ hidden: "Hidden", own_lodge: "Own lodge", participating_lodges: "Participating lodges" })[scope] ?? scope;
+const visibilityLabel = (scope: string) => ({ hidden: "Hidden", own_lodge: "Own lodge", participating_lodges: "WorkingTools lodges" })[scope] ?? scope;
 const openEditor = (member: Member) => {
     const saved = new Map(member.proficiencies.map((part) => [part.ritual_part_id, part]));
     form.parts = props.categories.flatMap((category) => category.parts.map((part) => {

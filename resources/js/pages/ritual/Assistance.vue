@@ -154,7 +154,7 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                     >
                         <option value="own_lodge">Own lodge</option>
                         <option value="participating_lodges">
-                            Participating lodges
+                            WorkingTools lodges
                         </option>
                     </select></label
                 >

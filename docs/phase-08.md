@@ -6,7 +6,7 @@ Every approved, verified user linked to an active member can privately track rit
 
 Ritual proficiency and program credit are separate facts. A brother may know a part and be willing to perform it without claiming points. Points begin only when he self-reports that he performed the part from memory in an open lodge. The platform records that honor-system statement without testing, certification, lodge approval, or Grand Lodge verification.
 
-Cross-lodge ritual discovery is independently opt-in. It does not depend on general directory scope. When a brother explicitly chooses participating-lodge ritual visibility, the ritual result may identify all of his active hosted-lodge affiliations. This is a deliberate, ritual-specific exception to Phase 6's rule that general cross-lodge directory results omit lodge affiliations. Email and phone remain subject to the brother's existing directory field choices.
+Cross-lodge ritual discovery is independently opt-in. It does not depend on general directory scope. When a brother explicitly chooses WorkingTools-lodge ritual visibility, the ritual result may identify all of his active hosted-lodge affiliations. This was a deliberate, ritual-specific exception to Phase 6's original affiliation-omission rule; Phase 9 later permits the same bounded active-affiliation disclosure in authorized general cross-lodge directory results. Email and phone remain subject to the brother's existing directory field choices.
 
 ## Repository Baseline and Scope
 
@@ -14,8 +14,8 @@ Implementation starts from the repository after Phase 7:
 
 - `Person` is the canonical global identity. Ritual settings, proficiency, availability, and achievements are person-owned and must not be duplicated by membership or lodge.
 - An active membership means a membership with no end date, the platform reference status key `active`, and an active owning lodge. Existing degree references are platform-owned and establish EA, FC, and MM ordering.
-- Phase 6 provides approved/verified account gates, active-lodge requester authorization, person-wide directory privacy, explicit field projection, dashboard composition, and the initial meaning of participating lodges: all active lodges hosted by the platform. Phase 8 reuses those foundations but has independent ritual visibility.
-- There is no regional-group model yet. Phase 8 does not pull Phase 9 regional organization forward. Participating-lodge ritual search spans all active hosted lodges.
+- Phase 6 provides approved/verified account gates, active-lodge requester authorization, person-wide directory privacy, explicit field projection, dashboard composition, and the WorkingTools-lodge scope: all active lodges hosted by the platform. Phase 8 reuses those foundations but has independent ritual visibility.
+- There is no lodge-group model yet. Phase 8 does not pull Phase 9 group organization forward. WorkingTools-wide ritual search spans all active hosted lodges.
 - Built-in lodge roles and permissions are synchronized through `LodgeRoleCatalog`; officer assignment never grants application permission.
 - `PersonMergeService` already resolves person-owned privacy conservatively and moves person-dependent records transactionally. Ritual rows must be integrated explicitly.
 - PostgreSQL is the production database. SQLite behavior does not define checks, partial indexes, case-insensitive uniqueness, aggregate locking, or concurrent achievement insertion.
@@ -319,7 +319,7 @@ The visibility editor explains:
 
 - Hidden: no assistance-search listing, including within the member's own lodges.
 - Own lodges: discoverable from each active lodge in which the member currently belongs.
-- Participating lodges: discoverable by authorized members of any active hosted lodge; active hosted-lodge affiliations will be shown.
+- WorkingTools lodges: discoverable by authorized members of any active hosted lodge; active hosted-lodge affiliations will be shown.
 - Contact fields come from the existing directory email/phone choices and can be changed in Profile settings.
 
 Switching to hidden takes effect on the next request. No search-result cache is introduced.
@@ -357,7 +357,7 @@ Directory scope is not tested for inclusion. Missing ritual settings mean hidden
 
 Support:
 
-- Audience: requesting lodge or participating lodges; default requesting lodge.
+- Audience: requesting lodge or WorkingTools lodges; default requesting lodge.
 - Active ritual category.
 - Active ritual part.
 - Degree metadata through the part/category association.
@@ -449,7 +449,7 @@ Updates should preserve scroll/filter state, show accessible success/error feedb
 
 Add “Ritual Assistance” to lodge navigation when the active lodge grants `ritual.search`. The page includes:
 
-- Own lodge / Participating lodges selector.
+- Own lodge / WorkingTools lodges selector.
 - Category, part, lodge affiliation, weekday, and daypart filters.
 - Self-reported proficiency explanation.
 - Result cards showing matching parts, active lodge affiliations, broad availability, freshness, and permitted email/phone.
@@ -589,7 +589,7 @@ Use at least three active lodges plus one disabled lodge and distinct single-/mu
 5. Repeat across thresholds and verify automatic durable levels.
 6. Configure availability and its public note.
 7. Enable own-lodge visibility and verify own-lodge discovery only.
-8. Enable participating-lodge visibility and verify another lodge sees matching parts, active affiliations, overlap, freshness, and only permitted contact fields.
+8. Enable WorkingTools-lodge visibility and verify another lodge sees matching parts, active affiliations, overlap, freshness, and only permitted contact fields.
 9. Hide general directory scope and confirm ritual discovery remains while general directory discovery stops.
 10. Remove willingness or ritual visibility and confirm immediate disappearance including direct detail.
 11. Platform admin changes a point value and deactivates a part; current totals update while achieved rank remains.
@@ -631,7 +631,7 @@ Warnings and failures are resolved, not silently suppressed. Database constraint
 11. Enter weekday/daypart availability and a public note; verify the no-commitment explanation.
 12. Confirm the member is absent from all assistance search while ritual scope is hidden.
 13. Select own-lodge visibility and find the member from each lodge where he has an active membership, but not a foreign lodge.
-14. Select participating-lodge visibility and find him from another active hosted lodge.
+14. Select WorkingTools-lodge visibility and find him from another active hosted lodge.
 15. Verify all active hosted-lodge affiliations and no inactive/historical affiliations are shown.
 16. Enable email, hide phone in directory privacy, and verify ritual results show only email even if general directory scope is hidden.
 17. Filter by category, part, lodge affiliation, and matching availability.
@@ -801,7 +801,7 @@ Phase 8 is complete only when:
 - Email, SMS, push, in-app messaging, contact-all, exports, or notification campaigns for matches.
 - Per-lodge or per-part visibility, availability, points, proficiency, or willingness.
 - Anonymous/public ritual discovery or search-engine-visible profiles.
-- Regional groups, district hierarchy, lodge opt-in controls, or Phase 9 regional event/lodge discovery.
+- Lodge groups, district hierarchy, lodge opt-in controls, or Phase 9 regional event/lodge discovery.
 - Member-created ritual parts or lodge-specific point schedules.
 - Full performance history, endorsements, ratings, reviews, rankings, leaderboards, or competitive statistics.
 - Import of legacy Newburgh ritual records; Phase 8 preserves stable person/reference keys needed for later migration work.

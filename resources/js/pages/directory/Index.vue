@@ -106,7 +106,7 @@ watch([query, audience, degree], () => {
                     >
                         <option value="own_lodge">My lodge</option>
                         <option value="participating_lodges">
-                            Participating lodges
+                            WorkingTools lodges
                         </option>
                     </select>
                 </div>

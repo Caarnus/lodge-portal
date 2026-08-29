@@ -65,3 +65,9 @@ See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), [Pha
 Ritual reference records are platform-owned. Settings, proficiency, availability, and achievements are person-owned and contain no lodge ID. `RitualProgress` derives current totals from active parts/categories and confirmed credit; it never stores a total. `RitualAssistanceAccess` is independent from directory visibility and rebuilds requester and subject predicates on every request. Assistance responses use explicit safe projections and private/no-store caching.
 
 Person merge locks both people and ritual rows. Survivor settings win; missing survivor settings become hidden. Conflicting private notes or first-proficient dates block merge. Availability and achievements union conservatively, then achievements reconcile.
+
+## Regional Discovery Boundary
+
+Lodge groups are platform-owned organization and filtering records, never tenant or authorization boundaries. A reusable group predicate may narrow lodge, event, member-directory, or ritual-assistance queries only after each domain's existing visibility and eligibility rules have been applied.
+
+Public lodge and group projections contain active lodge identity, explicitly public contact/meeting data, published homepage links, and public events only. Authenticated event aggregation reuses hardened event eligibility. Cross-lodge directory and ritual aggregation reuse their dedicated access services, produce explicit safe projections, deduplicate multi-lodge people, and use private/no-store responses.

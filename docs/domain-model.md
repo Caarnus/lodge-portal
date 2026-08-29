@@ -59,3 +59,13 @@ Manual person merge selects one survivor, moves compatible dependent records tra
 - Volunteer staffing reminder delivery: one at-most-once delivery per commitment, independent of ordinary reminder subscriptions and deliveries.
 
 Every event child repeats or derives lodge ownership and is validated against its parent. A recurrence key identifies the original scheduled local occurrence and does not change when the effective time moves. Protected-event eligibility is derived at request time from active membership and qualification rather than copied into a reservation or subscription.
+
+## Lodge Groups and Regional Discovery
+
+- `LodgeGroupType`: platform-owned reference data describing group presentation such as region, district, county, informal, or other. Type never changes authorization.
+- `LodgeGroup`: platform-owned organizational record with name, slug, description, active/archive lifecycle, type, and optional public landing page.
+- Lodge-group membership: many-to-many organizational relationship between active or historical lodges and groups. It grants no permission, visibility, consent, reservation, reminder, or administrative authority.
+
+One lodge may belong to several groups or none. Group-filtered discovery first builds each domain's authorized result set, then narrows by active lodge membership in selected group. Disabling lodge or group removes it from active discovery without destroying historical group membership.
+
+Lodge identity also includes optional public `meeting_schedule` free text, separate from meeting location. Platform-wide lodge discovery links to lodge's WorkingTools homepage only when published.

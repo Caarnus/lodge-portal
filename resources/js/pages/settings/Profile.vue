@@ -310,8 +310,8 @@ const uploadPhoto = () => {
                                 name="directory-scope"
                             />
                             <span
-                                ><strong>Participating lodges</strong><br />Opt
-                                in to directory sharing across participating
+                                ><strong>WorkingTools lodges</strong><br />Opt
+                                in to directory sharing across WorkingTools
                                 lodges.</span
                             >
                         </label>

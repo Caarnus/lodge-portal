@@ -39,4 +39,8 @@ Directory projections may cross lodges only when the subject chose `participatin
 
 ## Ritual assistance exception
 
-Ritual progress is person-owned, not lodge-owned. An active member may opt into discovery from every own active lodge or from participating lodges. This narrow discovery exception is independent from directory scope: cross-lodge results disclose only active hosted-lodge affiliations and separately opted-in email/phone. Disabled and historical affiliations never authorize or project. Every search starts from its explicit requesting lodge; current-lodge selection never supplies authority.
+Ritual progress is person-owned, not lodge-owned. An active member may opt into discovery from every own active lodge or across WorkingTools lodges. This narrow discovery exception is independent from directory scope: cross-lodge results disclose only active hosted-lodge affiliations and separately opted-in email/phone. Disabled and historical affiliations never authorize or project. Every search starts from its explicit requesting lodge; current-lodge selection never supplies authority.
+
+## Lodge groups and discovery
+
+Lodge groups are platform-owned filter metadata, not tenant containers. Adding lodge to group never grants access to lodge-owned data. Every group-filtered query must first apply event eligibility, directory privacy, ritual consent, or public-resource rules, then narrow result through active group membership. Inactive/archived groups and disabled lodges cannot supply active discovery results; historical pivots may remain.
