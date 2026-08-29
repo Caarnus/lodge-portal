@@ -50,7 +50,7 @@ Before implementation, run the existing backend and frontend gates. A failing Ph
 - A short public availability note is visible only to authorized members who can see the person in ritual search. “Public” in this context never means anonymous web access.
 - Personal ritual notes are always private and are never serialized to assistance search, lodge administration, audit payloads, logs, or analytics.
 - Assistance search returns only active parts for which the subject is currently proficient and willing to assist. Every result labels proficiency as self-reported.
-- Lodge administrators, officers, platform administrators, and Grand Lodge representatives cannot edit another person's progress, credit, willingness, availability, or visibility in Phase 8.
+- Authorized officers with the existing `officers.manage` permission may manage active members of their explicit lodge through Ritual Management. They may update active-part status, interest, willingness, credit after explicit confirmation, first-proficient date, and all availability windows after speaking with or observing the member. This authority never exposes, changes, or serializes private ritual notes, and does not permit visibility edits.
 - No periodic reconfirmation prompt is required.
 - Phase labels such as `PhaseEight`, `P8`, or `phase_08` must not appear in implementation filenames, class names, route names, database objects, or code comments.
 
@@ -767,7 +767,7 @@ Every package handoff must:
 - Identify verified prerequisite commits/contracts and PostgreSQL baseline results.
 - State allowed files/directories and preserve unrelated dirty-worktree changes.
 - Prohibit phase labels in implementation artifacts.
-- Prohibit client-side point calculation or visibility filtering, raw model serialization, submitted person ownership, lodge-owned proficiency, admin editing of member ritual data, private-note exposure, stored point totals, and contact-field bypass.
+- Prohibit client-side point calculation or visibility filtering, raw model serialization, submitted person ownership, lodge-owned proficiency, officer edits outside the explicit active-lodge `officers.manage` workflow, private-note exposure, stored point totals, and contact-field bypass.
 - Require Lodge A/B/C plus disabled-lodge adversarial tests and exact 403/404 behavior.
 - Require reporting any conflict with person ownership, directory contact flags, explicit affiliation consent, performed-credit semantics, durable achievements, role/assignment separation, or merge safety rather than silently changing it.
 - Require focused tests plus package gates and warning resolution without suppression.

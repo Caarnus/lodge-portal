@@ -144,6 +144,12 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: `/lodges/${lodge.id}/officers`,
             icon: UserStar,
         });
+    if (lodge.can_manage_officers)
+        items.push({
+            title: "Ritual management",
+            href: `/lodges/${lodge.id}/ritual-management`,
+            icon: HandHelping,
+        });
     if (lodge.can_manage_roles)
         items.push({
             title: "Roles",

@@ -17,6 +17,7 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\LodgeCommunicationController;
 use App\Http\Controllers\LodgeCommunicationSettingController;
 use App\Http\Controllers\LodgeRoleController;
+use App\Http\Controllers\LodgeRitualController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
 use App\Http\Controllers\MemberNewsletterController;
@@ -240,6 +241,8 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::post('lodges/{lodge}/people/{person}/photo', [PersonPhotoController::class, 'store'])->name('lodges.people.photo.store');
     Route::get('lodges/{lodge}/people/{person}/photo', [PersonPhotoController::class, 'show'])->name('lodges.people.photo.show');
     Route::resource('lodges.officers', OfficerController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('lodges/{lodge}/ritual-management', [LodgeRitualController::class, 'index'])->name('lodges.ritual-management.index');
+    Route::put('lodges/{lodge}/ritual-management/{membership}', [LodgeRitualController::class, 'update'])->name('lodges.ritual-management.update');
     Route::get('lodges/{lodge}/roles', [LodgeRoleController::class, 'index'])->name('lodges.roles.index');
     Route::get('lodges/{lodge}/role-assignments', [LodgeRoleController::class, 'assignments'])->name('lodges.roles.assignments');
     Route::post('lodges/{lodge}/roles', [LodgeRoleController::class, 'store'])->name('lodges.roles.store');
