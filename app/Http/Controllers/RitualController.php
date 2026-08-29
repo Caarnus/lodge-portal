@@ -26,10 +26,11 @@ class RitualController extends Controller
         ]);
     }
 
-    public function updatePart(RitualProficiencyUpdateRequest $request, RitualPart $ritualPart, RitualSelfService $self, RitualProgress $progress): RedirectResponse
+    public function updatePart(RitualProficiencyUpdateRequest $request, RitualPart $ritualPart, RitualSelfService $self, RitualProgress $progress)
     {
         abort_unless($ritualPart->is_active && $ritualPart->category()->where('is_active', true)->exists(), 404);
         $progress->updateProficiency($self->personFor($request->user()), $ritualPart, $request->validated());
+        if ($request->expectsJson()) return response()->noContent();
         return to_route('ritual.index');
     }
 
