@@ -28,6 +28,7 @@ defineProps<{
         degree: string | null;
         site_url: string;
         directory_url: string | null;
+        ritual_assistance_url: string | null;
         newsletters_url: string;
     }>;
     upcomingEvents: Array<{
@@ -42,8 +43,10 @@ defineProps<{
         linked: boolean;
         directory_scope: string | null;
         settings_url: string;
+        ritual_url: string;
     };
     volunteerCommitments: VolunteerCommitment[];
+    ritual: { current_total: number; highest_level: string | null; learning_count: number; proficient_count: number; credited_count: number; url: string } | null;
 }>();
 const withdraw = (commitment: VolunteerCommitment) =>
     router.patch(
@@ -80,6 +83,7 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                 :href="item.directory_url"
                                 class="underline"
                                 >Directory</Link
+                            ><Link v-if="item.ritual_assistance_url" :href="item.ritual_assistance_url" class="underline">Ritual assistance</Link
                             ><Link
                                 :href="item.newsletters_url"
                                 class="underline"
@@ -89,6 +93,7 @@ const withdraw = (commitment: VolunteerCommitment) =>
                     </li>
                 </ul>
             </section>
+            <section v-if="ritual" class="rounded-xl border p-5"><h2 class="font-semibold">Ritual progress</h2><p class="mt-2 text-sm text-muted-foreground">{{ ritual.current_total }} current points<span v-if="ritual.highest_level"> · {{ ritual.highest_level }}</span></p><p class="mt-1 text-sm text-muted-foreground">{{ ritual.learning_count }} learning · {{ ritual.proficient_count }} proficient · {{ ritual.credited_count }} credited</p><Link :href="ritual.url" class="mt-2 inline-block text-sm underline">Manage ritual progress</Link></section>
             <section class="rounded-xl border p-5">
                 <h2 class="font-semibold">Upcoming events</h2>
                 <p
@@ -120,6 +125,7 @@ const withdraw = (commitment: VolunteerCommitment) =>
                     class="mt-2 inline-block text-sm underline"
                     >Profile and privacy settings</Link
                 >
+                <Link v-if="profile.linked" :href="profile.ritual_url" class="mt-2 ml-3 inline-block text-sm underline">Ritual progress</Link>
             </section>
             <section class="rounded-xl border p-5">
                 <h2 class="font-semibold">Reservations</h2>

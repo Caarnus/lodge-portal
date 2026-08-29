@@ -161,7 +161,7 @@ class DirectoryPrivacyFoundationTest extends TestCase
         $officer = Role::query()->where('lodge_id', $lodge->id)->where('name', 'Officer')->sole();
         $administrator = Role::query()->where('lodge_id', $lodge->id)->where('name', 'Administrator')->sole();
 
-        $this->assertSame(['directory.view'], $member->permissions()->pluck('key')->sort()->values()->all());
+        $this->assertSame(['directory.view', 'ritual.search'], $member->permissions()->pluck('key')->sort()->values()->all());
         $this->assertContains('directory.view', $officer->permissions()->pluck('key')->all());
         $this->assertContains('people.view', $officer->permissions()->pluck('key')->all());
         $this->assertContains('directory.view', $administrator->permissions()->pluck('key')->all());

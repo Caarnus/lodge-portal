@@ -14,6 +14,10 @@ Run `php artisan communications:dispatch` every minute (already scheduled) to cl
 
 People remain canonical shared identity records. Members manage their own directory scope, optional contact fields, photo, and per-membership lodge-email preference at `/settings/profile`. Directory responses are request-scoped, private/no-store, paginated, and never expose family, membership, account, storage, or hidden-contact data. Administrative People and member Directory are separate products with separate authorization.
 
+## Ritual program and assistance
+
+Members maintain person-owned, self-reported ritual proficiency, learning interest, willingness, credit claims, broad availability, and discovery scope at `/ritual`. Current points derive from active reference rules and confirmed credit claims; achievements are durable. Ritual Assistance is a protected lodge tool, not a directory extension: it requires an explicit active-lodge `ritual.search` grant and returns only opted-in, proficient, willing members with separately enabled contact fields. It creates no assignment, booking, message, roster, or certification.
+
 ## Planned Stack
 
 - Laravel 13 and PHP 8.4
@@ -109,6 +113,7 @@ To deliberately erase the local database, Redis data, media, and browser-test No
 - [Phase 4 specification](docs/phase-04.md)
 - [Phase 5 specification](docs/phase-05.md)
 - [Phase 6 specification](docs/phase-06.md)
+- [Phase 8 specification](docs/phase-08.md)
 - [Architecture](docs/architecture.md)
 - [Domain model](docs/domain-model.md)
 - [Tenancy rules](docs/tenancy-rules.md)

@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 
 defineOptions({ layout: AppLayout });
-const props = defineProps<{
+defineProps<{
     lodge: any;
     requests: any[];
     subscriptions: any[];

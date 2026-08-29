@@ -68,6 +68,26 @@ class Person extends Model
         return $this->hasOne(PersonDirectoryPrivacySetting::class);
     }
 
+    public function ritualSetting()
+    {
+        return $this->hasOne(PersonRitualSetting::class);
+    }
+
+    public function ritualProficiencies()
+    {
+        return $this->hasMany(PersonRitualProficiency::class);
+    }
+
+    public function ritualAvailabilities()
+    {
+        return $this->hasMany(PersonRitualAvailability::class);
+    }
+
+    public function ritualLevelAchievements()
+    {
+        return $this->hasMany(PersonRitualLevelAchievement::class);
+    }
+
     public function pastMasterTerms()
     {
         return $this->hasMany(PastMasterTerm::class);
@@ -100,8 +120,14 @@ class Person extends Model
 
     protected static function booted(): void
     {
-        static::created(fn(Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
+        static::created(function (Person $person): void {
+            $person->directoryPrivacySetting()->firstOrCreate();
+            $person->ritualSetting()->firstOrCreate();
+        });
         static::deleting(fn(Person $person) => $person->directoryPrivacySetting()->delete());
-        static::restored(fn(Person $person) => $person->directoryPrivacySetting()->firstOrCreate());
+        static::restored(function (Person $person): void {
+            $person->directoryPrivacySetting()->firstOrCreate();
+            $person->ritualSetting()->firstOrCreate();
+        });
     }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from "@inertiajs/vue3";
-const props = defineProps<{ lodge: any; token: string }>();
+defineProps<{ lodge: any; token: string }>();
 const form = useForm({});
 </script>
 <template>

@@ -14,6 +14,7 @@ class LodgeRoleCatalog
         'website.manage' => 'Manage lodge website',
         'website.publish' => 'Publish lodge website',
         'directory.view' => 'View member directory',
+        'ritual.search' => 'Search ritual assistance',
         'people.view' => 'View lodge-reachable people',
         'people.manage' => 'Manage shared person identity and contact details',
         'memberships.manage' => 'Manage lodge memberships',
@@ -42,8 +43,8 @@ class LodgeRoleCatalog
     {
         $this->seedPermissions();
         $all = Permission::query()->whereIn('key', array_keys(self::PERMISSIONS))->pluck('id');
-        $officer = Permission::query()->whereIn('key', ['directory.view', 'people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage', 'galleries.manage', 'communications.send'])->pluck('id');
-        $member = Permission::query()->where('key', 'directory.view')->pluck('id');
+        $officer = Permission::query()->whereIn('key', ['directory.view', 'ritual.search', 'people.view', 'people.manage', 'memberships.manage', 'relationships.view', 'events.manage', 'galleries.manage', 'communications.send'])->pluck('id');
+        $member = Permission::query()->whereIn('key', ['directory.view', 'ritual.search'])->pluck('id');
 
         foreach (['Administrator', 'Officer', 'Member', 'Non-member'] as $name) {
             $role = Role::query()->where('lodge_id', $lodge->id)->where('name', $name)->first();

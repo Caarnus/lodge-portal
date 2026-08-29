@@ -23,6 +23,8 @@ import {
     Newspaper,
     PanelsTopLeft,
     LayoutGrid,
+    BookOpen,
+    HandHelping,
     Settings,
     ShieldCheck,
     Tags,
@@ -47,6 +49,7 @@ const platformNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
         { title: "Dashboard", href: "/dashboard", icon: LayoutGrid },
     ];
+    items.push({ title: "Ritual", href: "/ritual", icon: BookOpen });
     if (auth.value.user.is_platform_admin) {
         items.push({
             title: "Platform Lodges",
@@ -62,6 +65,11 @@ const platformNavItems = computed<NavItem[]>(() => {
             title: "Event Categories",
             href: "/platform/event-categories",
             icon: Tags,
+        });
+        items.push({
+            title: "Ritual Reference",
+            href: "/platform/ritual-reference",
+            icon: BookOpen,
         });
         items.push({
             title: "Merge People",
@@ -123,6 +131,12 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             title: "People",
             href: `/lodges/${lodge.id}/people`,
             icon: ContactRound,
+        });
+    if (lodge.can_search_ritual)
+        items.push({
+            title: "Ritual Assistance",
+            href: `/lodges/${lodge.id}/ritual-assistance`,
+            icon: HandHelping,
         });
     if (lodge.can_manage_officers)
         items.push({

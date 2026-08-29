@@ -13,6 +13,7 @@ export interface LodgeSummary {
     slug: string;
     can_manage_lodge: boolean;
     can_view_directory: boolean;
+    can_search_ritual: boolean;
     can_view_lodge_site: boolean;
     can_view_member_events: boolean;
     can_view_member_newsletters: boolean;

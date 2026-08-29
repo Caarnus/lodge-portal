@@ -36,3 +36,7 @@
 Directory requester authorization is evaluated from the route lodge, never `current_lodge_id`. A person-wide privacy setting belongs to the canonical person, while lodge-email preference belongs to a specific membership and its lodge. Self-service profile writes resolve the current user-to-person link server-side; submitted person or lodge identifiers never establish ownership.
 
 Directory projections may cross lodges only when the subject chose `participating_lodges`. They contain presentation fields only and are delivered with private/no-store cache policy. Originals and processed profile photos stay on private storage; derivative reads re-check requester and subject eligibility.
+
+## Ritual assistance exception
+
+Ritual progress is person-owned, not lodge-owned. An active member may opt into discovery from every own active lodge or from participating lodges. This narrow discovery exception is independent from directory scope: cross-lodge results disclose only active hosted-lodge affiliations and separately opted-in email/phone. Disabled and historical affiliations never authorize or project. Every search starts from its explicit requesting lodge; current-lodge selection never supplies authority.

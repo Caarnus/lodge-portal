@@ -34,6 +34,7 @@ use App\Http\Controllers\Platform\AccountController;
 use App\Http\Controllers\Platform\EventCategoryController as PlatformEventCategoryController;
 use App\Http\Controllers\Platform\LodgeController;
 use App\Http\Controllers\Platform\PersonMergeController;
+use App\Http\Controllers\Platform\RitualReferenceController;
 use App\Http\Controllers\PublicCommunicationUnsubscribeController;
 use App\Http\Controllers\PublicContactFormController;
 use App\Http\Controllers\PublicEventCalendarController;
@@ -46,6 +47,8 @@ use App\Http\Controllers\PublicReminderUnsubscribeController;
 use App\Http\Controllers\PublicReservationCancellationController;
 use App\Http\Controllers\PublicWebsiteController;
 use App\Http\Controllers\RegistrationReviewController;
+use App\Http\Controllers\RitualController;
+use App\Http\Controllers\RitualAssistanceController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteSectionController;
 use App\Models\Lodge;
@@ -63,11 +66,21 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified', 'approved'])->name('dashboard');
+Route::middleware(['auth', 'verified', 'approved'])->group(function () {
+    Route::get('ritual', [RitualController::class, 'index'])->name('ritual.index');
+    Route::put('ritual/settings', [RitualController::class, 'updateSettings'])->name('ritual.settings.update');
+    Route::put('ritual/parts/{ritualPart}', [RitualController::class, 'updatePart'])->name('ritual.parts.update');
+    Route::put('ritual/availability', [RitualController::class, 'updateAvailability'])->name('ritual.availability.update');
+});
 
 Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.directory.')->group(function () {
     Route::get('directory', [DirectoryController::class, 'index'])->middleware('throttle:60,1')->name('index');
     Route::get('directory/{person}/photo', [DirectoryController::class, 'photo'])->name('photo');
     Route::get('directory/{person}', [DirectoryController::class, 'show'])->name('show');
+});
+Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.ritual-assistance.')->group(function () {
+    Route::get('ritual-assistance', [RitualAssistanceController::class, 'index'])->middleware('throttle:60,1')->name('index');
+    Route::get('ritual-assistance/{person}', [RitualAssistanceController::class, 'show'])->name('show');
 });
 
 Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->name('lodges.newsletters.')->group(function () {
@@ -159,6 +172,13 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::get('platform/event-categories', [PlatformEventCategoryController::class, 'index'])->name('platform.event-categories.index')->middleware('platform-admin');
     Route::post('platform/event-categories', [PlatformEventCategoryController::class, 'store'])->name('platform.event-categories.store')->middleware('platform-admin');
     Route::put('platform/event-categories/{eventCategory}', [PlatformEventCategoryController::class, 'update'])->name('platform.event-categories.update')->middleware('platform-admin');
+    Route::get('platform/ritual-reference', [RitualReferenceController::class, 'index'])->name('platform.ritual-reference.index')->middleware('platform-admin');
+    Route::post('platform/ritual-categories', [RitualReferenceController::class, 'storeCategory'])->name('platform.ritual-categories.store')->middleware('platform-admin');
+    Route::put('platform/ritual-categories/{ritualCategory}', [RitualReferenceController::class, 'updateCategory'])->name('platform.ritual-categories.update')->middleware('platform-admin');
+    Route::post('platform/ritual-parts', [RitualReferenceController::class, 'storePart'])->name('platform.ritual-parts.store')->middleware('platform-admin');
+    Route::put('platform/ritual-parts/{ritualPart}', [RitualReferenceController::class, 'updatePart'])->name('platform.ritual-parts.update')->middleware('platform-admin');
+    Route::post('platform/ritual-levels', [RitualReferenceController::class, 'storeLevel'])->name('platform.ritual-levels.store')->middleware('platform-admin');
+    Route::put('platform/ritual-levels/{ritualProgramLevel}', [RitualReferenceController::class, 'updateLevel'])->name('platform.ritual-levels.update')->middleware('platform-admin');
     Route::post('platform/lodges/{lodge}/admins', [LodgeController::class, 'assignAdmin'])->name('platform.lodges.admins')->middleware('platform-admin');
     Route::put('platform/lodges/{lodge}/features', [LodgeController::class, 'features'])->name('platform.lodges.features')->middleware('platform-admin');
     Route::get('platform/people/merge', [PersonMergeController::class, 'create'])->name('platform.people.merge.create')->middleware('platform-admin');

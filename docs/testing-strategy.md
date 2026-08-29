@@ -65,3 +65,7 @@ Reservation tests cover normalized-email duplicates, party-size capacity under l
 Volunteer tests use same Lodge A/Lodge B isolation pattern. They cover exact volunteer eligibility, series and occurrence position scope, hard position capacity, same-position duplicate prevention, recommit history, member privacy, manager roster authorization, lifecycle suppression, and staffing-reminder at-most-once behavior.
 
 Public event and ICS tests assert publication state, cancellation, date range, lodge isolation, protected-data exclusion, RFC escaping/folding, recurrence exceptions, and cache invalidation when caching exists.
+
+## Ritual coverage
+
+Feature coverage exercises Lodge A/B/C plus a disabled lodge: requester permission must be local to explicit lodge; hidden, unwilling, inactive, deceased, merged, or membership-less subjects are absent from pagination and detail. Merge coverage verifies conservative visibility, conflict rejection for private ritual fields, availability union, proficiency consolidation, and achievement union. Browser/manual coverage verifies self-reported/no-commitment language, contact projection, direct-URL revocation, and no assignment or bulk-contact controls.

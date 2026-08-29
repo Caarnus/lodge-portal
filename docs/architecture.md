@@ -59,3 +59,9 @@ Protected-event visibility is derived from the explicitly loaded event lodge, th
 Reservations consume occurrence capacity; reminder subscriptions express notification consent and consume none. Volunteer positions and commitments are a third independent interaction type and are never stored in either record. Positions may be series- or occurrence-scoped; commitments bind one linked person to one position and occurrence. Staffing reminders use dedicated delivery rows and reload the complete ownership chain before mail.
 
 See [Phase 1](phase-01.md), [Phase 2](phase-02.md), [Phase 3](phase-03.md), [Phase 4](phase-04.md), and the records in [decisions](decisions/README.md).
+
+## Ritual Boundary
+
+Ritual reference records are platform-owned. Settings, proficiency, availability, and achievements are person-owned and contain no lodge ID. `RitualProgress` derives current totals from active parts/categories and confirmed credit; it never stores a total. `RitualAssistanceAccess` is independent from directory visibility and rebuilds requester and subject predicates on every request. Assistance responses use explicit safe projections and private/no-store caching.
+
+Person merge locks both people and ritual rows. Survivor settings win; missing survivor settings become hidden. Conflicting private notes or first-proficient dates block merge. Availability and achievements union conservatively, then achievements reconcile.

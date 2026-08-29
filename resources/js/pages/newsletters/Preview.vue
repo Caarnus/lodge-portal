@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{ lodge: any; issue: any; version: any }>();
+defineProps<{ lodge: any; issue: any; version: any }>();
 </script>
 <template>
     <main class="mx-auto max-w-4xl p-6">

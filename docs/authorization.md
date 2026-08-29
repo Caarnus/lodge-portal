@@ -90,3 +90,9 @@ Event management authority does not make the actor an eligible attendee. Public,
 Volunteer commitments require an approved, verified account linked to an active member of the event-owning lodge. `events.manage` controls position management, rosters, manager-created commitments, administrative removal, and staffing-reminder retry, but never bypasses target-volunteer eligibility. Manager rosters expose names; contact fields require the existing lodge-scoped Person access rule.
 
 Lodge-only qualification uses an active membership in the owning lodge. Masons-only visibility and reminder eligibility may use any active membership represented on the platform; making a reservation through another lodge's membership additionally requires the event's cross-lodge reservation flag. Past Master qualification is derived separately from degree but remains behind the active-membership gate.
+
+## Ritual
+
+Self-service ritual writes require an approved, verified account linked to a living, unmerged person with an active membership in an active lodge. They are person-owned; no lodge or platform administrator can edit another person's ritual state.
+
+Ritual Assistance requires all requester checks in the explicit route lodge: approved/verified account, linked eligible person, active membership, active lodge, and a directly assigned `ritual.search` permission in that lodge. Platform administrator status, active-lodge selection, and a role in another lodge do not bypass this. Subject inclusion is controlled only by ritual scope plus active hosted memberships, proficient/willing active parts, and optional filters. Directory scope never controls ritual inclusion; directory email and phone flags still control contact projection.

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Domain\Directory\DirectoryAccess;
 use App\Domain\Newsletters\NewsletterAccess;
+use App\Domain\Ritual\RitualAssistanceAccess;
 use App\Enums\LodgeStatus;
 use App\Models\Lodge;
 use App\Models\User;
@@ -55,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                 ->map(fn (Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
                     ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
+                    ->setAttribute('can_search_ritual', app(RitualAssistanceAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_view_lodge_site', $lodge->status === LodgeStatus::Active)
                     ->setAttribute('can_view_member_events', app(NewsletterAccess::class)->canRead($user, $lodge))
                     ->setAttribute('can_view_member_newsletters', app(NewsletterAccess::class)->canRead($user, $lodge))
