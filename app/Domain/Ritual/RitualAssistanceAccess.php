@@ -34,11 +34,9 @@ class RitualAssistanceAccess
     {
         $query = $this->visibleQuery($lodge, $filters['audience'] ?? 'own_lodge');
         $this->applyFilters($query, $filters);
+        $this->applySort($query, $filters);
 
         return $this->withProjectionRelationships($query)
-            ->orderByRaw("LOWER(COALESCE(legal_last_name, name, ''))")
-            ->orderByRaw("LOWER(COALESCE(preferred_name, legal_first_name, name, ''))")
-            ->orderBy('id')
             ->paginate(min($filters['per_page'] ?? 25, 25))
             ->through(fn (Person $person) => $this->project($person, $filters));
     }
@@ -70,9 +68,15 @@ class RitualAssistanceAccess
     public function project(Person $person, array $filters = [], bool $detail = false): array
     {
         $proficiencies = $person->ritualProficiencies->filter(fn ($item) => $this->isMatchingProficiency($item));
-        if (! $detail && isset($filters['part'])) $proficiencies = $proficiencies->where('ritual_part_id', $filters['part']);
-        if (! $detail && isset($filters['category'])) $proficiencies = $proficiencies->filter(fn ($item) => $item->part->ritual_category_id === $filters['category']);
-        if (! $detail && isset($filters['degree'])) $proficiencies = $proficiencies->filter(fn ($item) => $item->part->category->masonic_degree_id === $filters['degree']);
+        if (! $detail && isset($filters['part'])) {
+            $proficiencies = $proficiencies->where('ritual_part_id', $filters['part']);
+        }
+        if (! $detail && isset($filters['category'])) {
+            $proficiencies = $proficiencies->filter(fn ($item) => $item->part->ritual_category_id === $filters['category']);
+        }
+        if (! $detail && isset($filters['degree'])) {
+            $proficiencies = $proficiencies->filter(fn ($item) => $item->part->category->masonic_degree_id === $filters['degree']);
+        }
 
         $availability = $person->ritualAvailabilities->where('is_enabled', true);
         if (! $detail && isset($filters['day_of_week'])) {
@@ -97,15 +101,52 @@ class RitualAssistanceAccess
 
     private function applyFilters(Builder $query, array $filters): void
     {
-        if (isset($filters['part'])) $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->where('ritual_part_id', $filters['part']));
-        if (isset($filters['category'])) $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->whereHas('part', fn (Builder $part) => $part->where('ritual_category_id', $filters['category'])));
-        if (isset($filters['degree'])) $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->whereHas('part.category', fn (Builder $category) => $category->where('masonic_degree_id', $filters['degree'])));
-        if (isset($filters['lodge'])) $query->whereHas('memberships', fn (Builder $m) => $this->activeMembershipQuery($m)->where('lodge_id', $filters['lodge']));
-        if (isset($filters['day_of_week'])) $query->whereHas('ritualAvailabilities', fn (Builder $a) => $a->where('is_enabled', true)->where('day_of_week', $filters['day_of_week'])->where('daypart', $filters['daypart']));
+        if (isset($filters['part'])) {
+            $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->where('ritual_part_id', $filters['part']));
+        }
+        if (isset($filters['category'])) {
+            $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->whereHas('part', fn (Builder $part) => $part->where('ritual_category_id', $filters['category'])));
+        }
+        if (isset($filters['degree'])) {
+            $query->whereHas('ritualProficiencies', fn (Builder $p) => $this->matchingProficiencyQuery($p)->whereHas('part.category', fn (Builder $category) => $category->where('masonic_degree_id', $filters['degree'])));
+        }
+        if (isset($filters['lodge'])) {
+            $query->whereHas('memberships', fn (Builder $m) => $this->activeMembershipQuery($m)->where('lodge_id', $filters['lodge']));
+        }
+        if (isset($filters['day_of_week'])) {
+            $query->whereHas('ritualAvailabilities', fn (Builder $a) => $a->where('is_enabled', true)->where('day_of_week', $filters['day_of_week'])->where('daypart', $filters['daypart']));
+        }
         if (($name = trim((string) ($filters['query'] ?? ''))) !== '') {
-            $pattern = '%' . mb_strtolower($name) . '%';
+            $pattern = '%'.mb_strtolower($name).'%';
             $query->where(fn (Builder $names) => $names->whereRaw('LOWER(legal_first_name) LIKE ?', [$pattern])->orWhereRaw('LOWER(legal_last_name) LIKE ?', [$pattern])->orWhereRaw('LOWER(preferred_name) LIKE ?', [$pattern])->orWhereRaw('LOWER(name) LIKE ?', [$pattern]));
         }
+    }
+
+    private function applySort(Builder $query, array $filters): void
+    {
+        $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+        match ($filters['sort'] ?? 'name') {
+            'affiliations' => $query->withCount([
+                'memberships as active_affiliations_count' => fn (Builder $memberships) => $this->activeMembershipQuery($memberships),
+            ])->orderBy('active_affiliations_count', $direction),
+            'roles' => $query->withCount([
+                'ritualProficiencies as matching_roles_count' => fn (Builder $proficiencies) => $this->matchingProficiencyQuery($proficiencies),
+            ])->orderBy('matching_roles_count', $direction),
+            'availability' => $query->withCount([
+                'ritualAvailabilities as active_availability_count' => fn (Builder $availability) => $availability->where('is_enabled', true),
+            ])->orderBy('active_availability_count', $direction),
+            default => $query
+                ->orderByRaw("LOWER(COALESCE(legal_last_name, name, '')) {$direction}")
+                ->orderByRaw("LOWER(COALESCE(preferred_name, legal_first_name, name, '')) {$direction}"),
+        };
+
+        if (($filters['sort'] ?? 'name') !== 'name') {
+            $query->orderByRaw("LOWER(COALESCE(legal_last_name, name, ''))")
+                ->orderByRaw("LOWER(COALESCE(preferred_name, legal_first_name, name, ''))");
+        }
+
+        $query->orderBy('id');
     }
 
     private function withProjectionRelationships(Builder $query): Builder

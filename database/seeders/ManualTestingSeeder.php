@@ -101,6 +101,7 @@ class ManualTestingSeeder extends Seeder
         $album->versions()->create(['lodge_id' => $a->id, 'status' => ContentVersionStatus::Published, 'title' => 'Open House', 'description' => 'Gallery ready for photo upload testing.', 'visibility' => GalleryVisibility::Public, 'created_by' => $admin->id, 'published_by' => $admin->id, 'published_at' => now()]);
         LodgeCommunication::create(['lodge_id' => $a->id, 'status' => 'draft', 'subject' => 'Manual test announcement', 'body_html' => '<p>Draft communication ready to send.</p>', 'created_by' => $officer->id, 'last_edited_by' => $officer->id]);
         $this->ritualFixtures($a, $b);
+        $this->ritualAssistanceFixtures([$a, $b, $newburgh]);
         $this->command?->info('Manual accounts: admin@washington.test, admin@newburgh.test, officer@washington.test, member1@washington.test — password: password');
     }
 
@@ -276,5 +277,52 @@ class ManualTestingSeeder extends Seeder
         }
         $ownLodge->person->directoryPrivacySetting()->update(['show_email' => true, 'show_phone' => false]);
         $participating->person->directoryPrivacySetting()->update(['show_email' => true, 'show_phone' => true]);
+    }
+
+    private function ritualAssistanceFixtures(array $lodges): void
+    {
+        $parts = RitualPart::query()->where('is_active', true)->orderBy('ritual_category_id')->orderBy('sort_order')->get()->values();
+
+        foreach (range(1, 54) as $number) {
+            $lodge = $lodges[($number - 1) % count($lodges)];
+            $user = $this->member($lodge, 'Ritual', sprintf('Tester %02d', $number), "ritual{$number}@manual.test");
+            $primaryPart = $parts[($number - 1) % $parts->count()];
+            $secondaryPart = $parts[$number % $parts->count()];
+
+            $user->person->ritualSetting()->updateOrCreate([], [
+                'visibility_scope' => $number % 4 === 0 ? 'own_lodge' : 'participating_lodges',
+                'public_availability_note' => "Manual fixture {$number}: contact separately.",
+                'updated_by' => $user->id,
+            ]);
+            $user->person->directoryPrivacySetting()->updateOrCreate([], [
+                'scope' => 'hidden',
+                'show_email' => $number % 3 === 0,
+                'show_phone' => $number % 5 === 0,
+                'show_address' => false,
+                'show_degree' => true,
+            ]);
+
+            PersonRitualProficiency::query()->updateOrCreate(
+                ['person_id' => $user->person_id, 'ritual_part_id' => $primaryPart->id],
+                ['status' => 'proficient', 'willing_to_assist' => true, 'interested_in_learning' => $number % 2 === 0, 'performed_for_credit' => $number % 6 === 0],
+            );
+
+            $secondary = match ($number % 3) {
+                0 => ['status' => 'learning', 'interested_in_learning' => true, 'willing_to_assist' => false],
+                1 => ['status' => 'proficient', 'interested_in_learning' => false, 'willing_to_assist' => false],
+                default => ['status' => 'proficient', 'interested_in_learning' => true, 'willing_to_assist' => true],
+            };
+            PersonRitualProficiency::query()->updateOrCreate(
+                ['person_id' => $user->person_id, 'ritual_part_id' => $secondaryPart->id],
+                $secondary,
+            );
+
+            foreach ([$number % 7 + 1 => $number % 2 === 0 ? 'evening' : 'afternoon', ($number + 2) % 7 + 1 => 'morning'] as $day => $daypart) {
+                PersonRitualAvailability::query()->updateOrCreate(
+                    ['person_id' => $user->person_id, 'day_of_week' => $day, 'daypart' => $daypart],
+                    ['is_enabled' => true],
+                );
+            }
+        }
     }
 }

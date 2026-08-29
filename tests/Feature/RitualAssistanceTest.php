@@ -35,7 +35,7 @@ class RitualAssistanceTest extends TestCase
         $person->directoryPrivacySetting()->update(['show_email' => true, 'show_phone' => false, 'scope' => 'hidden']);
         $person->update(['email' => 'visible@example.test', 'phone' => '555-111-2222']);
 
-        $response = $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance");
+        $response = $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1");
 
         $response->assertOk()->assertHeader('Cache-Control', 'no-store, private')
             ->assertJsonPath('total', 1)
@@ -44,6 +44,25 @@ class RitualAssistanceTest extends TestCase
             ->assertJsonPath('data.0.phone', null)
             ->assertJsonMissingPath('data.0.parts.0.notes')
             ->assertJsonMissingPath('data.0.parts.0.performed_for_credit');
+    }
+
+    public function test_index_does_not_search_until_explicitly_requested(): void
+    {
+        [$lodge, $user] = $this->requester();
+        $this->visibleCandidate($lodge);
+
+        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance")
+            ->assertOk()
+            ->assertContent('{}');
+    }
+
+    public function test_initial_inertia_visit_renders_the_assistance_page(): void
+    {
+        [$lodge, $user] = $this->requester();
+
+        $this->actingAs($user)->get("/lodges/{$lodge->id}/ritual-assistance")
+            ->assertOk()
+            ->assertSee('data-page');
     }
 
     public function test_detail_returns_404_after_visibility_revocation_and_requester_without_local_role_gets_403(): void
@@ -65,9 +84,9 @@ class RitualAssistanceTest extends TestCase
         $person = $this->visibleCandidate($lodge);
         PersonRitualAvailability::factory()->create(['person_id' => $person->id, 'day_of_week' => 2, 'daypart' => 'evening']);
 
-        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?day_of_week=2&daypart=evening")->assertJsonPath('total', 1);
-        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?day_of_week=2")->assertUnprocessable();
-        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?daypart=evening")->assertUnprocessable();
+        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&day_of_week=2&daypart=evening")->assertJsonPath('total', 1);
+        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&day_of_week=2")->assertUnprocessable();
+        $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&daypart=evening")->assertUnprocessable();
     }
 
     private function requester(): array

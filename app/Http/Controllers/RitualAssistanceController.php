@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Ritual\RitualAssistanceAccess;
+use App\Enums\LodgeStatus;
 use App\Models\Lodge;
 use App\Models\Person;
+use App\Models\RitualCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -24,20 +26,25 @@ class RitualAssistanceController extends Controller
             'daypart' => ['nullable', 'required_with:day_of_week', 'in:morning,afternoon,evening'],
             'query' => ['nullable', 'string', 'max:120'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:25'],
+            'searched' => ['nullable', 'boolean'],
+            'sort' => ['nullable', 'in:name,affiliations,roles,availability'],
+            'direction' => ['nullable', 'in:asc,desc'],
         ]);
 
-        $results = $access->search($lodge, $filters);
-        if ($request->header('X-Inertia')) {
-            return Inertia::render('ritual/Assistance', [
-                'requestingLodge' => $lodge->only(['id', 'name', 'number']),
-                'filters' => $filters,
-                'results' => $results,
-                'categories' => \App\Models\RitualCategory::query()->with(['parts' => fn ($parts) => $parts->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'masonic_degree_id']),
-                'lodges' => Lodge::query()->where('status', \App\Enums\LodgeStatus::Active)->orderBy('name')->get(['id', 'name', 'number']),
-            ])->toResponse($request)->header('Cache-Control', 'private, no-store');
+        $searched = $request->boolean('searched');
+        $results = $searched ? $access->search($lodge, $filters) : null;
+        if ($request->expectsJson()) {
+            return response()->json($results)->header('Cache-Control', 'private, no-store');
         }
 
-        return response()->json($results)->header('Cache-Control', 'private, no-store');
+        return Inertia::render('ritual/Assistance', [
+            'requestingLodge' => $lodge->only(['id', 'name', 'number']),
+            'filters' => $filters,
+            'results' => $results,
+            'searched' => $searched,
+            'categories' => RitualCategory::query()->with(['parts' => fn ($parts) => $parts->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'masonic_degree_id']),
+            'lodges' => Lodge::query()->where('status', LodgeStatus::Active)->orderBy('name')->get(['id', 'name', 'number']),
+        ])->toResponse($request)->header('Cache-Control', 'private, no-store');
     }
 
     public function show(Request $request, Lodge $lodge, Person $person, RitualAssistanceAccess $access)
