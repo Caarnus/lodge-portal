@@ -133,9 +133,6 @@ class RitualAssistanceAccess
             'roles' => $query->withCount([
                 'ritualProficiencies as matching_roles_count' => fn (Builder $proficiencies) => $this->matchingProficiencyQuery($proficiencies),
             ])->orderBy('matching_roles_count', $direction),
-            'availability' => $query->withCount([
-                'ritualAvailabilities as active_availability_count' => fn (Builder $availability) => $availability->where('is_enabled', true),
-            ])->orderBy('active_availability_count', $direction),
             default => $query
                 ->orderByRaw("LOWER(COALESCE(legal_last_name, name, '')) {$direction}")
                 ->orderByRaw("LOWER(COALESCE(preferred_name, legal_first_name, name, '')) {$direction}"),

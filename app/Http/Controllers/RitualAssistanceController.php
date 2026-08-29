@@ -27,7 +27,7 @@ class RitualAssistanceController extends Controller
             'query' => ['nullable', 'string', 'max:120'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:25'],
             'searched' => ['nullable', 'boolean'],
-            'sort' => ['nullable', 'in:name,affiliations,roles,availability'],
+            'sort' => ['nullable', 'in:name,affiliations,roles'],
             'direction' => ['nullable', 'in:asc,desc'],
         ]);
 

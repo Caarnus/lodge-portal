@@ -95,10 +95,29 @@ const dayName = (day: number) =>
         "Saturday",
         "Sunday",
     ][day - 1];
-const availability = (person: any) =>
-    person.availability
-        .map((item: any) => `${dayName(item.day_of_week)} ${item.daypart}`)
-        .join(", ");
+const availabilityDays = [7, 1, 2, 3, 4, 5, 6];
+const dayparts = ["morning", "afternoon", "evening"];
+const roleTone = (part: any) => {
+    const category = part.category.toLowerCase();
+    if (category.includes("entered apprentice"))
+        return "bg-sky-500/10 text-sky-950 dark:text-sky-100";
+    if (category.includes("fellow craft"))
+        return "bg-violet-500/10 text-violet-950 dark:text-violet-100";
+    if (category.includes("master mason"))
+        return "bg-emerald-500/10 text-emerald-950 dark:text-emerald-100";
+
+    return "bg-amber-500/10 text-amber-950 dark:text-amber-100";
+};
+const availabilityTone = (daypart: string) =>
+    ({
+        morning: "bg-amber-500/10 text-amber-950 dark:text-amber-100",
+        afternoon: "bg-sky-500/10 text-sky-950 dark:text-sky-100",
+        evening: "bg-violet-500/10 text-violet-950 dark:text-violet-100",
+    })[daypart] ?? "bg-muted";
+const isAvailable = (person: any, day: number, daypart: string) =>
+    person.availability.some(
+        (item: any) => item.day_of_week === day && item.daypart === daypart,
+    );
 </script>
 
 <template>
@@ -258,10 +277,10 @@ const availability = (person: any) =>
                             <th class="p-3" :aria-sort="sortLabel('name')">
                                 <button
                                     type="button"
-                                    class="font-semibold hover:underline"
+                                    class="font-bold hover:underline"
                                     @click="sortBy('name')"
                                 >
-                                    Member
+                                    NAME
                                     <span aria-hidden="true">{{
                                         sort === "name"
                                             ? direction === "asc"
@@ -277,10 +296,10 @@ const availability = (person: any) =>
                             >
                                 <button
                                     type="button"
-                                    class="font-semibold hover:underline"
+                                    class="font-bold hover:underline"
                                     @click="sortBy('affiliations')"
                                 >
-                                    Affiliations
+                                    AFFILIATIONS
                                     <span aria-hidden="true">{{
                                         sort === "affiliations"
                                             ? direction === "asc"
@@ -296,10 +315,10 @@ const availability = (person: any) =>
                             >
                                 <button
                                     type="button"
-                                    class="font-semibold hover:underline"
+                                    class="font-bold hover:underline"
                                     @click="sortBy('roles')"
                                 >
-                                    Roles
+                                    ROLES
                                     <span aria-hidden="true">{{
                                         sort === "roles"
                                             ? direction === "asc"
@@ -309,26 +328,8 @@ const availability = (person: any) =>
                                     }}</span>
                                 </button>
                             </th>
-                            <th
-                                class="p-3 text-center"
-                                :aria-sort="sortLabel('availability')"
-                            >
-                                <button
-                                    type="button"
-                                    class="font-semibold hover:underline"
-                                    @click="sortBy('availability')"
-                                >
-                                    Availability
-                                    <span aria-hidden="true">{{
-                                        sort === "availability"
-                                            ? direction === "asc"
-                                                ? "↑"
-                                                : "↓"
-                                            : ""
-                                    }}</span>
-                                </button>
-                            </th>
-                            <th class="p-3">Contact</th>
+                            <th class="p-3 text-center">AVAILABILITY</th>
+                            <th class="p-3">CONTACT</th>
                             <th class="p-3">
                                 <span class="sr-only">Details</span>
                             </th>
@@ -429,35 +430,136 @@ const availability = (person: any) =>
                 >
                 <section class="space-y-2">
                     <h2 class="font-semibold">Ritual roles</h2>
-                    <ul class="space-y-2 text-sm">
-                        <li v-for="part in selectedPerson.parts" :key="part.id">
-                            <strong
-                                >{{ part.category }} — {{ part.name }}</strong
-                            ><span class="text-muted-foreground">
-                                · Self-reported · Updated
-                                {{
-                                    new Date(
-                                        part.updated_at,
-                                    ).toLocaleDateString()
-                                }}</span
+                    <div class="overflow-x-auto rounded-md bg-muted/20 p-2">
+                        <table class="w-full min-w-[420px] text-left text-sm">
+                            <caption class="sr-only">
+                                Ritual roles
+                            </caption>
+                            <thead
+                                class="text-xs uppercase tracking-wide text-muted-foreground"
                             >
-                        </li>
-                    </ul>
+                                <tr>
+                                    <th class="p-2">Category</th>
+                                    <th class="p-2">Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="part in selectedPerson.parts"
+                                    :key="part.id"
+                                    class="border-t border-border/50"
+                                >
+                                    <td class="p-2">
+                                        <span
+                                            class="rounded px-2 py-1 text-xs font-medium"
+                                            :class="roleTone(part)"
+                                            >{{ part.category }}</span
+                                        >
+                                    </td>
+                                    <td class="p-2 font-medium">
+                                        {{ part.name }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
                 <section class="space-y-2">
                     <h2 class="font-semibold">Broad availability</h2>
-                    <p class="text-sm">
-                        {{
-                            availability(selectedPerson) ||
-                            "No availability shared."
-                        }}
-                    </p>
+                    <div class="overflow-x-auto rounded-md bg-muted/20 p-2">
+                        <table class="w-full min-w-[480px] text-left text-sm">
+                            <caption class="sr-only">
+                                Broad availability
+                            </caption>
+                            <thead
+                                class="text-xs uppercase tracking-wide text-muted-foreground"
+                            >
+                                <tr>
+                                    <th class="p-2">Weekday</th>
+                                    <th
+                                        v-for="daypart in dayparts"
+                                        :key="daypart"
+                                        class="p-2"
+                                    >
+                                        {{ daypart }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="day in availabilityDays"
+                                    :key="day"
+                                    class="border-t border-border/50"
+                                >
+                                    <td class="p-2 font-medium">
+                                        {{ dayName(day) }}
+                                    </td>
+                                    <td
+                                        v-for="daypart in dayparts"
+                                        :key="daypart"
+                                        class="p-2"
+                                    >
+                                        <span
+                                            v-if="
+                                                isAvailable(
+                                                    selectedPerson,
+                                                    day,
+                                                    daypart,
+                                                )
+                                            "
+                                            class="rounded px-2 py-1 text-xs font-medium"
+                                            :class="availabilityTone(daypart)"
+                                            >Available</span
+                                        ><span
+                                            v-else
+                                            class="text-muted-foreground"
+                                            >—</span
+                                        >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <p
                         v-if="selectedPerson.public_availability_note"
                         class="text-sm text-muted-foreground"
                     >
                         {{ selectedPerson.public_availability_note }}
                     </p>
+                </section>
+                <section
+                    v-if="selectedPerson.email || selectedPerson.phone"
+                    class="space-y-2"
+                >
+                    <h2 class="font-semibold">Contact information</h2>
+                    <dl class="grid gap-2 rounded-md bg-muted/20 p-3 text-sm">
+                        <div
+                            v-if="selectedPerson.email"
+                            class="grid gap-1 sm:grid-cols-[7rem_1fr]"
+                        >
+                            <dt class="text-muted-foreground">Email</dt>
+                            <dd>
+                                <a
+                                    :href="`mailto:${selectedPerson.email}`"
+                                    class="underline"
+                                    >{{ selectedPerson.email }}</a
+                                >
+                            </dd>
+                        </div>
+                        <div
+                            v-if="selectedPerson.phone"
+                            class="grid gap-1 sm:grid-cols-[7rem_1fr]"
+                        >
+                            <dt class="text-muted-foreground">Phone</dt>
+                            <dd>
+                                <a
+                                    :href="`tel:${selectedPerson.phone}`"
+                                    class="underline"
+                                    >{{ selectedPerson.phone }}</a
+                                >
+                            </dd>
+                        </div>
+                    </dl>
                 </section></DialogScrollContent
             ></Dialog
         >
