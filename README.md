@@ -31,7 +31,7 @@ Members maintain person-owned, self-reported ritual proficiency, learning intere
 
 ## Local Development
 
-For a repeatable manual-test database, run `php artisan manual:reset`. It destroys all data, runs migrations from scratch, and loads three lodges (including a disabled lodge), platform/lodge admins, officer/member accounts, event data, a published newsletter, gallery, and communication draft. Use `--force` only in non-interactive automation.
+For a repeatable manual-test database, run `docker compose exec app php artisan manual:reset`. It destroys all data, runs migrations from scratch, and loads three lodges (including a disabled lodge), platform/lodge admins, officer/member accounts, event data, ritual-assistance fixtures, a published newsletter, gallery, and communication draft. Use `--force` only in non-interactive automation. Host PHP may not include PostgreSQL drivers, so run this command in the application container.
 
 The backend services run in Docker Compose, while Node.js and Vite run directly on the host for faster file watching and frontend builds. Install Node.js 24 and npm on the host before starting.
 

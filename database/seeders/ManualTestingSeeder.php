@@ -23,6 +23,9 @@ use App\Models\OfficerAssignment;
 use App\Models\OfficerPosition;
 use App\Models\PastMasterTerm;
 use App\Models\Person;
+use App\Models\PersonRitualAvailability;
+use App\Models\PersonRitualProficiency;
+use App\Models\RitualPart;
 use App\Models\User;
 use App\Models\WebsitePage;
 use App\Services\DefaultWebsiteTemplate;
@@ -36,7 +39,7 @@ class ManualTestingSeeder extends Seeder
     public function run(): void
     {
         app(LodgeRoleCatalog::class)->seedPermissions();
-        $this->call([PeopleMembershipReferenceSeeder::class, EventReferenceSeeder::class]);
+        $this->call([PeopleMembershipReferenceSeeder::class, EventReferenceSeeder::class, RitualReferenceSeeder::class]);
         $a = $this->lodge('Washington Lodge', '101', 'washington-101');
         $b = $this->lodge('Franklin Lodge', '202', 'franklin-202');
         $newburgh = $this->lodge('Newburgh Lodge No. 174 F. & A.M.', '174', 'newburgh-174', 'active', [
@@ -97,6 +100,7 @@ class ManualTestingSeeder extends Seeder
         $album = GalleryAlbum::create(['lodge_id' => $a->id, 'slug' => 'public-open-house', 'created_by' => $admin->id]);
         $album->versions()->create(['lodge_id' => $a->id, 'status' => ContentVersionStatus::Published, 'title' => 'Open House', 'description' => 'Gallery ready for photo upload testing.', 'visibility' => GalleryVisibility::Public, 'created_by' => $admin->id, 'published_by' => $admin->id, 'published_at' => now()]);
         LodgeCommunication::create(['lodge_id' => $a->id, 'status' => 'draft', 'subject' => 'Manual test announcement', 'body_html' => '<p>Draft communication ready to send.</p>', 'created_by' => $officer->id, 'last_edited_by' => $officer->id]);
+        $this->ritualFixtures($a, $b);
         $this->command?->info('Manual accounts: admin@washington.test, admin@newburgh.test, officer@washington.test, member1@washington.test — password: password');
     }
 
@@ -251,5 +255,26 @@ class ManualTestingSeeder extends Seeder
         $admin->person->directoryPrivacySetting()->update(['scope' => 'participating_lodges', 'show_email' => true, 'show_phone' => true, 'show_address' => false, 'show_degree' => true]);
         $officer->person->directoryPrivacySetting()->update(['scope' => 'own_lodge', 'show_email' => false, 'show_phone' => false, 'show_address' => false, 'show_degree' => true]);
         $members->each(fn (User $user, int $index) => $user->person->directoryPrivacySetting()->update(['scope' => $index % 2 ? 'hidden' : 'own_lodge', 'show_email' => $index % 3 === 0, 'show_phone' => false, 'show_address' => false, 'show_degree' => true]));
+    }
+
+    private function ritualFixtures(Lodge $a, Lodge $b): void
+    {
+        $ownLodge = User::query()->where('email', 'member1@washington.test')->sole();
+        $participating = User::query()->where('email', 'member2@washington.test')->sole();
+        Membership::create([
+            'lodge_id' => $b->id,
+            'person_id' => $participating->person_id,
+            'membership_status_id' => MembershipStatus::query()->where('key', 'active')->value('id'),
+            'masonic_degree_id' => MasonicDegree::query()->where('key', 'master_mason')->value('id'),
+            'primary_lodge_number' => $a->number,
+        ]);
+        $part = RitualPart::query()->where('is_active', true)->orderBy('sort_order')->firstOrFail();
+        foreach ([[$ownLodge, 'own_lodge', 2, 'evening'], [$participating, 'participating_lodges', 4, 'afternoon']] as [$user, $scope, $day, $daypart]) {
+            $user->person->ritualSetting()->update(['visibility_scope' => $scope, 'public_availability_note' => 'Broad availability only; please contact separately.', 'updated_by' => $user->id]);
+            PersonRitualProficiency::create(['person_id' => $user->person_id, 'ritual_part_id' => $part->id, 'status' => 'proficient', 'willing_to_assist' => true]);
+            PersonRitualAvailability::create(['person_id' => $user->person_id, 'day_of_week' => $day, 'daypart' => $daypart, 'is_enabled' => true]);
+        }
+        $ownLodge->person->directoryPrivacySetting()->update(['show_email' => true, 'show_phone' => false]);
+        $participating->person->directoryPrivacySetting()->update(['show_email' => true, 'show_phone' => true]);
     }
 }
