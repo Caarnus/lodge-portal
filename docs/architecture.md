@@ -54,7 +54,7 @@ The public Officers section is a narrow read model keyed by the explicitly resol
 
 Events and materialized occurrences are lodge-owned. A canonical RRULE and IANA time zone define a recurring series, while bounded occurrence rows provide stable identities for overrides, attendance reservations, reminder subscriptions and deliveries, routes, and calendar output. The original recurrence identity remains stable when an occurrence moves.
 
-Protected-event visibility is derived from the explicitly loaded event lodge, the linked person, active membership, configured cross-lodge participation, and qualification. Active lodge selection never supplies eligibility. Public CMS queries return only published public occurrences for the public site's resolved lodge.
+Protected-event visibility is derived from the explicitly loaded event lodge, the linked person, active membership, and qualification. Masons may view qualified protected events across active lodges; lodge-only events require membership in the owning lodge. The cross-lodge reservation setting does not grant basic visibility. Active lodge selection never supplies eligibility. Public CMS queries return only published public occurrences for the public site's resolved lodge.
 
 Reservations consume occurrence capacity; reminder subscriptions express notification consent and consume none. Volunteer positions and commitments are a third independent interaction type and are never stored in either record. Positions may be series- or occurrence-scoped; commitments bind one linked person to one position and occurrence. Staffing reminders use dedicated delivery rows and reload the complete ownership chain before mail.
 

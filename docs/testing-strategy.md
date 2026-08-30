@@ -69,3 +69,7 @@ Public event and ICS tests assert publication state, cancellation, date range, l
 ## Ritual coverage
 
 Feature coverage exercises Lodge A/B/C plus a disabled lodge: requester permission must be local to explicit lodge; hidden, unwilling, inactive, deceased, merged, or membership-less subjects are absent from pagination and detail. Merge coverage verifies conservative visibility, conflict rejection for private ritual fields, availability union, proficiency consolidation, and achievement union. Browser/manual coverage verifies self-reported/no-commitment language, contact projection, direct-URL revocation, and no assignment or bulk-contact controls.
+
+## Regional discovery and group coverage
+
+Feature tests cover group type/group activation, archive and restore, overlapping lodge membership, and audit history. Discovery fixtures combine active and disabled lodges, public and protected events, hidden directory subjects, and inactive or archived groups. They prove a group filter can only narrow results; it must not override public-event, event-eligibility, directory-privacy, ritual-consent, active-membership, or active-lodge predicates. Cross-lodge result sets remain deduplicated and only expose their documented safe projections. Query-plan reviews cover the regional occurrence, active lodge, and active membership indexes.

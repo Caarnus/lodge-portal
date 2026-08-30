@@ -18,6 +18,10 @@ People remain canonical shared identity records. Members manage their own direct
 
 Members maintain person-owned, self-reported ritual proficiency, learning interest, willingness, credit claims, broad availability, and discovery scope at `/ritual`. Current points derive from active reference rules and confirmed credit claims; achievements are durable. Ritual Assistance is a protected lodge tool, not a directory extension: it requires an explicit active-lodge `ritual.search` grant and returns only opted-in, proficient, willing members with separately enabled contact fields. It creates no assignment, booking, message, roster, or certification.
 
+## Regional discovery
+
+Platform-managed lodge groups organize active lodges and may only narrow an existing public, directory, ritual, or event query; they never grant tenancy or authorization. `/lodges` and public group pages expose safe public lodge data and public events only. `/events` shows anonymous visitors public events and authenticated members only the protected events they independently qualify to view. Cross-lodge directory and ritual results remain protected, deduplicated, and private/no-store.
+
 ## Planned Stack
 
 - Laravel 13 and PHP 8.4
