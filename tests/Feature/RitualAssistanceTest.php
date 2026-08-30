@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Lodge;
+use App\Models\LodgeGroup;
+use App\Models\LodgeGroupType;
 use App\Models\Membership;
 use App\Models\MembershipStatus;
 use App\Models\Permission;
@@ -14,6 +16,7 @@ use App\Models\RitualPart;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PeopleMembershipReferenceSeeder;
+use Database\Seeders\LodgeGroupTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -87,6 +90,34 @@ class RitualAssistanceTest extends TestCase
         $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&day_of_week=2&daypart=evening")->assertJsonPath('total', 1);
         $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&day_of_week=2")->assertUnprocessable();
         $this->actingAs($user)->getJson("/lodges/{$lodge->id}/ritual-assistance?searched=1&daypart=evening")->assertUnprocessable();
+    }
+
+    public function test_group_filter_narrows_candidates_without_restoring_hidden_or_unwilling_people(): void
+    {
+        $this->seed(LodgeGroupTypeSeeder::class);
+        [$requestLodge, $user] = $this->requester();
+        $inside = Lodge::factory()->create();
+        $outside = Lodge::factory()->create();
+        $group = LodgeGroup::create([
+            'lodge_group_type_id' => LodgeGroupType::query()->where('key', 'region')->sole()->id,
+            'name' => 'Southwest Indiana', 'slug' => 'southwest-indiana', 'is_active' => true, 'has_public_landing_page' => false,
+        ]);
+        $group->lodges()->attach($inside->id);
+        $matching = $this->visibleCandidate($inside);
+        $matching->ritualSetting()->update(['visibility_scope' => 'participating_lodges']);
+        $hidden = $this->visibleCandidate($inside);
+        $hidden->ritualSetting()->update(['visibility_scope' => 'hidden']);
+        $unwilling = $this->visibleCandidate($inside);
+        $unwilling->ritualSetting()->update(['visibility_scope' => 'participating_lodges']);
+        $unwilling->ritualProficiencies()->update(['willing_to_assist' => false]);
+        $foreign = $this->visibleCandidate($outside);
+        $foreign->ritualSetting()->update(['visibility_scope' => 'participating_lodges']);
+
+        $this->actingAs($user)->getJson("/lodges/{$requestLodge->id}/ritual-assistance?searched=1&audience=participating_lodges&group=southwest-indiana")
+            ->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $matching->id);
+        $this->assertNotSame($matching->id, $hidden->id);
+        $this->assertNotSame($matching->id, $unwilling->id);
+        $this->assertNotSame($matching->id, $foreign->id);
     }
 
     private function requester(): array

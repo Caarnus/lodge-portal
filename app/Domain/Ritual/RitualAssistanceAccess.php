@@ -5,6 +5,7 @@ namespace App\Domain\Ritual;
 use App\Enums\LodgeStatus;
 use App\Enums\RitualVisibilityScope;
 use App\Models\Lodge;
+use App\Models\LodgeGroup;
 use App\Models\Membership;
 use App\Models\Person;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class RitualAssistanceAccess
 {
@@ -112,6 +114,16 @@ class RitualAssistanceAccess
         }
         if (isset($filters['lodge'])) {
             $query->whereHas('memberships', fn (Builder $m) => $this->activeMembershipQuery($m)->where('lodge_id', $filters['lodge']));
+        }
+        if (filled($filters['group'] ?? null)) {
+            $groupId = LodgeGroup::query()->active()
+                ->where(fn (Builder $groups) => $groups->where('slug', $filters['group'])->orWhere('id', is_numeric($filters['group']) ? (int) $filters['group'] : 0))
+                ->value('id');
+            if (! $groupId) {
+                throw ValidationException::withMessages(['group' => 'Select an active lodge group.']);
+            }
+            $query->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships)
+                ->whereHas('lodge.lodgeGroups', fn (Builder $groups) => $groups->whereKey($groupId)));
         }
         if (isset($filters['day_of_week'])) {
             $query->whereHas('ritualAvailabilities', fn (Builder $a) => $a->where('is_enabled', true)->where('day_of_week', $filters['day_of_week'])->where('daypart', $filters['daypart']));

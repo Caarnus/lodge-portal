@@ -22,12 +22,14 @@ const props = defineProps<{
     searched: boolean;
     categories: any[];
     lodges: any[];
+    groups: any[];
 }>();
 const form = reactive({
     audience: props.filters.audience ?? "own_lodge",
     category: props.filters.category ?? "",
     part: props.filters.part ?? "",
     lodge: props.filters.lodge ?? "",
+    group: props.filters.group ?? "",
     day_of_week: props.filters.day_of_week ?? "",
     daypart: props.filters.daypart ?? "",
     query: props.filters.query ?? "",
@@ -61,6 +63,7 @@ const reset = () => {
         category: "",
         part: "",
         lodge: "",
+        group: "",
         day_of_week: "",
         daypart: "",
         query: "",
@@ -140,7 +143,8 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                 <p class="mt-1 text-sm text-muted-foreground">
                     Proficiency and availability are self-reported. A listed
                     member has not accepted an assignment; contact him
-                    separately.
+                    separately. Lodge groups only narrow these consented
+                    results and grant no assignment authority.
                 </p>
             </header>
             <form
@@ -200,6 +204,21 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                             :value="item.id"
                         >
                             {{ item.name }} · {{ item.number }}
+                        </option>
+                    </select></label
+                >
+                <label class="text-sm"
+                    >Lodge group<select
+                        v-model="form.group"
+                        class="mt-1 w-full rounded border bg-background p-2"
+                    >
+                        <option value="">Any active group</option>
+                        <option
+                            v-for="item in groups"
+                            :key="item.id"
+                            :value="item.slug"
+                        >
+                            {{ item.name }}
                         </option>
                     </select></label
                 >
