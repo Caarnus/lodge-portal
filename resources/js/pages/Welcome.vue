@@ -31,6 +31,7 @@ const page = usePage<SharedData>();
                     >
                         Lodges
                     </Link>
+                    <Link href="/events" class="rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted">Events</Link>
                     <AppearanceTabs compact />
                     <Link
                         :href="

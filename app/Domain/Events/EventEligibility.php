@@ -44,6 +44,15 @@ class EventEligibility
         return $this->qualifyingMembership($user, $event, true) !== null;
     }
 
+    public function isEligibleViewer(?User $user): bool
+    {
+        return $this->hasEligiblePerson($user)
+            && Membership::query()->where('person_id', $user->person_id)->whereNull('end_date')
+                ->whereHas('status', fn (Builder $query) => $query->where('key', 'active'))
+                ->whereHas('lodge', fn (Builder $query) => $query->where('status', LodgeStatus::Active))
+                ->exists();
+    }
+
     private function qualifyingMembership(User $user, Event $event, bool $forReservation): ?Membership
     {
         /** @var Builder<Membership> $membershipsQuery */

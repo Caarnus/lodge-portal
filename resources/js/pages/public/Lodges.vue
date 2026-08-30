@@ -42,7 +42,7 @@ const search = () => router.get("/lodges", filters.data(), { preserveState: true
     <main class="min-h-dvh bg-muted/30 px-5 py-8 text-foreground sm:py-12">
         <div class="mx-auto max-w-6xl">
             <header class="flex items-center justify-between gap-4">
-                <Link href="/" class="text-lg font-semibold">WorkingTools lodges</Link>
+                <div class="flex items-center gap-3"><Link href="/" class="text-lg font-semibold">WorkingTools lodges</Link><Link href="/events" class="text-sm underline">Events</Link></div>
                 <div class="flex items-center gap-3"><AppearanceTabs compact /><Link :href="page.props.auth.user ? route('dashboard') : route('login')" class="rounded-md border bg-background px-3 py-2 text-sm font-medium">{{ page.props.auth.user ? "Portal" : "Log in" }}</Link></div>
             </header>
             <section class="py-10 sm:py-14">
