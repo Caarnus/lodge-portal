@@ -46,6 +46,8 @@ use App\Http\Controllers\PublicEventReminderController;
 use App\Http\Controllers\PublicEventReservationController;
 use App\Http\Controllers\PublicEventVolunteerController;
 use App\Http\Controllers\PublicFamilyNewsletterRequestController;
+use App\Http\Controllers\PublicLodgeDirectoryController;
+use App\Http\Controllers\PublicLodgeGroupController;
 use App\Http\Controllers\PublicReminderUnsubscribeController;
 use App\Http\Controllers\PublicReservationCancellationController;
 use App\Http\Controllers\PublicWebsiteController;
@@ -98,6 +100,8 @@ Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->n
 });
 
 Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
+Route::get('lodges', [PublicLodgeDirectoryController::class, 'index'])->name('public.lodges.index');
+Route::get('groups/{slug}', [PublicLodgeGroupController::class, 'show'])->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->name('public.lodge-groups.show');
 Route::get('l/{lodge:slug}', [PublicWebsiteController::class, 'home'])->name('public.website.home');
 Route::get('l/{lodge:slug}/events', [PublicEventController::class, 'index'])->name('public.events.index');
 Route::get('l/{lodge:slug}/calendar.ics', [PublicEventCalendarController::class, 'feed'])->name('public.calendar.feed');

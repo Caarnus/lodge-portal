@@ -25,6 +25,12 @@ const page = usePage<SharedData>();
             <header class="flex items-center justify-between gap-4">
                 <p class="text-lg font-semibold">Lodge Directory</p>
                 <div class="flex items-center gap-3">
+                    <Link
+                        href="/lodges"
+                        class="rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+                    >
+                        Lodges
+                    </Link>
                     <AppearanceTabs compact />
                     <Link
                         :href="
