@@ -19,6 +19,7 @@ const form = useForm({
     physical_address: l.physical_address ?? "",
     mailing_address: l.mailing_address ?? "",
     meeting_location: l.meeting_location ?? "",
+    meeting_schedule: l.meeting_schedule ?? "",
     timezone: l.timezone ?? "America/Chicago",
     date_display_format: l.date_display_format ?? "day_month_year",
     public_email: l.public_email ?? "",
@@ -68,6 +69,7 @@ function submit() {
                     'physical_address',
                     'mailing_address',
                     'meeting_location',
+                    'meeting_schedule',
                     'timezone',
                     'public_email',
                     'public_phone',
@@ -82,6 +84,7 @@ function submit() {
                         ![
                             'mailing_address',
                             'meeting_location',
+                            'meeting_schedule',
                             'public_phone',
                         ].includes(f)
                     "

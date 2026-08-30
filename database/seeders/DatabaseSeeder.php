@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PeopleMembershipReferenceSeeder::class);
         $this->call(RitualReferenceSeeder::class);
         $this->call(EventReferenceSeeder::class);
+        $this->call(LodgeGroupTypeSeeder::class);
 
         foreach ([
             ['name' => 'Lodge A', 'number' => '101', 'slug' => 'lodge-a', 'city' => 'Evansville'],

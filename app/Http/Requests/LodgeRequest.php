@@ -29,6 +29,7 @@ class LodgeRequest extends FormRequest
             'physical_address' => 'required|string|max:255',
             'mailing_address' => 'nullable|string|max:255',
             'meeting_location' => 'nullable|string|max:255',
+            'meeting_schedule' => 'nullable|string|max:255',
             'timezone' => 'required|timezone',
             'public_email' => 'required|email',
             'public_phone' => 'nullable|string|max:40',

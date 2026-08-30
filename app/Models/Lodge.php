@@ -79,6 +79,11 @@ class Lodge extends Model
         return $this->hasMany(Event::class);
     }
 
+    public function lodgeGroups()
+    {
+        return $this->belongsToMany(LodgeGroup::class, 'lodge_group_memberships')->withPivot('created_by')->withTimestamps();
+    }
+
     public function eventOccurrences()
     {
         return $this->hasMany(EventOccurrence::class);
