@@ -19,7 +19,7 @@ class PublicEventCalendarController extends Controller
     {
         abort_unless($lodge->status === LodgeStatus::Active && $occurrence->lodge_id === $lodge->id, 404);
         $occurrence->load('event');
-        abort_unless($occurrence->status === EventOccurrenceStatus::Scheduled && $occurrence->event->status === EventStatus::Published && ($occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event)), 404);
+        abort_unless($occurrence->status === EventOccurrenceStatus::Scheduled && $occurrence->event->status === EventStatus::Published && $eligibility->canView($request->user(), $occurrence->event), 404);
 
         return response($calendar->build([$occurrence]), 200, ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => 'attachment; filename="event.ics"']);
     }
@@ -34,7 +34,7 @@ class PublicEventCalendarController extends Controller
 
     public function series(Request $request, Lodge $lodge, Event $event, EventEligibility $eligibility, ICalendarBuilder $calendar)
     {
-        abort_unless($lodge->status === LodgeStatus::Active && $event->lodge_id === $lodge->id && $event->rrule !== null && $event->status === EventStatus::Published && ($event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $event)), 404);
+        abort_unless($lodge->status === LodgeStatus::Active && $event->lodge_id === $lodge->id && $event->rrule !== null && $event->status === EventStatus::Published && $eligibility->canView($request->user(), $event), 404);
 
         return response($calendar->buildSeries($event), 200, ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => 'attachment; filename="event-series.ics"']);
     }

@@ -4,7 +4,6 @@ namespace App\Domain\Events;
 
 use App\Enums\EventQualification;
 use App\Enums\EventStatus;
-use App\Enums\LodgeStatus;
 use App\Models\Event;
 use App\Models\Membership;
 use App\Models\User;
@@ -12,9 +11,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class VolunteerEligibility
 {
+    public function __construct(private readonly EventEligibility $eventEligibility)
+    {
+    }
+
     public function canVolunteer(?User $user, Event $event): bool
     {
-        if (!$user || !$user->person_id || !$user->email_verified_at || $user->approval_status !== 'approved' || $event->status !== EventStatus::Published || $event->lodge?->status !== LodgeStatus::Active) {
+        if (!$user || !$user->person_id || !$user->email_verified_at || $user->approval_status !== 'approved' || $event->status !== EventStatus::Published || !$this->eventEligibility->canView($user, $event)) {
             return false;
         }
         $person = $user->person;

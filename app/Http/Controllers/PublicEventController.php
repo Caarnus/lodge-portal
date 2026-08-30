@@ -7,7 +7,6 @@ use App\Domain\Events\EventOccurrenceMaterializer;
 use App\Domain\Events\VolunteerEligibility;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventStatus;
-use App\Enums\EventVisibility;
 use App\Enums\LodgeStatus;
 use App\Models\Event;
 use App\Models\EventOccurrence;
@@ -39,7 +38,7 @@ class PublicEventController extends Controller
         $occurrences = EventOccurrence::query()->with(['event.category', 'event.coverMediaAsset'])
             ->where('lodge_id', $lodge->id)->where('status', EventOccurrenceStatus::Scheduled)
             ->whereBetween('starts_at', [$now, $through])->whereHas('event', fn ($query) => $query->where('status', EventStatus::Published))
-            ->orderBy('starts_at')->get()->filter(fn (EventOccurrence $occurrence) => $occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event))
+            ->orderBy('starts_at')->get()->filter(fn (EventOccurrence $occurrence) => $eligibility->canView($request->user(), $occurrence->event))
             ->take(20)->values();
 
         return Inertia::render('public/Events', [
@@ -57,7 +56,7 @@ class PublicEventController extends Controller
         abort_unless($occurrence->lodge_id === $lodge->id, 404);
         $occurrence->load(['event.category', 'event.coverMediaAsset', 'event.reservationFields']);
         abort_unless($occurrence->status === EventOccurrenceStatus::Scheduled && $occurrence->event->status === EventStatus::Published, 404);
-        abort_unless($occurrence->event->visibility === EventVisibility::Public || $eligibility->canView($request->user(), $occurrence->event), 404);
+        abort_unless($eligibility->canView($request->user(), $occurrence->event), 404);
 
         $props = [
             'lodge' => $lodge,
