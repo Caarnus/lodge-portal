@@ -21,6 +21,7 @@ interface Props {
         } | null;
         degree: string | null;
         profile_photo_url: string | null;
+        affiliations: Array<{ id: number; name: string; number: string; slug: string }>;
     };
 }
 const props = defineProps<Props>();
@@ -60,6 +61,18 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                 </div>
                 <dl class="mt-6 space-y-4 text-sm">
+                    <div v-if="audience === 'participating_lodges' && person.affiliations.length">
+                        <dt class="font-medium">WorkingTools lodges</dt>
+                        <dd class="mt-1 flex flex-wrap gap-1">
+                            <span
+                                v-for="affiliation in person.affiliations"
+                                :key="affiliation.id"
+                                class="rounded-full border px-2 py-0.5 text-xs"
+                            >
+                                {{ affiliation.name }} No. {{ affiliation.number }}
+                            </span>
+                        </dd>
+                    </div>
                     <div v-if="person.email">
                         <dt class="font-medium">Email</dt>
                         <dd>{{ person.email }}</dd>

@@ -15,10 +15,14 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DirectoryAccess
 {
-    public function canBrowse(User $user, Lodge $lodge): bool
+    public function canBrowse(User $user, Lodge $lodge, DirectoryAudience $audience = DirectoryAudience::OwnLodge): bool
     {
         if ($lodge->status !== LodgeStatus::Active || $user->approval_status !== 'approved' || !$user->hasVerifiedEmail()) {
             return false;
+        }
+
+        if ($audience === DirectoryAudience::ParticipatingLodges && $user->is_platform_admin) {
+            return true;
         }
 
         $person = $user->person;
@@ -32,7 +36,7 @@ class DirectoryAccess
 
     public function canView(User $user, Lodge $lodge, Person $person, DirectoryAudience $audience): bool
     {
-        return $this->canBrowse($user, $lodge)
+        return $this->canBrowse($user, $lodge, $audience)
             && $this->visibleQuery($lodge, $audience)->whereKey($person->id)->exists();
     }
 
@@ -75,6 +79,7 @@ class DirectoryAccess
         DirectoryAudience $audience,
         ?string           $query = null,
         ?int              $degreeId = null,
+        ?string           $group = null,
         int               $perPage = 25,
     ): LengthAwarePaginator
     {
@@ -87,6 +92,9 @@ class DirectoryAccess
         }
         if ($degreeId) {
             $this->applyDegreeFilter($people, $lodge, $audience, $degreeId);
+        }
+        if ($audience === DirectoryAudience::ParticipatingLodges && filled($group)) {
+            $this->applyGroupFilter($people, $group);
         }
 
         return $people->orderByRaw("LOWER(COALESCE(legal_last_name, name, ''))")
@@ -122,6 +130,14 @@ class DirectoryAccess
             && $person->profile_photo_derivative_path
                 ? route('lodges.directory.photo', ['lodge' => $lodge, 'person' => $person, 'audience' => $audience->value])
                 : null,
+            'affiliations' => $audience === DirectoryAudience::ParticipatingLodges
+                ? $person->memberships->map(fn (Membership $membership) => [
+                    'id' => $membership->lodge->id,
+                    'name' => $membership->lodge->name,
+                    'number' => $membership->lodge->number,
+                    'slug' => $membership->lodge->slug,
+                ])->values()->all()
+                : [],
         ];
     }
 
@@ -149,7 +165,7 @@ class DirectoryAccess
                 $this->activeMembershipQuery(
                     $memberships,
                     $audience === DirectoryAudience::OwnLodge ? $lodge : null,
-                )->with('degree');
+                )->with(['degree', 'lodge:id,name,number,slug']);
             },
         ]);
     }
@@ -190,6 +206,18 @@ class DirectoryAccess
         }
 
         $people->where($this->highestActiveDegreeIdQuery(), '=', $degreeId);
+    }
+
+    private function applyGroupFilter(Builder $people, string $group): void
+    {
+        $groupId = \App\Models\LodgeGroup::query()->active()
+            ->where(fn (Builder $groups) => $groups->where('slug', $group)->orWhere('id', is_numeric($group) ? (int) $group : 0))
+            ->value('id');
+        if (! $groupId) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['group' => 'Select an active lodge group.']);
+        }
+        $people->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships)
+            ->whereHas('lodge.lodgeGroups', fn (Builder $groups) => $groups->whereKey($groupId)));
     }
 
     private function highestActiveDegreeIdQuery(): Builder

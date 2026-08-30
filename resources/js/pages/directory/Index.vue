@@ -23,6 +23,7 @@ interface Person {
     } | null;
     degree: string | null;
     profile_photo_url: string | null;
+    affiliations: Array<{ id: number; name: string; number: string; slug: string }>;
 }
 
 interface Props {
@@ -39,14 +40,17 @@ interface Props {
         audience: "own_lodge" | "participating_lodges";
         query: string;
         degree: number | null;
+        group: string;
     };
     degrees: Array<{ id: number; name: string }>;
+    groups: Array<{ id: number; name: string; slug: string }>;
 }
 
 const props = defineProps<Props>();
 const query = ref(props.filters.query);
 const audience = ref(props.filters.audience);
 const degree = ref(props.filters.degree ? String(props.filters.degree) : "");
+const group = ref(props.filters.group);
 let debounce: ReturnType<typeof setTimeout> | undefined;
 const breadcrumbs: BreadcrumbItem[] = [
     { title: "Directory", href: `/lodges/${props.lodge.id}/directory` },
@@ -63,13 +67,14 @@ const visit = (page?: number) => {
             audience: audience.value,
             query: query.value || undefined,
             degree: degree.value || undefined,
+            group: audience.value === "participating_lodges" ? group.value || undefined : undefined,
             page,
         },
         { preserveState: true, preserveScroll: true, replace: true },
     );
 };
 
-watch([query, audience, degree], () => {
+watch([query, audience, degree, group], () => {
     clearTimeout(debounce);
     debounce = setTimeout(() => visit(), 300);
 });
@@ -85,7 +90,7 @@ watch([query, audience, degree], () => {
             />
 
             <form
-                class="grid gap-4 rounded-lg border p-4 md:grid-cols-[minmax(0,1fr)_13rem_13rem]"
+                class="grid gap-4 rounded-lg border p-4 md:grid-cols-[minmax(0,1fr)_13rem_13rem_13rem]"
                 @submit.prevent="visit()"
             >
                 <div class="grid gap-2">
@@ -96,6 +101,26 @@ watch([query, audience, degree], () => {
                         autocomplete="off"
                         placeholder="Name, shared email, or shared phone"
                     />
+                </div>
+                <div
+                    v-if="audience === 'participating_lodges'"
+                    class="grid gap-2"
+                >
+                    <Label for="directory-group">Lodge group</Label
+                    ><select
+                        id="directory-group"
+                        v-model="group"
+                        class="h-9 rounded-md border bg-background px-3 text-sm"
+                    >
+                        <option value="">All active groups</option>
+                        <option
+                            v-for="item in groups"
+                            :key="item.id"
+                            :value="item.slug"
+                        >
+                            {{ item.name }}
+                        </option>
+                    </select>
                 </div>
                 <div class="grid gap-2">
                     <Label for="directory-audience">Audience</Label
@@ -178,6 +203,18 @@ watch([query, audience, degree], () => {
                         </div>
                     </div>
                     <dl class="mt-4 space-y-2 text-sm">
+                        <div v-if="audience === 'participating_lodges' && person.affiliations.length">
+                            <dt class="font-medium">WorkingTools lodges</dt>
+                            <dd class="mt-1 flex flex-wrap gap-1">
+                                <span
+                                    v-for="affiliation in person.affiliations"
+                                    :key="affiliation.id"
+                                    class="rounded-full border px-2 py-0.5 text-xs"
+                                >
+                                    {{ affiliation.name }} No. {{ affiliation.number }}
+                                </span>
+                            </dd>
+                        </div>
                         <div v-if="person.email">
                             <dt class="sr-only">Email</dt>
                             <dd>{{ person.email }}</dd>

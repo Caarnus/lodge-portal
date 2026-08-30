@@ -6,6 +6,7 @@ use App\Domain\Directory\DirectoryAccess;
 use App\Enums\DirectoryAudience;
 use App\Http\Requests\DirectoryIndexRequest;
 use App\Models\Lodge;
+use App\Models\LodgeGroup;
 use App\Models\MasonicDegree;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -16,13 +17,14 @@ class DirectoryController extends Controller
 {
     public function index(DirectoryIndexRequest $request, Lodge $lodge, DirectoryAccess $directory)
     {
-        abort_unless($directory->canBrowse($request->user(), $lodge), 403);
         $audience = DirectoryAudience::tryFrom($request->input('audience')) ?? DirectoryAudience::OwnLodge;
+        abort_unless($directory->canBrowse($request->user(), $lodge, $audience), 403);
         $people = $directory->search(
             $lodge,
             $audience,
             $request->input('query'),
             $request->integer('degree') ?: null,
+            $request->input('group'),
         )->withQueryString();
 
         return Inertia::render('directory/Index', [
@@ -32,15 +34,19 @@ class DirectoryController extends Controller
                 'audience' => $audience->value,
                 'query' => $request->input('query', ''),
                 'degree' => $request->integer('degree') ?: null,
+                'group' => $request->input('group', ''),
             ],
             'degrees' => MasonicDegree::query()->where('is_active', true)->orderBy('sort_order')->get(['id', 'name']),
+            'groups' => $audience === DirectoryAudience::ParticipatingLodges
+                ? LodgeGroup::query()->active()->orderBy('name')->get(['id', 'name', 'slug'])
+                : [],
         ])->toResponse($request)->header('Cache-Control', 'private, no-store');
     }
 
     public function show(Request $request, Lodge $lodge, Person $person, DirectoryAccess $directory)
     {
-        abort_unless($directory->canBrowse($request->user(), $lodge), 403);
         $audience = DirectoryAudience::tryFrom($request->query('audience')) ?? DirectoryAudience::OwnLodge;
+        abort_unless($directory->canBrowse($request->user(), $lodge, $audience), 403);
         $visible = $directory->findVisible($lodge, $person, $audience);
         abort_unless($visible, 404);
 
@@ -53,8 +59,8 @@ class DirectoryController extends Controller
 
     public function photo(Request $request, Lodge $lodge, Person $person, DirectoryAccess $directory)
     {
-        abort_unless($directory->canBrowse($request->user(), $lodge), 403);
         $audience = DirectoryAudience::tryFrom($request->query('audience')) ?? DirectoryAudience::OwnLodge;
+        abort_unless($directory->canBrowse($request->user(), $lodge, $audience), 403);
         $visible = $directory->findVisible($lodge, $person, $audience);
         abort_unless(
             $visible && $visible->directoryPrivacySetting?->show_profile_photo

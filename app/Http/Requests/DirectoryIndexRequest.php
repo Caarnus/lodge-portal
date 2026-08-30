@@ -14,6 +14,7 @@ class DirectoryIndexRequest extends FormRequest
             'audience' => ['nullable', Rule::enum(DirectoryAudience::class)],
             'query' => ['nullable', 'string', 'max:100'],
             'degree' => ['nullable', 'integer', 'exists:masonic_degrees,id'],
+            'group' => ['nullable', 'string', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
