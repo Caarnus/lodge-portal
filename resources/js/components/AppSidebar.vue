@@ -25,6 +25,7 @@ import {
     HandHelping,
     Settings,
     Tags,
+    Network,
     UserCog,
     Users,
 } from "lucide-vue-next";
@@ -61,6 +62,11 @@ const platformNavItems = computed<NavItem[]>(() => {
             title: "Event Categories",
             href: "/platform/event-categories",
             icon: Tags,
+        });
+        items.push({
+            title: "Lodge groups",
+            href: "/platform/lodge-groups",
+            icon: Network,
         });
         items.push({
             title: "Ritual Reference",
