@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\WebsitePageStatus;
 use App\Models\Lodge;
 use App\Models\MediaAsset;
 use App\Models\PastMasterTerm;
@@ -164,6 +165,41 @@ class PublicWebsiteTest extends TestCase
         $this->actingAs($manager)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/publish")->assertForbidden();
         $this->actingAs($publisher)->post("/lodges/{$lodge->id}/website/pages/{$page->id}/publish")->assertRedirect();
         $this->actingAs($publisher)->get("/lodges/{$lodge->id}/website")->assertForbidden();
+    }
+
+    public function test_saving_navigation_updates_published_navigation_without_creating_page_drafts(): void
+    {
+        $lodge = Lodge::factory()->create();
+        $admin = $this->userFor($lodge, ['website.manage', 'website.publish']);
+        $home = $this->createPage($lodge, $admin);
+        $about = $this->createPage($lodge, $admin, [
+            'title' => 'About',
+            'slug' => 'about',
+            'is_home' => false,
+            'navigation_order' => 10,
+        ]);
+
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$home->id}/publish")->assertRedirect();
+        $this->actingAs($admin)->post("/lodges/{$lodge->id}/website/pages/{$about->id}/publish")->assertRedirect();
+
+        $this->assertSame(0, WebsitePageVersion::query()
+            ->whereIn('website_page_id', [$home->id, $about->id])
+            ->where('status', WebsitePageStatus::Draft)
+            ->count());
+
+        $this->actingAs($admin)->put("/lodges/{$lodge->id}/website/pages/navigation", [
+            'pages' => [
+                ['id' => $home->id, 'navigation_parent_page_id' => null, 'navigation_order' => 10],
+                ['id' => $about->id, 'navigation_parent_page_id' => null, 'navigation_order' => 0],
+            ],
+        ])->assertRedirect();
+
+        $this->assertSame(0, WebsitePageVersion::query()
+            ->whereIn('website_page_id', [$home->id, $about->id])
+            ->where('status', WebsitePageStatus::Draft)
+            ->count());
+        $this->assertSame(10, $home->fresh()->published()->value('navigation_order'));
+        $this->assertSame(0, $about->fresh()->published()->value('navigation_order'));
     }
 
     public function test_rich_text_is_sanitized_and_custom_html_is_platform_only(): void
