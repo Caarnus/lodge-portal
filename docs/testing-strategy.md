@@ -73,3 +73,22 @@ Feature coverage exercises Lodge A/B/C plus a disabled lodge: requester permissi
 ## Regional discovery and group coverage
 
 Feature tests cover group type/group activation, archive and restore, overlapping lodge membership, and audit history. Discovery fixtures combine active and disabled lodges, public and protected events, hidden directory subjects, and inactive or archived groups. They prove a group filter can only narrow results; it must not override public-event, event-eligibility, directory-privacy, ritual-consent, active-membership, or active-lodge predicates. Cross-lodge result sets remain deduplicated and only expose their documented safe projections. Query-plan reviews cover the regional occurrence, active lodge, and active membership indexes.
+
+## Optional-module coverage
+
+Every optional module uses the centralized module-state test contract in addition to its domain tests. Fixtures include Lodges A and B, users with and without `lodge_modules.manage`, users with module-specific permissions only, and all combinations of platform availability and lodge enabled preference.
+
+Required cases prove:
+
+- effective enabled state requires both availability and lodge preference;
+- platform-unavailable and lodge-disabled requests fail server-side;
+- module-specific permission does not bypass state, and state does not grant permission;
+- Lodge A state and permissions cannot read or change Lodge B through route, API, payload, or direct identifiers;
+- navigation/UI filtering agrees with server results but is not the only enforcement;
+- direct public and administrative URLs and APIs are denied while ineffective;
+- jobs reload state before work and stop safely when ineffective;
+- cache reads, invalidation, search indexing/results, downloads, public projections, and feature-backed CMS sections fail closed where applicable;
+- disablement and availability revocation preserve module records and the lodge preference; and
+- re-enablement restores only normally authorized and published access to preserved data.
+
+Phase 10 validates the generic service with non-user-facing test fixtures. Phases 11–14 repeat the contract with Scholarship, Store, Fundraisers, and Games records and add their domain-specific regression cases.

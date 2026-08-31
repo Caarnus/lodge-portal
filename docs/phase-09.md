@@ -4,13 +4,15 @@
 
 WorkingTools gains a public lodge directory, a public and member-aware aggregated event calendar, configurable overlapping lodge groups, group landing pages, and group filters for existing member-directory and ritual-assistance discovery.
 
+Phase 9 is implemented in development. The specification below records the implemented slice and its locked contracts; Phase 10 is the next planned phase.
+
 Groups organize and narrow results. They never grant visibility, membership, event eligibility, directory consent, ritual consent, reservation rights, reminder rights, lodge administration, or access to tenant-owned records.
 
 Phase 9 also replaces remaining user-facing “Participating lodges” language with “WorkingTools lodges,” while retaining existing internal enum and API values where renaming would add migration risk.
 
 ## Repository Baseline and Scope
 
-Implementation starts after Phases 1–8:
+Implementation was based on the completed Phase 1–8 development baseline:
 
 - `Lodge` is tenant-owned identity/configuration with active, disabled, and disabled-and-locked lifecycle states.
 - Public lodge sites resolve through `/l/{lodge-slug}` and expose only published content from active lodges.
@@ -22,7 +24,7 @@ Implementation starts after Phases 1–8:
 - Ritual-assistance results already expose active hosted-lodge affiliations after explicit ritual consent.
 - PostgreSQL is production storage; Redis supports ordinary cache, queue, and rate-limit infrastructure.
 
-Before implementation, run existing Phase 1–8 backend/frontend gates. Treat failures as prerequisite defects. Do not weaken earlier privacy, tenancy, recurrence, reservation, reminder, or ritual tests to make aggregation pass.
+Phase 9 validation includes the Phase 1–8 backend/frontend gates. Earlier privacy, tenancy, recurrence, reservation, reminder, and ritual tests remain authoritative regression contracts.
 
 ## Locked Product Decisions
 

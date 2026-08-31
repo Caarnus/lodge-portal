@@ -58,7 +58,9 @@ Move secondary details to a modal instead of forcing all fields into one row.
   preserve the active route with `aria-current`, and allow the row to scroll horizontally
   on phones.
 - Use `WorkspaceTabs` when the available tabs depend on lodge permissions; it applies the
-  same `TabBar` presentation after filtering inaccessible routes.
+  same `TabBar` presentation after filtering inaccessible routes. Optional-module tabs
+  must also be omitted unless the module is effectively enabled; the server remains the
+  enforcement boundary.
 - Use shared `Collapsible`, `CollapsibleTrigger`, and `CollapsibleContent` primitives to
   shorten long pages with repeated or optional sections. Keep the first or most relevant
   section open by default.
@@ -99,6 +101,24 @@ Use this structure, in order:
   is unavailable.
 - Keep order totals in a semantic summary surface and explain pickup, shipping, digital
   delivery, or other fulfillment before checkout.
+- Store administration uses the established table-at-`md`/card-below-`md` pattern. Phone
+  product and order cards keep a distinct bottom-right action row; dialogs use the shared
+  scrollable create/view/edit pattern.
+- Order summaries visibly identify total, manual payment method/status, fulfillment
+  method/status, and the customer/fulfillment snapshot required to complete the order.
+- Fundraising progress exposes a visible numeric amount or percentage and accessible
+  current/max semantics. Bar length or color alone never communicates progress.
+
+### Optional-module settings
+
+- Platform administration labels platform availability, lodge enabled preference, and
+  derived effective status separately. Revoking availability must not imply that the
+  lodge preference or module data is deleted.
+- Lodge administration permits toggling only available modules and only for users with
+  the lodge module-setting permission. Show unavailable modules as unavailable, not as
+  enabled-looking controls that fail after interaction.
+- Module settings never substitute for module-data permissions, and module enablement
+  never automatically creates a public page, CMS section, or navigation entry.
 
 ### Filters
 

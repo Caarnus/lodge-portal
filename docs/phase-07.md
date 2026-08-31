@@ -858,5 +858,5 @@ Phase 7 is complete only when:
 - Postal-vendor integration, postage purchase, label-printer drivers, returned-mail processing, household deduplication, or address verification service.
 - Photo comments, reactions, tagging people, face recognition, downloads of originals by ordinary viewers, video, GIF, RAW/DNG, SVG, or interactive image editing.
 - Cross-lodge gallery contribution or platform-curated regional gallery aggregation.
-- Legacy Newburgh import. Phase 7 preserves stable lodge ownership, content/version, recipient, and media metadata needed for Phase 12 migration.
+- Legacy Newburgh import. Phase 7 preserves stable lodge ownership, content/version, recipient, and media metadata needed for Phase 15 migration.
 - Ritualist taxonomy or implementation; that belongs to Phase 8.

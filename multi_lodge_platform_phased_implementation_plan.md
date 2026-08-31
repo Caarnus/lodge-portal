@@ -1,7 +1,7 @@
 # Multi-Lodge Masonic Platform
 ## Phased Implementation Plan
 
-**Status:** Implementation in progress — Phases 1–8 implemented in development; Phase 9 is the next planned phase.
+**Status:** Implementation in progress — Phases 1–9 implemented in development; Phase 10 is the next planned phase.
 **Initial target region:** Southwest Indiana  
 **Initial migration target:** Newburgh Lodge No. 174  
 **Implementation approach:** Clean-slate application rewrite  
@@ -17,7 +17,7 @@ This document defines a phased implementation plan for a new multi-lodge Masonic
 The platform is intended to:
 
 - Host public-facing websites for multiple lodges.
-- Give each lodge control over its own branding, content, officers, events, and enabled features.
+- Give each lodge control over its own branding, content, officers, events, and enabled preferences for optional modules made available by the platform.
 - Support a single person/user identity across multiple lodges.
 - Strictly isolate lodge-owned private data.
 - Allow selected information and features to be shared across active WorkingTools lodges according to explicit resource visibility and member privacy rules.
@@ -99,9 +99,13 @@ For this plan:
 - A **lodge group** is a configurable collection of WorkingTools lodges used for organization, aggregation, and filtering, such as a district, county, geographic region, or informal association.
 - Membership in a lodge group does not grant access to otherwise hidden lodge, event, member, or ritual data. Existing visibility, privacy, eligibility, and authorization rules remain authoritative.
 - A lodge may belong to multiple groups simultaneously.
-- Because Phases 1–8 are already implemented in development, this terminology clarification does not by itself require renaming existing database values, API fields, routes, or code symbols that use older "participating" terminology when their behavior already matches these rules. User-facing labels and future documentation should use the WorkingTools terminology; internal renames may be handled separately when they are worth the migration risk.
+- Because Phases 1–9 are already implemented in development, terminology clarifications do not by themselves require renaming existing database values, API fields, routes, or code symbols when behavior already matches these rules. User-facing labels and future documentation should use the WorkingTools terminology; internal renames may be handled separately when they are worth the migration risk.
 
-## 2.7 Testability Is a Phase Requirement
+## 2.7 Optional Lodge Modules
+
+Only Scholarship, Store, Fundraisers, and Games are optional lodge modules. Platform availability, the lodge enabled preference, effective state, authorization, and CMS publication are separate concepts. Effective state is `platform availability AND lodge enabled preference`; it never grants authorization. Website/CMS, People, Events, Volunteer staffing, member portal/directory, Newsletters, Galleries, Ritualist Program, and Lodge groups/regional discovery remain baseline platform capabilities.
+
+## 2.8 Testability Is a Phase Requirement
 
 Every phase must end with:
 
@@ -134,16 +138,19 @@ Platform
 │   │   └── Volunteer Staffing / Commitments
 │   ├── Newsletters
 │   ├── Galleries
-│   ├── Scholarships
 │   ├── Ritualist Program
 │   └── Lodge-Specific Administration
+├── Optional Lodge Modules
+│   ├── Scholarships
+│   ├── Store / Orders
+│   ├── Fundraising Campaigns
+│   └── Games / Trivia
 ├── Regional / Shared Features
 │   ├── Lodge Groups
 │   ├── Lodge Directory
 │   ├── Shared Event Discovery
 │   ├── Cross-Lodge Member Directory
-│   ├── Shared Ritual Proficiency Discovery
-│   └── Games / Trivia
+│   └── Shared Ritual Proficiency Discovery
 └── Platform Administration
 ```
 
@@ -151,21 +158,24 @@ Platform
 
 # 4. Phase Summary
 
-| Phase | Complete Slice | Primary Outcome |
-|---|---|---|
-| 1 | Platform Foundation and Lodge Provisioning | A platform administrator can create lodges and lodge admins can sign in and manage basic lodge identity. |
-| 2 | Public Lodge Website and Content Management | Each lodge can independently publish and manage a branded public website. |
-| 3 | People, Membership, and Lodge Administration | Lodges can maintain member records, accounts, roles, officers, and family relationships. |
-| 4 | Events, Recurrence, Reservations, and Reminders | Lodges can manage calendars, recurring events, occurrence exceptions, limited-capacity reservations, reminder subscriptions, and email reminders. |
-| 5 | Volunteer Staffing and Commitments | Lodges can define event volunteer positions, members can make explicit volunteer commitments, and authorized managers can track staffing needs, rosters, and volunteer-specific reminders without conflating them with attendance reservations or reminder subscriptions. |
-| 6 | Member Portal and Directory Privacy | Members can manage their profile and control own-lodge versus cross-lodge directory visibility. |
-| 7 | Newsletters, Galleries, and Lodge Communications | Lodges can publish newsletters, photo galleries, and member/public communications. |
-| 8 | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into cross-lodge ritual-assistance discovery. |
-| 9 | Lodge Groups and Regional Discovery | WorkingTools lodges can be organized into overlapping districts, counties, regions, and informal groups, and users can browse/filter already-authorized lodge, event, member, and ritual data across the platform. |
-| 10 | Scholarship Management | Each lodge can securely run independent scholarship cycles and reviews. |
-| 11 | Games and Shared Content | Lodges can run shared or private Masonic trivia/game content and sessions. |
-| 12 | Newburgh Migration and Production Cutover | Existing Newburgh Lodge data is migrated, validated, and the new platform replaces the existing application. |
-| 13 | Regional Lodge Onboarding and Operational Hardening | Additional Southwest Indiana lodges can be onboarded without developer intervention for normal setup tasks. |
+| Phase | Status | Complete Slice | Primary Outcome |
+|---|---|---|---|
+| 1 | Implemented in development | Platform Foundation and Lodge Provisioning | A platform administrator can create lodges and lodge admins can sign in and manage basic lodge identity. |
+| 2 | Implemented in development | Public Lodge Website and Content Management | Each lodge can independently publish and manage a branded public website. |
+| 3 | Implemented in development | People, Membership, and Lodge Administration | Lodges can maintain member records, accounts, roles, officers, and family relationships. |
+| 4 | Implemented in development | Events, Recurrence, Reservations, and Reminders | Lodges can manage calendars, recurring events, occurrence exceptions, limited-capacity reservations, reminder subscriptions, and email reminders. |
+| 5 | Implemented in development | Volunteer Staffing and Commitments | Lodges can define event volunteer positions, members can make explicit volunteer commitments, and authorized managers can track staffing needs, rosters, and volunteer-specific reminders without conflating them with attendance reservations or reminder subscriptions. |
+| 6 | Implemented in development | Member Portal and Directory Privacy | Members can manage their profile and control own-lodge versus cross-lodge directory visibility. |
+| 7 | Implemented in development | Newsletters, Galleries, and Lodge Communications | Lodges can publish newsletters, photo galleries, and member/public communications. |
+| 8 | Implemented in development | Ritualist Program | Brothers can self-report ritual proficiency, track pin-program points and learning progress, maintain broad availability, and opt into cross-lodge ritual-assistance discovery. |
+| 9 | Implemented in development | Lodge Groups and Regional Discovery | WorkingTools lodges can be organized into overlapping districts, counties, regions, and informal groups, and users can browse/filter already-authorized lodge, event, member, and ritual data across the platform. |
+| 10 | Next planned | Optional Lodge Module Gating | Platform availability and lodge enabled preference form one reusable, audited, server-enforced module-state contract. |
+| 11 | Planned | Scholarship Management | Each lodge can securely run independent scholarship cycles and reviews when Scholarship is effectively enabled. |
+| 12 | Planned | Store and Order Management | Lodges can manage products, variants, inventory, carts, and offline/manual-payment orders. |
+| 13 | Planned | Fundraising Campaigns | Lodges can publish accessible, manually maintained fundraising progress and optionally associate Store products. |
+| 14 | Planned | Games and Shared Content | Lodges can run shared or private Masonic trivia/game content and sessions when Games is effectively enabled. |
+| 15 | Planned | Newburgh Migration and Production Cutover | Existing Newburgh Lodge data is transformed, validated, and the new platform replaces the legacy application. |
+| 16 | Planned | Regional Lodge Onboarding and Operational Hardening | Additional Southwest Indiana lodges can be onboarded without developer intervention for normal setup tasks. |
 
 ---
 
@@ -200,8 +210,7 @@ A platform administrator must be able to:
 - Set a lodge to active, disabled, or disabled-and-locked status.
 - Reactivate a disabled lodge as permitted by the lodge-status rules.
 - Assign at least one lodge administrator.
-- View enabled features for a lodge.
-- Enable or disable feature flags that exist in the current release.
+- View and assign the platform-defined feature foundation available in Phase 1. Phase 10 retrofits that foundation into distinct platform module availability and lodge enabled preference; Phase 1 did not provide lodge self-service module toggles.
 
 ### Lodge Identity
 
@@ -1493,7 +1502,7 @@ This phase does not include:
 
 ## 13.1 Goal
 
-Add a regional and cross-lodge discovery layer on top of the visibility, privacy, eligibility, and authorization rules already implemented in Phases 1–8.
+Phase 9 added a regional and cross-lodge discovery layer on top of the visibility, privacy, eligibility, and authorization rules established by Phases 1–8.
 
 This phase does not make cross-lodge access possible for the first time. Instead, it makes the existing cross-lodge capabilities easier to discover and use by:
 
@@ -1505,7 +1514,7 @@ This phase does not make cross-lodge access possible for the first time. Instead
 
 ## 13.2 Assumptions
 
-- Phases 1–8 are already implemented in development.
+- The Phase 9 implementation began from the completed Phase 1–8 development baseline; Phases 1–9 are now implemented in development.
 - A **WorkingTools lodge** is a lodge hosted as a tenant on the WorkingTools platform. There is no separate "participating lodge" opt-in state for ordinary cross-lodge functionality.
 - Existing Phase 4 event visibility and eligibility rules remain authoritative.
 - Existing Phase 6 member directory privacy rules remain authoritative.
@@ -1723,25 +1732,60 @@ This phase does not include:
 
 ---
 
-# 14. Phase 10 — Scholarship Management
+# 14. Phase 10 — Optional Lodge Module Gating
 
 ## 14.1 Goal
 
+Retrofit Phase 1's platform feature-assignment foundation into one generic optional-module contract before Scholarship is implemented. A platform administrator grants or revokes module availability for a lodge; an authorized lodge administrator controls that lodge's enabled preference only while available. Effective state is `platform availability AND lodge enabled preference` and remains independent from authorization and CMS publication.
+
+## 14.2 Scope
+
+Only Scholarship, Store, Fundraisers, and Games use this mechanism. Phase 10 does not add their production definitions or placeholder workspaces. Use test fixtures or another non-user-facing means to validate the generic mechanism; each module phase adds its definition and domain regression coverage.
+
+The domain and UI distinguish module definition, platform availability, lodge enabled preference, derived effective state, and authorization. Revoking availability preserves the lodge preference. Disabling or revoking availability never deletes module data.
+
+## 14.3 Required Slice
+
+- Platform-owned stable module definitions and per-lodge platform availability.
+- A separate persisted lodge enabled preference and centralized effective-state resolver.
+- Platform administration UI for availability, with lodge preference and effective status shown read-only.
+- Lodge administration UI for available-module toggles; unavailable modules are labeled unavailable.
+- Platform-defined `lodge_modules.manage` permission for the preference operation in the explicit lodge.
+- Server enforcement for routes/APIs/services, navigation, public projections, module-backed CMS sections, jobs, search, cache, and downloads.
+- Audit records for platform availability and lodge preference transitions.
+- Data/preference preservation and state-aware cache/index invalidation.
+- Cross-lodge and direct-identifier negative tests.
+
+Authorization is always additional: state grants no permission, and a module permission cannot bypass ineffective state. Module-specific managers/reviewers cannot toggle the module unless separately granted `lodge_modules.manage`. Jobs reload lodge and state at execution. Published module-backed sections fail closed without deleting the page/section.
+
+## 14.4 Acceptance and Tests
+
+Prove that a platform administrator makes a test module available to Lodge A but not Lodge B; Lodge A's authorized administrator can enable/disable it; Lodge B cannot; Lodge A cannot manipulate Lodge B by changing identifiers; direct routes/APIs/jobs/cache/search/public projections fail while ineffective; data survives disablement; and re-enablement restores normally authorized access. Availability revocation must preserve the lodge preference and audit every transition.
+
+The independently implementable specification is [Phase 10](docs/phase-10.md), and the governing decision is [ADR 0009](docs/decisions/0009-optional-lodge-module-state.md).
+
+---
+
+# 15. Phase 11 — Scholarship Management
+
+## 15.1 Goal
+
 Provide each lodge with an isolated scholarship application and review workflow.
 
-## 14.2 Assumptions
+## 15.2 Assumptions
 
 - Scholarship applicant data is sensitive and lodge-specific.
 - Each lodge may have different application windows and reviewer committees.
 - Regional discovery does not imply shared scholarship access.
 - The current Newburgh scholarship workflow can inform requirements.
 
-## 14.3 Functional Requirements
+## 15.3 Functional Requirements
 
 ### Scholarship Module
 
-- The scholarship module is disabled by default for a lodge.
-- A platform or authorized lodge administrator may enable it for lodges that want to use the feature.
+- Add the `scholarship` definition through the Phase 10 module contract.
+- A platform administrator controls availability. An authorized lodge administrator with `lodge_modules.manage` controls the lodge preference only when available.
+- Scholarship administrators/reviewers receive no module-toggle authority unless separately granted that lodge permission.
 
 ### Scholarship Cycles
 
@@ -1788,7 +1832,7 @@ Lodge scholarship administrators can:
 - Change statuses.
 - Close/archive cycles.
 
-## 14.4 Technical Requirements
+## 15.4 Technical Requirements
 
 - Every application is owned by exactly one lodge and one scholarship cycle.
 - Reviewers require explicit lodge-scoped scholarship permission.
@@ -1797,8 +1841,10 @@ Lodge scholarship administrators can:
 - Download access must be authorized.
 - Sensitive documents must not use public media URLs.
 - Audit important status and review changes.
+- Enforce effective Scholarship state on routes, APIs, private downloads, jobs, search/cache, navigation, and public CMS projections before ordinary Scholarship authorization.
+- Preserve cycles, applications, reviews, assignments, documents, and history when Scholarship becomes unavailable or lodge-disabled.
 
-## 14.5 Acceptance Criteria
+## 15.5 Acceptance Criteria
 
 A tester can:
 
@@ -1810,8 +1856,10 @@ A tester can:
 6. Score an application.
 7. Produce aggregate review results.
 8. Archive the cycle.
+9. Confirm platform-unavailable and lodge-disabled states fail closed without deleting data.
+10. Re-enable Scholarship and confirm preserved data returns only to normally authorized users.
 
-## 14.6 Automated Test Requirements
+## 15.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1823,10 +1871,12 @@ Tests must cover:
 - Status transitions.
 - Email verification where configured.
 - Direct document URL protection.
-- Scholarship module disabled by default.
+- Scholarship is ineffective until both platform availability and the lodge enabled preference are true.
 - Lodge-defined custom application questions when the module is enabled.
+- Platform-unavailable, lodge-disabled, permission-without-state, and state-without-permission cases.
+- Jobs, cache/search/public projections, preservation, and restoration where applicable.
 
-## 14.7 Non-Goals
+## 15.7 Non-Goals
 
 This phase does not include:
 
@@ -1835,22 +1885,62 @@ This phase does not include:
 - School transcript API integrations.
 - Automated applicant ranking decisions.
 
+See the complete implementation specification in [Phase 11](docs/phase-11.md).
+
 ---
 
-# 15. Phase 11 — Games and Shared Content
+# 16. Phase 12 — Store and Order Management
 
-## 15.1 Goal
+## 16.1 Goal
+
+Provide lodge-owned products, photos, variants, inventory, carts, and orders with pickup/shipping and cash, check, and pay-at-pickup/manual payment workflows. Store is optional through Phase 10 and public storefront output uses the existing versioned CMS; enablement never creates public navigation.
+
+## 16.2 Requirements
+
+Products support name, description, photos, price, active state, quantity, and size/color or similar variants with variant inventory where applicable. Orders preserve product/variant/price line snapshots, customer/contact information required for fulfillment, pickup or shipping choice, total, manual payment method/status, and fulfillment status. Lodge administrators receive explicit catalog/order permissions.
+
+At `md` and above administration uses the established stable table layout; below `md` it uses intentional cards and bottom action rows. Storefront cards visibly show price, availability/fulfillment, and purchase action without hover.
+
+If Store is ineffective, public/admin/API/job/cache/search output fails closed and a published Store CMS section exposes no products or purchase links. Products, inventory, orders, lines, snapshots, and history remain stored and return subject to permission/publication after re-enablement.
+
+Online card payment, carrier rates/labels, tax engines, accounting integrations, and discounts are excluded. Preserve a provider-neutral future payment extension point, never store raw card data, keep each lodge's financial relationship attributable, and require future webhooks to be idempotent and lodge-aware. Provider selection is deferred.
+
+See the complete implementation specification in [Phase 12](docs/phase-12.md).
+
+---
+
+# 17. Phase 13 — Fundraising Campaigns
+
+## 17.1 Goal
+
+Support the Newburgh-style manually maintained fundraising progress board as a first-class, accessible workflow without requiring Store or online payments.
+
+## 17.2 Requirements
+
+Lodge-owned campaigns support stable identity/slug, title, description, optional image, goal, authoritative manual progress, useful dates, lifecycle, public display, and multiple campaigns/history. Numeric progress remains visible and accessible. A campaign may optionally associate same-lodge Store products when both modules are effective.
+
+Store and Fundraisers are independent. If Store is disabled, the campaign and historical association remain while purchasing actions disappear. Fundraisers works fully as a manual progress board without Store. Future direct/offline/order/provider contribution sources may extend the domain, but initial progress is manual and no automatic accounting reconciliation, online payment, tax-deductibility claim, or tax-receipt behavior is required.
+
+Public presentation uses the existing CMS. Disablement fails closed across public/admin/API/job/cache/search paths without deleting campaigns, progress, media, or associations.
+
+See the complete implementation specification in [Phase 13](docs/phase-13.md).
+
+---
+
+# 18. Phase 14 — Games and Shared Content
+
+## 18.1 Goal
 
 Provide reusable Masonic game functionality, beginning with a Jeopardy-style trivia game, while allowing both platform-shared and lodge-private content.
 
-## 15.2 Assumptions
+## 18.2 Assumptions
 
 - Game engines are platform-level functionality.
 - Question banks may have different ownership and visibility.
 - A lodge should be able to host a game session without duplicating the engine.
 - Shared question banks can reduce duplicated content effort.
 
-## 15.3 Functional Requirements
+## 18.3 Functional Requirements
 
 ### Question Banks
 
@@ -1888,15 +1978,17 @@ Game sessions should record:
 - Selected content.
 - Session state.
 
-## 15.4 Technical Requirements
+## 18.4 Technical Requirements
 
 - Lodge-private questions remain isolated.
 - Shared banks are explicitly designated shared.
 - Game sessions are lodge-owned.
 - Shared content editing requires appropriate platform or shared-content permissions.
 - Question history should not leak private banks into shared search.
+- Add `games` through the Phase 10 module contract. Ineffective state blocks lodge use but does not hide or destroy platform/shared reference content itself.
+- Preserve lodge-private banks and session history across disablement and restore authorized access after re-enablement.
 
-## 15.5 Acceptance Criteria
+## 18.5 Acceptance Criteria
 
 A tester can:
 
@@ -1909,8 +2001,9 @@ A tester can:
 7. Track scores.
 8. Confirm another lodge cannot see the private bank.
 9. Confirm shared content is usable across lodges.
+10. Confirm unavailable/disabled Games blocks lodge use without deleting private banks or sessions.
 
-## 15.6 Automated Test Requirements
+## 18.6 Automated Test Requirements
 
 Tests must cover:
 
@@ -1920,8 +2013,9 @@ Tests must cover:
 - Final Round behavior.
 - Shared versus private access.
 - Cross-lodge private-content denial.
+- Platform-unavailable, lodge-disabled, direct URL/API, preservation, and restoration cases.
 
-## 15.7 Non-Goals
+## 18.7 Non-Goals
 
 This phase does not include:
 
@@ -1930,15 +2024,17 @@ This phase does not include:
 - Monetized game packs.
 - Advanced tournament brackets.
 
+See the complete implementation specification in [Phase 14](docs/phase-14.md).
+
 ---
 
-# 16. Phase 12 — Newburgh Migration and Production Cutover
+# 19. Phase 15 — Newburgh Migration and Production Cutover
 
-## 16.1 Goal
+## 19.1 Goal
 
 Migrate the existing Newburgh Lodge application data into the new platform and replace the legacy site without loss of required functionality or historical data.
 
-## 16.2 Assumptions
+## 19.2 Assumptions
 
 - The new platform has already been validated independently.
 - The old application's schema should not dictate the new application's schema.
@@ -1946,7 +2042,7 @@ Migrate the existing Newburgh Lodge application data into the new platform and r
 - The existing domain should continue to be usable after cutover.
 - A rollback plan is required.
 
-## 16.3 Functional Requirements
+## 19.3 Functional Requirements
 
 Migrate applicable Newburgh data including, where present:
 
@@ -1969,6 +2065,9 @@ Migrate applicable Newburgh data including, where present:
 - Ritualist tracking data.
 - Existing user accounts where safe and feasible.
 - Game/question data where applicable.
+- Optional-module availability and lodge enabled preferences.
+- Store products, variants, inventory, orders, fulfillment/payment state, and historical snapshots.
+- Fundraising campaigns, manual progress/history, and Store associations.
 
 ### Domain and URL Cutover
 
@@ -1978,7 +2077,7 @@ Support:
 - Preservation or redirects for important legacy URLs.
 - New tenant-aware route generation.
 
-## 16.4 Technical Requirements
+## 19.4 Technical Requirements
 
 - Migration scripts must be repeatable in a staging environment.
 - Source data must not be mutated by migration.
@@ -1988,8 +2087,9 @@ Support:
 - Media files must be copied with ownership metadata.
 - Recurrence exceptions must be verified carefully.
 - A final read-only or maintenance window may be used for final synchronization.
+- Transform primitive legacy Store/Fundraiser data into the new domain rather than treating old schema quirks as requirements.
 
-## 16.5 Acceptance Criteria
+## 19.5 Acceptance Criteria
 
 A tester can verify:
 
@@ -2006,8 +2106,10 @@ A tester can verify:
 11. Ritualist records are transformed correctly.
 12. The production domain resolves to the new platform.
 13. Required legacy URLs redirect or remain functional.
+14. Module settings and optional-module data retain correct ownership and disabled-state behavior.
+15. Store order history and Fundraiser progress/associations are transformed and validated.
 
-## 16.6 Automated Test Requirements
+## 19.6 Automated Test Requirements
 
 Create migration validation tests or scripts for:
 
@@ -2022,8 +2124,9 @@ Create migration validation tests or scripts for:
 - Media references.
 - Scholarship ownership.
 - User-account linkage.
+- Optional-module state, Store totals/inventory/history, Fundraiser progress/associations, and Games ownership.
 
-## 16.7 Non-Goals
+## 19.7 Non-Goals
 
 This phase does not include:
 
@@ -2031,22 +2134,24 @@ This phase does not include:
 - Supporting every obsolete legacy behavior.
 - Preserving implementation-specific quirks that are not valid business requirements.
 
+See the complete implementation specification in [Phase 15](docs/phase-15.md).
+
 ---
 
-# 17. Phase 13 — Regional Lodge Onboarding and Operational Hardening
+# 20. Phase 16 — Regional Lodge Onboarding and Operational Hardening
 
-## 17.1 Goal
+## 20.1 Goal
 
 Make the platform practical for onboarding additional Southwest Indiana lodges without requiring custom development for each normal deployment.
 
-## 17.2 Assumptions
+## 20.2 Assumptions
 
 - Newburgh has been migrated successfully.
 - At least one additional lodge is available as a pilot.
 - Platform administrators may initially handle account provisioning.
 - Billing is not required for initial adoption.
 
-## 17.3 Functional Requirements
+## 20.3 Functional Requirements
 
 ### Lodge Onboarding Wizard
 
@@ -2057,11 +2162,13 @@ A platform administrator can:
 3. Choose a default website template.
 4. Upload branding.
 5. Configure meeting information.
-6. Select enabled features.
+6. Grant platform availability for optional modules, shown separately from lodge enabled preference and effective state.
 7. Assign initial lodge administrator.
 8. Configure public hostname/domain.
 9. Preview.
 10. Publish.
+
+After onboarding, the initial lodge administrator may enable/disable available modules using `lodge_modules.manage`. The platform administrator's availability choice is not the lodge preference, and onboarding never auto-publishes a module-backed CMS section.
 
 ### Custom Domains
 
@@ -2100,7 +2207,7 @@ Platform administrators need:
 - Storage usage visibility if appropriate.
 - Ability to disable or disable-and-lock a compromised or retired lodge.
 
-## 17.4 Technical Requirements
+## 20.4 Technical Requirements
 
 - Domain-to-lodge resolution must be secure and deterministic.
 - Unknown hostnames must not fall back to arbitrary lodge content.
@@ -2110,7 +2217,7 @@ Platform administrators need:
 - Backups and restore procedures must be documented.
 - Production observability must include tenant/lodge identifiers where safe.
 
-## 17.5 Acceptance Criteria
+## 20.5 Acceptance Criteria
 
 Using only platform administration tools and documented import processes, a tester can:
 
@@ -2126,21 +2233,22 @@ Using only platform administration tools and documented import processes, a test
 10. Use the directory.
 11. Verify tenant isolation against Newburgh.
 12. Disable the lodge and confirm the expected behavior.
+13. Grant different module availability to two lodges and confirm each lodge administrator can change only available preferences for their own lodge.
 
-## 17.6 Automated Test Requirements
+## 20.6 Automated Test Requirements
 
 Tests must cover:
 
 - Domain resolution.
 - Unknown domains.
 - Onboarding workflow.
-- Feature flags.
+- Platform module availability, lodge enabled preferences, effective state, and cross-lodge toggle denial.
 - CSV validation.
 - Cross-tenant import safety.
 - Disabled and disabled-and-locked behavior, including the correct reactivation permissions.
 - Custom-domain tenant selection.
 
-## 17.7 Non-Goals
+## 20.7 Non-Goals
 
 This phase does not include:
 
@@ -2150,20 +2258,23 @@ This phase does not include:
 - Multi-region infrastructure.
 - Franchise-style white labeling beyond supported lodge branding.
 
+See the complete implementation specification in [Phase 16](docs/phase-16.md).
+
 ---
 
-# 18. Cross-Cutting Requirements
+# 21. Cross-Cutting Requirements
 
 The following requirements apply to all applicable phases.
 
-## 18.1 Authorization
+## 21.1 Authorization
 
 - Server-side authorization is mandatory for every protected action.
 - Resource ownership must be validated, not inferred from route context.
 - Lodge administrators may only administer explicitly authorized lodges.
 - Platform roles and lodge roles must remain distinct.
+- Optional-module state is a prerequisite, not authorization. Availability or enablement grants no permission, and permission never bypasses unavailable/disabled state.
 
-## 18.2 Tenant Isolation
+## 21.2 Tenant Isolation
 
 Every applicable feature must test:
 
@@ -2175,8 +2286,9 @@ Every applicable feature must test:
 - File/media access.
 - Cached data.
 - API responses.
+- Optional-module state and direct Scholarship, Store, Fundraiser, and lodge-private Games identifiers.
 
-## 18.3 Auditability
+## 21.3 Auditability
 
 Sensitive administrative actions should record:
 
@@ -2192,10 +2304,12 @@ At minimum this should cover:
 - Membership changes.
 - Role changes.
 - Scholarship status/review changes.
+- Platform module availability and lodge enabled-preference changes.
+- Store order/payment/fulfillment and Fundraiser manual-progress changes.
 - Lodge configuration changes.
 - Sensitive account-linking operations.
 
-## 18.4 Background Jobs
+## 21.4 Background Jobs
 
 Every lodge-related job must explicitly retain enough context to identify:
 
@@ -2204,8 +2318,9 @@ Every lodge-related job must explicitly retain enough context to identify:
 - Intended recipient or action.
 
 Jobs must not rely on an HTTP request's current-lodge state.
+Jobs for optional modules reload current module state and stop safely when the module is ineffective.
 
-## 18.5 Email
+## 21.5 Email
 
 Email must support:
 
@@ -2216,29 +2331,31 @@ Email must support:
 - Idempotent scheduled delivery.
 - Delivery logging sufficient for troubleshooting.
 
-## 18.6 File Storage
+## 21.6 File Storage
 
 Files must have explicit ownership and visibility.
 
 Private files must not become publicly accessible merely because the storage backend supports public URLs.
 
-## 18.7 Search
+## 21.7 Search
 
 Search must enforce the same authorization and visibility rules as direct record access.
 
 Search must not become a bypass for privacy or tenant isolation.
+Module-owned data is neither indexed nor returned for a lodge while its module is ineffective.
 
-## 18.8 Caching
+## 21.8 Caching
 
 Cache keys for lodge-owned or visibility-sensitive data must contain enough identity and scope information to prevent cross-tenant leakage.
+Module state changes invalidate affected projections, and cache reads recheck effective state so stale output fails closed.
 
-## 18.9 Time Zones
+## 21.9 Time Zones
 
 Each lodge has a configured time zone.
 
 Events, reminders, recurrence, and date presentation must consistently respect lodge/event time zones.
 
-## 18.10 Accessibility and Responsive Design
+## 21.10 Accessibility and Responsive Design
 
 Public and authenticated interfaces should:
 
@@ -2247,7 +2364,7 @@ Public and authenticated interfaces should:
 - Avoid interactions that require hover-only behavior.
 - Preserve readable contrast when lodge branding is applied.
 
-## 18.11 Backup, Restore, and Portability
+## 21.11 Backup, Restore, and Portability
 
 The platform must support both:
 
@@ -2262,7 +2379,7 @@ The design should:
 - Avoid backup formats that make individual-lodge extraction impractical.
 - Allow future S3-compatible or other cloud object storage without redesigning the domain model.
 
-## 18.12 Logging and Monitoring
+## 21.12 Logging and Monitoring
 
 The initial deployment should favor free or open-source operational tooling.
 
@@ -2281,7 +2398,7 @@ The implementation should avoid requiring a paid monitoring SaaS for normal oper
 
 ---
 
-# 19. Implementation Stack
+# 22. Implementation Stack
 
 The initial implementation stack is:
 
@@ -2298,7 +2415,7 @@ The initial implementation stack is:
 - Locally hosted email on the application infrastructure initially.
 - Optional support for a transactional email provider later if operational needs justify it.
 
-## 19.1 Production Hosting Assumptions
+## 22.1 Production Hosting Assumptions
 
 Initial production hosting is expected to use:
 
@@ -2312,7 +2429,7 @@ Initial production hosting is expected to use:
 
 Exact package versions and service topology should be pinned in the deployment documentation when implementation begins.
 
-## 19.2 Local Development Environment
+## 22.2 Local Development Environment
 
 Local development uses Docker Compose and exposes the application at `http://localhost`. Nginx, PHP-FPM, PostgreSQL, Redis, a queue worker, Node.js/Vite, and Mailpit run as separate services. PHP-FPM and queue workers share the same application image. Database data and application media use persistent volumes, with a documented explicit reset procedure.
 
@@ -2320,9 +2437,9 @@ Docker Compose is the required development interface; production is not required
 
 ---
 
-# 20. Recommended Repository Documentation Before Coding
+# 23. Required Repository Documentation for the Remaining Plan
 
-Before Phase 1 implementation begins, create these project documents:
+Phases 1–9 are implemented and their specifications remain historical implementation contracts. Before Phase 10 implementation begins, keep these active documents synchronized:
 
 ```text
 /docs
@@ -2332,7 +2449,8 @@ Before Phase 1 implementation begins, create these project documents:
   authorization.md
   coding-standards.md
   testing-strategy.md
-  phase-01.md
+  phase-01.md … phase-09.md
+  phase-10.md … phase-16.md
   decisions/
 ```
 
@@ -2354,7 +2472,7 @@ Architectural decisions that affect later phases should be recorded as ADRs rath
 
 ---
 
-# 21. Definition of Done for Every Phase
+# 24. Definition of Done for Every Phase
 
 A phase is complete only when all of the following are true:
 
@@ -2372,25 +2490,25 @@ A phase is complete only when all of the following are true:
 
 ---
 
-# 22. Recommended First Pilot Sequence
+# 25. Recommended First Pilot Sequence
 
 The practical rollout should be:
 
-1. Build Phases 1-11 on the new platform using synthetic/demo lodges.
+1. Treat implemented Phases 1–9 as the development baseline, then build Phases 10–14 using synthetic/demo lodges and two-lodge module-state fixtures.
 2. Continuously exercise at least two lodges in automated and manual tests to detect tenancy assumptions.
-3. Perform Phase 12 using Newburgh Lodge as the first real production tenant.
+3. Perform Phase 15 using Newburgh Lodge as the first real production tenant.
 4. Operate Newburgh on the new platform long enough to validate day-to-day behavior.
-5. Use one additional Southwest Indiana lodge as the Phase 13 pilot.
+5. Use one additional Southwest Indiana lodge as the Phase 16 pilot.
 6. Refine onboarding based on that real second-lodge experience.
 7. Begin broader Southwest Indiana adoption only after the second lodge can be operated without custom development.
 
 ---
 
-# 23. Resolved Design Decisions and Deferred Detail
+# 26. Resolved Design Decisions and Deferred Detail
 
 The following decisions are considered established planning requirements unless a later architectural decision record explicitly changes them.
 
-## 23.1 Identity and Membership
+## 26.1 Identity and Membership
 
 - Users may self-register.
 - Self-registration requires the registrant to identify their home lodge.
@@ -2409,7 +2527,7 @@ The following decisions are considered established planning requirements unless 
 - Core `Person` identity/contact information is shared person-owned data. An authorized officer of any lodge in which the person has an active membership may update those fields. Changes apply globally and must be audit logged.
 - Lodge-specific information belongs on the `Membership` and may only be edited by an authorized user of that lodge.
 
-## 23.2 Lodge Administration
+## 26.2 Lodge Administration
 
 Initial built-in lodge roles are:
 
@@ -2456,7 +2574,7 @@ Primary lodge is represented by lodge number and does not require the lodge to e
 
 Officer positions are database-configured reference values.
 
-## 23.3 Privacy
+## 26.3 Privacy
 
 - Default directory visibility is own-lodge only.
 - Cross-lodge shareable fields are:
@@ -2469,7 +2587,7 @@ Officer positions are database-configured reference values.
 - Family information is not shared outside the owning lodge.
 - Another lodge needing family-related information must contact the owning lodge rather than retrieving it through the regional directory.
 
-## 23.4 Public CMS
+## 26.4 Public CMS
 
 Initial content-section support is the catalog defined in Phase 2.
 
@@ -2485,7 +2603,7 @@ Additional rules:
     - Secondary color.
 - Additional components or branding controls may be added later if the initial set proves insufficient.
 
-## 23.5 Events
+## 26.5 Events
 
 Event visibility is:
 
@@ -2520,7 +2638,7 @@ Calendar behavior:
 - Standards-based ICS/iCalendar support is the preferred common mechanism.
 - Two-way external calendar synchronization is not required initially.
 
-## 23.6 Volunteer Staffing and Commitments
+## 26.6 Volunteer Staffing and Commitments
 
 - Volunteer staffing is implemented as a separate event interaction after Phase 4.
 - Volunteer positions are named, occurrence-aware staffing needs with a configurable number needed.
@@ -2532,7 +2650,7 @@ Calendar behavior:
 - A combined UI may offer reservation, reminder subscription, and volunteer commitment together only when each intent is separately labeled and explicitly confirmed.
 - Regional volunteer discovery, volunteer-hour tracking, and general-purpose volunteer management are deferred.
 
-## 23.7 Ritualist Program
+## 26.7 Ritualist Program
 
 The detailed ritual taxonomy, official point values, rank thresholds, and complete list of tracked non-point parts are intentionally deferred to the Phase 8 specification.
 
@@ -2555,7 +2673,7 @@ Established rules are:
 - A member never loses a previously achieved ritualist-program rank solely because point values later change.
 - Members are not periodically prompted to reconfirm proficiency or availability.
 
-## 23.8 WorkingTools Cross-Lodge Terminology and Lodge Groups
+## 26.8 WorkingTools Cross-Lodge Terminology and Lodge Groups
 
 - A **WorkingTools lodge** is a lodge hosted as a tenant on the WorkingTools platform. There is no separate regional-participation opt-in state for ordinary cross-lodge functionality.
 - Cross-lodge event, directory, and ritual behavior remains controlled by the visibility, privacy, eligibility, and authorization rules established in the feature phases.
@@ -2574,16 +2692,31 @@ Established rules are:
 - Removing a lodge from a group changes group-filtered discovery only; it does not by itself change underlying event, member-directory, or ritual visibility.
 - Discoverable groups may have generated aggregation/landing pages, but those pages are not independent CMS-managed lodge sites.
 
-## 23.9 Scholarship Module
+## 26.9 Optional Lodge Modules
 
-- The scholarship module is disabled by default for each lodge.
-- Lodges that enable the scholarship module may define custom application questions in addition to the platform-supported scholarship fields.
+- Only Scholarship, Store, Fundraisers, and Games are optional modules. Baseline CMS, People, Events, Volunteer staffing, Directory, Newsletters, Galleries, Ritual, and Lodge groups are not feature-flagged.
+- Platform administrators control module availability per lodge. Lodge administrators with `lodge_modules.manage` control the lodge preference only when available.
+- Effective state is platform availability and lodge enabled preference. It is independent from authorization and CMS publication.
+- Removing availability preserves the lodge preference. Either kind of disablement preserves all module data and fails closed across public/admin/API/job/search/cache/CMS surfaces.
+- Scholarship administrators/reviewers and other module-specific managers receive no toggle authority unless separately granted `lodge_modules.manage`.
 
-## 23.10 Games
+## 26.10 Scholarship
+
+- Scholarship cycles, questions, applications, reviews, and private documents remain lodge-owned and survive module disablement.
+- Lodges with effective Scholarship may define custom application questions in addition to supported fields.
+
+## 26.11 Store and Fundraisers
+
+- Store initially uses cash, check, and pay-at-pickup/manual payment; online payment and raw card handling are excluded.
+- Fundraisers initially supports authoritative manual progress without Store. Store and Fundraisers are independent modules.
+- Campaign/product associations are optional and historical relationships survive Store disablement.
+- Future payments remain provider-neutral, lodge-attributable, and require idempotent lodge-aware webhooks; provider selection is deferred.
+
+## 26.12 Games
 
 - The Jeopardy-style game includes Final Round support in the first release.
 
-## 23.11 Operations
+## 26.13 Operations
 
 ### Hosting
 
@@ -2633,9 +2766,9 @@ The backup strategy must support:
 
 ---
 
-# 24. Final Planning Recommendation
+# 27. Final Planning Recommendation
 
-The rewrite should begin with a detailed Phase 1 specification rather than a whole-application Codex prompt.
+Phases 1–9 are implemented in development. The next implementation work should begin with the detailed Phase 10 optional-module gating specification, not Scholarship or a module-specific shortcut.
 
 For each phase:
 

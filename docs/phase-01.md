@@ -2,11 +2,11 @@
 
 ## Outcome
 
-A platform administrator can provision lodges and administrators. Lodge administrators can securely manage identity and branding only for assigned lodges. Users can register, verify email, wait in a restricted state, and be approved or rejected.
+A platform administrator can provision lodges and administrators. Lodge administrators can securely manage identity and branding only for assigned lodges. Users can register, verify email, wait in a restricted state, and be approved or rejected. This phase is implemented in development.
 
 ## Schema Scope
 
-Phase 1 introduces users, minimal people, lodges, minimal memberships, platform permission definitions, lodge roles and assignments, registrations/approval state, feature definitions and lodge assignments, media ownership, and immutable audit events. Full person and membership profiles remain in Phase 3.
+Phase 1 introduced users, minimal people, lodges, minimal memberships, platform permission definitions, lodge roles and assignments, registrations/approval state, feature definitions and lodge assignments, media ownership, and immutable audit events. Full person and membership profiles arrived in Phase 3. Phase 10 explicitly retrofits the feature-assignment foundation into separate platform availability and lodge enabled preference; this preserves Phase 1 history without treating its original assignment concept as the complete optional-module contract.
 
 Critical constraints include globally unique lodge slugs, globally unique non-null person email addresses, explicit lodge keys on lodge-owned rows, and safe foreign keys for role and media ownership.
 
@@ -23,7 +23,7 @@ Critical constraints include globally unique lodge slugs, globally unique non-nu
 
 ## Routes and UI
 
-Provide authentication, verification, password reset, optional 2FA, registration and pending-status screens; platform lodge list/create/edit, feature assignment, and registration review screens; and lodge identity, branding, and active-lodge switching screens. Exact route names are finalized during implementation and remain server-authorized.
+Phase 1 provided authentication, verification, password reset, optional 2FA, registration and pending-status screens; platform lodge list/create/edit, feature assignment, and registration review screens; and lodge identity, branding, and active-lodge switching screens. Phase 10 separates platform module availability from the lodge preference and adds the lodge-side setting authority. Existing routes remain server-authorized.
 
 ## Authorization
 

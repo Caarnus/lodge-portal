@@ -18,3 +18,7 @@
 - Require meaningful alternative text for informative public images and preserve keyboard operation without hover-only interactions.
 - Prefer no-fee open-source dependencies. Record and review licenses before adding a runtime package, and do not make ordinary lodge operation depend on a premium component or paid SaaS.
 - Keep uploaded originals private; validate decoded image content and publish only normalized derivatives with unnecessary metadata removed.
+- Use the centralized optional-module state service for Scholarship, Store, Fundraisers, and Games. Do not scatter feature booleans or hard-coded module-name authorization through controllers, policies, jobs, Vue components, or queries.
+- Enforce effective module state on the server at every route/API/service/public-projection boundary. UI and navigation filtering are never the security boundary.
+- Keep module availability, lodge enabled preference, effective state, authorization, and CMS publication as distinct concepts. Do not overload one boolean with all five meanings.
+- Every optional-module change includes enabled, lodge-disabled, platform-unavailable, direct URL/API, and cross-lodge negative tests. Where applicable, cover jobs, cache, search, public projections, data preservation, and restored access after re-enablement.

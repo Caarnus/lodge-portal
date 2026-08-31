@@ -8,3 +8,4 @@
 - [Materialize event occurrences from RRULE series](0006-materialized-event-occurrences.md)
 - [Person-owned directory privacy with request-scoped projections](0007-person-owned-directory-privacy.md)
 - [Person-owned ritual discovery with lodge-scoped authorization](0008-person-owned-ritual-discovery.md)
+- [Separate optional-module availability, lodge preference, and authorization](0009-optional-lodge-module-state.md)

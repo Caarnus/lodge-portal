@@ -20,12 +20,39 @@ Directory scope is person-owned: `hidden`, `own_lodge`, or `participating_lodges
 | View/create lodges | Yes | No | No |
 | Edit lodge identity | Yes | Assigned lodge only | No |
 | Assign lodge administrator | Yes | Assigned lodge only | No |
-| Manage feature assignments | Yes | No | No |
+| Grant/revoke optional-module availability | Yes | No | No |
 | Approve/reject registration | Yes | Selected home lodge only | No |
 | Reactivate disabled lodge | Yes | Assigned lodge only | No |
 | Reactivate disabled-and-locked lodge | Yes | No | No |
 
 Pending registrants may authenticate only into the pending-approval experience. Selecting a home or active lodge never grants access.
+
+## Optional Lodge Module Matrix
+
+| Action | Platform administrator | User with `lodge_modules.manage` | Module-specific manager/reviewer | Ordinary officer/member |
+|---|---:|---:|---:|---:|
+| Create/retire module definitions | Yes | No | No | No |
+| Grant/revoke availability for a lodge | Yes | No | No | No |
+| View platform availability across lodges | Yes | No | No | No |
+| Enable/disable preference for own authorized lodge | Only through an explicit lodge assignment/permission | Yes, available module and assigned lodge only | No, unless separately granted `lodge_modules.manage` | No |
+| Manage module-owned data | According to explicit module policy; no automatic reviewer/attendee status | Only with separate module permission and effective state | Assigned lodge only, with effective state | No unless separately permitted |
+
+`lodge_modules.manage` is a platform-defined lodge permission assigned to the built-in Administrator role. It controls only the lodge enabled preference and remains usable for an available-but-disabled module so the lodge can re-enable it. It cannot grant platform availability. Module-specific permissions such as Scholarship review/administration, Store catalog/orders, Fundraiser management, or Games management do not include toggle authority.
+
+Effective module state is `platform availability AND lodge enabled preference`. It is an additional precondition, never authorization: enablement grants no permission, and permission cannot bypass unavailable or disabled state. Active lodge context cannot supply either requirement. Every operation authorizes the explicit lodge and resource server-side.
+
+Scholarship reviewers are explicitly lodge-scoped and are not module administrators merely because they can review. Store catalog and order permissions may be separated so fulfillment staff need not edit products. Fundraiser managers can maintain campaign lifecycle and manual progress without Store authority. Games lodge managers cannot edit platform/shared banks unless separately granted platform/shared-content authority.
+
+| Module action | Platform-defined lodge permission | Additional boundary |
+|---|---|---|
+| Manage Scholarship cycles/applications | `scholarships.manage` | Effective Scholarship; explicit target lodge |
+| Review assigned Scholarship applications | `scholarships.review` | Effective Scholarship; lodge and reviewer assignment |
+| Manage Store products/variants/inventory | `store.catalog.manage` | Effective Store; explicit product lodge |
+| Manage Store orders/payment/fulfillment state | `store.orders.manage` | Effective Store; explicit order lodge |
+| Manage Fundraiser campaigns/manual progress | `fundraisers.manage` | Effective Fundraisers; explicit campaign lodge |
+| Manage lodge-private Games banks/sessions | `games.manage` | Effective Games; explicit hosting/owning lodge |
+
+These permissions are added with their module phases. The built-in lodge Administrator may receive the relevant module-data permissions when that module definition is introduced, but every use remains ineffective while the module is unavailable or lodge-disabled.
 
 ## Public Website Matrix
 

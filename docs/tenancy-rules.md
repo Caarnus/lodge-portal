@@ -31,6 +31,14 @@
 29. Event jobs carry stable identifiers and reload the complete lodge/event/occurrence/subscription/delivery ownership chain before mutation or delivery.
 30. Reservations, reminder subscriptions, and future volunteer commitments are independent intents. Creating one never authorizes, implies, or silently creates another.
 31. Volunteer positions, commitments, and staffing reminder deliveries carry matching lodge, event, and occurrence ownership. Nested volunteer routes validate every link before authorization.
+32. Optional-module availability never grants authorization, and lodge module enablement never grants authorization.
+33. A module-specific permission cannot bypass platform-unavailable or lodge-disabled state; effective module state cannot bypass permission or ownership checks.
+34. Module state is resolved for the explicit target lodge. State for one lodge cannot enable, disable, expose, or suppress another lodge's records.
+35. Scholarship, Store, Fundraiser, and lodge-private Games records carry explicit lodge ownership. Platform/shared Games content retains its explicit platform/shared ownership.
+36. Direct module/resource identifiers never bypass effective state or lodge ownership. Active lodge context is not evidence of either.
+37. Module jobs reload lodge ownership and effective state; search, cache, public projections, downloads, and feature-backed CMS sections fail closed when ineffective.
+38. Disabling a module or revoking availability does not delete, reassign, anonymize, or unpublish its stored records as a side effect. Re-enablement restores only normally authorized/published access.
+39. Platform availability and lodge enabled preference are separate configuration values. Revoking availability does not erase the lodge preference.
 # Directory and profile ownership
 
 Directory requester authorization is evaluated from the route lodge, never `current_lodge_id`. A person-wide privacy setting belongs to the canonical person, while lodge-email preference belongs to a specific membership and its lodge. Self-service profile writes resolve the current user-to-person link server-side; submitted person or lodge identifiers never establish ownership.

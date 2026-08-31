@@ -20,6 +20,14 @@ The local environment is Docker Compose. Production initially uses conventional 
 - People, authenticated users, and lodge memberships are distinct concepts.
 - Files, cache entries, jobs, logs, and audit entries retain lodge context when applicable.
 
+## Optional Module Boundary
+
+Scholarship, Store, Fundraisers, and Games are the only optional lodge modules. A centralized module-state service resolves a platform-owned definition, platform availability for the explicit lodge, the lodge's enabled preference, and the derived effective state: `availability AND enabled preference`.
+
+Module state is an application availability boundary, not tenant authorization, permission, or CMS publication. Every module entry point checks effective state before exposing module-specific routes, services, public projections, jobs, search results, caches, downloads, or CMS sections, then applies its ordinary authentication, ownership, permission, privacy, visibility, and publication rules. Active lodge selection supplies neither check.
+
+Removing availability or disabling a module invalidates or suppresses its projections but never deletes or reassigns module data. Jobs reload lodge ownership and current module state at execution. Cache reads and public section renderers fail closed so stale content cannot survive a state change. Module definitions are added with production modules; the generic boundary does not create unfinished workspaces.
+
 ## Runtime
 
 Local services are Nginx, PHP-FPM/application, PostgreSQL, Redis, a queue worker, Node.js/Vite, and Mailpit. The application and queue worker use the same PHP image. PostgreSQL data and local media persist in Docker volumes.
@@ -71,3 +79,15 @@ Person merge locks both people and ritual rows. Survivor settings win; missing s
 Lodge groups are platform-owned organization and filtering records, never tenant or authorization boundaries. A reusable group predicate may narrow lodge, event, member-directory, or ritual-assistance queries only after each domain's existing visibility and eligibility rules have been applied.
 
 Public lodge and group projections contain active lodge identity, explicitly public contact/meeting data, published homepage links, and public events only. Authenticated event aggregation reuses hardened event eligibility. Cross-lodge directory and ritual aggregation reuse their dedicated access services, produce explicit safe projections, deduplicate multi-lodge people, and use private/no-store responses.
+
+## Store and Commerce Boundary
+
+Products, variants, inventory, orders, order lines, customer/fulfillment snapshots, and manual payment/fulfillment state are lodge-owned. Checkout reloads the lodge's effective Store state and authoritative price/inventory before order creation. Orders snapshot mutable catalog and customer facts needed for historical fulfillment. Public storefront output is a bounded projection through the existing versioned CMS and never appears merely because Store is enabled.
+
+Initial payments are cash, check, or pay-at-pickup/manual workflows. The domain leaves a provider-neutral extension point for future lodge-attributable transactions without accepting or storing raw card details. Any future webhook boundary must be idempotent, lodge-aware, and unable to mix lodge funds; provider choice is deferred.
+
+## Fundraising Boundary
+
+Campaigns, progress history, and media are lodge-owned. Authoritative manual progress supports the initial Newburgh-style information board without Store or payment processing. Public campaign output uses the existing CMS and accessible numeric progress projections.
+
+Campaign-to-product associations are optional, same-lodge relationships. Fundraisers and Store have independent effective states. If Store becomes ineffective, the campaign and historical association remain while purchasing projections disappear. Future contribution/payment sources may extend the campaign aggregate without redefining lodge ownership or making online payment a Phase 13 dependency.

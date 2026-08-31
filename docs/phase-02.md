@@ -41,7 +41,7 @@ Publishing promotes a validated draft in one transaction, archives the prior pub
 - Lodge branding must preserve accessible contrast. The supported design system may adjust how a supplied color is used rather than rendering inaccessible text.
 - Rich text and custom HTML are sanitized on the server. Scripts, inline event handlers, unsafe URLs, and arbitrary JavaScript are rejected.
 - Lodge administrators may use only the supported section catalog. Custom HTML sections are restricted to platform administrators.
-- Feature-driven placeholder sections render an intentional unavailable or empty state until their module exists; they must not expose another lodge's data.
+- Phase 2 feature-driven placeholder sections render an intentional unavailable or empty state until their later module exists; they must not expose another lodge's data. Phase 10 retrofits the runtime contract: once a module-backed section exists, it must also fail closed whenever that module is platform-unavailable or lodge-disabled, without deleting the published page/version/section.
 - Page media must be owned by the same lodge or explicitly marked as platform-shared.
 - Managed content stores route targets or lodge-relative paths, not absolute lodge-domain URLs.
 - Page creation/deletion, publication state, navigation changes, template application, public-brand changes, and custom HTML changes are audited with actor, lodge, subject, and relevant before/after state.
@@ -80,7 +80,7 @@ The release includes a versioned, platform-owned default template that creates:
 - Officers placeholder.
 - Contact.
 
-The generated copy is Masonic-oriented but intentionally generic. It may describe fellowship, service, personal growth, and a welcoming place to learn about the lodge, but it must not invent the lodge's history, charities, officers, meeting schedule, or affiliations. Lodge-specific facts come from structured lodge data or remain clearly marked for administrator completion. Feature-backed sections display an intentional placeholder until their later module exists.
+The generated copy is Masonic-oriented but intentionally generic. It may describe fellowship, service, personal growth, and a welcoming place to learn about the lodge, but it must not invent the lodge's history, charities, officers, meeting schedule, or affiliations. Lodge-specific facts come from structured lodge data or remain clearly marked for administrator completion. Feature-backed sections display an intentional placeholder until their later module exists. After Phase 10, module-backed public renderers recheck effective module state and invalidate/suppress stale cached output; module enablement never publishes a section or navigation entry automatically.
 
 Phase 3 replaces the Officers placeholder's fallback with a lodge-isolated projection of current public officer assignments. The placeholder remains the Phase 2 behavior when no such data exists.
 

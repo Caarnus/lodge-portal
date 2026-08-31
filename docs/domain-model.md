@@ -12,7 +12,7 @@ Every persistent domain model must be classified as platform-owned, lodge-owned,
 - `Membership`: the relationship between a person and lodge. Phase 1 establishes only the minimum authorization-compatible structure.
 - Lodge role assignment: grants a user or linked person a platform-defined permission set within one lodge.
 - Registration: captures a selected home lodge for approval routing. It does not grant membership or authorization.
-- Feature definition/assignment: platform-defined functionality enabled per lodge. Phase 1 establishes the mechanism without premature module flags.
+- Feature definition/assignment: the Phase 1 platform-owned foundation that Phase 10 retrofits into the optional-module contract below. It is not authorization or CMS publication state.
 - Audit event: immutable record of a sensitive action and relevant before/after state.
 
 Lodge slugs are globally unique but may be changed by an authorized administrator. Person email addresses, when present directly on people, are globally unique.
@@ -69,3 +69,38 @@ Every event child repeats or derives lodge ownership and is validated against it
 One lodge may belong to several groups or none. Group-filtered discovery first builds each domain's authorized result set, then narrows by active lodge membership in selected group. Disabling lodge or group removes it from active discovery without destroying historical group membership.
 
 Lodge identity also includes optional public `meeting_schedule` free text, separate from meeting location. Platform-wide lodge discovery links to lodge's WorkingTools homepage only when published.
+
+## Optional Lodge Modules
+
+Only Scholarship, Store, Fundraisers, and Games use optional-module gating. Website/CMS, People, Events, Volunteer staffing, member portal/directory, Newsletters, Galleries, Ritualist Program, and Lodge groups/regional discovery remain baseline platform capabilities.
+
+- Module definition: platform-owned stable identity for a supported optional module.
+- Module availability: platform-owned decision allowing one lodge to use one module.
+- Lodge module preference: lodge-specific enabled/disabled choice, mutable only for an available module by an authorized lodge administrator.
+- Effective module state: derived as availability and lodge preference; it is not persisted as an independent source of truth.
+
+Module state is platform/lodge configuration. It is distinct from role permissions, resource authorization, and public CMS publication. Removing availability preserves the lodge preference. Either kind of disablement preserves all module records and ownership.
+
+## Scholarship
+
+Scholarship cycles, applications, answers, reviewer assignments, reviews, and applicant documents are lodge-owned and sensitive. Reviewers receive explicit lodge-scoped authority. Documents remain private and every read/download revalidates lodge, module state, and permission.
+
+## Store and Commerce
+
+- Product and product variant are lodge-owned catalog identities with presentation, price, active state, media, option, and inventory behavior.
+- Inventory records/adjustments remain attributable to one lodge and product/variant.
+- Order and order line are lodge-owned historical aggregates. Lines snapshot purchase-time description, variant, price, and quantity.
+- Customer/contact and fulfillment details are order snapshots needed for pickup or shipping, not global Person records.
+- Manual payment and fulfillment states belong to the lodge-owned order and allow future provider-neutral transaction associations without storing raw card data.
+
+Disabling Store retains catalog and order history. Public storefront publication remains an independent CMS decision.
+
+## Fundraising
+
+Fundraising campaign is lodge-owned and contains stable identity, content/media, goal, authoritative manual progress, dates, and lifecycle/history. Progress changes are auditable. A campaign may optionally associate lodge-owned Store products, but Store and Fundraisers remain independent modules. Store disablement removes purchasing actions without deleting or invalidating campaign history or associations.
+
+Future contribution/payment records must retain explicit lodge and campaign ownership. Initial manual progress is not a payment ledger and implies neither tax deductibility nor receipt behavior.
+
+## Games and Shared Content
+
+Game sessions and lodge-private question banks are lodge-owned. Platform/shared question banks are explicitly platform/shared reference content. Games module state controls a lodge's use of the engine and content; it does not transfer ownership or destroy/hide shared records at the platform boundary.
