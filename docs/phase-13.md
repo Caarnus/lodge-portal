@@ -37,11 +37,15 @@ When Fundraisers is ineffective, public campaign output/actions, administration,
 
 ## Future Payment Boundary
 
-Future contributions may reference provider-neutral transaction IDs/statuses and must remain attributable to one lodge. WorkingTools will not store/process raw card data. Provider selection and online payments are deferred; future webhook handling must be idempotent and lodge-aware.
+Future contributions may reference provider-neutral transaction IDs/statuses and must remain attributable to one lodge and campaign. Fundraisers consumes the shared lodge payment-provider configuration rather than owning provider credentials. A lodge may independently choose whether its connected provider and supported methods are enabled for Fundraisers, independently from Store, or may use only manual progress with no connection at all.
+
+WorkingTools remains authoritative for campaigns, goals, manual progress/contribution information, campaign state/history, and Store associations. The provider handles only the financial transaction. One lodge's campaign can never be charged through another lodge's merchant account or credentials, and no generic WorkingTools merchant account is a fallback. A bad or unavailable lodge connection fails closed for online contributions; the campaign continues to support its separately configured manual/offline workflow.
+
+WorkingTools will not collect, send through Laravel, or store raw payment credentials. Future provider-controlled checkout/tokenization and authenticated, idempotent, lodge-aware webhooks must validate the complete provider-connection/lodge/campaign-or-contribution chain before reconciliation. Provider selection, including the current Helcim candidate, and online payments remain deferred beyond Phase 13.
 
 ## Automated Tests
 
-Cover campaign ownership/lifecycle/slugs, manual progress validation/audit, accessible numeric projections, CMS publication, image ownership, multiple/history behavior, and cross-lodge identifiers. Test Fundraisers with Store unavailable, disabled, and enabled; Store with Fundraisers absent; product associations with matching/mismatched lodges; Store disablement preserving the campaign and removing purchase actions. Repeat enabled/lodge-disabled/platform-unavailable tests for direct URLs/APIs, jobs, cache/search/public projections, preservation, and restoration.
+Cover campaign ownership/lifecycle/slugs, manual progress validation/audit, accessible numeric projections, CMS publication, image ownership, multiple/history behavior, and cross-lodge identifiers. Test Fundraisers with Store unavailable, disabled, and enabled; Store with Fundraisers absent; product associations with matching/mismatched lodges; Store disablement preserving the campaign and removing purchase actions. Repeat enabled/lodge-disabled/platform-unavailable tests for direct URLs/APIs, jobs, cache/search/public projections, preservation, and restoration. A later online-payment phase adds isolated merchant-account, connection-failure, webhook/provider-identifier, and no-cross-lodge-fallback negative coverage.
 
 ## Manual Acceptance
 

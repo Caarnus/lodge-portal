@@ -14,6 +14,8 @@ Migrate applicable lodge identity/branding, public pages/sections/navigation/med
 - Fundraising campaigns, manual progress/history, media, and Store associations; and
 - Games banks/questions and lodge session history.
 
+When a future online-payment capability exists in the source, migrate only the lodge-specific provider connection configuration and safe reconciliation metadata needed to preserve the lodge-owned business history. Never migrate raw payment credentials. Validate that imported provider account/transaction references remain attached to the correct lodge and never create a shared or cross-lodge merchant fallback.
+
 The legacy Store and fundraiser are primitive inputs, not normative schema. Document transformations into the new aggregates and preserve business meaning/history without copying obsolete implementation quirks. Source data is never mutated.
 
 ## Cutover and Validation
@@ -22,7 +24,7 @@ Migration is repeatable in staging, uses explicit ownership mappings, records cl
 
 Validate module state separately from data presence: imported records do not imply availability or lodge enablement. Verify every imported optional-module record remains inaccessible when its effective state is false and returns under normal permissions/publication rules when re-enabled.
 
-Automated validation covers counts, required mappings, orphans, duplicate people, memberships, recurrence comparison, reservations/reminders/volunteers, media, private Scholarship ownership, Store totals/inventory/order history, Fundraiser progress/associations, Games ownership, account links, module states, direct identifiers, and cross-lodge isolation.
+Automated validation covers counts, required mappings, orphans, duplicate people, memberships, recurrence comparison, reservations/reminders/volunteers, media, private Scholarship ownership, Store totals/inventory/order history, Fundraiser progress/associations, Games ownership, account links, module states, direct identifiers, and cross-lodge isolation. If provider configuration exists, include per-lodge connection/account identity, safe transaction correlation, encrypted-secret migration policy, and no cross-lodge merchant-account mapping.
 
 ## Manual Acceptance
 

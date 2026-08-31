@@ -92,3 +92,9 @@ Required cases prove:
 - re-enablement restores only normally authorized and published access to preserved data.
 
 Phase 10 validates the generic service with non-user-facing test fixtures. Phases 11–14 repeat the contract with Scholarship, Store, Fundraisers, and Games records and add their domain-specific regression cases.
+
+## Future payment-provider coverage
+
+When an online-payment phase is approved, fixtures include lodges with separate merchant accounts, connection states, and per-module payment methods. Tests prove that no request, checkout/session reference, provider transaction identifier, credential/token, webhook, queue job, cache entry, or retry can charge or reconcile Lodge A through Lodge B's merchant account.
+
+Cover disconnected, disabled, unavailable, invalid, misconfigured, and transiently failing connections. Online payment must fail closed or expose only explicitly configured offline methods; it must never use a shared platform or another lodge's merchant account as fallback. Verify direct provider payload/identifier attacks, signature/authentication failure, duplicate and practical out-of-order webhooks, safe reconciliation to the correct lodge-owned order/campaign, audit diagnostics, and absence of raw payment credentials from requests, logs, storage, and serialized props.

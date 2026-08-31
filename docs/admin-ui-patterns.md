@@ -120,6 +120,15 @@ Use this structure, in order:
 - Module settings never substitute for module-data permissions, and module enablement
   never automatically creates a public page, CMS section, or navigation entry.
 
+### Future payment-provider settings
+
+- Show the supported provider, masked lodge merchant-account identity, connection state,
+  enabled payment methods, and separate Store/Fundraiser online-payment preferences. Do
+  not display or treat provider credentials as ordinary editable form fields.
+- Platform support views distinguish integration availability and bounded diagnostics from
+  lodge-owned merchant-account configuration. A missing or failed connection clearly
+  leaves only that lodge's explicitly configured offline methods available.
+
 ### Filters
 
 - Apply text search with a short debounce (about 300–450 ms).

@@ -22,3 +22,5 @@
 - Enforce effective module state on the server at every route/API/service/public-projection boundary. UI and navigation filtering are never the security boundary.
 - Keep module availability, lodge enabled preference, effective state, authorization, and CMS publication as distinct concepts. Do not overload one boolean with all five meanings.
 - Every optional-module change includes enabled, lodge-disabled, platform-unavailable, direct URL/API, and cross-lodge negative tests. Where applicable, cover jobs, cache, search, public projections, data preservation, and restored access after re-enablement.
+- Keep payment-provider adapters and lodge connection configuration separate from Store and Fundraiser aggregates. Do not scatter provider-specific credentials or assumptions through order, campaign, controller, or UI code.
+- Never accept, relay through Laravel, log, or persist raw card, CVV, avoidable expiration, bank-account, or routing credentials. Future checkout must use provider-controlled capture/tokenization, and webhook handlers must verify signatures, be idempotent, and revalidate the complete lodge/provider/business-record chain.

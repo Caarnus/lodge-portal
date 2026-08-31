@@ -39,11 +39,15 @@ Products, variants, inventory history, carts where retention is appropriate, ord
 
 ## Future Payment Extension Boundary
 
-The model may later associate provider-neutral payment attempts/transactions and statuses with a lodge-owned order. It must not assume manual payments are the only future method, store/process raw card details, mix funds between lodges, or make a provider dependency part of Phase 12. Provider choice is deferred. Future webhooks must be idempotent, lodge-aware, and map provider transaction identities to the correct lodge-owned aggregate.
+The model may later associate provider-neutral payment attempts/transactions and statuses with a lodge-owned order. A future platform-supported provider is connected independently by each lodge to that lodge's own merchant account. Store consumes the shared lodge payment configuration; it does not own provider credentials. A lodge can independently enable online payment for Store, choose supported methods, or continue with only cash, check, and pay-at-pickup/manual payment.
+
+WorkingTools remains authoritative for products, variants, inventory, carts, orders, order lines, customer/fulfillment snapshots, and fulfillment state. The provider handles only the financial transaction. WorkingTools must never route one lodge's Store payment through another lodge's merchant account or credentials, and it has no generic platform merchant-account fallback. A disconnected, disabled, unavailable, invalid, misconfigured, or failing connection fails closed for online payment; only explicitly configured offline methods may remain available.
+
+Future checkout sends sensitive credentials directly from the browser to a provider-hosted/provider-controlled checkout or tokenization component. WorkingTools stores only safe reconciliation identifiers and metadata. Webhooks verify provider authentication, are idempotent and lodge-aware, and validate the complete provider-connection/lodge/order chain before mutation. A transaction ID alone cannot update a foreign-lodge order. Helcim is a current connected-account candidate, not a required dependency. Provider choice and online-payment implementation remain deferred beyond Phase 12.
 
 ## Automated Tests
 
-Cover two-lodge product/media/variant/inventory/order isolation; price and order snapshots; cart revalidation; inventory boundaries; pickup/shipping; cash/check/pay-at-pickup; payment and fulfillment transitions; permissions; direct identifiers; public CMS publication; and responsive critical paths. Repeat representative public/admin/API/job/cache/search paths for Store enabled, lodge-disabled, and platform-unavailable. Verify disabling retains products/orders and re-enabling restores them.
+Cover two-lodge product/media/variant/inventory/order isolation; price and order snapshots; cart revalidation; inventory boundaries; pickup/shipping; cash/check/pay-at-pickup; payment and fulfillment transitions; permissions; direct identifiers; public CMS publication; and responsive critical paths. Repeat representative public/admin/API/job/cache/search paths for Store enabled, lodge-disabled, and platform-unavailable. Verify disabling retains products/orders and re-enabling restores them. A later online-payment phase adds separate-merchant-account, connection-failure, provider-payload/webhook, and no-cross-lodge-fallback negative coverage.
 
 ## Manual Acceptance
 

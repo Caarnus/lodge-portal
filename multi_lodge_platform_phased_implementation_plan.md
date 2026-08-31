@@ -1903,7 +1903,7 @@ At `md` and above administration uses the established stable table layout; below
 
 If Store is ineffective, public/admin/API/job/cache/search output fails closed and a published Store CMS section exposes no products or purchase links. Products, inventory, orders, lines, snapshots, and history remain stored and return subject to permission/publication after re-enablement.
 
-Online card payment, carrier rates/labels, tax engines, accounting integrations, and discounts are excluded. Preserve a provider-neutral future payment extension point, never store raw card data, keep each lodge's financial relationship attributable, and require future webhooks to be idempotent and lodge-aware. Provider selection is deferred.
+Online card payment, carrier rates/labels, tax engines, accounting integrations, and discounts are excluded. Preserve a provider-neutral future payment extension point with independently connected merchant accounts for each lodge. Store consumes a shared lodge payment-provider configuration rather than owning credentials; WorkingTools remains authoritative for catalog, inventory, carts, orders, and fulfillment. Never store raw payment credentials, never route a lodge transaction through another lodge or a generic platform merchant account, and require future webhooks to be authenticated, idempotent, lodge-aware, and ownership-chain validated. Provider selection is deferred; Helcim is a current connected-account candidate, not a dependency.
 
 See the complete implementation specification in [Phase 12](docs/phase-12.md).
 
@@ -1919,7 +1919,7 @@ Support the Newburgh-style manually maintained fundraising progress board as a f
 
 Lodge-owned campaigns support stable identity/slug, title, description, optional image, goal, authoritative manual progress, useful dates, lifecycle, public display, and multiple campaigns/history. Numeric progress remains visible and accessible. A campaign may optionally associate same-lodge Store products when both modules are effective.
 
-Store and Fundraisers are independent. If Store is disabled, the campaign and historical association remain while purchasing actions disappear. Fundraisers works fully as a manual progress board without Store. Future direct/offline/order/provider contribution sources may extend the domain, but initial progress is manual and no automatic accounting reconciliation, online payment, tax-deductibility claim, or tax-receipt behavior is required.
+Store and Fundraisers are independent. If Store is disabled, the campaign and historical association remain while purchasing actions disappear. Fundraisers works fully as a manual progress board without Store or a payment-provider connection. Future direct/offline/order/provider contribution sources may extend the domain, but initial progress is manual and no automatic accounting reconciliation, online payment, tax-deductibility claim, or tax-receipt behavior is required. Future provider-backed contributions use the same lodge-separated payment-provider configuration as Store, never provider credentials on campaign records.
 
 Public presentation uses the existing CMS. Disablement fails closed across public/admin/API/job/cache/search paths without deleting campaigns, progress, media, or associations.
 
@@ -2068,6 +2068,7 @@ Migrate applicable Newburgh data including, where present:
 - Optional-module availability and lodge enabled preferences.
 - Store products, variants, inventory, orders, fulfillment/payment state, and historical snapshots.
 - Fundraising campaigns, manual progress/history, and Store associations.
+- Lodge-specific payment-provider connection/configuration and safe transaction reconciliation metadata where a future source system contains them.
 
 ### Domain and URL Cutover
 
@@ -2088,6 +2089,7 @@ Support:
 - Recurrence exceptions must be verified carefully.
 - A final read-only or maintenance window may be used for final synchronization.
 - Transform primitive legacy Store/Fundraiser data into the new domain rather than treating old schema quirks as requirements.
+- Do not migrate raw payment credentials. Preserve explicit lodge/provider account and transaction correlation only when it can be validated without creating a cross-lodge or shared-merchant fallback.
 
 ## 19.5 Acceptance Criteria
 
@@ -2108,6 +2110,7 @@ A tester can verify:
 13. Required legacy URLs redirect or remain functional.
 14. Module settings and optional-module data retain correct ownership and disabled-state behavior.
 15. Store order history and Fundraiser progress/associations are transformed and validated.
+16. Any migrated payment-provider metadata remains mapped to the correct lodge-specific merchant relationship.
 
 ## 19.6 Automated Test Requirements
 
@@ -2125,6 +2128,7 @@ Create migration validation tests or scripts for:
 - Scholarship ownership.
 - User-account linkage.
 - Optional-module state, Store totals/inventory/history, Fundraiser progress/associations, and Games ownership.
+- Where applicable, lodge-specific provider/account mapping, safe transaction correlation, and no cross-lodge merchant-account association.
 
 ## 19.7 Non-Goals
 
@@ -2169,6 +2173,10 @@ A platform administrator can:
 10. Publish.
 
 After onboarding, the initial lodge administrator may enable/disable available modules using `lodge_modules.manage`. The platform administrator's availability choice is not the lodge preference, and onboarding never auto-publishes a module-backed CMS section.
+
+### Future Payment-Provider Onboarding
+
+Online payment remains outside the current Store and Fundraising phases. When later implemented, platform administration may configure supported provider integrations and make them available for lodge connection. An authorized lodge administrator connects only that lodge's independent merchant account, sees its connection status, enables supported payment methods, and separately opts Store and/or Fundraisers into online payment. No connection is required for manual/offline Store or Fundraiser workflows, and no absent/failed connection may use another lodge or a generic platform merchant account as fallback.
 
 ### Custom Domains
 
@@ -2273,6 +2281,7 @@ The following requirements apply to all applicable phases.
 - Lodge administrators may only administer explicitly authorized lodges.
 - Platform roles and lodge roles must remain distinct.
 - Optional-module state is a prerequisite, not authorization. Availability or enablement grants no permission, and permission never bypasses unavailable/disabled state.
+- Future payment-provider availability, a lodge connection, online-payment preferences, and Store/Fundraiser permissions are separate conditions. Platform administration supports integrations but does not normally control lodge-deposited funds.
 
 ## 21.2 Tenant Isolation
 
@@ -2287,6 +2296,7 @@ Every applicable feature must test:
 - Cached data.
 - API responses.
 - Optional-module state and direct Scholarship, Store, Fundraiser, and lodge-private Games identifiers.
+- Future payment-provider account, credential/token, checkout/session, transaction, and webhook identifiers; no identifier may route or reconcile a lodge through another lodge's merchant relationship.
 
 ## 21.3 Auditability
 
@@ -2319,6 +2329,7 @@ Every lodge-related job must explicitly retain enough context to identify:
 
 Jobs must not rely on an HTTP request's current-lodge state.
 Jobs for optional modules reload current module state and stop safely when the module is ineffective.
+Future payment jobs and webhooks also reload and validate the provider connection, lodge, and order/campaign chain; they are idempotent and authenticated according to the provider mechanism.
 
 ## 21.5 Email
 
@@ -2711,6 +2722,7 @@ Established rules are:
 - Fundraisers initially supports authoritative manual progress without Store. Store and Fundraisers are independent modules.
 - Campaign/product associations are optional and historical relationships survive Store disablement.
 - Future payments remain provider-neutral, lodge-attributable, and require idempotent lodge-aware webhooks; provider selection is deferred.
+- Each future online payment uses the explicitly connected merchant account for its lodge. WorkingTools has no implicit shared merchant-account fallback, and Store/Fundraisers do not own provider credentials.
 
 ## 26.12 Games
 

@@ -39,6 +39,12 @@
 37. Module jobs reload lodge ownership and effective state; search, cache, public projections, downloads, and feature-backed CMS sections fail closed when ineffective.
 38. Disabling a module or revoking availability does not delete, reassign, anonymize, or unpublish its stored records as a side effect. Re-enablement restores only normally authorized/published access.
 39. Platform availability and lodge enabled preference are separate configuration values. Revoking availability does not erase the lodge preference.
+40. A lodge payment-provider connection has explicit lodge and provider ownership. Provider account identifiers, encrypted credentials/tokens, supported methods, checkout sessions, transactions, and webhook records are always resolved through that complete ownership chain.
+41. WorkingTools must never process a lodge's payment through another lodge's merchant account or credentials and has no implicit shared platform merchant-account fallback.
+42. A disconnected, disabled, unavailable, invalid, misconfigured, or failing lodge payment connection fails closed for online payment. Only payment methods explicitly configured by that lodge may remain available.
+43. A provider transaction/payment identifier, checkout/session identifier, or webhook payload never by itself authorizes a cross-lodge order, campaign, contribution, or payment-state mutation.
+44. Raw card, CVV, avoidable expiration, bank-account, and routing credentials never enter WorkingTools application storage or Laravel request processing. Provider-controlled checkout/tokenization handles sensitive credential capture.
+45. Payment-provider webhooks authenticate with the provider mechanism, are idempotent and lodge-aware, revalidate connection/lodge/business-record ownership, and retain bounded audit/diagnostic context.
 # Directory and profile ownership
 
 Directory requester authorization is evaluated from the route lodge, never `current_lodge_id`. A person-wide privacy setting belongs to the canonical person, while lodge-email preference belongs to a specific membership and its lodge. Self-service profile writes resolve the current user-to-person link server-side; submitted person or lodge identifiers never establish ownership.

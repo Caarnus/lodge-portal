@@ -54,6 +54,19 @@ Scholarship reviewers are explicitly lodge-scoped and are not module administrat
 
 These permissions are added with their module phases. The built-in lodge Administrator may receive the relevant module-data permissions when that module definition is introduced, but every use remains ineffective while the module is unavailable or lodge-disabled.
 
+## Future Payment-Provider Matrix
+
+| Action | Platform administrator | Authorized lodge administrator | Store/Fundraiser manager |
+|---|---:|---:|---:|
+| Configure supported provider/integration catalog and required platform partner credentials | Yes | No | No |
+| Make a provider integration available to a lodge | Yes | No | No |
+| View platform diagnostic connection state | Yes, bounded support projection | Own lodge only | No, unless separately granted lodge payment-settings permission |
+| Start/connect/disconnect own lodge merchant account | No, except explicit support workflow | Assigned lodge only, with future payment-settings permission | No, unless separately granted that permission |
+| Enable online payment/methods for Store or Fundraisers | No, except explicit support workflow | Assigned lodge only, with future payment-settings permission | No, unless separately granted that permission |
+| Manage products/orders/campaigns | Existing explicit module policy | Existing explicit module policy | Existing explicit module policy |
+
+The future payment-settings permission and provider integration remain outside Phases 12 and 13. Platform support may configure a supported integration or disable a compromised connection, but does not normally control a lodge's deposited funds. Lodge administrators may configure only their lodge's connection and methods. A payment-provider connection grants neither Store/Fundraiser data permission nor module-toggle authority.
+
 ## Public Website Matrix
 
 | Action | Public visitor | Platform administrator | User with `website.manage` | User with `website.publish` |

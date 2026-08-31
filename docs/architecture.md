@@ -84,7 +84,17 @@ Public lodge and group projections contain active lodge identity, explicitly pub
 
 Products, variants, inventory, orders, order lines, customer/fulfillment snapshots, and manual payment/fulfillment state are lodge-owned. Checkout reloads the lodge's effective Store state and authoritative price/inventory before order creation. Orders snapshot mutable catalog and customer facts needed for historical fulfillment. Public storefront output is a bounded projection through the existing versioned CMS and never appears merely because Store is enabled.
 
-Initial payments are cash, check, or pay-at-pickup/manual workflows. The domain leaves a provider-neutral extension point for future lodge-attributable transactions without accepting or storing raw card details. Any future webhook boundary must be idempotent, lodge-aware, and unable to mix lodge funds; provider choice is deferred.
+Initial payments are cash, check, or pay-at-pickup/manual workflows. The domain leaves a provider-neutral extension point for future lodge-attributable transactions without accepting or storing raw card details. Provider selection is deferred.
+
+## Lodge Payment-Provider Boundary
+
+Future online payments use a shared payment-provider integration boundary, not Store or Fundraiser credentials. Platform administration configures supported provider integrations and any required platform-level partner credentials, and may make an integration available to lodges. Every lodge independently connects its own merchant account/relationship, credentials or tokens, connection state, enabled state, and supported payment methods. The same lodge may enable online payment differently for Store and Fundraisers; no lodge is required to connect a provider to use either module.
+
+WorkingTools is authoritative for its lodge-owned catalog, inventory, carts, orders, fulfillment, campaigns, goals, manual progress, and history. The provider is authoritative only for the financial transaction. WorkingTools must never route one lodge's transaction through another lodge's merchant account or credentials, and it has no generic platform merchant account fallback. A disconnected, disabled, unavailable, invalid, misconfigured, or failing lodge connection causes online payment to fail closed; only the lodge's separately configured offline methods may remain usable.
+
+Customers submit sensitive payment data directly to a provider-hosted or provider-controlled checkout/tokenization component. Laravel never collects, forwards, or stores raw card numbers, CVV, avoidable expiration credentials, bank account numbers, or routing numbers. WorkingTools stores only safe reconciliation metadata tied to the explicit lodge/provider connection and lodge-owned business record.
+
+Future webhooks verify the provider's authentication mechanism, reload and validate the complete provider-connection/lodge/order-or-campaign ownership chain, are idempotent and safe against duplicate/out-of-order delivery where practical, and audit mismatches/failures. A provider transaction ID alone cannot select or mutate another lodge's order or campaign. Helcim's connected-account/integration-partner model is a current candidate, not a core-domain dependency or selected provider.
 
 ## Fundraising Boundary
 

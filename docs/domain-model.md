@@ -93,6 +93,8 @@ Scholarship cycles, applications, answers, reviewer assignments, reviews, and ap
 - Customer/contact and fulfillment details are order snapshots needed for pickup or shipping, not global Person records.
 - Manual payment and fulfillment states belong to the lodge-owned order and allow future provider-neutral transaction associations without storing raw card data.
 
+Payment-provider integration is a separate boundary from Store and Fundraisers. A platform-supported provider/integration may carry platform-level partner credentials where required and have a lodge-specific connection containing the explicit lodge, provider account identity, connection/enabled state, encrypted credentials/tokens, supported method categories, and encapsulated provider-specific options. Store/Fundraiser records reference only the safe provider-transaction/reconciliation information needed for their lodge-owned business records; they do not own credentials. One lodge's connection may never authorize use of another lodge's merchant account.
+
 Disabling Store retains catalog and order history. Public storefront publication remains an independent CMS decision.
 
 ## Fundraising
@@ -100,6 +102,8 @@ Disabling Store retains catalog and order history. Public storefront publication
 Fundraising campaign is lodge-owned and contains stable identity, content/media, goal, authoritative manual progress, dates, and lifecycle/history. Progress changes are auditable. A campaign may optionally associate lodge-owned Store products, but Store and Fundraisers remain independent modules. Store disablement removes purchasing actions without deleting or invalidating campaign history or associations.
 
 Future contribution/payment records must retain explicit lodge and campaign ownership. Initial manual progress is not a payment ledger and implies neither tax deductibility nor receipt behavior.
+
+Future provider-backed contributions reference the same lodge payment-provider boundary as Store and retain an explicit campaign correlation. Provider availability, lodge connection, payment-method configuration, and Store/Fundraiser online-payment preference remain distinct; no connection is required for manual progress.
 
 ## Games and Shared Content
 

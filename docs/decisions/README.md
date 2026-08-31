@@ -9,3 +9,4 @@
 - [Person-owned directory privacy with request-scoped projections](0007-person-owned-directory-privacy.md)
 - [Person-owned ritual discovery with lodge-scoped authorization](0008-person-owned-ritual-discovery.md)
 - [Separate optional-module availability, lodge preference, and authorization](0009-optional-lodge-module-state.md)
+- [Lodge-separated payment-provider connections](0010-lodge-separated-payment-provider-connections.md)
