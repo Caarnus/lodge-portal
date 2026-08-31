@@ -8,11 +8,6 @@ class EventCategory extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['is_active' => 'boolean'];
-    }
-
     public function lodges()
     {
         return $this->belongsToMany(Lodge::class)->withTimestamps();
@@ -21,5 +16,10 @@ class EventCategory extends Model
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
     }
 }

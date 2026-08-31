@@ -12,16 +12,9 @@ class PersonRitualSetting extends Model
     /** @use HasFactory<PersonRitualSettingFactory> */
     use HasFactory;
 
-    protected $guarded = [];
-
-    protected $primaryKey = 'person_id';
-
     public $incrementing = false;
-
-    protected function casts(): array
-    {
-        return ['visibility_scope' => RitualVisibilityScope::class];
-    }
+    protected $guarded = [];
+    protected $primaryKey = 'person_id';
 
     public function person()
     {
@@ -31,5 +24,10 @@ class PersonRitualSetting extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    protected function casts(): array
+    {
+        return ['visibility_scope' => RitualVisibilityScope::class];
     }
 }

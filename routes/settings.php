@@ -28,8 +28,8 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
     Route::get('settings/two-factor', function () {
         return Inertia::render('settings/TwoFactor', [
-            'enabled' => (bool) request()->user()->two_factor_secret,
-            'confirmed' => (bool) request()->user()->two_factor_confirmed_at,
+            'enabled' => (bool)request()->user()->two_factor_secret,
+            'confirmed' => (bool)request()->user()->two_factor_confirmed_at,
             'required' => config('security.admin_2fa_required'),
         ]);
     })->name('two-factor.settings');

@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Domain\Directory\DirectoryAccess;
-use App\Domain\Ritual\RitualProgress;
 use App\Domain\Ritual\RitualAssistanceAccess;
+use App\Domain\Ritual\RitualProgress;
 use App\Enums\EventOccurrenceStatus;
 use App\Enums\EventReservationStatus;
 use App\Enums\EventStatus;
@@ -67,14 +67,14 @@ class DashboardService
         ];
     }
 
-    private function owned($query, User $user, ?int $personId)
-    {
-        return $personId ? $query->where('user_id', $user->id)->where('person_id', $personId) : $query->whereRaw('1 = 0');
-    }
-
     private function occurrence(EventOccurrence $occurrence): array
     {
         return ['id' => $occurrence->id, 'event' => $occurrence->event->title, 'lodge' => $occurrence->lodge->name, 'starts_at' => $occurrence->starts_at, 'time_zone' => $occurrence->event->time_zone, 'url' => route('public.events.show', [$occurrence->lodge->slug, $occurrence->id])];
+    }
+
+    private function owned($query, User $user, ?int $personId)
+    {
+        return $personId ? $query->where('user_id', $user->id)->where('person_id', $personId) : $query->whereRaw('1 = 0');
     }
 
     private function ritualSummary(User $user): ?array
@@ -83,7 +83,7 @@ class DashboardService
         if (!$person || $person->trashed() || $person->is_deceased || $person->merged_at) return null;
 
         $projection = $this->ritual->projection($person);
-        $active = $person->ritualProficiencies()->whereHas('part', fn ($part) => $part->where('is_active', true)->whereHas('category', fn ($category) => $category->where('is_active', true)));
+        $active = $person->ritualProficiencies()->whereHas('part', fn($part) => $part->where('is_active', true)->whereHas('category', fn($category) => $category->where('is_active', true)));
 
         return [
             'current_total' => $projection['current_total'],

@@ -1,1 +1,1 @@
-export { default as SearchableSelect } from "./SearchableSelect.vue";
+export {default as SearchableSelect} from "./SearchableSelect.vue";

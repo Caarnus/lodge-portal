@@ -1,26 +1,16 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Head, router } from "@inertiajs/vue3";
-import { ChevronDown } from "lucide-vue-next";
-import { ref } from "vue";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Collapsible, CollapsibleContent, CollapsibleTrigger,} from "@/components/ui/collapsible";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Head, router} from "@inertiajs/vue3";
+import {ChevronDown} from "lucide-vue-next";
+import {ref} from "vue";
 
 const props = defineProps<{
     categories: any[];
@@ -48,7 +38,7 @@ const selectedWindows = ref(
         ),
     ),
 );
-const localProficiencies = ref<Record<string, any>>({ ...props.proficiencies });
+const localProficiencies = ref<Record<string, any>>({...props.proficiencies});
 const saving = ref<Record<string, boolean>>({});
 const errors = ref<Record<string, string>>({});
 const versions = new Map<number, number>();
@@ -84,8 +74,8 @@ const failureMessage = async (response: Response) => {
 };
 const update = (part: any, values: any) => {
     const key = String(part.id);
-    const previous = { ...saved(part) };
-    const next = { ...previous, ...values };
+    const previous = {...saved(part)};
+    const next = {...previous, ...values};
     const version = (versions.get(part.id) ?? 0) + 1;
     versions.set(part.id, version);
     localProficiencies.value[key] = next;
@@ -134,8 +124,8 @@ const completion = (part: any) =>
     !saved(part).performed_for_credit
         ? "not_completed"
         : saved(part).willing_to_assist
-          ? "completed_and_willing"
-          : "completed";
+            ? "completed_and_willing"
+            : "completed";
 const completionLabel = (part: any) =>
     ({
         not_completed: "Not completed",
@@ -166,13 +156,13 @@ const advanceCompletion = (part: any) => {
     update(
         part,
         next === "not_completed"
-            ? { performed_for_credit: false, willing_to_assist: false }
+            ? {performed_for_credit: false, willing_to_assist: false}
             : {
-                  status: "proficient",
-                  performed_for_credit: true,
-                  confirm_performed_for_credit: true,
-                  willing_to_assist: next === "completed_and_willing",
-              },
+                status: "proficient",
+                performed_for_credit: true,
+                confirm_performed_for_credit: true,
+                willing_to_assist: next === "completed_and_willing",
+            },
     );
 };
 const toggleWindow = (day: number, daypart: string) => {
@@ -185,13 +175,13 @@ const saveAvailability = () =>
     router.put("/ritual/availability", {
         windows: [...selectedWindows.value].map((key) => {
             const [day_of_week, daypart] = key.split(":");
-            return { day_of_week: Number(day_of_week), daypart };
+            return {day_of_week: Number(day_of_week), daypart};
         }),
     });
 </script>
 
 <template>
-    <Head title="Ritual" />
+    <Head title="Ritual"/>
     <AppLayout :breadcrumbs="[{ title: 'Ritual', href: '/ritual' }]">
         <main class="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
             <p
@@ -202,52 +192,72 @@ const saveAvailability = () =>
                 {{ Object.values(errors).join(" ") }}
             </p>
             <PageHeader
-                title="Ritual progress"
                 description="Track your self-reported ritual knowledge, open-lodge credit, and general availability."
+                title="Ritual progress"
             >
                 <template #actions
-                    ><Badge
-                        >{{ progress.current_total }} current points</Badge
-                    ></template
+                >
+                    <Badge
+                    >{{ progress.current_total }} current points
+                    </Badge
+                    >
+                </template
                 >
             </PageHeader>
             <Card
-                ><CardHeader
-                    ><CardTitle>Visibility and availability</CardTitle
-                    ><CardDescription
-                        >Choose who can discover your ritual
-                        availability.</CardDescription
-                    ></CardHeader
-                ><CardContent>
+            >
+                <CardHeader
+                >
+                    <CardTitle>Visibility and availability
+                    </CardTitle
+                    >
+                    <CardDescription
+                    >Choose who can discover your ritual
+                        availability.
+                    </CardDescription
+                    >
+                </CardHeader
+                >
+                <CardContent>
                     <select v-model="visibilityScope" class="field-input">
                         <option value="hidden">Hidden</option>
                         <option value="own_lodge">Own lodges</option>
                         <option value="participating_lodges">
                             WorkingTools lodges
-                        </option></select
+                        </option>
+                    </select
                     ><textarea
-                        v-model="note"
-                        class="field-input mt-3 min-h-24"
-                        maxlength="500"
-                        placeholder="General availability note (visible only in ritual search)"
-                    /><Button class="mt-3" @click="saveSettings">
+                    v-model="note"
+                    class="field-input mt-3 min-h-24"
+                    maxlength="500"
+                    placeholder="General availability note (visible only in ritual search)"
+                />
+                    <Button class="mt-3" @click="saveSettings">
                         Save visibility
                     </Button>
                     <p class="mt-2 text-xs text-muted-foreground">
                         Availability is informational only and creates no
                         commitment, booking, or assignment.
                     </p>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
             <Card
-                ><CardHeader
-                    ><CardTitle>General availability</CardTitle
-                    ><CardDescription>
+            >
+                <CardHeader
+                >
+                    <CardTitle>General availability
+                    </CardTitle
+                    >
+                    <CardDescription>
                         Choose broad weekday/daypart windows. This is not a
                         reservation or commitment.
-                    </CardDescription></CardHeader
-                ><CardContent
-                    ><div class="space-y-3 md:hidden">
+                    </CardDescription>
+                </CardHeader
+                >
+                <CardContent
+                >
+                    <div class="space-y-3 md:hidden">
                         <div
                             v-for="(day, index) in days"
                             :key="day"
@@ -261,12 +271,12 @@ const saveAvailability = () =>
                                     class="flex flex-col items-center gap-2 rounded-md border border-border/50 bg-background px-2 py-3 text-center text-xs capitalize"
                                 >
                                     <Checkbox
+                                        :aria-label="`${day} ${daypart}`"
                                         :checked="
                                             selectedWindows.has(
                                                 `${index + 1}:${daypart}`,
                                             )
                                         "
-                                        :aria-label="`${day} ${daypart}`"
                                         @update:checked="
                                             toggleWindow(index + 1, daypart)
                                         "
@@ -279,57 +289,64 @@ const saveAvailability = () =>
                     <div class="hidden overflow-x-auto md:block">
                         <table class="w-full min-w-[480px] text-sm">
                             <thead>
-                                <tr>
-                                    <th class="p-2 text-left">Day</th>
-                                    <th
-                                        v-for="daypart in dayparts"
-                                        :key="daypart"
-                                        class="p-2 capitalize"
-                                    >
-                                        {{ daypart }}
-                                    </th>
-                                </tr>
+                            <tr>
+                                <th class="p-2 text-left">Day</th>
+                                <th
+                                    v-for="daypart in dayparts"
+                                    :key="daypart"
+                                    class="p-2 capitalize"
+                                >
+                                    {{ daypart }}
+                                </th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(day, index) in days" :key="day">
-                                    <th class="p-2 text-left">{{ day }}</th>
-                                    <td
-                                        v-for="daypart in dayparts"
-                                        :key="daypart"
-                                        class="p-2 text-center"
-                                    >
-                                        <Checkbox
-                                            :checked="
+                            <tr v-for="(day, index) in days" :key="day">
+                                <th class="p-2 text-left">{{ day }}</th>
+                                <td
+                                    v-for="daypart in dayparts"
+                                    :key="daypart"
+                                    class="p-2 text-center"
+                                >
+                                    <Checkbox
+                                        :aria-label="`${day} ${daypart}`"
+                                        :checked="
                                                 selectedWindows.has(
                                                     `${index + 1}:${daypart}`,
                                                 )
                                             "
-                                            :aria-label="`${day} ${daypart}`"
-                                            @update:checked="
+                                        @update:checked="
                                                 toggleWindow(index + 1, daypart)
                                             "
-                                        />
-                                    </td>
-                                </tr>
+                                    />
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                     <Button class="mt-4" @click="saveAvailability">
                         Save availability
                     </Button>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
 
             <Card
-                ><CardHeader
-                    ><CardTitle>Completed in an open lodge</CardTitle
-                    ><CardDescription>
+            >
+                <CardHeader
+                >
+                    <CardTitle>Completed in an open lodge
+                    </CardTitle
+                    >
+                    <CardDescription>
                         Click a completion button to cycle: not completed,
                         completed from memory in an open lodge, then completed
                         and willing to assist. The last state does not accept an
                         assignment.
-                    </CardDescription></CardHeader
-                ><CardContent>
+                    </CardDescription>
+                </CardHeader
+                >
+                <CardContent>
                     <Collapsible
                         v-for="(category, categoryIndex) in categories"
                         :key="category.id"
@@ -339,22 +356,22 @@ const saveAvailability = () =>
                     >
                         <CollapsibleTrigger as-child>
                             <button
-                                type="button"
                                 class="flex w-full items-center justify-between gap-3 p-4 text-left"
+                                type="button"
                             >
                                 <span>
                                     <span class="block font-semibold">{{
-                                        category.name
-                                    }}</span>
+                                            category.name
+                                        }}</span>
                                     <span
                                         class="block text-sm text-muted-foreground"
-                                        >{{ category.parts.length }} ritual
+                                    >{{ category.parts.length }} ritual
                                         parts</span
                                     >
                                 </span>
                                 <ChevronDown
-                                    class="size-4 shrink-0 transition-transform"
                                     :class="open && 'rotate-180'"
+                                    class="size-4 shrink-0 transition-transform"
                                 />
                             </button>
                         </CollapsibleTrigger>
@@ -380,15 +397,15 @@ const saveAvailability = () =>
                                         </p>
                                     </div>
                                     <button
-                                        type="button"
-                                        class="flex min-h-16 w-full flex-col items-start justify-center rounded-md border px-3 py-2 text-left text-sm transition-colors md:w-64"
-                                        :class="completionButtonClass(part)"
                                         :aria-label="`${part.name}: ${completionLabel(part)}. Click to change.`"
+                                        :class="completionButtonClass(part)"
+                                        class="flex min-h-16 w-full flex-col items-start justify-center rounded-md border px-3 py-2 text-left text-sm transition-colors md:w-64"
+                                        type="button"
                                         @click="advanceCompletion(part)"
                                     >
                                         <span
                                             class="text-xs text-muted-foreground"
-                                            >Open-lodge completion</span
+                                        >Open-lodge completion</span
                                         ><span class="font-medium">{{
                                             completionLabel(part)
                                         }}</span>
@@ -397,17 +414,24 @@ const saveAvailability = () =>
                             </div>
                         </CollapsibleContent>
                     </Collapsible>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
 
             <Card
-                ><CardHeader
-                    ><CardTitle>Study and proficiency</CardTitle
-                    ><CardDescription>
+            >
+                <CardHeader
+                >
+                    <CardTitle>Study and proficiency
+                    </CardTitle
+                    >
+                    <CardDescription>
                         Set your current self-reported knowledge and learning
                         interest.
-                    </CardDescription></CardHeader
-                ><CardContent>
+                    </CardDescription>
+                </CardHeader
+                >
+                <CardContent>
                     <Collapsible
                         v-for="(category, categoryIndex) in categories"
                         :key="category.id"
@@ -417,22 +441,22 @@ const saveAvailability = () =>
                     >
                         <CollapsibleTrigger as-child>
                             <button
-                                type="button"
                                 class="flex w-full items-center justify-between gap-3 p-4 text-left"
+                                type="button"
                             >
                                 <span>
                                     <span class="block font-semibold">{{
-                                        category.name
-                                    }}</span>
+                                            category.name
+                                        }}</span>
                                     <span
                                         class="block text-sm text-muted-foreground"
-                                        >{{ category.parts.length }} ritual
+                                    >{{ category.parts.length }} ritual
                                         parts</span
                                     >
                                 </span>
                                 <ChevronDown
-                                    class="size-4 shrink-0 transition-transform"
                                     :class="open && 'rotate-180'"
+                                    class="size-4 shrink-0 transition-transform"
                                 />
                             </button>
                         </CollapsibleTrigger>
@@ -452,9 +476,9 @@ const saveAvailability = () =>
                                         <div class="block w-full">
                                             <Label>Status</Label>
                                             <select
-                                                class="field-input mt-1"
                                                 :class="statusSelectClass(part)"
                                                 :value="saved(part).status"
+                                                class="field-input mt-1"
                                                 @change="
                                                     update(part, {
                                                         status: (
@@ -477,13 +501,13 @@ const saveAvailability = () =>
                                         <div class="block w-full">
                                             <Label>First proficient</Label>
                                             <Input
-                                                type="date"
-                                                class="mt-1"
                                                 :value="
                                                     saved(part)
                                                         .first_marked_proficient_on ??
                                                     ''
                                                 "
+                                                class="mt-1"
+                                                type="date"
                                                 @change="
                                                     update(part, {
                                                         first_marked_proficient_on:
@@ -498,10 +522,11 @@ const saveAvailability = () =>
                                             class="block w-full md:col-span-2 xl:col-span-1"
                                         >
                                             <Label
-                                                >Interested in learning</Label
+                                            >Interested in learning</Label
                                             >
                                             <label class="checkbox-field mt-2"
-                                                ><Checkbox
+                                            >
+                                                <Checkbox
                                                     :checked="
                                                         saved(part)
                                                             .interested_in_learning
@@ -518,8 +543,8 @@ const saveAvailability = () =>
                                         </div>
                                     </div>
                                     <textarea
-                                        class="field-input min-h-20 text-sm"
                                         :value="saved(part).notes ?? ''"
+                                        class="field-input min-h-20 text-sm"
                                         maxlength="2000"
                                         placeholder="Private notes"
                                         @change="
@@ -534,8 +559,10 @@ const saveAvailability = () =>
                                 </div>
                             </div>
                         </CollapsibleContent>
-                    </Collapsible> </CardContent
-            ></Card>
+                    </Collapsible>
+                </CardContent
+                >
+            </Card>
             <Collapsible
                 v-if="progress.credited_retired_parts.length"
                 v-slot="{ open }"
@@ -543,12 +570,12 @@ const saveAvailability = () =>
                 <Card class="overflow-hidden">
                     <CollapsibleTrigger as-child>
                         <button
-                            type="button"
                             class="flex w-full items-center justify-between gap-3 p-6 text-left"
+                            type="button"
                         >
                             <span>
                                 <span class="block font-semibold"
-                                    >Retired credited parts</span
+                                >Retired credited parts</span
                                 >
                                 <span
                                     class="block text-sm text-muted-foreground"
@@ -564,8 +591,8 @@ const saveAvailability = () =>
                                 </span>
                             </span>
                             <ChevronDown
-                                class="size-4 shrink-0 transition-transform"
                                 :class="open && 'rotate-180'"
+                                class="size-4 shrink-0 transition-transform"
                             />
                         </button>
                     </CollapsibleTrigger>

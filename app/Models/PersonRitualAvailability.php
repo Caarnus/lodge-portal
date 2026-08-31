@@ -14,16 +14,16 @@ class PersonRitualAvailability extends Model
 
     protected $guarded = [];
 
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
+
     protected function casts(): array
     {
         return [
             'daypart' => RitualDaypart::class,
             'is_enabled' => 'boolean',
         ];
-    }
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class);
     }
 }

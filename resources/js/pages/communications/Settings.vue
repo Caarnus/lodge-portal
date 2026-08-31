@@ -1,8 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {Head, Link, useForm} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{ lodge: any; settings: any }>();
 const form = useForm({
     sender_display_name: props.settings.sender_display_name ?? "",
@@ -12,11 +13,11 @@ const form = useForm({
 });
 </script>
 <template>
-    <Head title="Communication settings" />
+    <Head title="Communication settings"/>
     <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
         <PageHeader
-            title="Communication settings"
             description="Used for future lodge communication headers and replies."
+            title="Communication settings"
         >
             <template #actions>
                 <Link
@@ -34,25 +35,25 @@ const form = useForm({
             "
         >
             <label class="field-label"
-                >Sender display name<input
-                    v-model="form.sender_display_name"
-                    class="field-input" /></label
+            >Sender display name<input
+                v-model="form.sender_display_name"
+                class="field-input"/></label
             ><label class="field-label"
-                >Reply-to email<input
-                    v-model="form.reply_to_email"
-                    type="email"
-                    class="field-input" /></label
-            ><label class="field-label"
-                >Secretary email<input
-                    v-model="form.secretary_email"
-                    type="email"
-                    class="field-input" /></label
-            ><label class="field-label"
-                >Newsletter contact email<input
-                    v-model="form.newsletter_contact_email"
-                    type="email"
-                    class="field-input"
-            /></label>
+        >Reply-to email<input
+            v-model="form.reply_to_email"
+            class="field-input"
+            type="email"/></label
+        ><label class="field-label"
+        >Secretary email<input
+            v-model="form.secretary_email"
+            class="field-input"
+            type="email"/></label
+        ><label class="field-label"
+        >Newsletter contact email<input
+            v-model="form.newsletter_contact_email"
+            class="field-input"
+            type="email"
+        /></label>
             <p v-if="Object.keys(form.errors).length" class="text-destructive">
                 {{ Object.values(form.errors)[0] }}
             </p>

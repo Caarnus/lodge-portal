@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import { useForm } from "@inertiajs/vue3";
-import { formatLodgeDate } from "@/utils/date";
+<script lang="ts" setup>
+import {useForm} from "@inertiajs/vue3";
+import {formatLodgeDate} from "@/utils/date";
 
 const props = defineProps<{
     section: any;
@@ -26,7 +26,7 @@ const displayedEvents = (section: any) =>
             (item) =>
                 !section.configuration.event_category_id ||
                 item.event_category_id ===
-                    section.configuration.event_category_id,
+                section.configuration.event_category_id,
         )
         .slice(0, section.configuration.maximum_items ?? 6);
 const displayedGalleries = (section: any) => {
@@ -54,7 +54,6 @@ const sendContact = () =>
 <template>
     <section
         v-if="section.type === 'hero'"
-        class="relative isolate overflow-hidden border-b-4 px-5 py-24 text-center sm:py-32"
         :style="{
             backgroundColor: lodge.primary_color,
             borderColor: lodge.secondary_color,
@@ -62,11 +61,12 @@ const sendContact = () =>
                 ? '#ffffff'
                 : primaryForeground,
         }"
+        class="relative isolate overflow-hidden border-b-4 px-5 py-24 text-center sm:py-32"
     >
         <img
             v-if="asset(section.configuration.media_id)"
-            :src="asset(section.configuration.media_id).url"
             :alt="asset(section.configuration.media_id).alt_text"
+            :src="asset(section.configuration.media_id).url"
             class="absolute inset-0 -z-20 size-full object-cover"
         />
         <div
@@ -98,8 +98,8 @@ const sendContact = () =>
     >
         <img
             v-if="asset(section.configuration.media_id)"
-            :src="asset(section.configuration.media_id).url"
             :alt="asset(section.configuration.media_id).alt_text"
+            :src="asset(section.configuration.media_id).url"
             class="w-full rounded-xl object-cover shadow-sm"
         />
         <figcaption
@@ -115,12 +115,12 @@ const sendContact = () =>
     >
         <img
             v-if="asset(section.configuration.media_id)"
-            :src="asset(section.configuration.media_id).url"
             :alt="asset(section.configuration.media_id).alt_text"
-            class="w-full rounded-xl object-cover"
             :class="{
                 'md:order-2': section.configuration.image_side === 'right',
             }"
+            :src="asset(section.configuration.media_id).url"
+            class="w-full rounded-xl object-cover"
         />
         <div>
             <h2 class="text-3xl font-bold">
@@ -143,18 +143,18 @@ const sendContact = () =>
                 <a
                     :href="link.url"
                     class="block px-4 py-3 font-medium hover:bg-muted"
-                    >{{ link.label }} →</a
+                >{{ link.label }} →</a
                 >
             </li>
         </ul>
     </section>
     <section
         v-else-if="section.type === 'call_to_action'"
-        class="mx-auto my-10 max-w-5xl rounded-xl px-6 py-10 text-center"
         :style="{
             backgroundColor: lodge.secondary_color,
             color: secondaryForeground,
         }"
+        class="mx-auto my-10 max-w-5xl rounded-xl px-6 py-10 text-center"
     >
         <h2 class="text-3xl font-bold">{{ section.configuration.heading }}</h2>
         <p v-if="section.configuration.body" class="mx-auto mt-3 max-w-2xl">
@@ -162,12 +162,12 @@ const sendContact = () =>
         </p>
         <a
             :href="section.configuration.url"
-            class="mt-6 inline-block rounded-md px-5 py-3 font-semibold"
             :style="{
                 backgroundColor: lodge.primary_color,
                 color: primaryForeground,
             }"
-            >{{ section.configuration.label }}</a
+            class="mt-6 inline-block rounded-md px-5 py-3 font-semibold"
+        >{{ section.configuration.label }}</a
         >
     </section>
     <section
@@ -187,13 +187,13 @@ const sendContact = () =>
             </p>
             <p>
                 <a :href="`mailto:${lodge.public_email}`" class="underline">{{
-                    lodge.public_email
-                }}</a>
+                        lodge.public_email
+                    }}</a>
             </p>
             <p v-if="lodge.public_phone">
                 <a :href="`tel:${lodge.public_phone}`" class="underline">{{
-                    lodge.public_phone
-                }}</a>
+                        lodge.public_phone
+                    }}</a>
             </p>
         </address>
         <form
@@ -203,49 +203,49 @@ const sendContact = () =>
         >
             <h3 class="text-xl font-semibold">Send us a message</h3>
             <label class="grid gap-1 text-sm font-medium"
-                >Name<input
-                    v-model="contactForm.name"
-                    autocomplete="name"
-                    required
-                    class="rounded-md border px-3 py-2"
-                /><span
-                    v-if="contactForm.errors.name"
-                    class="text-sm text-red-700"
-                    >{{ contactForm.errors.name }}</span
-                ></label
+            >Name<input
+                v-model="contactForm.name"
+                autocomplete="name"
+                class="rounded-md border px-3 py-2"
+                required
+            /><span
+                v-if="contactForm.errors.name"
+                class="text-sm text-red-700"
+            >{{ contactForm.errors.name }}</span
+            ></label
             >
             <label class="grid gap-1 text-sm font-medium"
-                >Email<input
-                    v-model="contactForm.email"
-                    type="email"
-                    autocomplete="email"
-                    required
-                    class="rounded-md border px-3 py-2"
-                /><span
-                    v-if="contactForm.errors.email"
-                    class="text-sm text-red-700"
-                    >{{ contactForm.errors.email }}</span
-                ></label
+            >Email<input
+                v-model="contactForm.email"
+                autocomplete="email"
+                class="rounded-md border px-3 py-2"
+                required
+                type="email"
+            /><span
+                v-if="contactForm.errors.email"
+                class="text-sm text-red-700"
+            >{{ contactForm.errors.email }}</span
+            ></label
             >
             <label class="grid gap-1 text-sm font-medium"
-                >Message<textarea
-                    v-model="contactForm.message"
-                    required
-                    rows="5"
-                    class="rounded-md border px-3 py-2"
-                ></textarea
-                ><span
-                    v-if="contactForm.errors.message"
-                    class="text-sm text-red-700"
-                    >{{ contactForm.errors.message }}</span
-                ></label
+            >Message<textarea
+                v-model="contactForm.message"
+                class="rounded-md border px-3 py-2"
+                required
+                rows="5"
+            ></textarea
+            ><span
+                v-if="contactForm.errors.message"
+                class="text-sm text-red-700"
+            >{{ contactForm.errors.message }}</span
+            ></label
             >
             <input
                 v-model="contactForm.website"
                 aria-hidden="true"
                 autocomplete="off"
-                tabindex="-1"
                 class="hidden"
+                tabindex="-1"
             />
             <p
                 v-if="contactForm.recentlySuccessful"
@@ -255,11 +255,11 @@ const sendContact = () =>
             </p>
             <button
                 :disabled="contactForm.processing"
-                class="w-fit rounded-md px-4 py-2 font-medium"
                 :style="{
                     backgroundColor: lodge.primary_color,
                     color: primaryForeground,
                 }"
+                class="w-fit rounded-md px-4 py-2 font-medium"
             >
                 Send message
             </button>
@@ -303,13 +303,13 @@ const sendContact = () =>
                 <h3 class="mt-1 text-xl font-bold">{{ officer.name }}</h3>
                 <p v-if="officer.email" class="mt-3">
                     <a :href="`mailto:${officer.email}`" class="underline">{{
-                        officer.email
-                    }}</a>
+                            officer.email
+                        }}</a>
                 </p>
                 <p v-if="officer.phone">
                     <a :href="`tel:${officer.phone}`" class="underline">{{
-                        officer.phone
-                    }}</a>
+                            officer.phone
+                        }}</a>
                 </p>
             </article>
         </div>
@@ -344,7 +344,7 @@ const sendContact = () =>
             >
                 <span
                     class="font-mono text-lg font-semibold text-muted-foreground"
-                    >{{ term.year }}</span
+                >{{ term.year }}</span
                 ><span class="text-lg font-medium">{{ term.name }}</span>
             </li>
         </ol>
@@ -374,7 +374,7 @@ const sendContact = () =>
                 <a
                     :href="`/l/${lodge.slug}/events/${event.id}`"
                     class="font-medium underline"
-                    >{{ event.title }}</a
+                >{{ event.title }}</a
                 >
                 <p class="text-sm text-muted-foreground">
                     {{ new Date(event.starts_at).toLocaleString() }}
@@ -388,7 +388,7 @@ const sendContact = () =>
             v-if="section.configuration.show_all_link"
             :href="`/l/${lodge.slug}/events`"
             class="mt-5 inline-block font-medium underline"
-            >View all events</a
+        >View all events</a
         >
     </section>
     <section
@@ -457,7 +457,7 @@ const sendContact = () =>
             <a
                 :href="`/lodges/${lodge.id}/directory`"
                 class="mt-5 inline-block font-medium underline"
-                >Open directory</a
+            >Open directory</a
             >
         </div>
     </section>
@@ -477,7 +477,7 @@ const sendContact = () =>
                 :key="album.slug"
                 :href="`/l/${lodge.slug}/galleries/${album.slug}?from=${encodeURIComponent(galleryPageSlug)}`"
                 class="rounded-xl border border-border/80 p-4 hover:bg-muted"
-                ><strong>{{ album.title }}</strong></a
+            ><strong>{{ album.title }}</strong></a
             >
         </div>
         <p v-else class="mt-3 text-muted-foreground">

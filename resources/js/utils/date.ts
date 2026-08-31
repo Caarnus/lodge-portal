@@ -10,10 +10,10 @@ export function formatLodgeDate(
     const date = new Date(`${value.slice(0, 10)}T12:00:00`);
     const options: Intl.DateTimeFormatOptions =
         format === "month_year"
-            ? { month: "long", year: "numeric" }
+            ? {month: "long", year: "numeric"}
             : format === "month_day_year"
-              ? { month: "long", day: "numeric", year: "numeric" }
-              : { day: "numeric", month: "long", year: "numeric" };
+                ? {month: "long", day: "numeric", year: "numeric"}
+                : {day: "numeric", month: "long", year: "numeric"};
 
     return new Intl.DateTimeFormat(undefined, options).format(date);
 }

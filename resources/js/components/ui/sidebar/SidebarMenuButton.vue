@@ -1,12 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Tooltip from "@/components/ui/tooltip/Tooltip.vue";
 import TooltipContent from "@/components/ui/tooltip/TooltipContent.vue";
 import TooltipTrigger from "@/components/ui/tooltip/TooltipTrigger.vue";
-import { computed, type Component } from "vue";
-import SidebarMenuButtonChild, {
-    type SidebarMenuButtonProps,
-} from "./SidebarMenuButtonChild.vue";
-import { useSidebar } from "./utils";
+import {type Component, computed} from "vue";
+import SidebarMenuButtonChild, {type SidebarMenuButtonProps,} from "./SidebarMenuButtonChild.vue";
+import {useSidebar} from "./utils";
 
 defineOptions({
     inheritAttrs: false,
@@ -15,8 +13,8 @@ defineOptions({
 const props = withDefaults(
     defineProps<
         SidebarMenuButtonProps & {
-            tooltip?: string | Component;
-        }
+        tooltip?: string | Component;
+    }
     >(),
     {
         as: "button",
@@ -25,10 +23,10 @@ const props = withDefaults(
     },
 );
 
-const { isMobile, state } = useSidebar();
+const {isMobile, state} = useSidebar();
 
 const delegatedProps = computed(() => {
-    const { tooltip, ...delegated } = props;
+    const {tooltip, ...delegated} = props;
     return delegated;
 });
 </script>
@@ -38,24 +36,24 @@ const delegatedProps = computed(() => {
         v-if="!tooltip"
         v-bind="{ ...delegatedProps, ...$attrs }"
     >
-        <slot />
+        <slot/>
     </SidebarMenuButtonChild>
 
     <Tooltip v-else>
         <TooltipTrigger as-child>
             <SidebarMenuButtonChild v-bind="{ ...delegatedProps, ...$attrs }">
-                <slot />
+                <slot/>
             </SidebarMenuButtonChild>
         </TooltipTrigger>
         <TooltipContent
-            side="right"
-            align="center"
             :hidden="state !== 'collapsed' || isMobile"
+            align="center"
+            side="right"
         >
             <template v-if="typeof tooltip === 'string'">
                 {{ tooltip }}
             </template>
-            <component :is="tooltip" v-else />
+            <component :is="tooltip" v-else/>
         </TooltipContent>
     </Tooltip>
 </template>

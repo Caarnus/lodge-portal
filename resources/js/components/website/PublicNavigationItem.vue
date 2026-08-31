@@ -1,8 +1,8 @@
-<script setup lang="ts">
-import { ChevronRight } from "lucide-vue-next";
-import { onBeforeUnmount, onMounted, ref } from "vue";
+<script lang="ts" setup>
+import {ChevronRight} from "lucide-vue-next";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 
-defineOptions({ name: "PublicNavigationItem" });
+defineOptions({name: "PublicNavigationItem"});
 withDefaults(defineProps<{ item: any; lodgeSlug: string; depth?: number }>(), {
     depth: 0,
 });
@@ -56,27 +56,27 @@ onBeforeUnmount(() =>
 <template>
     <li
         ref="itemElement"
-        class="nav-item relative"
         :class="{
             'is-open': isOpen,
             'is-hover-suppressed': isHoverSuppressed,
         }"
+        class="nav-item relative"
         @mouseleave="isHoverSuppressed = false"
     >
         <button
             v-if="item.is_navigation_container"
-            type="button"
-            class="flex items-center gap-1 rounded px-3 py-2 font-medium hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-2"
             :aria-expanded="isOpen"
             :aria-label="`${isOpen ? 'Close' : 'Open'} ${item.title} submenu`"
-            @pointerdown="markPointerType"
+            class="flex items-center gap-1 rounded px-3 py-2 font-medium hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-2"
+            type="button"
             @click="toggleContainer($event)"
+            @pointerdown="markPointerType"
         >
             {{ item.title }}
             <ChevronRight
                 v-if="item.children?.length"
-                class="nav-caret size-4 transition-transform"
                 aria-hidden="true"
+                class="nav-caret size-4 transition-transform"
             />
         </button>
         <a
@@ -87,27 +87,27 @@ onBeforeUnmount(() =>
                     : `/l/${lodgeSlug}/${item.slug}`
             "
             class="flex items-center gap-1 rounded px-3 py-2 font-medium hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-2"
-            @pointerdown="markPointerType"
             @click="handleNavigation($event, item)"
+            @pointerdown="markPointerType"
         >
             {{ item.title }}
             <ChevronRight
                 v-if="item.children?.length"
-                class="nav-caret size-4 transition-transform"
                 aria-hidden="true"
+                class="nav-caret size-4 transition-transform"
             />
         </a>
         <ul
             v-if="item.children?.length"
-            class="submenu absolute z-30 hidden min-w-48 rounded-md border bg-background p-1 shadow-lg"
             :class="depth === 0 ? 'left-0 top-full' : 'left-full top-0'"
+            class="submenu absolute z-30 hidden min-w-48 rounded-md border bg-background p-1 shadow-lg"
         >
             <PublicNavigationItem
                 v-for="child in item.children"
                 :key="child.slug"
+                :depth="depth + 1"
                 :item="child"
                 :lodge-slug="lodgeSlug"
-                :depth="depth + 1"
             />
         </ul>
     </li>

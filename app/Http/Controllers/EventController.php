@@ -36,7 +36,7 @@ class EventController extends Controller
             'sort' => ['nullable', 'in:title,first_starts_at,status,visibility'],
             'direction' => ['nullable', 'in:asc,desc'],
         ]);
-        $search = trim((string) ($filters['search'] ?? ''));
+        $search = trim((string)($filters['search'] ?? ''));
         $sort = $filters['sort'] ?? 'first_starts_at';
         $direction = $filters['direction'] ?? 'desc';
         $modal = $request->string('modal')->toString();
@@ -86,11 +86,35 @@ class EventController extends Controller
         ]);
     }
 
-    public function create(Lodge $lodge)
+    private function allow(Lodge $lodge): void
     {
-        $this->allow($lodge);
+        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
 
-        return redirect()->route('lodges.events.index', [$lodge, 'modal' => 'create']);
+    private function newEvent(Lodge $lodge): Event
+    {
+        return new Event([
+            'time_zone' => $lodge->timezone,
+            'first_starts_at' => now()->addHour()->startOfHour(),
+            'visibility' => EventVisibility::Public->value,
+            'reminders_enabled' => true,
+            'guest_reminders_enabled' => true,
+        ]);
+    }
+
+    private function editorData(Lodge $lodge, Event $event): array
+    {
+        return [
+            'lodge' => $lodge->only('id', 'name', 'timezone'),
+            'event' => $event,
+            'reservationFields' => $event->exists ? $event->reservationFields()->get() : [],
+            'reminderRules' => $event->exists ? $event->reminderRules()->get(['id', 'offset_minutes']) : [],
+            'reminderSubscriptionCount' => $event->exists ? $event->reminderSubscriptions()->where('status', 'active')->count() : 0,
+            'volunteerPositions' => $event->exists ? $event->volunteerPositions()->orderBy('sort_order')->orderBy('name')->get(['id', 'event_occurrence_id', 'name', 'description', 'needed_count', 'sort_order', 'is_active']) : [],
+            'occurrences' => $event->exists ? $event->occurrences()->where('starts_at', '>=', now())->orderBy('starts_at')->limit(50)->get(['id', 'starts_at', 'status']) : [],
+            'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
+            'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
+        ];
     }
 
     public function store(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, WebsiteHtmlSanitizer $sanitizer)
@@ -110,11 +134,78 @@ class EventController extends Controller
         return redirect()->route('lodges.events.index', $lodge);
     }
 
+    private function data(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, WebsiteHtmlSanitizer $sanitizer): array
+    {
+        $data = $request->validated();
+        foreach (['allows_cross_lodge_reservations', 'reservations_enabled', 'guest_reservations_enabled', 'reminders_enabled', 'guest_reminders_enabled'] as $field) {
+            $data[$field] = $request->boolean($field);
+        }
+        if ($data['reservations_enabled'] && empty($data['capacity'])) {
+            throw ValidationException::withMessages(['capacity' => 'A positive capacity is required when reservations are enabled.']);
+        }
+        if (($data['maximum_party_size'] ?? null) > ($data['capacity'] ?? PHP_INT_MAX)) {
+            throw ValidationException::withMessages(['maximum_party_size' => 'Maximum party size cannot exceed capacity.']);
+        }
+        if ($data['guest_reservations_enabled'] && $data['visibility'] !== EventVisibility::Public->value) {
+            throw ValidationException::withMessages(['guest_reservations_enabled' => 'Guest reservations are available only for public events.']);
+        }
+        if ($data['guest_reminders_enabled'] && $data['visibility'] !== EventVisibility::Public->value) {
+            throw ValidationException::withMessages(['guest_reminders_enabled' => 'Guest reminders are available only for public events.']);
+        }
+        if ($data['allows_cross_lodge_reservations'] && $data['visibility'] !== EventVisibility::Masons->value) {
+            throw ValidationException::withMessages(['allows_cross_lodge_reservations' => 'Cross-lodge reservations are available only for Masons-only events.']);
+        }
+        if ($data['visibility'] !== EventVisibility::Public->value) {
+            $data['required_qualification'] ??= 'ea';
+        } else {
+            $data['required_qualification'] = null;
+        }
+        $data['description'] = $sanitizer->sanitize($data['description'] ?? '');
+        $data['first_starts_at'] = CarbonImmutable::parse($data['first_starts_at'], $data['time_zone'])->utc();
+        $data['rrule'] = filled($data['rrule'] ?? null) ? $recurrence->canonicalize($data['rrule'], $data['first_starts_at'], $data['time_zone']) : null;
+        if ($data['cover_media_asset_id'] ?? null) {
+            $asset = MediaAsset::query()->whereKey($data['cover_media_asset_id'])->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->first();
+            if (!$asset) {
+                throw ValidationException::withMessages(['cover_media_asset_id' => 'Selected media is unavailable.']);
+            }
+        }
+
+        return $data;
+    }
+
+    public function create(Lodge $lodge)
+    {
+        $this->allow($lodge);
+
+        return redirect()->route('lodges.events.index', [$lodge, 'modal' => 'create']);
+    }
+
+    private function materialize(Event $event, EventOccurrenceMaterializer $materializer): void
+    {
+        $materializer->materialize($event, now()->subMonths(3)->toImmutable(), now()->addMonths(18)->toImmutable());
+    }
+
     public function edit(Lodge $lodge, Event $event)
     {
         $this->allowEvent($lodge, $event);
 
         return redirect()->route('lodges.events.index', [$lodge, 'modal' => $event->id]);
+    }
+
+    private function allowEvent(Lodge $lodge, Event $event): void
+    {
+        abort_unless($event->lodge_id === $lodge->id, 404);
+        $this->allow($lodge);
+    }
+
+    public function publish(Lodge $lodge, Event $event)
+    {
+        $this->allowEvent($lodge, $event);
+        $before = $event->toArray();
+        $event->update(['status' => EventStatus::Published, 'published_at' => now()]);
+        Audit::record('event.published', $event, $lodge, $before, $event->fresh()->toArray());
+
+        return back()->with('notice', 'Event published.');
     }
 
     public function update(EventRequest $request, Lodge $lodge, Event $event, RecurrenceExpander $recurrence, EventOccurrenceMaterializer $materializer, EventScheduleReconciler $reconciler, WebsiteHtmlSanitizer $sanitizer)
@@ -157,14 +248,9 @@ class EventController extends Controller
         return back()->with('notice', 'Event saved.');
     }
 
-    public function publish(Lodge $lodge, Event $event)
+    private function scheduleChanged(Event $event, array $data): bool
     {
-        $this->allowEvent($lodge, $event);
-        $before = $event->toArray();
-        $event->update(['status' => EventStatus::Published, 'published_at' => now()]);
-        Audit::record('event.published', $event, $lodge, $before, $event->fresh()->toArray());
-
-        return back()->with('notice', 'Event published.');
+        return collect(['first_starts_at', 'duration_minutes', 'time_zone', 'rrule'])->contains(fn(string $key) => (string)$event->getAttribute($key) !== (string)($data[$key] ?? null));
     }
 
     public function cancel(Lodge $lodge, Event $event)
@@ -198,91 +284,5 @@ class EventController extends Controller
         Audit::record('event.archived', $event, $lodge, $before, $event->fresh()->toArray());
 
         return back()->with('notice', 'Event archived.');
-    }
-
-    private function newEvent(Lodge $lodge): Event
-    {
-        return new Event([
-            'time_zone' => $lodge->timezone,
-            'first_starts_at' => now()->addHour()->startOfHour(),
-            'visibility' => EventVisibility::Public->value,
-            'reminders_enabled' => true,
-            'guest_reminders_enabled' => true,
-        ]);
-    }
-
-    private function editorData(Lodge $lodge, Event $event): array
-    {
-        return [
-            'lodge' => $lodge->only('id', 'name', 'timezone'),
-            'event' => $event,
-            'reservationFields' => $event->exists ? $event->reservationFields()->get() : [],
-            'reminderRules' => $event->exists ? $event->reminderRules()->get(['id', 'offset_minutes']) : [],
-            'reminderSubscriptionCount' => $event->exists ? $event->reminderSubscriptions()->where('status', 'active')->count() : 0,
-            'volunteerPositions' => $event->exists ? $event->volunteerPositions()->orderBy('sort_order')->orderBy('name')->get(['id', 'event_occurrence_id', 'name', 'description', 'needed_count', 'sort_order', 'is_active']) : [],
-            'occurrences' => $event->exists ? $event->occurrences()->where('starts_at', '>=', now())->orderBy('starts_at')->limit(50)->get(['id', 'starts_at', 'status']) : [],
-            'categories' => $lodge->eventCategories()->where('is_active', true)->orderBy('sort_order')->get(['event_categories.id', 'event_categories.name']),
-            'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->get(['id', 'original_name', 'derivative_path']),
-        ];
-    }
-
-    private function data(EventRequest $request, Lodge $lodge, RecurrenceExpander $recurrence, WebsiteHtmlSanitizer $sanitizer): array
-    {
-        $data = $request->validated();
-        foreach (['allows_cross_lodge_reservations', 'reservations_enabled', 'guest_reservations_enabled', 'reminders_enabled', 'guest_reminders_enabled'] as $field) {
-            $data[$field] = $request->boolean($field);
-        }
-        if ($data['reservations_enabled'] && empty($data['capacity'])) {
-            throw ValidationException::withMessages(['capacity' => 'A positive capacity is required when reservations are enabled.']);
-        }
-        if (($data['maximum_party_size'] ?? null) > ($data['capacity'] ?? PHP_INT_MAX)) {
-            throw ValidationException::withMessages(['maximum_party_size' => 'Maximum party size cannot exceed capacity.']);
-        }
-        if ($data['guest_reservations_enabled'] && $data['visibility'] !== EventVisibility::Public->value) {
-            throw ValidationException::withMessages(['guest_reservations_enabled' => 'Guest reservations are available only for public events.']);
-        }
-        if ($data['guest_reminders_enabled'] && $data['visibility'] !== EventVisibility::Public->value) {
-            throw ValidationException::withMessages(['guest_reminders_enabled' => 'Guest reminders are available only for public events.']);
-        }
-        if ($data['allows_cross_lodge_reservations'] && $data['visibility'] !== EventVisibility::Masons->value) {
-            throw ValidationException::withMessages(['allows_cross_lodge_reservations' => 'Cross-lodge reservations are available only for Masons-only events.']);
-        }
-        if ($data['visibility'] !== EventVisibility::Public->value) {
-            $data['required_qualification'] ??= 'ea';
-        } else {
-            $data['required_qualification'] = null;
-        }
-        $data['description'] = $sanitizer->sanitize($data['description'] ?? '');
-        $data['first_starts_at'] = CarbonImmutable::parse($data['first_starts_at'], $data['time_zone'])->utc();
-        $data['rrule'] = filled($data['rrule'] ?? null) ? $recurrence->canonicalize($data['rrule'], $data['first_starts_at'], $data['time_zone']) : null;
-        if ($data['cover_media_asset_id'] ?? null) {
-            $asset = MediaAsset::query()->whereKey($data['cover_media_asset_id'])->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->first();
-            if (!$asset) {
-                throw ValidationException::withMessages(['cover_media_asset_id' => 'Selected media is unavailable.']);
-            }
-        }
-
-        return $data;
-    }
-
-    private function materialize(Event $event, EventOccurrenceMaterializer $materializer): void
-    {
-        $materializer->materialize($event, now()->subMonths(3)->toImmutable(), now()->addMonths(18)->toImmutable());
-    }
-
-    private function scheduleChanged(Event $event, array $data): bool
-    {
-        return collect(['first_starts_at', 'duration_minutes', 'time_zone', 'rrule'])->contains(fn(string $key) => (string)$event->getAttribute($key) !== (string)($data[$key] ?? null));
-    }
-
-    private function allow(Lodge $lodge): void
-    {
-        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
-    }
-
-    private function allowEvent(Lodge $lodge, Event $event): void
-    {
-        abort_unless($event->lodge_id === $lodge->id, 404);
-        $this->allow($lodge);
     }
 }

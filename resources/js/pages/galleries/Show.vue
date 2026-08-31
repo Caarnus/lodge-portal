@@ -1,9 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {Dialog, DialogContent} from "@/components/ui/dialog";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import { Head } from "@inertiajs/vue3";
-import { ref } from "vue";
+import {Head} from "@inertiajs/vue3";
+import {ref} from "vue";
+
 const props = defineProps<{
     lodge: any;
     album: any;
@@ -16,11 +17,11 @@ const photo = (id: number) =>
 const selectedPhoto = ref<any | null>(null);
 </script>
 <template>
-    <Head :title="version.title" />
+    <Head :title="version.title"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
@@ -50,13 +51,13 @@ const selectedPhoto = ref<any | null>(null);
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>
         <main class="mx-auto w-full max-w-6xl flex-1 px-5 py-10">
             <a :href="galleryIndexUrl" class="text-sm font-medium underline"
-                >← All galleries</a
+            >← All galleries</a
             >
             <h1 class="mt-4 text-3xl font-bold">{{ version.title }}</h1>
             <p v-if="version.description" class="mt-2 text-muted-foreground">
@@ -65,13 +66,13 @@ const selectedPhoto = ref<any | null>(null);
             <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <figure v-for="item in version.photos" :key="item.id">
                     <button
-                        type="button"
                         class="block w-full overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        type="button"
                         @click="selectedPhoto = item"
                     >
                         <img
-                            :src="photo(item.id)"
                             :alt="item.media_asset.alt_text"
+                            :src="photo(item.id)"
                             class="aspect-square w-full object-cover transition duration-200 hover:scale-[1.02]"
                         />
                     </button>
@@ -95,8 +96,8 @@ const selectedPhoto = ref<any | null>(null);
         <DialogContent class="w-[calc(100vw-2rem)] max-w-6xl p-3 sm:p-4">
             <img
                 v-if="selectedPhoto"
-                :src="photo(selectedPhoto.id)"
                 :alt="selectedPhoto.media_asset.alt_text"
+                :src="photo(selectedPhoto.id)"
                 class="max-h-[calc(100vh-5rem)] w-full rounded-md object-contain"
             />
             <p v-if="selectedPhoto?.caption" class="px-1 text-sm">

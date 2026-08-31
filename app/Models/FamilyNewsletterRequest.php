@@ -14,11 +14,6 @@ class FamilyNewsletterRequest extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['receives_email' => 'boolean', 'receives_print' => 'boolean', 'status' => DistributionRequestStatus::class, 'email_verification_expires_at' => 'datetime', 'reviewed_at' => 'datetime'];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -32,5 +27,10 @@ class FamilyNewsletterRequest extends Model
     public function subscription()
     {
         return $this->belongsTo(FamilyNewsletterSubscription::class, 'family_newsletter_subscription_id');
+    }
+
+    protected function casts(): array
+    {
+        return ['receives_email' => 'boolean', 'receives_print' => 'boolean', 'status' => DistributionRequestStatus::class, 'email_verification_expires_at' => 'datetime', 'reviewed_at' => 'datetime'];
     }
 }

@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { Separator } from "@/components/ui/separator";
+<script lang="ts" setup>
+import {Separator} from "@/components/ui/separator";
 
 interface Props {
     title: string;
@@ -16,5 +16,5 @@ defineProps<Props>();
             {{ description }}
         </p>
     </div>
-    <Separator class="my-6" />
+    <Separator class="my-6"/>
 </template>

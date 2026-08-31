@@ -16,15 +16,27 @@ class Person extends Model
 
     protected $appends = ['display_name'];
 
-    protected function casts(): array
+    protected static function booted(): void
     {
-        return [
-            'email' => 'string',
-            'birth_date' => 'date',
-            'is_deceased' => 'boolean',
-            'death_date' => 'date',
-            'merged_at' => 'datetime',
-        ];
+        static::created(function (Person $person): void {
+            $person->directoryPrivacySetting()->firstOrCreate();
+            $person->ritualSetting()->firstOrCreate();
+        });
+        static::deleting(fn(Person $person) => $person->directoryPrivacySetting()->delete());
+        static::restored(function (Person $person): void {
+            $person->directoryPrivacySetting()->firstOrCreate();
+            $person->ritualSetting()->firstOrCreate();
+        });
+    }
+
+    public function directoryPrivacySetting()
+    {
+        return $this->hasOne(PersonDirectoryPrivacySetting::class);
+    }
+
+    public function ritualSetting()
+    {
+        return $this->hasOne(PersonRitualSetting::class);
     }
 
     public function setEmailAttribute(?string $email): void
@@ -61,16 +73,6 @@ class Person extends Model
     public function memberships()
     {
         return $this->hasMany(Membership::class);
-    }
-
-    public function directoryPrivacySetting()
-    {
-        return $this->hasOne(PersonDirectoryPrivacySetting::class);
-    }
-
-    public function ritualSetting()
-    {
-        return $this->hasOne(PersonRitualSetting::class);
     }
 
     public function ritualProficiencies()
@@ -118,16 +120,14 @@ class Person extends Model
         return $this->belongsTo(self::class, 'merged_into_person_id');
     }
 
-    protected static function booted(): void
+    protected function casts(): array
     {
-        static::created(function (Person $person): void {
-            $person->directoryPrivacySetting()->firstOrCreate();
-            $person->ritualSetting()->firstOrCreate();
-        });
-        static::deleting(fn(Person $person) => $person->directoryPrivacySetting()->delete());
-        static::restored(function (Person $person): void {
-            $person->directoryPrivacySetting()->firstOrCreate();
-            $person->ritualSetting()->firstOrCreate();
-        });
+        return [
+            'email' => 'string',
+            'birth_date' => 'date',
+            'is_deceased' => 'boolean',
+            'death_date' => 'date',
+            'merged_at' => 'datetime',
+        ];
     }
 }

@@ -14,25 +14,6 @@ class Event extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'status' => EventStatus::class,
-            'visibility' => EventVisibility::class,
-            'required_qualification' => EventQualification::class,
-            'allows_cross_lodge_reservations' => 'boolean',
-            'reservations_enabled' => 'boolean',
-            'guest_reservations_enabled' => 'boolean',
-            'reminders_enabled' => 'boolean',
-            'guest_reminders_enabled' => 'boolean',
-            'first_starts_at' => 'datetime',
-            'occurrences_generated_through' => 'datetime',
-            'published_at' => 'datetime',
-            'cancelled_at' => 'datetime',
-            'archived_at' => 'datetime',
-        ];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -81,5 +62,24 @@ class Event extends Model
     public function volunteerCommitments()
     {
         return $this->hasMany(EventVolunteerCommitment::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => EventStatus::class,
+            'visibility' => EventVisibility::class,
+            'required_qualification' => EventQualification::class,
+            'allows_cross_lodge_reservations' => 'boolean',
+            'reservations_enabled' => 'boolean',
+            'guest_reservations_enabled' => 'boolean',
+            'reminders_enabled' => 'boolean',
+            'guest_reminders_enabled' => 'boolean',
+            'first_starts_at' => 'datetime',
+            'occurrences_generated_through' => 'datetime',
+            'published_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'archived_at' => 'datetime',
+        ];
     }
 }

@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import type {HTMLAttributes} from "vue";
 
 const props = defineProps<{
     class?: HTMLAttributes["class"];
@@ -9,7 +9,6 @@ const props = defineProps<{
 
 <template>
     <ul
-        data-sidebar="menu-badge"
         :class="
             cn(
                 'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5',
@@ -17,7 +16,8 @@ const props = defineProps<{
                 props.class,
             )
         "
+        data-sidebar="menu-badge"
     >
-        <slot />
+        <slot/>
     </ul>
 </template>

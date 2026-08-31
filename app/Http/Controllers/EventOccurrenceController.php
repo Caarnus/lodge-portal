@@ -58,6 +58,32 @@ class EventOccurrenceController extends Controller
         ]);
     }
 
+    private function allow(Lodge $lodge, Event $event): void
+    {
+        abort_unless($event->lodge_id === $lodge->id, 404);
+        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
+    public function cancel(Lodge $lodge, Event $event, EventOccurrence $occurrence)
+    {
+        $this->allowOccurrence($lodge, $event, $occurrence);
+        $before = $occurrence->toArray();
+        $occurrence->update(['status' => EventOccurrenceStatus::Cancelled, 'cancelled_at' => now()]);
+        $occurrence->reservations()->where('status', EventReservationStatus::Confirmed)->update(['status' => EventReservationStatus::EventCancelled, 'cancelled_at' => now()]);
+        $occurrence->reminderDeliveries()->whereIn('status', [ReminderDeliveryStatus::Pending, ReminderDeliveryStatus::Claimed])->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
+        $occurrence->volunteerReminderDeliveries()->whereIn('status', [VolunteerReminderDeliveryStatus::Pending, VolunteerReminderDeliveryStatus::Claimed])->update(['status' => VolunteerReminderDeliveryStatus::Skipped, 'skip_reason' => 'occurrence_cancelled', 'skipped_at' => now()]);
+        Audit::record('event_occurrence.cancelled', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
+        $this->sendCancellationNotices($occurrence);
+
+        return back()->with('notice', 'Occurrence cancelled.');
+    }
+
+    private function allowOccurrence(Lodge $lodge, Event $event, EventOccurrence $occurrence): void
+    {
+        $this->allow($lodge, $event);
+        abort_unless($occurrence->event_id === $event->id && $occurrence->lodge_id === $lodge->id, 404);
+    }
+
     public function update(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence, WebsiteHtmlSanitizer $sanitizer)
     {
         $this->allowOccurrence($lodge, $event, $occurrence);
@@ -85,18 +111,15 @@ class EventOccurrenceController extends Controller
         return back()->with('notice', 'Occurrence updated.');
     }
 
-    public function cancel(Lodge $lodge, Event $event, EventOccurrence $occurrence)
+    private function sendCancellationNotices(EventOccurrence $occurrence): void
     {
-        $this->allowOccurrence($lodge, $event, $occurrence);
-        $before = $occurrence->toArray();
-        $occurrence->update(['status' => EventOccurrenceStatus::Cancelled, 'cancelled_at' => now()]);
-        $occurrence->reservations()->where('status', EventReservationStatus::Confirmed)->update(['status' => EventReservationStatus::EventCancelled, 'cancelled_at' => now()]);
-        $occurrence->reminderDeliveries()->whereIn('status', [ReminderDeliveryStatus::Pending, ReminderDeliveryStatus::Claimed])->update(['status' => ReminderDeliveryStatus::Skipped, 'skipped_at' => now()]);
-        $occurrence->volunteerReminderDeliveries()->whereIn('status', [VolunteerReminderDeliveryStatus::Pending, VolunteerReminderDeliveryStatus::Claimed])->update(['status' => VolunteerReminderDeliveryStatus::Skipped, 'skip_reason' => 'occurrence_cancelled', 'skipped_at' => now()]);
-        Audit::record('event_occurrence.cancelled', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
-        $this->sendCancellationNotices($occurrence);
-
-        return back()->with('notice', 'Occurrence cancelled.');
+        $occurrence->loadMissing('event');
+        $recipients = $occurrence->reservations()->where('status', EventReservationStatus::EventCancelled)->get(['name', 'email', 'normalized_email'])
+            ->concat($occurrence->reminderSubscriptions()->where('status', 'active')->get(['name', 'email', 'normalized_email']))
+            ->unique('normalized_email');
+        foreach ($recipients as $recipient) {
+            Notification::route('mail', [$recipient->email => $recipient->name])->notify(new EventOccurrenceCancelled($occurrence));
+        }
     }
 
     public function restore(Lodge $lodge, Event $event, EventOccurrence $occurrence)
@@ -110,28 +133,5 @@ class EventOccurrenceController extends Controller
         Audit::record('event_occurrence.restored', $occurrence, $lodge, $before, $occurrence->fresh()->toArray());
 
         return back()->with('notice', 'Occurrence restored.');
-    }
-
-    private function allow(Lodge $lodge, Event $event): void
-    {
-        abort_unless($event->lodge_id === $lodge->id, 404);
-        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
-    }
-
-    private function allowOccurrence(Lodge $lodge, Event $event, EventOccurrence $occurrence): void
-    {
-        $this->allow($lodge, $event);
-        abort_unless($occurrence->event_id === $event->id && $occurrence->lodge_id === $lodge->id, 404);
-    }
-
-    private function sendCancellationNotices(EventOccurrence $occurrence): void
-    {
-        $occurrence->loadMissing('event');
-        $recipients = $occurrence->reservations()->where('status', EventReservationStatus::EventCancelled)->get(['name', 'email', 'normalized_email'])
-            ->concat($occurrence->reminderSubscriptions()->where('status', 'active')->get(['name', 'email', 'normalized_email']))
-            ->unique('normalized_email');
-        foreach ($recipients as $recipient) {
-            Notification::route('mail', [$recipient->email => $recipient->name])->notify(new EventOccurrenceCancelled($occurrence));
-        }
     }
 }

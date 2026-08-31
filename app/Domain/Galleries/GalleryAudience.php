@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class GalleryAudience
 {
+    public function canView(?User $user, Lodge $lodge, GalleryAlbumVersion $version): bool
+    {
+        return $this->visible(GalleryAlbumVersion::query()->whereKey($version->id), $lodge, $user)->exists();
+    }
+
     public function visible(Builder $query, Lodge $lodge, ?User $user): Builder
     {
         if ($lodge->status !== LodgeStatus::Active) {
@@ -25,11 +30,6 @@ class GalleryAudience
         }
 
         return $query;
-    }
-
-    public function canView(?User $user, Lodge $lodge, GalleryAlbumVersion $version): bool
-    {
-        return $this->visible(GalleryAlbumVersion::query()->whereKey($version->id), $lodge, $user)->exists();
     }
 
     private function activeMason(?User $user): bool

@@ -1,13 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Tooltip from "primevue/tooltip";
-import {
-    computed,
-    nextTick,
-    onBeforeUnmount,
-    onMounted,
-    ref,
-    watch,
-} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch,} from "vue";
 
 const vTooltip = Tooltip;
 
@@ -66,15 +59,6 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
 
 <template>
     <button
-        type="button"
-        class="block min-w-0 max-w-full text-left"
-        :class="canExpand ? 'cursor-pointer' : 'cursor-default'"
-        :aria-expanded="canExpand ? expanded : undefined"
-        :aria-label="
-            canExpand
-                ? `${expanded ? 'Collapse' : 'Expand'} ${label}`
-                : undefined
-        "
         v-tooltip.bottom="
             canExpand
                 ? {
@@ -83,13 +67,22 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
                   }
                 : undefined
         "
+        :aria-expanded="canExpand ? expanded : undefined"
+        :aria-label="
+            canExpand
+                ? `${expanded ? 'Collapse' : 'Expand'} ${label}`
+                : undefined
+        "
+        :class="canExpand ? 'cursor-pointer' : 'cursor-default'"
+        class="block min-w-0 max-w-full text-left"
+        type="button"
         @click="toggle"
     >
         <span
             ref="content"
-            class="block max-w-full"
             :class="expanded ? 'whitespace-normal break-words' : 'truncate'"
             :title="canExpand ? undefined : displayText"
+            class="block max-w-full"
         >
             {{ displayText }}
         </span>

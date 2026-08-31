@@ -21,7 +21,7 @@ class GalleryController extends Controller
     public function index(Request $request, Lodge $lodge, GalleryAudience $audience)
     {
         $albums = $lodge->galleryAlbums()
-            ->whereHas('published', fn ($query) => $audience->visible($query, $lodge, $request->user()))
+            ->whereHas('published', fn($query) => $audience->visible($query, $lodge, $request->user()))
             ->with(['published.photos.mediaAsset'])
             ->get();
 
@@ -30,6 +30,33 @@ class GalleryController extends Controller
             'albums' => $albums,
             'navigation' => $this->publicNavigation($lodge),
         ]);
+    }
+
+    private function publicNavigation(Lodge $lodge): array
+    {
+        $versions = WebsitePageVersion::query()
+            ->where('lodge_id', $lodge->id)
+            ->where('status', WebsitePageStatus::Published)
+            ->where('show_in_navigation', true)
+            ->with('page')
+            ->whereHas('page', fn($query) => $query->whereNull('deleted_at'))
+            ->orderBy('navigation_order')
+            ->orderBy('title')
+            ->get();
+
+        return $this->navigationTree($versions);
+    }
+
+    private function navigationTree($versions, ?int $parentId = null): array
+    {
+        return $versions->filter(fn($version) => $version->navigation_parent_page_id === $parentId)
+            ->map(fn($version) => [
+                'title' => $version->title,
+                'slug' => $version->slug,
+                'is_home' => $version->is_home,
+                'is_navigation_container' => $version->is_navigation_container,
+                'children' => $this->navigationTree($versions, $version->website_page_id),
+            ])->values()->all();
     }
 
     public function show(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryAudience $audience)
@@ -45,6 +72,29 @@ class GalleryController extends Controller
             'navigation' => $this->publicNavigation($lodge),
             'galleryIndexUrl' => $this->galleryPageUrl($lodge, $request->string('from')->toString()),
         ]);
+    }
+
+    private function galleryPageUrl(Lodge $lodge, string $pageSlug): string
+    {
+        $page = WebsitePageVersion::query()
+            ->where('lodge_id', $lodge->id)
+            ->where('status', WebsitePageStatus::Published)
+            ->when(
+                $pageSlug === 'home',
+                fn($query) => $query->where('is_home', true),
+                fn($query) => $query->where('slug', $pageSlug),
+            )
+            ->whereHas('page', fn($query) => $query->whereNull('deleted_at'))
+            ->whereHas('sections', fn($query) => $query->where('type', 'gallery_placeholder'))
+            ->first();
+
+        if (!$page) {
+            return "/l/{$lodge->slug}/galleries";
+        }
+
+        return $page->is_home
+            ? "/l/{$lodge->slug}"
+            : "/l/{$lodge->slug}/{$page->slug}";
     }
 
     public function photo(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryAlbumPhoto $photo, GalleryAudience $audience, MediaExposureService $media)
@@ -74,6 +124,11 @@ class GalleryController extends Controller
         return redirect()->route('lodges.galleries.manage', $lodge);
     }
 
+    private function validateAlbum(Request $request, Lodge $lodge, ?GalleryAlbum $album = null): array
+    {
+        return $request->validate(['title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('gallery_albums')->where(fn($q) => $q->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($album?->id)], 'description' => 'nullable|string|max:10000', 'visibility' => ['required', Rule::in(['public', 'masons', 'lodge'])], 'cover_photo_id' => 'nullable|integer']);
+    }
+
     public function edit(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryPublisher $publisher)
     {
         $this->allowAlbum($lodge, $album, 'galleries.manage');
@@ -81,12 +136,10 @@ class GalleryController extends Controller
         return Inertia::render('galleries/Edit', ['lodge' => $lodge, 'album' => $album, 'draft' => $publisher->draftFor($album, $request->user())->load('photos.mediaAsset'), 'media' => $lodge->mediaAssets()->orderByDesc('id')->get(), 'canPublish' => $request->user()->hasLodgePermission($lodge, 'galleries.publish')]);
     }
 
-    public function update(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryPublisher $publisher)
+    private function allowAlbum(Lodge $lodge, GalleryAlbum $album, string $permission): void
     {
-        $this->allowAlbum($lodge, $album, 'galleries.manage');
-        $publisher->update($album, $lodge, $request->user(), $this->validateAlbum($request, $lodge, $album));
-
-        return back();
+        abort_unless($album->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, $permission);
     }
 
     public function addPhoto(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryPublisher $publisher)
@@ -94,7 +147,7 @@ class GalleryController extends Controller
         $this->allowAlbum($lodge, $album, 'galleries.manage');
         $asset = MediaAsset::query()->whereKey($request->validate(['media_asset_id' => 'required|integer'])['media_asset_id'])->where('lodge_id', $lodge->id)->firstOrFail();
         $draft = $publisher->draftFor($album, $request->user());
-        GalleryAlbumPhoto::firstOrCreate(['gallery_album_version_id' => $draft->id, 'media_asset_id' => $asset->id], ['lodge_id' => $lodge->id, 'caption' => '', 'sort_order' => ((int) $draft->photos()->max('sort_order')) + 1]);
+        GalleryAlbumPhoto::firstOrCreate(['gallery_album_version_id' => $draft->id, 'media_asset_id' => $asset->id], ['lodge_id' => $lodge->id, 'caption' => '', 'sort_order' => ((int)$draft->photos()->max('sort_order')) + 1]);
 
         return back();
     }
@@ -105,6 +158,14 @@ class GalleryController extends Controller
         $draft = $publisher->draftFor($album, $request->user());
         abort_unless($photo->gallery_album_version_id === $draft->id, 404);
         $photo->update($request->validate(['caption' => 'nullable|string|max:2000', 'sort_order' => 'nullable|integer|min:0']));
+
+        return back();
+    }
+
+    public function update(Request $request, Lodge $lodge, GalleryAlbum $album, GalleryPublisher $publisher)
+    {
+        $this->allowAlbum($lodge, $album, 'galleries.manage');
+        $publisher->update($album, $lodge, $request->user(), $this->validateAlbum($request, $lodge, $album));
 
         return back();
     }
@@ -152,66 +213,5 @@ class GalleryController extends Controller
         Audit::record('gallery.album_restored', $album, $lodge);
 
         return back();
-    }
-
-    private function validateAlbum(Request $request, Lodge $lodge, ?GalleryAlbum $album = null): array
-    {
-        return $request->validate(['title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('gallery_albums')->where(fn ($q) => $q->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($album?->id)], 'description' => 'nullable|string|max:10000', 'visibility' => ['required', Rule::in(['public', 'masons', 'lodge'])], 'cover_photo_id' => 'nullable|integer']);
-    }
-
-    private function allowAlbum(Lodge $lodge, GalleryAlbum $album, string $permission): void
-    {
-        abort_unless($album->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, $permission);
-    }
-
-    private function publicNavigation(Lodge $lodge): array
-    {
-        $versions = WebsitePageVersion::query()
-            ->where('lodge_id', $lodge->id)
-            ->where('status', WebsitePageStatus::Published)
-            ->where('show_in_navigation', true)
-            ->with('page')
-            ->whereHas('page', fn ($query) => $query->whereNull('deleted_at'))
-            ->orderBy('navigation_order')
-            ->orderBy('title')
-            ->get();
-
-        return $this->navigationTree($versions);
-    }
-
-    private function galleryPageUrl(Lodge $lodge, string $pageSlug): string
-    {
-        $page = WebsitePageVersion::query()
-            ->where('lodge_id', $lodge->id)
-            ->where('status', WebsitePageStatus::Published)
-            ->when(
-                $pageSlug === 'home',
-                fn ($query) => $query->where('is_home', true),
-                fn ($query) => $query->where('slug', $pageSlug),
-            )
-            ->whereHas('page', fn ($query) => $query->whereNull('deleted_at'))
-            ->whereHas('sections', fn ($query) => $query->where('type', 'gallery_placeholder'))
-            ->first();
-
-        if (! $page) {
-            return "/l/{$lodge->slug}/galleries";
-        }
-
-        return $page->is_home
-            ? "/l/{$lodge->slug}"
-            : "/l/{$lodge->slug}/{$page->slug}";
-    }
-
-    private function navigationTree($versions, ?int $parentId = null): array
-    {
-        return $versions->filter(fn ($version) => $version->navigation_parent_page_id === $parentId)
-            ->map(fn ($version) => [
-                'title' => $version->title,
-                'slug' => $version->slug,
-                'is_home' => $version->is_home,
-                'is_navigation_container' => $version->is_navigation_container,
-                'children' => $this->navigationTree($versions, $version->website_page_id),
-            ])->values()->all();
     }
 }

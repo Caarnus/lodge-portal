@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppearanceTabs from "@/components/AppearanceTabs.vue";
-import type { SharedData } from "@/types";
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import type {SharedData} from "@/types";
+import {Head, Link, usePage} from "@inertiajs/vue3";
 
 defineProps<{
     lodges: Array<{
@@ -19,20 +19,22 @@ const page = usePage<SharedData>();
 </script>
 
 <template>
-    <Head title="Lodge Directory" />
+    <Head title="Lodge Directory"/>
     <main class="min-h-dvh bg-muted/30 px-5 py-8 text-foreground sm:py-12">
         <div class="mx-auto max-w-5xl">
             <header class="flex items-center justify-between gap-4">
                 <p class="text-lg font-semibold">Lodge Directory</p>
                 <div class="flex items-center gap-3">
                     <Link
-                        href="/lodges"
                         class="rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+                        href="/lodges"
                     >
                         Lodges
                     </Link>
-                    <Link href="/events" class="rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted">Events</Link>
-                    <AppearanceTabs compact />
+                    <Link class="rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+                          href="/events">Events
+                    </Link>
+                    <AppearanceTabs compact/>
                     <Link
                         :href="
                             page.props.auth.user
@@ -78,9 +80,12 @@ const page = usePage<SharedData>();
                     />
                     <div>
                         <h2 class="font-semibold group-hover:underline">
-                            {{ lodge.name
-                            }}<template v-if="lodge.number">
-                                No. {{ lodge.number }}</template
+                            {{
+                                lodge.name
+                            }}
+                            <template v-if="lodge.number">
+                                No. {{ lodge.number }}
+                            </template
                             >
                         </h2>
                         <p class="mt-1 text-sm text-muted-foreground">

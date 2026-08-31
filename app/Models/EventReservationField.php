@@ -9,11 +9,6 @@ class EventReservationField extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['type' => ReservationFieldType::class, 'is_required' => 'boolean', 'is_active' => 'boolean', 'options' => 'array'];
-    }
-
     public function event()
     {
         return $this->belongsTo(Event::class);
@@ -22,5 +17,10 @@ class EventReservationField extends Model
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['type' => ReservationFieldType::class, 'is_required' => 'boolean', 'is_active' => 'boolean', 'options' => 'array'];
     }
 }

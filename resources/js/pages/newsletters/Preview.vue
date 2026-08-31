@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 defineProps<{ lodge: any; issue: any; version: any }>();
 </script>
 <template>
@@ -8,9 +8,9 @@ defineProps<{ lodge: any; issue: any; version: any }>();
         <img
             v-if="version.cover_media_asset?.url"
             :src="version.cover_media_asset.url"
-            class="mt-5 max-h-96"
             alt="Newsletter cover"
+            class="mt-5 max-h-96"
         />
-        <article class="public-rich-text mt-6" v-html="version.body_html" />
+        <article class="public-rich-text mt-6" v-html="version.body_html"/>
     </main>
 </template>

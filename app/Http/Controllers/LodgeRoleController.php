@@ -28,6 +28,16 @@ class LodgeRoleController extends Controller
         ]);
     }
 
+    private function availablePermissions(Request $request, Lodge $lodge)
+    {
+        if ($request->user()->is_platform_admin) {
+            return Permission::query()->orderBy('name')->get();
+        }
+
+        return Permission::query()->whereHas('roles', fn($query) => $query->whereHas('users', fn($users) => $users
+            ->where('users.id', $request->user()->id)->where('lodge_user_roles.lodge_id', $lodge->id)))->orderBy('name')->get();
+    }
+
     public function assignments(Request $request, Lodge $lodge, PersonAccess $access)
     {
         $this->allowLodge($lodge, 'roles.manage');
@@ -66,6 +76,14 @@ class LodgeRoleController extends Controller
         return back();
     }
 
+    private function assertPermissionsAvailable(Request $request, Lodge $lodge, array $permissionIds): void
+    {
+        $available = $this->availablePermissions($request, $lodge)->pluck('id');
+        if (collect($permissionIds)->diff($available)->isNotEmpty()) {
+            throw ValidationException::withMessages(['permission_ids' => 'A role cannot grant permissions you do not hold.']);
+        }
+    }
+
     public function update(Request $request, Lodge $lodge, Role $role)
     {
         $this->allowRole($lodge, $role);
@@ -78,6 +96,12 @@ class LodgeRoleController extends Controller
         Audit::record('role.updated', $role, $lodge, $before, $role->load('permissions')->toArray());
 
         return back();
+    }
+
+    private function allowRole(Lodge $lodge, Role $role): void
+    {
+        abort_unless($role->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, 'roles.manage');
     }
 
     public function assign(Request $request, Lodge $lodge, PersonAccess $access)
@@ -106,29 +130,5 @@ class LodgeRoleController extends Controller
         Audit::record('role.unassigned', User::find($data['user_id']), $lodge, ['role_id' => $role->id]);
 
         return back();
-    }
-
-    private function allowRole(Lodge $lodge, Role $role): void
-    {
-        abort_unless($role->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'roles.manage');
-    }
-
-    private function availablePermissions(Request $request, Lodge $lodge)
-    {
-        if ($request->user()->is_platform_admin) {
-            return Permission::query()->orderBy('name')->get();
-        }
-
-        return Permission::query()->whereHas('roles', fn($query) => $query->whereHas('users', fn($users) => $users
-            ->where('users.id', $request->user()->id)->where('lodge_user_roles.lodge_id', $lodge->id)))->orderBy('name')->get();
-    }
-
-    private function assertPermissionsAvailable(Request $request, Lodge $lodge, array $permissionIds): void
-    {
-        $available = $this->availablePermissions($request, $lodge)->pluck('id');
-        if (collect($permissionIds)->diff($available)->isNotEmpty()) {
-            throw ValidationException::withMessages(['permission_ids' => 'A role cannot grant permissions you do not hold.']);
-        }
     }
 }

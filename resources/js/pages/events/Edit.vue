@@ -1,21 +1,16 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import RecurrenceBuilder from "@/components/events/RecurrenceBuilder.vue";
 import InputError from "@/components/InputError.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
-import { normalizeSlug } from "@/utils/slug";
-import {
-    Dialog,
-    DialogScrollContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Link, router, useForm } from "@inertiajs/vue3";
-import { CircleOff, Pencil } from "lucide-vue-next";
-import { computed, ref, watch } from "vue";
+import {normalizeSlug} from "@/utils/slug";
+import {Dialog, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {Link, router, useForm} from "@inertiajs/vue3";
+import {CircleOff, Pencil} from "lucide-vue-next";
+import {computed, ref, watch} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: { id: number; name: string; timezone: string };
     event: any;
@@ -43,9 +38,9 @@ const scheduleChanged = computed(() => {
 
     return (
         new Date(form.first_starts_at).getTime() !==
-            new Date(props.event.first_starts_at).getTime() ||
+        new Date(props.event.first_starts_at).getTime() ||
         Number(form.duration_minutes) !==
-            Number(props.event.duration_minutes) ||
+        Number(props.event.duration_minutes) ||
         form.time_zone !== props.event.time_zone ||
         form.rrule !== (props.event.rrule ?? "")
     );
@@ -117,7 +112,7 @@ watch(
     },
 );
 const submit = () => {
-    const options = { onSuccess: () => emit("saved") };
+    const options = {onSuccess: () => emit("saved")};
 
     if (isNew.value) {
         form.post(`/lodges/${props.lodge.id}/events`, options);
@@ -132,7 +127,7 @@ const addReminderRule = () => {
     if (offset)
         router.post(
             `/lodges/${props.lodge.id}/events/${props.event.id}/reminder-rules`,
-            { offset_minutes: offset },
+            {offset_minutes: offset},
         );
 };
 const removeReminderRule = (rule: { id: number }) =>
@@ -168,24 +163,24 @@ const openVolunteerModal = (
 const addVolunteerPosition = () =>
     editingVolunteerPosition.value
         ? volunteerForm.put(
-              `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${editingVolunteerPosition.value}`,
-              {
-                  preserveScroll: true,
-                  onSuccess: () => (volunteerModalOpen.value = false),
-              },
-          )
+            `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${editingVolunteerPosition.value}`,
+            {
+                preserveScroll: true,
+                onSuccess: () => (volunteerModalOpen.value = false),
+            },
+        )
         : volunteerForm.post(
-              `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions`,
-              {
-                  preserveScroll: true,
-                  onSuccess: () => (volunteerModalOpen.value = false),
-              },
-          );
+            `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions`,
+            {
+                preserveScroll: true,
+                onSuccess: () => (volunteerModalOpen.value = false),
+            },
+        );
 const deactivateVolunteerPosition = (id: number) =>
     router.patch(
         `/lodges/${props.lodge.id}/events/${props.event.id}/volunteer-positions/${id}/deactivate`,
         {},
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 </script>
 
@@ -199,46 +194,47 @@ const deactivateVolunteerPosition = (id: number) =>
     >
         <PageHeader
             v-if="!embedded"
-            :title="isNew ? 'Create event' : 'Edit event'"
             :description="
                 !isNew
                     ? `Status: ${event.status}`
                     : 'Add the details, schedule, and attendance options for this event.'
             "
+            :title="isNew ? 'Create event' : 'Edit event'"
         >
             <template #actions>
                 <div class="flex flex-wrap gap-2">
                     <Link
                         :href="`/lodges/${lodge.id}/events`"
                         class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
-                        >All events</Link
+                    >All events
+                    </Link
                     >
                     <Link
                         v-if="!isNew"
                         :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
                         class="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
-                        >Occurrences
+                    >Occurrences
                     </Link>
                     <button
                         v-if="!isNew && event.status === 'draft'"
-                        type="button"
                         class="primary-button"
+                        type="button"
                         @click="transition('publish')"
                     >
                         Publish event
                     </button>
                     <button
                         v-if="!isNew && event.status === 'published'"
-                        type="button"
                         class="inline-flex cursor-pointer items-center justify-center rounded-md border border-destructive/50 bg-card px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+                        type="button"
                         @click="transition('cancel')"
                     >
                         Cancel event
                     </button>
                     <button
                         v-if="!isNew && event.status === 'cancelled'"
-                        type="button"
                         class="inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
+                        type="button"
                         @click="transition('archive')"
                     >
                         Archive event
@@ -265,37 +261,37 @@ const deactivateVolunteerPosition = (id: number) =>
             >
                 <h2 class="md:col-span-2 text-lg font-medium">Event details</h2>
                 <label class="field-label md:col-span-2"
-                    >Title<input
-                        v-model="form.title"
-                        class="field-input"
-                        required
-                    />
-                    <InputError :message="form.errors.title" />
+                >Title<input
+                    v-model="form.title"
+                    class="field-input"
+                    required
+                />
+                    <InputError :message="form.errors.title"/>
                 </label>
                 <label class="field-label"
-                    >Slug<input
-                        v-model="form.slug"
-                        @input="form.slug = normalizeSlug(form.slug)"
-                        class="field-input"
-                        required
-                    />
-                    <InputError :message="form.errors.slug" />
+                >Slug<input
+                    v-model="form.slug"
+                    class="field-input"
+                    required
+                    @input="form.slug = normalizeSlug(form.slug)"
+                />
+                    <InputError :message="form.errors.slug"/>
                 </label>
                 <label class="field-label"
-                    >Category<select
-                        v-model="form.event_category_id"
-                        class="field-input"
+                >Category<select
+                    v-model="form.event_category_id"
+                    class="field-input"
+                >
+                    <option value="">Uncategorized</option>
+                    <option
+                        v-for="category in categories"
+                        :key="category.id"
+                        :value="category.id"
                     >
-                        <option value="">Uncategorized</option>
-                        <option
-                            v-for="category in categories"
-                            :key="category.id"
-                            :value="category.id"
-                        >
-                            {{ category.name }}
-                        </option>
-                    </select>
-                    <InputError :message="form.errors.event_category_id" />
+                        {{ category.name }}
+                    </option>
+                </select>
+                    <InputError :message="form.errors.event_category_id"/>
                 </label>
                 <RichTextField
                     v-model="form.description"
@@ -305,39 +301,39 @@ const deactivateVolunteerPosition = (id: number) =>
                     <h3 class="text-sm font-medium">Location</h3>
                 </div>
                 <label class="field-label"
-                    >Venue or building<input
-                        v-model="form.location_name"
-                        class="field-input"
-                    />
+                >Venue or building<input
+                    v-model="form.location_name"
+                    class="field-input"
+                />
                 </label>
                 <label class="field-label"
-                    >Room, street address, or directions<input
-                        v-model="form.location_details"
-                        class="field-input"
-                    />
+                >Room, street address, or directions<input
+                    v-model="form.location_details"
+                    class="field-input"
+                />
                 </label>
                 <div class="md:col-span-2 border-t border-border pt-4">
                     <h3 class="text-sm font-medium">Event contact</h3>
                 </div>
                 <label class="field-label"
-                    >Contact name<input
-                        v-model="form.contact_name"
-                        class="field-input"
-                    />
+                >Contact name<input
+                    v-model="form.contact_name"
+                    class="field-input"
+                />
                 </label>
                 <label class="field-label"
-                    >Contact email<input
-                        v-model="form.contact_email"
-                        type="email"
-                        class="field-input"
-                    />
+                >Contact email<input
+                    v-model="form.contact_email"
+                    class="field-input"
+                    type="email"
+                />
                 </label>
                 <label class="field-label"
-                    >Contact phone<input
-                        v-model="form.contact_phone"
-                        type="tel"
-                        class="field-input"
-                    />
+                >Contact phone<input
+                    v-model="form.contact_phone"
+                    class="field-input"
+                    type="tel"
+                />
                 </label>
             </section>
             <section
@@ -345,38 +341,40 @@ const deactivateVolunteerPosition = (id: number) =>
             >
                 <h2 class="md:col-span-2 text-lg font-medium">Schedule</h2>
                 <label class="field-label"
-                    >Starts<input
-                        v-model="form.first_starts_at"
-                        type="datetime-local"
-                        class="field-input"
-                        required
-                    />
+                >Starts<input
+                    v-model="form.first_starts_at"
+                    class="field-input"
+                    required
+                    type="datetime-local"
+                />
                     <InputError
                         :message="form.errors.first_starts_at"
-                    /> </label
-                ><label class="field-label"
-                    >Time zone<input
-                        v-model="form.time_zone"
-                        class="field-input"
-                        required
                     />
-                    <InputError :message="form.errors.time_zone" /> </label
+                </label
                 ><label class="field-label"
-                    >Duration (minutes)<input
-                        v-model.number="form.duration_minutes"
-                        type="number"
-                        min="1"
-                        class="field-input"
-                        required
-                    />
-                    <InputError :message="form.errors.duration_minutes" />
-                </label>
+            >Time zone<input
+                v-model="form.time_zone"
+                class="field-input"
+                required
+            />
+                <InputError :message="form.errors.time_zone"/>
+            </label
+            ><label class="field-label"
+            >Duration (minutes)<input
+                v-model.number="form.duration_minutes"
+                class="field-input"
+                min="1"
+                required
+                type="number"
+            />
+                <InputError :message="form.errors.duration_minutes"/>
+            </label>
                 <div class="md:col-span-2">
                     <RecurrenceBuilder
                         v-model="form.rrule"
                         :starts-at="form.first_starts_at"
                     />
-                    <InputError :message="form.errors.rrule" />
+                    <InputError :message="form.errors.rrule"/>
                 </div>
             </section>
             <section
@@ -385,27 +383,27 @@ const deactivateVolunteerPosition = (id: number) =>
                 <h2 class="text-lg font-medium">Audience and reservations</h2>
                 <div class="grid gap-4 md:grid-cols-3">
                     <label class="field-label"
-                        >Visibility<select
-                            v-model="form.visibility"
-                            class="field-input"
-                        >
-                            <option value="public">Public</option>
-                            <option value="masons">Masons only</option>
-                            <option value="lodge">Lodge only</option>
-                        </select></label
+                    >Visibility<select
+                        v-model="form.visibility"
+                        class="field-input"
+                    >
+                        <option value="public">Public</option>
+                        <option value="masons">Masons only</option>
+                        <option value="lodge">Lodge only</option>
+                    </select></label
                     >
                     <label
                         v-if="form.visibility !== 'public'"
                         class="field-label"
-                        >Minimum degree<select
-                            v-model="form.required_qualification"
-                            class="field-input"
-                        >
-                            <option value="ea">Entered Apprentice</option>
-                            <option value="fc">Fellow Craft</option>
-                            <option value="mm">Master Mason</option>
-                            <option value="pm">Past Master</option>
-                        </select></label
+                    >Minimum degree<select
+                        v-model="form.required_qualification"
+                        class="field-input"
+                    >
+                        <option value="ea">Entered Apprentice</option>
+                        <option value="fc">Fellow Craft</option>
+                        <option value="mm">Master Mason</option>
+                        <option value="pm">Past Master</option>
+                    </select></label
                     >
                     <div v-else aria-hidden="true"></div>
                     <label class="field-toggle">
@@ -416,21 +414,21 @@ const deactivateVolunteerPosition = (id: number) =>
                         Enable reservations
                     </label>
                     <label v-if="form.reservations_enabled" class="field-label"
-                        >Capacity<input
-                            v-model.number="form.capacity"
-                            type="number"
-                            min="1"
-                            class="field-input"
-                        />
+                    >Capacity<input
+                        v-model.number="form.capacity"
+                        class="field-input"
+                        min="1"
+                        type="number"
+                    />
                     </label>
                     <div v-else aria-hidden="true"></div>
                     <label v-if="form.reservations_enabled" class="field-label"
-                        >Maximum party size<input
-                            v-model.number="form.maximum_party_size"
-                            type="number"
-                            min="1"
-                            class="field-input"
-                        />
+                    >Maximum party size<input
+                        v-model.number="form.maximum_party_size"
+                        class="field-input"
+                        min="1"
+                        type="number"
+                    />
                     </label>
                     <div v-else aria-hidden="true"></div>
                     <label
@@ -464,15 +462,15 @@ const deactivateVolunteerPosition = (id: number) =>
                     Active subscriptions: {{ reminderSubscriptionCount }}
                 </p>
                 <label class="flex items-center gap-2 text-sm font-medium"
-                    ><input v-model="form.reminders_enabled" type="checkbox" />
+                ><input v-model="form.reminders_enabled" type="checkbox"/>
                     Enable reminder subscriptions</label
                 ><label class="flex items-center gap-2 text-sm font-medium"
-                    ><input
-                        v-model="form.guest_reminders_enabled"
-                        type="checkbox"
-                    />
-                    Allow guest reminder subscriptions</label
-                >
+            ><input
+                v-model="form.guest_reminders_enabled"
+                type="checkbox"
+            />
+                Allow guest reminder subscriptions</label
+            >
                 <div v-if="!isNew" class="border-t pt-3">
                     <p class="text-sm font-medium">Reminder times</p>
                     <ul class="mt-2 space-y-1 text-sm">
@@ -484,8 +482,8 @@ const deactivateVolunteerPosition = (id: number) =>
                             {{ rule.offset_minutes }}
                             minutes before
                             <button
-                                type="button"
                                 class="inline-flex items-center rounded-md border border-border bg-card px-2 py-1 text-destructive hover:bg-accent"
+                                type="button"
                                 @click="removeReminderRule(rule)"
                             >
                                 Remove
@@ -493,8 +491,8 @@ const deactivateVolunteerPosition = (id: number) =>
                         </li>
                     </ul>
                     <button
-                        type="button"
                         class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                        type="button"
                         @click="addReminderRule"
                     >
                         Add reminder time
@@ -511,8 +509,8 @@ const deactivateVolunteerPosition = (id: number) =>
                     reservations and reminder subscriptions.
                 </p>
                 <button
-                    type="button"
                     class="primary-button"
+                    type="button"
                     @click="openVolunteerModal()"
                 >
                     Add staffing position
@@ -523,73 +521,73 @@ const deactivateVolunteerPosition = (id: number) =>
                 >
                     <table class="w-full text-left text-sm">
                         <thead class="bg-muted/50">
-                            <tr>
-                                <th class="px-3 py-2">Position</th>
-                                <th class="px-3 py-2">Scope</th>
-                                <th class="px-3 py-2">Needed</th>
-                                <th class="px-3 py-2"></th>
-                            </tr>
+                        <tr>
+                            <th class="px-3 py-2">Position</th>
+                            <th class="px-3 py-2">Scope</th>
+                            <th class="px-3 py-2">Needed</th>
+                            <th class="px-3 py-2"></th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="position in volunteerPositions"
-                                :key="position.id"
-                                class="border-t"
+                        <tr
+                            v-for="position in volunteerPositions"
+                            :key="position.id"
+                            class="border-t"
+                        >
+                            <td class="px-3 py-2">
+                                <strong>{{ position.name }}</strong
+                                ><span
+                                v-if="!position.is_active"
+                                class="ml-2 text-muted-foreground"
+                            >Inactive</span
                             >
-                                <td class="px-3 py-2">
-                                    <strong>{{ position.name }}</strong
-                                    ><span
-                                        v-if="!position.is_active"
-                                        class="ml-2 text-muted-foreground"
-                                        >Inactive</span
-                                    >
-                                </td>
-                                <td class="px-3 py-2">
-                                    {{
-                                        position.event_occurrence_id
-                                            ? "Occurrence-only"
-                                            : "Every occurrence"
-                                    }}
-                                </td>
-                                <td class="px-3 py-2">
-                                    {{ position.needed_count }}
-                                </td>
-                                <td class="px-3 py-2">
-                                    <div class="flex justify-end gap-2">
-                                        <button
-                                            type="button"
-                                            title="Edit position"
-                                            aria-label="Edit position"
-                                            class="icon-button"
-                                            @click="
+                            </td>
+                            <td class="px-3 py-2">
+                                {{
+                                    position.event_occurrence_id
+                                        ? "Occurrence-only"
+                                        : "Every occurrence"
+                                }}
+                            </td>
+                            <td class="px-3 py-2">
+                                {{ position.needed_count }}
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="flex justify-end gap-2">
+                                    <button
+                                        aria-label="Edit position"
+                                        class="icon-button"
+                                        title="Edit position"
+                                        type="button"
+                                        @click="
                                                 openVolunteerModal(position)
                                             "
-                                        >
-                                            <Pencil
-                                                class="size-4"
-                                                aria-hidden="true"
-                                            />
-                                        </button>
-                                        <button
-                                            v-if="position.is_active"
-                                            type="button"
-                                            title="Deactivate position"
-                                            aria-label="Deactivate position"
-                                            class="icon-button text-destructive"
-                                            @click="
+                                    >
+                                        <Pencil
+                                            aria-hidden="true"
+                                            class="size-4"
+                                        />
+                                    </button>
+                                    <button
+                                        v-if="position.is_active"
+                                        aria-label="Deactivate position"
+                                        class="icon-button text-destructive"
+                                        title="Deactivate position"
+                                        type="button"
+                                        @click="
                                                 deactivateVolunteerPosition(
                                                     position.id,
                                                 )
                                             "
-                                        >
-                                            <CircleOff
-                                                class="size-4"
-                                                aria-hidden="true"
-                                            />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                    >
+                                        <CircleOff
+                                            aria-hidden="true"
+                                            class="size-4"
+                                        />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -623,25 +621,25 @@ const deactivateVolunteerPosition = (id: number) =>
                         </div>
                         <div class="mt-3 flex min-h-9 justify-end gap-2">
                             <button
-                                type="button"
-                                title="Edit position"
                                 aria-label="Edit position"
                                 class="icon-button"
+                                title="Edit position"
+                                type="button"
                                 @click="openVolunteerModal(position)"
                             >
-                                <Pencil class="size-4" aria-hidden="true" />
+                                <Pencil aria-hidden="true" class="size-4"/>
                             </button>
                             <button
                                 v-if="position.is_active"
-                                type="button"
-                                title="Deactivate position"
                                 aria-label="Deactivate position"
                                 class="icon-button text-destructive"
+                                title="Deactivate position"
+                                type="button"
                                 @click="
                                     deactivateVolunteerPosition(position.id)
                                 "
                             >
-                                <CircleOff class="size-4" aria-hidden="true" />
+                                <CircleOff aria-hidden="true" class="size-4"/>
                             </button>
                         </div>
                     </article>
@@ -651,78 +649,83 @@ const deactivateVolunteerPosition = (id: number) =>
                     @update:open="volunteerModalOpen = $event"
                 >
                     <DialogScrollContent class="max-w-xl"
-                        ><DialogHeader
-                            ><DialogTitle>{{
-                                editingVolunteerPosition
-                                    ? "Edit staffing position"
-                                    : "Add staffing position"
-                            }}</DialogTitle></DialogHeader
+                    >
+                        <DialogHeader
+                        >
+                            <DialogTitle>{{
+                                    editingVolunteerPosition
+                                        ? "Edit staffing position"
+                                        : "Add staffing position"
+                                }}
+                            </DialogTitle>
+                        </DialogHeader
                         >
                         <div class="grid gap-3 md:grid-cols-2">
                             <label class="field-label"
-                                >Position name<input
-                                    v-model="volunteerForm.name"
-                                    maxlength="120"
-                                    class="field-input"
-                                />
+                            >Position name<input
+                                v-model="volunteerForm.name"
+                                class="field-input"
+                                maxlength="120"
+                            />
                                 <InputError
                                     :message="volunteerForm.errors.name"
-                                /> </label
+                                />
+                            </label
                             ><label class="field-label"
-                                >Scope<select
-                                    v-model="volunteerForm.event_occurrence_id"
-                                    class="field-input"
-                                >
-                                    <option value="">
-                                        Every occurrence in series
-                                    </option>
-                                    <option
-                                        v-for="occurrence in occurrences.filter(
+                        >Scope<select
+                            v-model="volunteerForm.event_occurrence_id"
+                            class="field-input"
+                        >
+                            <option value="">
+                                Every occurrence in series
+                            </option>
+                            <option
+                                v-for="occurrence in occurrences.filter(
                                             (item) =>
                                                 item.status === 'scheduled',
                                         )"
-                                        :key="occurrence.id"
-                                        :value="occurrence.id"
-                                    >
-                                        This occurrence:
-                                        {{
-                                            new Date(
-                                                occurrence.starts_at,
-                                            ).toLocaleString()
-                                        }}
-                                    </option>
-                                </select></label
-                            ><label class="field-label md:col-span-2"
-                                >Description / instructions<textarea
-                                    v-model="volunteerForm.description"
-                                    maxlength="2000"
-                                    class="field-input min-h-20"
-                                />
-                            </label>
+                                :key="occurrence.id"
+                                :value="occurrence.id"
+                            >
+                                This occurrence:
+                                {{
+                                    new Date(
+                                        occurrence.starts_at,
+                                    ).toLocaleString()
+                                }}
+                            </option>
+                        </select></label
+                        ><label class="field-label md:col-span-2"
+                        >Description / instructions<textarea
+                            v-model="volunteerForm.description"
+                            class="field-input min-h-20"
+                            maxlength="2000"
+                        />
+                        </label>
                             <div class="grid grid-cols-2 gap-3">
                                 <label class="field-label"
-                                    >Needed<input
-                                        v-model.number="
+                                >Needed<input
+                                    v-model.number="
                                             volunteerForm.needed_count
                                         "
-                                        type="number"
-                                        min="1"
-                                        class="field-input" /></label
+                                    class="field-input"
+                                    min="1"
+                                    type="number"/></label
                                 ><label class="field-label"
-                                    >Order<input
-                                        v-model.number="
+                            >Order<input
+                                v-model.number="
                                             volunteerForm.sort_order
                                         "
-                                        type="number"
-                                        min="0"
-                                        class="field-input"
-                                /></label>
+                                class="field-input"
+                                min="0"
+                                type="number"
+                            /></label>
                             </div>
                             <div class="md:col-span-2">
                                 <button
-                                    type="button"
                                     :disabled="volunteerForm.processing"
                                     class="primary-button"
+                                    type="button"
                                     @click="addVolunteerPosition"
                                 >
                                     {{
@@ -750,9 +753,9 @@ const deactivateVolunteerPosition = (id: number) =>
                     I understand this changes future occurrences.
                 </label>
                 <button
-                    type="submit"
                     :disabled="form.processing"
                     class="primary-button"
+                    type="submit"
                 >
                     Save event
                 </button>

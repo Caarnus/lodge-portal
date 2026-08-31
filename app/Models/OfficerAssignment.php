@@ -8,15 +8,6 @@ class OfficerAssignment extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'is_public' => 'boolean',
-            'show_email' => 'boolean',
-            'show_phone' => 'boolean',
-        ];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -30,5 +21,14 @@ class OfficerAssignment extends Model
     public function position()
     {
         return $this->belongsTo(OfficerPosition::class, 'officer_position_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+            'show_email' => 'boolean',
+            'show_phone' => 'boolean',
+        ];
     }
 }

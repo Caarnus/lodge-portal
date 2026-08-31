@@ -1,8 +1,8 @@
 <template>
     <div
+        aria-label="WorkingTools"
         class="relative h-16 w-64 overflow-hidden"
         role="img"
-        aria-label="WorkingTools"
     >
         <img
             :src="'/logo.png'"

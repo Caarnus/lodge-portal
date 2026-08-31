@@ -1,17 +1,11 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { type BreadcrumbItem } from "@/types";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {type BreadcrumbItem} from "@/types";
+import {Head, Link, router} from "@inertiajs/vue3";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -72,21 +66,26 @@ const withdraw = (commitment: VolunteerCommitment) =>
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Dashboard"/>
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
             <PageHeader
-                title="Dashboard"
                 description="Your lodge activity, memberships, and upcoming commitments."
+                title="Dashboard"
             />
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <Card>
                     <CardHeader
-                        ><CardTitle>Memberships</CardTitle
-                        ><CardDescription
-                            >Your active lodge connections.</CardDescription
-                        ></CardHeader
+                    >
+                        <CardTitle>Memberships
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Your active lodge connections.
+                        </CardDescription
+                        >
+                    </CardHeader
                     >
                     <CardContent>
                         <p
@@ -114,32 +113,36 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                     <Button
                                         :as="Link"
                                         :href="item.site_url"
-                                        variant="outline"
                                         size="sm"
-                                        >Lodge site</Button
+                                        variant="outline"
+                                    >Lodge site
+                                    </Button
                                     >
                                     <Button
                                         v-if="item.directory_url"
                                         :as="Link"
                                         :href="item.directory_url"
-                                        variant="outline"
                                         size="sm"
-                                        >Directory</Button
+                                        variant="outline"
+                                    >Directory
+                                    </Button
                                     >
                                     <Button
                                         v-if="item.ritual_assistance_url"
                                         :as="Link"
                                         :href="item.ritual_assistance_url"
-                                        variant="outline"
                                         size="sm"
-                                        >Ritual assistance</Button
+                                        variant="outline"
+                                    >Ritual assistance
+                                    </Button
                                     >
                                     <Button
                                         :as="Link"
                                         :href="item.newsletters_url"
-                                        variant="outline"
                                         size="sm"
-                                        >Newsletters</Button
+                                        variant="outline"
+                                    >Newsletters
+                                    </Button
                                     >
                                 </div>
                             </li>
@@ -147,21 +150,32 @@ const withdraw = (commitment: VolunteerCommitment) =>
                     </CardContent>
                 </Card>
                 <Card v-if="ritual"
-                    ><CardHeader
-                        ><CardTitle>Ritual progress</CardTitle
-                        ><CardDescription
-                            >Self-reported knowledge and open-lodge
-                            credit.</CardDescription
-                        ></CardHeader
-                    ><CardContent class="space-y-3"
-                        ><div class="flex flex-wrap gap-2">
+                >
+                    <CardHeader
+                    >
+                        <CardTitle>Ritual progress
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Self-reported knowledge and open-lodge
+                            credit.
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent class="space-y-3"
+                    >
+                        <div class="flex flex-wrap gap-2">
                             <Badge
-                                >{{ ritual.current_total }} current
-                                points</Badge
-                            ><Badge
+                            >{{ ritual.current_total }} current
+                                points
+                            </Badge
+                            >
+                            <Badge
                                 v-if="ritual.highest_level"
                                 variant="secondary"
-                                >{{ ritual.highest_level }}</Badge
+                            >{{ ritual.highest_level }}
+                            </Badge
                             >
                         </div>
                         <p class="text-sm text-muted-foreground">
@@ -172,19 +186,29 @@ const withdraw = (commitment: VolunteerCommitment) =>
                         <Button
                             :as="Link"
                             :href="ritual.url"
-                            variant="outline"
                             size="sm"
-                            >Manage ritual progress</Button
-                        ></CardContent
-                    ></Card
+                            variant="outline"
+                        >Manage ritual progress
+                        </Button
+                        >
+                    </CardContent
+                    >
+                </Card
                 >
                 <Card
-                    ><CardHeader
-                        ><CardTitle>Upcoming events</CardTitle
-                        ><CardDescription
-                            >Events on your lodge calendar.</CardDescription
-                        ></CardHeader
-                    ><CardContent>
+                >
+                    <CardHeader
+                    >
+                        <CardTitle>Upcoming events
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Events on your lodge calendar.
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent>
                         <p
                             v-if="!upcomingEvents.length"
                             class="text-sm text-muted-foreground"
@@ -196,48 +220,66 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                 <Link
                                     :href="item.url"
                                     class="font-medium text-primary hover:underline"
-                                    >{{ item.event }}</Link
+                                >{{ item.event }}
+                                </Link
                                 >
                                 · {{ item.lodge }}
                             </li>
                         </ul>
-                    </CardContent></Card
+                    </CardContent>
+                </Card
                 >
                 <Card
-                    ><CardHeader
-                        ><CardTitle>Profile</CardTitle
-                        ><CardDescription
-                            >Account and directory privacy.</CardDescription
-                        ></CardHeader
-                    ><CardContent
-                        ><p class="text-sm text-muted-foreground">
-                            {{
-                                profile.linked
-                                    ? `Directory: ${profile.directory_scope ?? "own lodge"}`
-                                    : "Your account is not linked to a member profile."
-                            }}
-                        </p>
+                >
+                    <CardHeader
+                    >
+                        <CardTitle>Profile
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Account and directory privacy.
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent
+                    ><p class="text-sm text-muted-foreground">
+                        {{
+                            profile.linked
+                                ? `Directory: ${profile.directory_scope ?? "own lodge"}`
+                                : "Your account is not linked to a member profile."
+                        }}
+                    </p>
                         <div class="mt-3 flex flex-wrap gap-2">
                             <Button
                                 :as="Link"
                                 :href="profile.settings_url"
-                                variant="outline"
                                 size="sm"
-                                >Profile and privacy</Button
-                            ><Button
+                                variant="outline"
+                            >Profile and privacy
+                            </Button
+                            >
+                            <Button
                                 v-if="profile.linked"
                                 :as="Link"
                                 :href="profile.ritual_url"
-                                variant="outline"
                                 size="sm"
-                                >Ritual progress</Button
+                                variant="outline"
+                            >Ritual progress
+                            </Button
                             >
-                        </div></CardContent
-                    ></Card
+                        </div>
+                    </CardContent
+                    >
+                </Card
                 >
                 <Card
-                    ><CardHeader><CardTitle>Reservations</CardTitle></CardHeader
-                    ><CardContent>
+                >
+                    <CardHeader>
+                        <CardTitle>Reservations</CardTitle>
+                    </CardHeader
+                    >
+                    <CardContent>
                         <p
                             v-if="!reservations.length"
                             class="text-sm text-muted-foreground"
@@ -249,14 +291,20 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                 {{ item.event }} · {{ item.lodge }}
                             </li>
                         </ul>
-                    </CardContent></Card
+                    </CardContent>
+                </Card
                 >
                 <Card
-                    ><CardHeader
-                        ><CardTitle
-                            >Reminder subscriptions</CardTitle
-                        ></CardHeader
-                    ><CardContent>
+                >
+                    <CardHeader
+                    >
+                        <CardTitle
+                        >Reminder subscriptions
+                        </CardTitle
+                        >
+                    </CardHeader
+                    >
+                    <CardContent>
                         <p
                             v-if="!reminders.length"
                             class="text-sm text-muted-foreground"
@@ -268,16 +316,22 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                 {{ item.event }} · {{ item.lodge }}
                             </li>
                         </ul>
-                    </CardContent></Card
+                    </CardContent>
+                </Card
                 >
             </div>
             <Card>
                 <CardHeader
-                    ><CardTitle>Upcoming volunteer commitments</CardTitle
-                    ><CardDescription
-                        >Positions you have volunteered to
-                        fill.</CardDescription
-                    ></CardHeader
+                >
+                    <CardTitle>Upcoming volunteer commitments
+                    </CardTitle
+                    >
+                    <CardDescription
+                    >Positions you have volunteered to
+                        fill.
+                    </CardDescription
+                    >
+                </CardHeader
                 >
                 <CardContent>
                     <p
@@ -296,18 +350,20 @@ const withdraw = (commitment: VolunteerCommitment) =>
                                 <Link
                                     :href="`/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}`"
                                     class="font-medium text-primary underline"
-                                    >{{ commitment.position }} —
-                                    {{ commitment.event }}</Link
+                                >{{ commitment.position }} —
+                                    {{ commitment.event }}
+                                </Link
                                 >
                                 <p class="mt-1 text-sm text-muted-foreground">
                                     {{ commitment.lodge }}
                                 </p>
                             </div>
                             <Button
-                                variant="outline"
                                 size="sm"
+                                variant="outline"
                                 @click="withdraw(commitment)"
-                                >Withdraw commitment</Button
+                            >Withdraw commitment
+                            </Button
                             >
                         </li>
                     </ul>

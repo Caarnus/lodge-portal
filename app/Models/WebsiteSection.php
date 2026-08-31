@@ -8,11 +8,6 @@ class WebsiteSection extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['configuration' => 'array'];
-    }
-
     public function version()
     {
         return $this->belongsTo(WebsitePageVersion::class, 'website_page_version_id');
@@ -21,5 +16,10 @@ class WebsiteSection extends Model
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['configuration' => 'array'];
     }
 }

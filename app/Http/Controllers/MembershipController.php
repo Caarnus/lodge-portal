@@ -11,16 +11,6 @@ use Illuminate\Http\Request;
 
 class MembershipController extends Controller
 {
-    public function update(MembershipRequest $request, Lodge $lodge, Membership $membership)
-    {
-        $this->allow($lodge, $membership);
-        $before = $membership->toArray();
-        $membership->update($request->validated());
-        Audit::record('membership.updated', $membership, $lodge, $before, $membership->fresh()->toArray());
-
-        return back();
-    }
-
     public function end(Request $request, Lodge $lodge, Membership $membership)
     {
         $this->allow($lodge, $membership);
@@ -28,6 +18,22 @@ class MembershipController extends Controller
         $before = $membership->toArray();
         $membership->update($data);
         Audit::record('membership.ended', $membership, $lodge, $before, $membership->fresh()->toArray());
+
+        return back();
+    }
+
+    private function allow(Lodge $lodge, Membership $membership): void
+    {
+        abort_unless($membership->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, 'memberships.manage');
+    }
+
+    public function update(MembershipRequest $request, Lodge $lodge, Membership $membership)
+    {
+        $this->allow($lodge, $membership);
+        $before = $membership->toArray();
+        $membership->update($request->validated());
+        Audit::record('membership.updated', $membership, $lodge, $before, $membership->fresh()->toArray());
 
         return back();
     }
@@ -55,11 +61,5 @@ class MembershipController extends Controller
         Audit::record('past_master_term.deleted', $term, $lodge, $before);
 
         return back();
-    }
-
-    private function allow(Lodge $lodge, Membership $membership): void
-    {
-        abort_unless($membership->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'memberships.manage');
     }
 }

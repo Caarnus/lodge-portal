@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { router } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import {router} from "@inertiajs/vue3";
+import {computed, ref} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 const props = defineProps<{
     lodge: { id: number; name: string };
@@ -37,13 +37,13 @@ const save = () =>
 <template>
     <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
         <PageHeader
-            title="Event categories"
             :description="`Choose the categories ${lodge.name} can use for new events.`"
+            title="Event categories"
         />
         <WorkspaceTabs
             :lodge="lodge"
-            workspace="settings"
             active="event-categories"
+            workspace="settings"
         />
         <form
             class="space-y-3 rounded-lg border border-border/80 bg-card p-4"
@@ -57,19 +57,19 @@ const save = () =>
                 <input
                     v-model="selected"
                     :value="category.id"
-                    type="checkbox"
                     class="mt-1"
+                    type="checkbox"
                 />
                 <span
-                    ><span class="block font-medium">{{ category.name }}</span
-                    ><span
-                        v-if="category.description"
-                        class="text-sm text-muted-foreground"
-                        >{{ category.description }}</span
-                    ></span
+                ><span class="block font-medium">{{ category.name }}</span
+                ><span
+                    v-if="category.description"
+                    class="text-sm text-muted-foreground"
+                >{{ category.description }}</span
+                ></span
                 >
             </label>
-            <button type="submit" class="primary-button">
+            <button class="primary-button" type="submit">
                 Save categories
             </button>
         </form>

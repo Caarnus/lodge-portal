@@ -1,15 +1,16 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { formatLodgeDate } from "@/utils/date";
-import { Head, Link } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {formatLodgeDate} from "@/utils/date";
+import {Head, Link} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{ lodge: any; communications: any[] }>();
 const formatDate = (value: string | null) =>
     formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 <template>
-    <Head title="Communications" />
+    <Head title="Communications"/>
     <main class="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
         <PageHeader
             :title="`${lodge.name} communications`"
@@ -21,7 +22,7 @@ const formatDate = (value: string | null) =>
                 :key="item.id"
                 :href="`/lodges/${lodge.id}/communications/${item.id}`"
                 class="block p-4 transition-colors hover:bg-muted"
-                ><strong>{{ item.subject }}</strong>
+            ><strong>{{ item.subject }}</strong>
                 <p class="text-sm">{{ formatDate(item.sent_at) }}</p></Link
             >
         </div>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     Dialog,
     DialogDescription,
@@ -7,8 +7,8 @@ import {
     DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { router, useForm } from "@inertiajs/vue3";
-import { reactive, ref, watch } from "vue";
+import {router, useForm} from "@inertiajs/vue3";
+import {reactive, ref, watch} from "vue";
 
 const props = defineProps<{
     lodge: { id: number; name: string };
@@ -22,7 +22,7 @@ const props = defineProps<{
 const categoriesOpen = ref(false);
 const rolesOpen = ref(false);
 const selectedCategoryIds = ref<number[]>([]);
-const roleForm = useForm({ name: "", permission_ids: [] as number[] });
+const roleForm = useForm({name: "", permission_ids: [] as number[]});
 const roleDrafts = reactive<
     Record<number, { name: string; permission_ids: number[] }>
 >({});
@@ -34,7 +34,7 @@ watch(
             .filter((category) => category.enabled)
             .map((category) => category.id);
     },
-    { immediate: true },
+    {immediate: true},
 );
 
 watch(
@@ -49,14 +49,14 @@ watch(
             };
         });
     },
-    { immediate: true },
+    {immediate: true},
 );
 
 const saveCategories = () =>
     router.put(
         `/lodges/${props.lodge.id}/event-categories`,
-        { category_ids: selectedCategoryIds.value },
-        { onSuccess: () => (categoriesOpen.value = false) },
+        {category_ids: selectedCategoryIds.value},
+        {onSuccess: () => (categoriesOpen.value = false)},
     );
 
 const createRole = () =>
@@ -83,16 +83,16 @@ const saveRole = (role: any) =>
         <div class="mt-4 flex flex-wrap gap-3">
             <button
                 v-if="canManageEvents"
-                type="button"
                 class="secondary-button"
+                type="button"
                 @click="categoriesOpen = true"
             >
                 Event categories
             </button>
             <button
                 v-if="canManageRoles"
-                type="button"
                 class="secondary-button"
+                type="button"
                 @click="rolesOpen = true"
             >
                 Role definitions
@@ -120,13 +120,13 @@ const saveRole = (role: any) =>
                     <input
                         v-model="selectedCategoryIds"
                         :value="category.id"
-                        type="checkbox"
                         class="mt-1"
+                        type="checkbox"
                     />
                     <span>
                         <span class="block font-medium">{{
-                            category.name
-                        }}</span>
+                                category.name
+                            }}</span>
                         <span
                             v-if="category.description"
                             class="text-sm text-muted-foreground"
@@ -136,7 +136,7 @@ const saveRole = (role: any) =>
                     </span>
                 </label>
                 <DialogFooter>
-                    <button type="submit" class="primary-button">
+                    <button class="primary-button" type="submit">
                         Save categories
                     </button>
                 </DialogFooter>
@@ -160,8 +160,8 @@ const saveRole = (role: any) =>
                         Role name
                         <input
                             v-model="roleForm.name"
-                            required
                             class="field-input"
+                            required
                         />
                     </label>
                     <fieldset>
@@ -176,8 +176,8 @@ const saveRole = (role: any) =>
                             >
                                 <input
                                     v-model="roleForm.permission_ids"
-                                    type="checkbox"
                                     :value="permission.id"
+                                    type="checkbox"
                                 />
                                 <span>{{ permission.name }}</span>
                             </label>
@@ -209,7 +209,7 @@ const saveRole = (role: any) =>
                         <p class="font-medium">
                             {{ role.name }}
                             <span class="text-xs text-muted-foreground"
-                                >Built in</span
+                            >Built in</span
                             >
                         </p>
                         <p class="mt-1 text-sm text-muted-foreground">
@@ -229,8 +229,8 @@ const saveRole = (role: any) =>
                             Role name
                             <input
                                 v-model="roleDrafts[role.id].name"
-                                required
                                 class="field-input"
+                                required
                             />
                         </label>
                         <fieldset>
@@ -247,15 +247,15 @@ const saveRole = (role: any) =>
                                         v-model="
                                             roleDrafts[role.id].permission_ids
                                         "
-                                        type="checkbox"
                                         :value="permission.id"
+                                        type="checkbox"
                                     />
                                     <span>{{ permission.name }}</span>
                                 </label>
                             </div>
                         </fieldset>
                         <div class="flex justify-end">
-                            <button type="submit" class="secondary-button">
+                            <button class="secondary-button" type="submit">
                                 Save role
                             </button>
                         </div>

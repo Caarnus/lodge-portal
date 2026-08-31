@@ -9,18 +9,6 @@ class EventOccurrence extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'status' => EventOccurrenceStatus::class,
-            'original_starts_at' => 'datetime',
-            'starts_at' => 'datetime',
-            'ends_at' => 'datetime',
-            'overridden_at' => 'datetime',
-            'cancelled_at' => 'datetime',
-        ];
-    }
-
     public function event()
     {
         return $this->belongsTo(Event::class);
@@ -59,5 +47,17 @@ class EventOccurrence extends Model
     public function volunteerReminderDeliveries()
     {
         return $this->hasMany(EventVolunteerReminderDelivery::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => EventOccurrenceStatus::class,
+            'original_starts_at' => 'datetime',
+            'starts_at' => 'datetime',
+            'ends_at' => 'datetime',
+            'overridden_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+        ];
     }
 }

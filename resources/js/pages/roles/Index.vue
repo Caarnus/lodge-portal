@@ -1,13 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { reactive } from "vue";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
+import {reactive} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{ lodge: any; roles: any[]; permissions: any[] }>();
-const roleForm = useForm({ name: "", permission_ids: [] as number[] });
+const roleForm = useForm({name: "", permission_ids: [] as number[]});
 const roleDrafts = reactive(
     Object.fromEntries(
         props.roles.map((role) => [
@@ -33,22 +33,25 @@ const updateRole = (role: any) =>
 </script>
 
 <template>
-    <Head :title="`${lodge.name} role definitions`" />
+    <Head :title="`${lodge.name} role definitions`"/>
     <main class="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
-        <PageHeader title="Role definitions" :description="lodge.name">
+        <PageHeader :description="lodge.name" title="Role definitions">
             <template #actions
-                ><Link
+            >
+                <Link
                     :href="`/lodges/${lodge.id}/role-assignments`"
                     class="primary-button"
-                    >Manage role assignments</Link
-                ></template
+                >Manage role assignments
+                </Link
+                >
+            </template
             >
         </PageHeader>
         <WorkspaceTabs
             :lodge="lodge"
-            workspace="settings"
             active="roles"
             class="mt-6"
+            workspace="settings"
         />
         <section
             class="mt-6 rounded-lg border border-border/80 bg-card p-4 sm:p-5"
@@ -56,10 +59,10 @@ const updateRole = (role: any) =>
             <h2 class="font-semibold">Create custom role</h2>
             <form class="mt-3" @submit.prevent="createRole">
                 <label
-                    >Role name<input
-                        v-model="roleForm.name"
-                        required
-                        class="field-input mt-1"
+                >Role name<input
+                    v-model="roleForm.name"
+                    class="field-input mt-1"
+                    required
                 /></label>
                 <fieldset class="mt-4">
                     <legend class="font-medium">
@@ -69,11 +72,11 @@ const updateRole = (role: any) =>
                         v-for="permission in permissions"
                         :key="permission.id"
                         class="mt-2 flex gap-2"
-                        ><input
-                            v-model="roleForm.permission_ids"
-                            type="checkbox"
-                            :value="permission.id"
-                        />
+                    ><input
+                        v-model="roleForm.permission_ids"
+                        :value="permission.id"
+                        type="checkbox"
+                    />
                         {{ permission.name }}</label
                     >
                 </fieldset>
@@ -95,12 +98,12 @@ const updateRole = (role: any) =>
                 class="mt-3 rounded-lg border border-border/80 bg-card p-4"
             >
                 <template v-if="role.is_system"
-                    ><p class="font-medium">
-                        {{ role.name }}
-                        <span class="text-xs text-muted-foreground"
-                            >Built in</span
-                        >
-                    </p>
+                ><p class="font-medium">
+                    {{ role.name }}
+                    <span class="text-xs text-muted-foreground"
+                    >Built in</span
+                    >
+                </p>
                     <p class="mt-1 text-sm text-muted-foreground">
                         {{
                             role.permissions
@@ -111,10 +114,10 @@ const updateRole = (role: any) =>
                 >
                 <form v-else @submit.prevent="updateRole(role)">
                     <label class="font-medium"
-                        >Role name<input
-                            v-model="roleDrafts[role.id].name"
-                            required
-                            class="field-input mt-1"
+                    >Role name<input
+                        v-model="roleDrafts[role.id].name"
+                        class="field-input mt-1"
+                        required
                     /></label>
                     <fieldset class="mt-3">
                         <legend class="text-sm font-medium">Permissions</legend>
@@ -122,11 +125,11 @@ const updateRole = (role: any) =>
                             v-for="permission in permissions"
                             :key="permission.id"
                             class="mt-2 flex gap-2 text-sm"
-                            ><input
-                                v-model="roleDrafts[role.id].permission_ids"
-                                type="checkbox"
-                                :value="permission.id"
-                            />
+                        ><input
+                            v-model="roleDrafts[role.id].permission_ids"
+                            :value="permission.id"
+                            type="checkbox"
+                        />
                             {{ permission.name }}</label
                         >
                     </fieldset>

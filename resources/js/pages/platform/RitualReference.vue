@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { router, useForm } from "@inertiajs/vue3";
+import {router, useForm} from "@inertiajs/vue3";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 defineProps<{ categories: any[]; levels: any[]; degrees: any[] }>();
 const categoryForm = useForm({
     key: "",
@@ -19,7 +19,7 @@ const partForm = useForm({
     counts_toward_program: false,
     point_value: "",
 });
-const levelForm = useForm({ key: "", name: "", point_threshold: "" });
+const levelForm = useForm({key: "", name: "", point_threshold: ""});
 const createCategory = () =>
     categoryForm.post("/platform/ritual-categories", {
         onSuccess: () => categoryForm.reset(),
@@ -45,37 +45,40 @@ const warning = (item: any) =>
 <template>
     <main class="mx-auto w-full max-w-6xl space-y-8 p-4 sm:p-6 lg:p-8">
         <PageHeader
-            title="Ritual Reference"
             description="Platform-wide catalog. Stable keys cannot change. Deactivate records instead of deleting them."
+            title="Ritual Reference"
         />
         <section class="space-y-4 rounded-lg border border-border/80 bg-card p-4 sm:p-5">
-            <div><h2 class="font-semibold">Categories</h2><p class="mt-1 text-sm text-muted-foreground">Maintain the catalog used for ritual crediting.</p></div>
+            <div><h2 class="font-semibold">Categories</h2>
+                <p class="mt-1 text-sm text-muted-foreground">Maintain the catalog used for ritual crediting.</p></div>
             <form
                 class="grid gap-3 rounded-lg border border-border/80 bg-muted/30 p-3 md:grid-cols-4"
                 @submit.prevent="createCategory"
             >
                 <input
                     v-model="categoryForm.name"
-                    required
+                    class="field-input"
                     placeholder="Category name"
-                    class="field-input"
+                    required
                 /><input
-                    v-model="categoryForm.key"
-                    placeholder="Stable key (optional)"
-                    class="field-input"
-                /><select
-                    v-model="categoryForm.masonic_degree_id"
-                    class="field-input"
+                v-model="categoryForm.key"
+                class="field-input"
+                placeholder="Stable key (optional)"
+            /><select
+                v-model="categoryForm.masonic_degree_id"
+                class="field-input"
+            >
+                <option value="">No degree</option>
+                <option
+                    v-for="degree in degrees"
+                    :key="degree.id"
+                    :value="degree.id"
                 >
-                    <option value="">No degree</option>
-                    <option
-                        v-for="degree in degrees"
-                        :key="degree.id"
-                        :value="degree.id"
-                    >
-                        {{ degree.name }}
-                    </option></select
-                ><button
+                    {{ degree.name }}
+                </option>
+            </select
+            >
+                <button
                     class="primary-button"
                 >
                     Add category
@@ -90,34 +93,35 @@ const warning = (item: any) =>
                 <div class="grid gap-2 md:grid-cols-5">
                     <input
                         v-model="category.name"
+                        class="field-input"
                         required
-                        class="field-input"
                     /><input
-                        :value="category.key"
-                        disabled
-                        aria-label="Stable category key"
-                        class="field-input bg-muted"
-                    /><select
-                        v-model="category.masonic_degree_id"
-                        class="field-input"
+                    :value="category.key"
+                    aria-label="Stable category key"
+                    class="field-input bg-muted"
+                    disabled
+                /><select
+                    v-model="category.masonic_degree_id"
+                    class="field-input"
+                >
+                    <option :value="null">No degree</option>
+                    <option
+                        v-for="degree in degrees"
+                        :key="degree.id"
+                        :value="degree.id"
                     >
-                        <option :value="null">No degree</option>
-                        <option
-                            v-for="degree in degrees"
-                            :key="degree.id"
-                            :value="degree.id"
-                        >
-                            {{ degree.name }}
-                        </option></select
-                    ><input
-                        v-model.number="category.sort_order"
-                        type="number"
-                        min="0"
-                        class="field-input"
-                    /><label class="flex items-center gap-2"
-                        ><input v-model="category.is_active" type="checkbox" />
-                        Active</label
-                    >
+                        {{ degree.name }}
+                    </option>
+                </select
+                ><input
+                    v-model.number="category.sort_order"
+                    class="field-input"
+                    min="0"
+                    type="number"
+                /><label class="flex items-center gap-2"
+                ><input v-model="category.is_active" type="checkbox"/>
+                    Active</label
+                >
                 </div>
                 <textarea
                     v-model="category.description"
@@ -128,56 +132,61 @@ const warning = (item: any) =>
                     {{ warning(category) }}
                 </p>
                 <label class="mt-2 flex items-center gap-2 text-sm"
-                    ><input v-model="category.confirm_impact" type="checkbox" />
+                ><input v-model="category.confirm_impact" type="checkbox"/>
                     Confirm any impact change</label
-                ><button class="secondary-button mt-3">
+                >
+                <button class="secondary-button mt-3">
                     Save category
                 </button>
             </form>
         </section>
         <section class="space-y-4 rounded-lg border border-border/80 bg-card p-4 sm:p-5">
-            <div><h2 class="font-semibold">Parts</h2><p class="mt-1 text-sm text-muted-foreground">Organize the individual ritual components within each category.</p></div>
+            <div><h2 class="font-semibold">Parts</h2>
+                <p class="mt-1 text-sm text-muted-foreground">Organize the individual ritual components within each
+                    category.</p></div>
             <form
                 class="grid gap-3 rounded-lg border border-border/80 bg-muted/30 p-3 md:grid-cols-3"
                 @submit.prevent="createPart"
             >
                 <select
                     v-model="partForm.ritual_category_id"
-                    required
                     class="field-input"
+                    required
                 >
-                    <option value="" disabled>Category</option>
+                    <option disabled value="">Category</option>
                     <option
                         v-for="category in categories"
                         :key="category.id"
                         :value="category.id"
                     >
                         {{ category.name }}
-                    </option></select
+                    </option>
+                </select
                 ><input
-                    v-model="partForm.name"
-                    required
-                    placeholder="Part name"
-                    class="field-input"
-                /><input
-                    v-model="partForm.key"
-                    placeholder="Stable key (optional)"
-                    class="field-input"
-                /><label class="flex items-center gap-2"
-                    ><input
-                        v-model="partForm.counts_toward_program"
-                        type="checkbox"
-                    />
-                    Counts toward program</label
-                ><input
-                    v-if="partForm.counts_toward_program"
-                    v-model.number="partForm.point_value"
-                    required
-                    type="number"
-                    min="1"
-                    placeholder="Points"
-                    class="field-input"
-                /><button
+                v-model="partForm.name"
+                class="field-input"
+                placeholder="Part name"
+                required
+            /><input
+                v-model="partForm.key"
+                class="field-input"
+                placeholder="Stable key (optional)"
+            /><label class="flex items-center gap-2"
+            ><input
+                v-model="partForm.counts_toward_program"
+                type="checkbox"
+            />
+                Counts toward program</label
+            ><input
+                v-if="partForm.counts_toward_program"
+                v-model.number="partForm.point_value"
+                class="field-input"
+                min="1"
+                placeholder="Points"
+                required
+                type="number"
+            />
+                <button
                     class="primary-button"
                 >
                     Add part
@@ -198,35 +207,35 @@ const warning = (item: any) =>
                     <div class="grid gap-2 md:grid-cols-6">
                         <input
                             v-model="part.name"
+                            class="field-input"
                             required
-                            class="field-input"
                         /><input
-                            :value="part.key"
-                            disabled
-                            aria-label="Stable part key"
-                            class="field-input bg-muted"
-                        /><input
-                            v-model.number="part.sort_order"
-                            type="number"
-                            min="0"
-                            class="field-input"
-                        /><label class="flex items-center gap-2"
-                            ><input
-                                v-model="part.counts_toward_program"
-                                type="checkbox"
-                            />
-                            Points</label
-                        ><input
-                            v-if="part.counts_toward_program"
-                            v-model.number="part.point_value"
-                            required
-                            type="number"
-                            min="1"
-                            class="field-input"
-                        /><label class="flex items-center gap-2"
-                            ><input v-model="part.is_active" type="checkbox" />
-                            Active</label
-                        >
+                        :value="part.key"
+                        aria-label="Stable part key"
+                        class="field-input bg-muted"
+                        disabled
+                    /><input
+                        v-model.number="part.sort_order"
+                        class="field-input"
+                        min="0"
+                        type="number"
+                    /><label class="flex items-center gap-2"
+                    ><input
+                        v-model="part.counts_toward_program"
+                        type="checkbox"
+                    />
+                        Points</label
+                    ><input
+                        v-if="part.counts_toward_program"
+                        v-model.number="part.point_value"
+                        class="field-input"
+                        min="1"
+                        required
+                        type="number"
+                    /><label class="flex items-center gap-2"
+                    ><input v-model="part.is_active" type="checkbox"/>
+                        Active</label
+                    >
                     </div>
                     <textarea
                         v-model="part.description"
@@ -237,33 +246,37 @@ const warning = (item: any) =>
                         {{ warning(part) }}
                     </p>
                     <label class="mt-2 flex items-center gap-2 text-sm"
-                        ><input v-model="part.confirm_impact" type="checkbox" />
+                    ><input v-model="part.confirm_impact" type="checkbox"/>
                         Confirm any impact change</label
-                    ><button class="secondary-button mt-3">
+                    >
+                    <button class="secondary-button mt-3">
                         Save part
                     </button>
                 </form>
             </div>
         </section>
         <section class="space-y-4 rounded-lg border border-border/80 bg-card p-4 sm:p-5">
-            <div><h2 class="font-semibold">Program levels</h2><p class="mt-1 text-sm text-muted-foreground">Set the point thresholds used to recognize program progress.</p></div>
+            <div><h2 class="font-semibold">Program levels</h2>
+                <p class="mt-1 text-sm text-muted-foreground">Set the point thresholds used to recognize program
+                    progress.</p></div>
             <form
                 class="grid gap-3 rounded-lg border border-border/80 bg-muted/30 p-3 md:grid-cols-3"
                 @submit.prevent="createLevel"
             >
                 <input
                     v-model="levelForm.name"
-                    required
+                    class="field-input"
                     placeholder="Level name"
-                    class="field-input"
-                /><input
-                    v-model.number="levelForm.point_threshold"
                     required
-                    type="number"
-                    min="1"
-                    placeholder="Point threshold"
-                    class="field-input"
-                /><button
+                /><input
+                v-model.number="levelForm.point_threshold"
+                class="field-input"
+                min="1"
+                placeholder="Point threshold"
+                required
+                type="number"
+            />
+                <button
                     class="primary-button"
                 >
                     Add level
@@ -277,35 +290,36 @@ const warning = (item: any) =>
             >
                 <input
                     v-model="level.name"
+                    class="field-input"
                     required
-                    class="field-input"
                 /><input
-                    :value="level.key"
-                    disabled
-                    aria-label="Stable level key"
-                    class="field-input bg-muted"
-                /><input
-                    v-model.number="level.point_threshold"
-                    required
-                    type="number"
-                    min="1"
-                    class="field-input"
-                /><label class="flex items-center gap-2"
-                    ><input v-model="level.is_active" type="checkbox" />
-                    Active</label
-                ><input
-                    v-model.number="level.sort_order"
-                    type="number"
-                    min="0"
-                    class="field-input"
-                />
+                :value="level.key"
+                aria-label="Stable level key"
+                class="field-input bg-muted"
+                disabled
+            /><input
+                v-model.number="level.point_threshold"
+                class="field-input"
+                min="1"
+                required
+                type="number"
+            /><label class="flex items-center gap-2"
+            ><input v-model="level.is_active" type="checkbox"/>
+                Active</label
+            ><input
+                v-model.number="level.sort_order"
+                class="field-input"
+                min="0"
+                type="number"
+            />
                 <p class="text-xs text-muted-foreground md:col-span-5">
                     {{ warning(level) }}
                 </p>
                 <label class="flex items-center gap-2 text-sm md:col-span-4"
-                    ><input v-model="level.confirm_impact" type="checkbox" />
+                ><input v-model="level.confirm_impact" type="checkbox"/>
                     Confirm any impact change</label
-                ><button class="secondary-button">Save level</button>
+                >
+                <button class="secondary-button">Save level</button>
             </form>
         </section>
     </main>

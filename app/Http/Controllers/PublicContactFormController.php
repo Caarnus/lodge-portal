@@ -27,7 +27,7 @@ class PublicContactFormController extends Controller
             "New contact form submission for {$lodge->name}\n\n"
             . "From: {$data['name']} <{$data['email']}>\n\n"
             . "Message:\n{$data['message']}",
-            fn ($mail) => $mail
+            fn($mail) => $mail
                 ->to($recipient)
                 ->replyTo($data['email'], $data['name'])
                 ->subject("Website contact: {$lodge->name}"),
@@ -39,12 +39,12 @@ class PublicContactFormController extends Controller
     private function isEnabled(Lodge $lodge): bool
     {
         return $lodge->websitePages()
-            ->whereHas('versions', fn ($versions) => $versions
+            ->whereHas('versions', fn($versions) => $versions
                 ->where('status', WebsitePageStatus::Published)
-                ->whereHas('sections', fn ($sections) => $sections->where('type', 'contact_information')))
-            ->with(['published.sections' => fn ($sections) => $sections->where('type', 'contact_information')])
+                ->whereHas('sections', fn($sections) => $sections->where('type', 'contact_information')))
+            ->with(['published.sections' => fn($sections) => $sections->where('type', 'contact_information')])
             ->get()
-            ->flatMap(fn ($page) => $page->published?->sections ?? [])
-            ->contains(fn ($section) => (bool) ($section->configuration['show_contact_form'] ?? false));
+            ->flatMap(fn($page) => $page->published?->sections ?? [])
+            ->contains(fn($section) => (bool)($section->configuration['show_contact_form'] ?? false));
     }
 }

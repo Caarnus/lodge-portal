@@ -1,27 +1,27 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
-import { Badge } from "@/components/ui/badge";
-import { normalizeSlug } from "@/utils/slug";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import {Badge} from "@/components/ui/badge";
+import {normalizeSlug} from "@/utils/slug";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
 import {
+    CornerDownRight,
     Eye,
     FilePlus2,
-    CornerDownRight,
     GripVertical,
     ImagePlus,
     Pencil,
-    RotateCcw,
     Rocket,
+    RotateCcw,
     Trash2,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { computed, ref, watch } from "vue";
+import {computed, ref, watch} from "vue";
 
 const vTooltip = Tooltip;
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 const props = defineProps<{
     lodge: any;
@@ -63,7 +63,7 @@ watch(
             localPages.value = clonePages(pages);
         }
     },
-    { immediate: true },
+    {immediate: true},
 );
 watch(
     () => [createForm.is_home, createForm.show_in_navigation],
@@ -104,14 +104,14 @@ const pageRows = computed(() => {
         siblingPages(parentId).forEach((page) => {
             if (seen.has(page.id)) return;
             seen.add(page.id);
-            rows.push({ page, depth });
+            rows.push({page, depth});
             visit(page.id, depth + 1, seen);
         });
     };
     visit(null, 0);
     localPages.value.forEach((page) => {
         if (!rows.some((row) => row.page.id === page.id)) {
-            rows.push({ page, depth: 0 });
+            rows.push({page, depth: 0});
         }
     });
 
@@ -265,24 +265,27 @@ const restore = (page: any) =>
 </script>
 
 <template>
-    <Head :title="`${lodge.name} website`" />
+    <Head :title="`${lodge.name} website`"/>
     <main class="mx-auto w-full max-w-6xl space-y-8 p-4 sm:p-6 lg:p-8">
-        <PageHeader title="Website" :description="lodge.name">
+        <PageHeader :description="lodge.name" title="Website">
             <template #actions
-                ><div class="flex gap-2">
+            >
+                <div class="flex gap-2">
                     <button class="secondary-button" @click="mediaOpen = true">
-                        <ImagePlus class="mr-1 size-4" /> Media library
+                        <ImagePlus class="mr-1 size-4"/>
+                        Media library
                     </button>
                     <a
                         :href="`/l/${lodge.slug}`"
-                        target="_blank"
                         class="secondary-button"
-                        >View public site</a
+                        target="_blank"
+                    >View public site</a
                     >
-                </div></template
+                </div>
+            </template
             >
         </PageHeader>
-        <WorkspaceTabs :lodge="lodge" workspace="content" active="website" />
+        <WorkspaceTabs :lodge="lodge" active="website" workspace="content"/>
 
         <section class="rounded-lg border border-border/80 bg-card p-5">
             <h2 class="text-lg font-semibold">Branding</h2>
@@ -293,60 +296,60 @@ const restore = (page: any) =>
                 "
             >
                 <label class="text-sm font-medium"
-                    >Tag line<input
-                        v-model="branding.tag_line"
-                        class="field-input mt-1"
-                        maxlength="255"
+                >Tag line<input
+                    v-model="branding.tag_line"
+                    class="field-input mt-1"
+                    maxlength="255"
                 /></label>
                 <label class="text-sm font-medium"
-                    >Primary<input
-                        v-model="branding.primary_color"
-                        type="color"
-                        class="mt-1 h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1"
+                >Primary<input
+                    v-model="branding.primary_color"
+                    class="mt-1 h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1"
+                    type="color"
                 /></label>
                 <label class="text-sm font-medium"
-                    >Secondary<input
-                        v-model="branding.secondary_color"
-                        type="color"
-                        class="mt-1 h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1"
+                >Secondary<input
+                    v-model="branding.secondary_color"
+                    class="mt-1 h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1"
+                    type="color"
                 /></label>
                 <label class="text-sm font-medium"
-                    >Logo<select
-                        v-model.number="branding.logo_media_id"
-                        class="field-input mt-1"
-                    >
-                        <option :value="null">Keep current</option>
-                        <option
-                            v-for="asset in media.filter(
+                >Logo<select
+                    v-model.number="branding.logo_media_id"
+                    class="field-input mt-1"
+                >
+                    <option :value="null">Keep current</option>
+                    <option
+                        v-for="asset in media.filter(
                                 (item) => item.processing_status === 'ready',
                             )"
-                            :key="asset.id"
-                            :value="asset.id"
-                        >
-                            {{ asset.original_name }}
-                        </option>
-                    </select></label
+                        :key="asset.id"
+                        :value="asset.id"
+                    >
+                        {{ asset.original_name }}
+                    </option>
+                </select></label
                 >
                 <label class="text-sm font-medium"
-                    >Seal<select
-                        v-model.number="branding.seal_media_id"
-                        class="field-input mt-1"
-                    >
-                        <option :value="null">Keep current</option>
-                        <option
-                            v-for="asset in media.filter(
+                >Seal<select
+                    v-model.number="branding.seal_media_id"
+                    class="field-input mt-1"
+                >
+                    <option :value="null">Keep current</option>
+                    <option
+                        v-for="asset in media.filter(
                                 (item) => item.processing_status === 'ready',
                             )"
-                            :key="asset.id"
-                            :value="asset.id"
-                        >
-                            {{ asset.original_name }}
-                        </option>
-                    </select></label
+                        :key="asset.id"
+                        :value="asset.id"
+                    >
+                        {{ asset.original_name }}
+                    </option>
+                </select></label
                 >
                 <button
-                    class="primary-button self-end disabled:opacity-50"
                     :disabled="branding.processing"
+                    class="primary-button self-end disabled:opacity-50"
                 >
                     Save branding
                 </button>
@@ -372,19 +375,19 @@ const restore = (page: any) =>
                     </p>
                     <button
                         v-if="navigationDirty"
-                        class="secondary-button text-sm"
                         :disabled="navigationSaving"
+                        class="secondary-button text-sm"
                         @click="discardNavigationChanges"
                     >
                         Discard changes
                     </button>
                     <button
                         v-if="navigationDirty"
-                        class="primary-button text-sm"
                         :disabled="navigationSaving"
+                        class="primary-button text-sm"
                         @click="saveNavigation"
                     >
-                        <Rocket class="mr-1 size-4" />
+                        <Rocket class="mr-1 size-4"/>
                         {{
                             navigationSaving
                                 ? "Saving navigation…"
@@ -412,8 +415,8 @@ const restore = (page: any) =>
             >
                 <div class="flex items-start gap-2">
                     <GripVertical
-                        class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                         aria-hidden="true"
+                        class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                     />
                     <span>
                         <strong class="font-medium">Reorder pages</strong>
@@ -424,8 +427,8 @@ const restore = (page: any) =>
                 </div>
                 <div class="flex items-start gap-2">
                     <CornerDownRight
-                        class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                         aria-hidden="true"
+                        class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                     />
                     <span>
                         <strong class="font-medium">Create a submenu</strong>
@@ -440,8 +443,6 @@ const restore = (page: any) =>
             >
                 <template v-for="row in pageRows" :key="row.page.id">
                     <div
-                        aria-hidden="true"
-                        class="flex items-center gap-2 overflow-hidden rounded transition-all"
                         :class="
                             dropTarget ===
                             reorderTargetKey(
@@ -456,6 +457,8 @@ const restore = (page: any) =>
                         :style="{
                             marginLeft: `${Math.min(row.depth, 4) * 1.5}rem`,
                         }"
+                        aria-hidden="true"
+                        class="flex items-center gap-2 overflow-hidden rounded transition-all"
                         @dragenter.prevent="
                             setReorderTarget(
                                 parentIdFor(row.page),
@@ -492,35 +495,35 @@ const restore = (page: any) =>
                         />
                     </div>
                     <article
-                        draggable="true"
-                        class="grid min-w-0 gap-3 rounded-md border border-border/80 bg-card p-3 shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition-colors hover:bg-muted/35 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-center"
                         :class="{
                             'opacity-60 ring-1 ring-primary/40':
                                 draggingPageId === row.page.id,
                             'border-primary bg-primary/10 ring-2 ring-primary/40':
                                 dropTarget === nestTargetKey(row.page.id),
                         }"
-                        @dragstart="beginDrag(row.page.id)"
+                        class="grid min-w-0 gap-3 rounded-md border border-border/80 bg-card p-3 shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition-colors hover:bg-muted/35 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-center"
+                        draggable="true"
                         @dragend="finishDrag"
+                        @dragstart="beginDrag(row.page.id)"
                         @dragenter.prevent="setNestTarget(row.page)"
                         @dragover.prevent
                         @drop.stop="moveIntoPage(row.page)"
                     >
                         <div class="flex min-w-0 items-start gap-2">
                             <div
-                                class="flex h-10 shrink-0 items-center"
                                 :style="{
                                     marginLeft: `${Math.min(row.depth, 4) * 1.5}rem`,
                                 }"
+                                class="flex h-10 shrink-0 items-center"
                             >
                                 <CornerDownRight
                                     v-if="row.depth > 0"
-                                    class="mr-1 size-4 text-muted-foreground"
                                     aria-hidden="true"
+                                    class="mr-1 size-4 text-muted-foreground"
                                 />
                                 <GripVertical
-                                    class="size-5 cursor-grab text-muted-foreground active:cursor-grabbing"
                                     aria-hidden="true"
+                                    class="size-5 cursor-grab text-muted-foreground active:cursor-grabbing"
                                 />
                             </div>
                             <div class="min-w-0 flex-1">
@@ -587,41 +590,45 @@ const restore = (page: any) =>
                         >
                             <a
                                 v-if="row.page.published"
+                                v-tooltip.top="{
+                                    value: 'View published page',
+                                    showDelay: 2000,
+                                }"
                                 :href="
                                     row.page.published.is_home
                                         ? `/l/${lodge.slug}`
                                         : `/l/${lodge.slug}/${row.page.published.slug}`
                                 "
-                                target="_blank"
                                 aria-label="View published page"
                                 class="icon-button"
-                                v-tooltip.top="{
-                                    value: 'View published page',
-                                    showDelay: 2000,
-                                }"
-                                ><Eye class="size-4"
-                            /></a>
+                                target="_blank"
+                            >
+                                <Eye class="size-4"
+                                />
+                            </a>
                             <Link
-                                :href="`/lodges/${lodge.id}/website/pages/${row.page.id}/edit`"
-                                aria-label="Edit page"
-                                class="icon-button"
                                 v-tooltip.top="{
                                     value: 'Edit page',
                                     showDelay: 2000,
                                 }"
-                                ><Pencil class="size-4"
-                            /></Link>
+                                :href="`/lodges/${lodge.id}/website/pages/${row.page.id}/edit`"
+                                aria-label="Edit page"
+                                class="icon-button"
+                            >
+                                <Pencil class="size-4"
+                                />
+                            </Link>
                             <button
                                 v-if="canPublish && row.page.draft"
-                                aria-label="Publish page"
-                                class="icon-button"
                                 v-tooltip.top="{
                                     value: 'Publish page',
                                     showDelay: 2000,
                                 }"
+                                aria-label="Publish page"
+                                class="icon-button"
                                 @click="publish(row.page)"
                             >
-                                <Rocket class="size-4" />
+                                <Rocket class="size-4"/>
                             </button>
                             <button
                                 v-if="
@@ -629,34 +636,32 @@ const restore = (page: any) =>
                                     row.page.published &&
                                     !row.page.published.is_home
                                 "
-                                aria-label="Unpublish page"
-                                class="icon-button"
                                 v-tooltip.top="{
                                     value: 'Unpublish page',
                                     showDelay: 2000,
                                 }"
+                                aria-label="Unpublish page"
+                                class="icon-button"
                                 @click="unpublish(row.page)"
                             >
-                                <Rocket class="size-4 rotate-180" />
+                                <Rocket class="size-4 rotate-180"/>
                             </button>
                             <button
                                 v-if="!row.page.published?.is_home"
-                                aria-label="Delete page"
-                                class="icon-button text-destructive hover:bg-destructive/10"
                                 v-tooltip.top="{
                                     value: 'Delete page',
                                     showDelay: 2000,
                                 }"
+                                aria-label="Delete page"
+                                class="icon-button text-destructive hover:bg-destructive/10"
                                 @click="remove(row.page)"
                             >
-                                <Trash2 class="size-4" />
+                                <Trash2 class="size-4"/>
                             </button>
                         </div>
                     </article>
                 </template>
                 <div
-                    aria-hidden="true"
-                    class="flex items-center gap-2 overflow-hidden rounded transition-all"
                     :class="
                         dropTarget ===
                         reorderTargetKey(null, siblingPages(null).length)
@@ -665,6 +670,8 @@ const restore = (page: any) =>
                               ? 'h-6 px-3'
                               : 'h-1'
                     "
+                    aria-hidden="true"
+                    class="flex items-center gap-2 overflow-hidden rounded transition-all"
                     @dragenter.prevent="
                         setReorderTarget(null, siblingPages(null).length)
                     "
@@ -709,18 +716,19 @@ const restore = (page: any) =>
                         class="flex items-center gap-3 p-3 transition-colors hover:bg-muted/35"
                     >
                         <span class="min-w-0 flex-1 truncate">{{
-                            page.versions[0]?.title ?? `Page ${page.id}`
-                        }}</span
-                        ><button
-                            class="icon-button"
-                            aria-label="Restore page"
+                                page.versions[0]?.title ?? `Page ${page.id}`
+                            }}</span
+                        >
+                        <button
                             v-tooltip.top="{
                                 value: 'Restore page',
                                 showDelay: 2000,
                             }"
+                            aria-label="Restore page"
+                            class="icon-button"
                             @click="restore(page)"
                         >
-                            <RotateCcw class="size-4" />
+                            <RotateCcw class="size-4"/>
                         </button>
                     </article>
                 </div>
@@ -729,104 +737,105 @@ const restore = (page: any) =>
 
         <section class="rounded-lg border border-border/80 bg-card p-5">
             <h2 class="flex items-center gap-2 text-lg font-semibold">
-                <FilePlus2 class="size-5" /> Create page
+                <FilePlus2 class="size-5"/>
+                Create page
             </h2>
             <form
                 class="mt-4 grid gap-4 sm:grid-cols-2"
                 @submit.prevent="submitPage"
             >
                 <label class="text-sm font-medium"
-                    >Title<input
-                        v-model="createForm.title"
-                        required
-                        class="field-input mt-1"
+                >Title<input
+                    v-model="createForm.title"
+                    class="field-input mt-1"
+                    required
                 /></label>
                 <label class="text-sm font-medium"
-                    >Slug<input
-                        v-model="createForm.slug"
-                        @input="
+                >Slug<input
+                    v-model="createForm.slug"
+                    :disabled="createForm.is_navigation_container"
+                    :required="!createForm.is_navigation_container"
+                    class="field-input mt-1"
+                    pattern="[A-Za-z0-9_-]+"
+                    @input="
                             createForm.slug = normalizeSlug(createForm.slug)
                         "
-                        :disabled="createForm.is_navigation_container"
-                        :required="!createForm.is_navigation_container"
-                        pattern="[A-Za-z0-9_-]+"
-                        class="field-input mt-1"
                 /></label>
                 <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
                     <div class="grid gap-3">
                         <div class="flex flex-wrap items-center gap-3">
                             <label class="field-toggle w-fit"
-                                ><input
-                                    v-model="createForm.is_home"
-                                    type="checkbox"
-                                />
+                            ><input
+                                v-model="createForm.is_home"
+                                type="checkbox"
+                            />
                                 Home page</label
                             >
                             <label class="field-toggle w-fit"
-                                ><input
-                                    v-model="createForm.show_in_navigation"
-                                    type="checkbox"
-                                />
+                            ><input
+                                v-model="createForm.show_in_navigation"
+                                type="checkbox"
+                            />
                                 Show in navigation</label
                             >
                             <label
-                                class="field-toggle w-fit"
                                 :class="{
                                     'opacity-50':
                                         !createForm.show_in_navigation ||
                                         createForm.is_home,
                                 }"
-                                ><input
-                                    v-model="createForm.is_navigation_container"
-                                    type="checkbox"
-                                    :disabled="
+                                class="field-toggle w-fit"
+                            ><input
+                                v-model="createForm.is_navigation_container"
+                                :disabled="
                                         !createForm.show_in_navigation ||
                                         createForm.is_home
                                     "
-                                />
+                                type="checkbox"
+                            />
                                 Nav container</label
                             >
                         </div>
                         <fieldset
-                            class="rounded-lg border border-border/80 bg-muted/30 p-3 transition-opacity"
                             :class="{
                                 'bg-muted/40 opacity-50':
                                     !createForm.show_in_navigation,
                             }"
                             :disabled="!createForm.show_in_navigation"
+                            class="rounded-lg border border-border/80 bg-muted/30 p-3 transition-opacity"
                         >
                             <legend class="px-1 text-sm font-medium">
                                 Navigation visibility
                             </legend>
                             <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                                 <label class="flex items-center gap-2"
-                                    ><input
-                                        v-model="
+                                ><input
+                                    v-model="
                                             createForm.navigation_visibility
                                         "
-                                        type="radio"
-                                        value="public"
-                                    />
+                                    type="radio"
+                                    value="public"
+                                />
                                     All visitors</label
                                 >
                                 <label class="flex items-center gap-2"
-                                    ><input
-                                        v-model="
+                                ><input
+                                    v-model="
                                             createForm.navigation_visibility
                                         "
-                                        type="radio"
-                                        value="masons"
-                                    />
+                                    type="radio"
+                                    value="masons"
+                                />
                                     Masons</label
                                 >
                                 <label class="flex items-center gap-2"
-                                    ><input
-                                        v-model="
+                                ><input
+                                    v-model="
                                             createForm.navigation_visibility
                                         "
-                                        type="radio"
-                                        value="lodge"
-                                    />
+                                    type="radio"
+                                    value="lodge"
+                                />
                                     Lodge members</label
                                 >
                             </div>
@@ -834,8 +843,8 @@ const restore = (page: any) =>
                     </div>
                     <div class="flex items-end justify-end">
                         <button
-                            class="primary-button"
                             :disabled="createForm.processing"
+                            class="primary-button"
                         >
                             Create page
                         </button>
@@ -851,9 +860,9 @@ const restore = (page: any) =>
         </section>
     </main>
     <MediaLibraryModal
-        :open="mediaOpen"
         :lodge="lodge"
         :media="media"
+        :open="mediaOpen"
         @update:open="mediaOpen = $event"
     />
 </template>

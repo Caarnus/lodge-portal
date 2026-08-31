@@ -9,11 +9,6 @@ class LodgeGroupType extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['is_active' => 'boolean'];
-    }
-
     public function groups()
     {
         return $this->hasMany(LodgeGroup::class);
@@ -22,5 +17,10 @@ class LodgeGroupType extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
     }
 }

@@ -20,7 +20,7 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request): Response
     {
         $returnTo = $request->query('return_to');
-        if (is_string($returnTo) && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+        if (is_string($returnTo) && str_starts_with($returnTo, '/') && !str_starts_with($returnTo, '//')) {
             $request->session()->put('url.intended', $returnTo);
             $request->session()->forget('auth_lodge_id');
             $path = parse_url($returnTo, PHP_URL_PATH);

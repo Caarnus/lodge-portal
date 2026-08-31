@@ -41,34 +41,6 @@ class OfficerController extends Controller
         return back()->with('officer_role_prompt', $this->rolePrompt($lodge, $membership, 'assign'));
     }
 
-    public function update(OfficerAssignmentRequest $request, Lodge $lodge, OfficerAssignment $officer)
-    {
-        $this->allow($lodge, $officer);
-        $membership = Membership::query()->where('lodge_id', $lodge->id)->findOrFail($request->integer('membership_id'));
-        $before = $officer->toArray();
-        $officer->update($request->validated() + ['membership_id' => $membership->id]);
-        Audit::record('officer.updated', $officer, $lodge, $before, $officer->fresh()->toArray());
-
-        return back()->with('officer_role_prompt', $this->rolePrompt($lodge, $membership, 'assign', $officer->id));
-    }
-
-    public function destroy(Request $request, Lodge $lodge, OfficerAssignment $officer)
-    {
-        $this->allow($lodge, $officer);
-        $membership = $officer->membership;
-        $before = $officer->toArray();
-        $officer->delete();
-        Audit::record('officer.removed', $officer, $lodge, $before);
-
-        return back()->with('officer_role_prompt', $this->rolePrompt($lodge, $membership, 'remove', $officer->id));
-    }
-
-    private function allow(Lodge $lodge, OfficerAssignment $officer): void
-    {
-        abort_unless($officer->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'officers.manage');
-    }
-
     private function rolePrompt(Lodge $lodge, Membership $membership, string $action, ?int $excludeAssignmentId = null): array
     {
         $user = $membership->person->user;
@@ -80,5 +52,33 @@ class OfficerController extends Controller
 
         return ['action' => $action, 'person_name' => $membership->person->display_name, 'user_id' => $user?->id,
             'has_linked_user' => (bool)$user, 'has_other_current_assignment' => $otherCurrent];
+    }
+
+    public function update(OfficerAssignmentRequest $request, Lodge $lodge, OfficerAssignment $officer)
+    {
+        $this->allow($lodge, $officer);
+        $membership = Membership::query()->where('lodge_id', $lodge->id)->findOrFail($request->integer('membership_id'));
+        $before = $officer->toArray();
+        $officer->update($request->validated() + ['membership_id' => $membership->id]);
+        Audit::record('officer.updated', $officer, $lodge, $before, $officer->fresh()->toArray());
+
+        return back()->with('officer_role_prompt', $this->rolePrompt($lodge, $membership, 'assign', $officer->id));
+    }
+
+    private function allow(Lodge $lodge, OfficerAssignment $officer): void
+    {
+        abort_unless($officer->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, 'officers.manage');
+    }
+
+    public function destroy(Request $request, Lodge $lodge, OfficerAssignment $officer)
+    {
+        $this->allow($lodge, $officer);
+        $membership = $officer->membership;
+        $before = $officer->toArray();
+        $officer->delete();
+        Audit::record('officer.removed', $officer, $lodge, $before);
+
+        return back()->with('officer_role_prompt', $this->rolePrompt($lodge, $membership, 'remove', $officer->id));
     }
 }

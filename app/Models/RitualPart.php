@@ -13,14 +13,6 @@ class RitualPart extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'counts_toward_program' => 'boolean',
-            'is_active' => 'boolean',
-        ];
-    }
-
     public function category()
     {
         return $this->belongsTo(RitualCategory::class, 'ritual_category_id');
@@ -29,5 +21,13 @@ class RitualPart extends Model
     public function proficiencies()
     {
         return $this->hasMany(PersonRitualProficiency::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'counts_toward_program' => 'boolean',
+            'is_active' => 'boolean',
+        ];
     }
 }

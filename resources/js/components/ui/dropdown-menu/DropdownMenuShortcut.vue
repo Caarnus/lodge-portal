@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import type {HTMLAttributes} from "vue";
 
 const props = defineProps<{
     class?: HTMLAttributes["class"];
@@ -11,6 +11,6 @@ const props = defineProps<{
     <span
         :class="cn('ml-auto text-xs tracking-widest opacity-60', props.class)"
     >
-        <slot />
+        <slot/>
     </span>
 </template>

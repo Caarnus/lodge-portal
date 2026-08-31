@@ -14,11 +14,6 @@ class CommunicationDistributionRun extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => DistributionRunStatus::class];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -42,5 +37,10 @@ class CommunicationDistributionRun extends Model
     public function deliveries()
     {
         return $this->hasMany(CommunicationDelivery::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => DistributionRunStatus::class];
     }
 }

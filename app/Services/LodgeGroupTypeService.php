@@ -17,11 +17,22 @@ class LodgeGroupTypeService
         $validated = $this->validator($data)->validate();
 
         return DB::transaction(function () use ($validated): LodgeGroupType {
-            $type = LodgeGroupType::create($validated + ['sort_order' => $validated['sort_order'] ?? ((int) LodgeGroupType::max('sort_order') + 10)]);
+            $type = LodgeGroupType::create($validated + ['sort_order' => $validated['sort_order'] ?? ((int)LodgeGroupType::max('sort_order') + 10)]);
             Audit::record('lodge_group_type.created', $type, null, null, $type->only(['id', 'key', 'name', 'is_active']));
 
             return $type;
         });
+    }
+
+    private function validator(array $data, ?LodgeGroupType $type = null)
+    {
+        return Validator::make($data, [
+            'key' => [$type ? 'sometimes' : 'required', 'string', 'max:100', 'regex:/^[a-z][a-z0-9_]*$/', Rule::unique('lodge_group_types', 'key')->ignore($type)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('lodge_group_types', 'name')->ignore($type)],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['required', 'boolean'],
+        ]);
     }
 
     public function update(LodgeGroupType $type, array $data): LodgeGroupType
@@ -55,16 +66,5 @@ class LodgeGroupTypeService
             Audit::record('lodge_group_type.deleted', $type, null, $type->only(['id', 'key', 'name']), null);
             $type->delete();
         });
-    }
-
-    private function validator(array $data, ?LodgeGroupType $type = null)
-    {
-        return Validator::make($data, [
-            'key' => [$type ? 'sometimes' : 'required', 'string', 'max:100', 'regex:/^[a-z][a-z0-9_]*$/', Rule::unique('lodge_group_types', 'key')->ignore($type)],
-            'name' => ['required', 'string', 'max:255', Rule::unique('lodge_group_types', 'name')->ignore($type)],
-            'description' => ['nullable', 'string', 'max:5000'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['required', 'boolean'],
-        ]);
     }
 }

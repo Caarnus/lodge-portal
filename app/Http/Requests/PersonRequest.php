@@ -13,12 +13,12 @@ class PersonRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
+    public function personData(): array
     {
-        $this->merge([
-            'email' => filled($this->email) ? strtolower(trim((string)$this->email)) : null,
-            'phone' => $this->formatPhone($this->phone),
-        ]);
+        $data = $this->safe()->only(array_keys($this->rules()));
+        $data['name'] = collect([$data['legal_first_name'], $data['legal_middle_name'] ?? null, $data['legal_last_name'], $data['legal_suffix'] ?? null])->filter()->implode(' ');
+
+        return $data;
     }
 
     public function rules(): array
@@ -48,12 +48,12 @@ class PersonRequest extends FormRequest
         ];
     }
 
-    public function personData(): array
+    protected function prepareForValidation(): void
     {
-        $data = $this->safe()->only(array_keys($this->rules()));
-        $data['name'] = collect([$data['legal_first_name'], $data['legal_middle_name'] ?? null, $data['legal_last_name'], $data['legal_suffix'] ?? null])->filter()->implode(' ');
-
-        return $data;
+        $this->merge([
+            'email' => filled($this->email) ? strtolower(trim((string)$this->email)) : null,
+            'phone' => $this->formatPhone($this->phone),
+        ]);
     }
 
     private function formatPhone(mixed $phone): ?string

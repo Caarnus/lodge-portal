@@ -1,16 +1,16 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import InputError from "@/components/InputError.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import SettingsLayout from "@/layouts/settings/Layout.vue";
-import { TransitionRoot } from "@headlessui/vue";
-import { Head, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import {TransitionRoot} from "@headlessui/vue";
+import {Head, useForm} from "@inertiajs/vue3";
+import {ref} from "vue";
 
 import HeadingSmall from "@/components/HeadingSmall.vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { type BreadcrumbItem } from "@/types";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {type BreadcrumbItem} from "@/types";
 
 interface Props {
     className?: string;
@@ -59,28 +59,28 @@ const updatePassword = () => {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Profile settings" />
+        <Head title="Profile settings"/>
 
         <SettingsLayout>
             <div class="space-y-6">
                 <HeadingSmall
-                    title="Update password"
                     description="Ensure your account is using a long, random password to stay secure"
+                    title="Update password"
                 />
 
-                <form @submit.prevent="updatePassword" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="updatePassword">
                     <div class="grid gap-2">
                         <Label for="current_password">Current Password</Label>
                         <Input
                             id="current_password"
                             ref="currentPasswordInput"
                             v-model="form.current_password"
-                            type="password"
-                            class="mt-1 block w-full"
                             autocomplete="current-password"
+                            class="mt-1 block w-full"
                             placeholder="Current password"
+                            type="password"
                         />
-                        <InputError :message="form.errors.current_password" />
+                        <InputError :message="form.errors.current_password"/>
                     </div>
 
                     <div class="grid gap-2">
@@ -89,25 +89,25 @@ const updatePassword = () => {
                             id="password"
                             ref="passwordInput"
                             v-model="form.password"
-                            type="password"
-                            class="mt-1 block w-full"
                             autocomplete="new-password"
+                            class="mt-1 block w-full"
                             placeholder="New password"
+                            type="password"
                         />
-                        <InputError :message="form.errors.password" />
+                        <InputError :message="form.errors.password"/>
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="password_confirmation"
-                            >Confirm password</Label
+                        >Confirm password</Label
                         >
                         <Input
                             id="password_confirmation"
                             v-model="form.password_confirmation"
-                            type="password"
-                            class="mt-1 block w-full"
                             autocomplete="new-password"
+                            class="mt-1 block w-full"
                             placeholder="Confirm password"
+                            type="password"
                         />
                         <InputError
                             :message="form.errors.password_confirmation"
@@ -116,7 +116,8 @@ const updatePassword = () => {
 
                     <div class="flex items-center gap-4">
                         <Button :disabled="form.processing"
-                            >Save password</Button
+                        >Save password
+                        </Button
                         >
 
                         <TransitionRoot

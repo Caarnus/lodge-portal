@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import TextLink from "@/components/TextLink.vue";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import AuthLayout from "@/layouts/AuthLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
-import { LoaderCircle } from "lucide-vue-next";
+import {Head, useForm} from "@inertiajs/vue3";
+import {LoaderCircle} from "lucide-vue-next";
 
 defineProps<{
     status?: string;
@@ -18,10 +18,10 @@ const submit = () => {
 
 <template>
     <AuthLayout
-        title="Verify email"
         description="Please verify your email address by clicking on the link we just emailed to you."
+        title="Verify email"
     >
-        <Head title="Email verification" />
+        <Head title="Email verification"/>
 
         <div
             v-if="status === 'verification-link-sent'"
@@ -31,7 +31,7 @@ const submit = () => {
             provided during registration.
         </div>
 
-        <form @submit.prevent="submit" class="space-y-6 text-center">
+        <form class="space-y-6 text-center" @submit.prevent="submit">
             <Button :disabled="form.processing" variant="secondary">
                 <LoaderCircle
                     v-if="form.processing"
@@ -42,9 +42,9 @@ const submit = () => {
 
             <TextLink
                 :href="route('logout')"
-                method="post"
                 as="button"
                 class="mx-auto block text-sm"
+                method="post"
             >
                 Log out
             </TextLink>

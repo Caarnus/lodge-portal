@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import type {HTMLAttributes} from "vue";
 
 defineOptions({
     inheritAttrs: false,
@@ -14,10 +14,10 @@ defineProps<Props>();
 
 <template>
     <img
+        :class="className"
         :src="'/favicon.png'"
         alt=""
         aria-hidden="true"
-        :class="className"
         v-bind="$attrs"
     />
 </template>

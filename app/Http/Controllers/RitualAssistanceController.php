@@ -44,7 +44,7 @@ class RitualAssistanceController extends Controller
             'filters' => $filters,
             'results' => $results,
             'searched' => $searched,
-            'categories' => RitualCategory::query()->with(['parts' => fn ($parts) => $parts->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'masonic_degree_id']),
+            'categories' => RitualCategory::query()->with(['parts' => fn($parts) => $parts->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'masonic_degree_id']),
             'lodges' => Lodge::query()->where('status', LodgeStatus::Active)->orderBy('name')->get(['id', 'name', 'number']),
             'groups' => LodgeGroup::query()->active()->orderBy('name')->get(['id', 'name', 'slug']),
         ])->toResponse($request)->header('Cache-Control', 'private, no-store');

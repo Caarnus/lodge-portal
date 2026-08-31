@@ -79,6 +79,17 @@ class ProcessMediaAsset implements ShouldQueue
         return $result;
     }
 
+    private function assertPixels(int $width, int $height): void
+    {
+        $maxPixels = (int)config('website.max_pixels', 60_000_000);
+        if ($maxPixels < 1) {
+            throw new \RuntimeException('Media pixel limit is not configured correctly.');
+        }
+        if ($width < 1 || $height < 1 || $width * $height > $maxPixels) {
+            throw new \RuntimeException('Image exceeds the 60-megapixel decoded image limit.');
+        }
+    }
+
     private function withGd(string $source): array
     {
         $details = @getimagesize($source);
@@ -105,16 +116,5 @@ class ProcessMediaAsset implements ShouldQueue
         imagedestroy($output);
 
         return [$bytes, $newWidth, $newHeight];
-    }
-
-    private function assertPixels(int $width, int $height): void
-    {
-        $maxPixels = (int)config('website.max_pixels', 60_000_000);
-        if ($maxPixels < 1) {
-            throw new \RuntimeException('Media pixel limit is not configured correctly.');
-        }
-        if ($width < 1 || $height < 1 || $width * $height > $maxPixels) {
-            throw new \RuntimeException('Image exceeds the 60-megapixel decoded image limit.');
-        }
     }
 }

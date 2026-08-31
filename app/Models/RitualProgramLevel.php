@@ -13,13 +13,13 @@ class RitualProgramLevel extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['is_active' => 'boolean'];
-    }
-
     public function achievements()
     {
         return $this->hasMany(PersonRitualLevelAchievement::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
     }
 }

@@ -12,10 +12,10 @@ class ResetManualTestingDatabase extends Command
 
     public function handle(): int
     {
-        if (! $this->option('force') && ! $this->confirm('Destroy all database data and rebuild manual test data?')) {
+        if (!$this->option('force') && !$this->confirm('Destroy all database data and rebuild manual test data?')) {
             return self::FAILURE;
         }
 
-return $this->call('migrate:fresh', ['--seed' => true, '--seeder' => 'ManualTestingSeeder', '--force' => true]);
+        return $this->call('migrate:fresh', ['--seed' => true, '--seeder' => 'ManualTestingSeeder', '--force' => true]);
     }
 }

@@ -1,13 +1,8 @@
-<script setup lang="ts">
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Check, ChevronDown } from "lucide-vue-next";
-import { computed, ref, watch } from "vue";
+<script lang="ts" setup>
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import {Input} from "@/components/ui/input";
+import {Check, ChevronDown} from "lucide-vue-next";
+import {computed, ref, watch} from "vue";
 
 const props = withDefaults(
     defineProps<{
@@ -37,8 +32,8 @@ const matches = computed(() => {
 
     return filter
         ? props.options.filter((option) =>
-              option.label.toLowerCase().includes(filter),
-          )
+            option.label.toLowerCase().includes(filter),
+        )
         : props.options;
 });
 
@@ -58,27 +53,27 @@ watch(open, (isOpen) => {
     <DropdownMenu v-model:open="open">
         <DropdownMenuTrigger as-child>
             <button
-                type="button"
-                class="field-input flex items-center justify-between gap-2 text-left"
                 :aria-label="ariaLabel"
+                class="field-input flex items-center justify-between gap-2 text-left"
+                type="button"
             >
                 <span class="min-w-0 truncate">{{
-                    selected?.label ?? placeholder
-                }}</span>
-                <ChevronDown class="size-4 shrink-0 text-muted-foreground" />
+                        selected?.label ?? placeholder
+                    }}</span>
+                <ChevronDown class="size-4 shrink-0 text-muted-foreground"/>
             </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-            class="w-[var(--radix-dropdown-menu-trigger-width)] min-w-64 p-0"
             align="start"
+            class="w-[var(--radix-dropdown-menu-trigger-width)] min-w-64 p-0"
             @open-auto-focus.prevent
         >
             <div class="border-b border-border/70 p-2">
                 <Input
                     v-model="query"
-                    type="search"
-                    autofocus
                     :placeholder="filterPlaceholder"
+                    autofocus
+                    type="search"
                     @keydown.stop
                 />
             </div>
@@ -88,10 +83,10 @@ watch(open, (isOpen) => {
                     @select="select(null)"
                 >
                     <Check
-                        class="size-4"
                         :class="
                             modelValue === null ? 'opacity-100' : 'opacity-0'
                         "
+                        class="size-4"
                     />
                     {{ placeholder }}
                 </DropdownMenuItem>
@@ -102,12 +97,12 @@ watch(open, (isOpen) => {
                     @select="select(option.value)"
                 >
                     <Check
-                        class="size-4"
                         :class="
                             modelValue === option.value
                                 ? 'opacity-100'
                                 : 'opacity-0'
                         "
+                        class="size-4"
                     />
                     <span class="min-w-0 truncate">{{ option.label }}</span>
                 </DropdownMenuItem>

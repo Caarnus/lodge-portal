@@ -1,17 +1,12 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import {
-    Dialog,
-    DialogHeader,
-    DialogScrollContent,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Link, router, useForm } from "@inertiajs/vue3";
-import { ArchiveRestore, Trash } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import {Dialog, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {Link, router, useForm} from "@inertiajs/vue3";
+import {ArchiveRestore, Trash} from "lucide-vue-next";
+import {computed, ref} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: { id: number; name: string };
     event: { id: number; title: string };
@@ -53,15 +48,15 @@ const removeVolunteer = (commitment: any) => {
     router.patch(
         `/lodges/${props.lodge.id}/events/${props.event.id}/occurrences/${roster.value.id}/volunteers/${commitment.id}/remove`,
         {},
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
-const volunteerForm = useForm({ position_id: "", person_id: "" });
+const volunteerForm = useForm({position_id: "", person_id: ""});
 const addVolunteer = () => {
     if (!roster.value) return;
     volunteerForm.post(
         `/lodges/${props.lodge.id}/events/${props.event.id}/occurrences/${roster.value.id}/volunteers`,
-        { preserveScroll: true, onSuccess: () => volunteerForm.reset() },
+        {preserveScroll: true, onSuccess: () => volunteerForm.reset()},
     );
 };
 const retryReminder = (id: number) => {
@@ -69,7 +64,7 @@ const retryReminder = (id: number) => {
     router.post(
         `/lodges/${props.lodge.id}/events/${props.event.id}/occurrences/${roster.value.id}/volunteer-reminders/${id}/retry`,
         {},
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 </script>
@@ -94,85 +89,85 @@ const retryReminder = (id: number) => {
         >
             <table class="w-full table-fixed text-left text-sm">
                 <thead class="bg-muted/50">
-                    <tr>
-                        <th class="w-[28%] px-4 py-3 font-medium">
-                            Start time
-                        </th>
-                        <th class="w-[16%] px-4 py-3 font-medium">Status</th>
-                        <th class="w-[18%] px-4 py-3 font-medium">
-                            Reservations
-                        </th>
-                        <th class="w-[22%] px-4 py-3 font-medium">
-                            Volunteer staffing
-                        </th>
-                        <th class="w-[16%] px-4 py-3">
-                            <span class="sr-only">Actions</span>
-                        </th>
-                    </tr>
+                <tr>
+                    <th class="w-[28%] px-4 py-3 font-medium">
+                        Start time
+                    </th>
+                    <th class="w-[16%] px-4 py-3 font-medium">Status</th>
+                    <th class="w-[18%] px-4 py-3 font-medium">
+                        Reservations
+                    </th>
+                    <th class="w-[22%] px-4 py-3 font-medium">
+                        Volunteer staffing
+                    </th>
+                    <th class="w-[16%] px-4 py-3">
+                        <span class="sr-only">Actions</span>
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        v-for="occurrence in occurrences.data"
-                        :key="occurrence.id"
-                        class="border-t border-border"
-                    >
-                        <td class="px-4 py-3">
-                            {{ formatStartTime(occurrence.starts_at) }}
-                        </td>
-                        <td class="px-4 py-3 capitalize">
-                            {{ occurrence.status }}
-                        </td>
-                        <td class="px-4 py-3">
+                <tr
+                    v-for="occurrence in occurrences.data"
+                    :key="occurrence.id"
+                    class="border-t border-border"
+                >
+                    <td class="px-4 py-3">
+                        {{ formatStartTime(occurrence.starts_at) }}
+                    </td>
+                    <td class="px-4 py-3 capitalize">
+                        {{ occurrence.status }}
+                    </td>
+                    <td class="px-4 py-3">
+                        <button
+                            v-if="occurrence.reservation_count !== null"
+                            class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+                            type="button"
+                            @click="showRoster(occurrence, 'reservations')"
+                        >
+                            {{ occurrence.reservation_count }} confirmed
+                        </button>
+                        <span v-else>—</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button
+                            class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+                            type="button"
+                            @click="showRoster(occurrence, 'volunteers')"
+                        >
+                            {{ occurrence.volunteer_filled }}/{{
+                                occurrence.volunteer_needed
+                            }}
+                            filled
+                        </button>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex min-h-9 justify-end gap-2">
                             <button
-                                v-if="occurrence.reservation_count !== null"
+                                v-if="occurrence.status === 'scheduled'"
+                                aria-label="Cancel occurrence"
+                                class="icon-button text-destructive"
+                                title="Cancel occurrence"
                                 type="button"
-                                class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-                                @click="showRoster(occurrence, 'reservations')"
+                                @click="transition(occurrence, 'cancel')"
                             >
-                                {{ occurrence.reservation_count }} confirmed
+                                <Trash aria-hidden="true" class="size-4"/>
                             </button>
-                            <span v-else>—</span>
-                        </td>
-                        <td class="px-4 py-3">
                             <button
+                                v-else
+                                aria-label="Restore occurrence"
+                                class="icon-button"
+                                title="Restore occurrence"
                                 type="button"
-                                class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-                                @click="showRoster(occurrence, 'volunteers')"
+                                @click="transition(occurrence, 'restore')"
                             >
-                                {{ occurrence.volunteer_filled }}/{{
-                                    occurrence.volunteer_needed
-                                }}
-                                filled
+                                <ArchiveRestore
+                                    aria-hidden="true"
+                                    class="size-4"
+                                />
                             </button>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex min-h-9 justify-end gap-2">
-                                <button
-                                    v-if="occurrence.status === 'scheduled'"
-                                    type="button"
-                                    title="Cancel occurrence"
-                                    aria-label="Cancel occurrence"
-                                    class="icon-button text-destructive"
-                                    @click="transition(occurrence, 'cancel')"
-                                >
-                                    <Trash class="size-4" aria-hidden="true" />
-                                </button>
-                                <button
-                                    v-else
-                                    type="button"
-                                    title="Restore occurrence"
-                                    aria-label="Restore occurrence"
-                                    class="icon-button"
-                                    @click="transition(occurrence, 'restore')"
-                                >
-                                    <ArchiveRestore
-                                        class="size-4"
-                                        aria-hidden="true"
-                                    />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -187,8 +182,8 @@ const retryReminder = (id: number) => {
                         {{ formatStartTime(occurrence.starts_at) }}
                     </h2>
                     <span class="text-sm capitalize text-muted-foreground">{{
-                        occurrence.status
-                    }}</span>
+                            occurrence.status
+                        }}</span>
                 </div>
                 <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                     <div>
@@ -196,13 +191,15 @@ const retryReminder = (id: number) => {
                         <dd>
                             <button
                                 v-if="occurrence.reservation_count !== null"
-                                type="button"
                                 class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+                                type="button"
                                 @click="showRoster(occurrence, 'reservations')"
                             >
                                 {{ occurrence.reservation_count }}
-                                confirmed</button
-                            ><span v-else>—</span>
+                                confirmed
+                            </button
+                            >
+                            <span v-else>—</span>
                         </dd>
                     </div>
                     <div>
@@ -211,8 +208,8 @@ const retryReminder = (id: number) => {
                         </dt>
                         <dd>
                             <button
-                                type="button"
                                 class="cursor-pointer font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+                                type="button"
                                 @click="showRoster(occurrence, 'volunteers')"
                             >
                                 {{ occurrence.volunteer_filled }}/{{
@@ -226,23 +223,23 @@ const retryReminder = (id: number) => {
                 <div class="mt-4 flex min-h-9 justify-end gap-2">
                     <button
                         v-if="occurrence.status === 'scheduled'"
-                        type="button"
-                        title="Cancel occurrence"
                         aria-label="Cancel occurrence"
                         class="icon-button text-destructive"
+                        title="Cancel occurrence"
+                        type="button"
                         @click="transition(occurrence, 'cancel')"
                     >
-                        <Trash class="size-4" aria-hidden="true" />
+                        <Trash aria-hidden="true" class="size-4"/>
                     </button>
                     <button
                         v-else
-                        type="button"
-                        title="Restore occurrence"
                         aria-label="Restore occurrence"
                         class="icon-button"
+                        title="Restore occurrence"
+                        type="button"
                         @click="transition(occurrence, 'restore')"
                     >
-                        <ArchiveRestore class="size-4" aria-hidden="true" />
+                        <ArchiveRestore aria-hidden="true" class="size-4"/>
                     </button>
                 </div>
             </article>
@@ -253,7 +250,9 @@ const retryReminder = (id: number) => {
         >
             <DialogScrollContent class="max-w-2xl">
                 <DialogHeader
-                    ><DialogTitle>{{ rosterTitle }}</DialogTitle></DialogHeader
+                >
+                    <DialogTitle>{{ rosterTitle }}</DialogTitle>
+                </DialogHeader
                 >
                 <div
                     v-if="rosterType === 'reservations'"
@@ -286,44 +285,44 @@ const retryReminder = (id: number) => {
                         @submit.prevent="addVolunteer"
                     >
                         <label class="field-label"
-                            >Position<select
-                                v-model="volunteerForm.position_id"
-                                required
-                                class="field-input"
-                            >
-                                <option value="">Choose position</option>
-                                <option
-                                    v-for="position in roster?.volunteer_positions?.filter(
+                        >Position<select
+                            v-model="volunteerForm.position_id"
+                            class="field-input"
+                            required
+                        >
+                            <option value="">Choose position</option>
+                            <option
+                                v-for="position in roster?.volunteer_positions?.filter(
                                         (item: any) => item.is_active,
                                     )"
-                                    :key="position.id"
-                                    :value="position.id"
-                                >
-                                    {{ position.name }}
-                                </option>
-                            </select></label
+                                :key="position.id"
+                                :value="position.id"
+                            >
+                                {{ position.name }}
+                            </option>
+                        </select></label
                         >
                         <label class="field-label"
-                            >Member<select
-                                v-model="volunteerForm.person_id"
-                                required
-                                class="field-input"
+                        >Member<select
+                            v-model="volunteerForm.person_id"
+                            class="field-input"
+                            required
+                        >
+                            <option value="">Choose member</option>
+                            <option
+                                v-for="member in members"
+                                :key="member.id"
+                                :value="member.id"
                             >
-                                <option value="">Choose member</option>
-                                <option
-                                    v-for="member in members"
-                                    :key="member.id"
-                                    :value="member.id"
-                                >
-                                    {{ member.display_name }}
-                                </option>
-                            </select></label
+                                {{ member.display_name }}
+                            </option>
+                        </select></label
                         >
                         <div class="flex items-end justify-end">
                             <button
-                                type="submit"
                                 :disabled="volunteerForm.processing"
                                 class="primary-button w-full md:w-auto"
+                                type="submit"
                             >
                                 Add volunteer
                             </button>
@@ -365,23 +364,23 @@ const retryReminder = (id: number) => {
                                 <span class="capitalize">{{ item.status }}</span
                                 ><span v-if="item.reminder">
                                     · Reminder: {{ item.reminder.status }}</span
-                                ><span v-if="item.reminder?.last_error">
+                            ><span v-if="item.reminder?.last_error">
                                     — {{ item.reminder.last_error }}</span
-                                >
+                            >
                             </p>
                             <div class="flex min-h-9 gap-2">
                                 <button
                                     v-if="item.status === 'committed'"
-                                    type="button"
                                     class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 font-medium text-destructive hover:bg-accent"
+                                    type="button"
                                     @click="removeVolunteer(item)"
                                 >
                                     Remove
                                 </button>
                                 <button
                                     v-if="item.reminder?.status === 'failed'"
-                                    type="button"
                                     class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 font-medium hover:bg-accent"
+                                    type="button"
                                     @click="retryReminder(item.reminder.id)"
                                 >
                                     Retry reminder

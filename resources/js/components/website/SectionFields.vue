@@ -1,7 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import RichTextField from "./RichTextField.vue";
+
 defineProps<{ type: string; media: any[]; galleries: any[] }>();
-const config = defineModel<Record<string, any>>({ required: true });
+const config = defineModel<Record<string, any>>({required: true});
 const placeholders = [
     "meeting_information",
     "contact_information",
@@ -12,7 +13,7 @@ const placeholders = [
     "directory_placeholder",
     "gallery_placeholder",
 ];
-const addLink = () => (config.value.links ??= []).push({ label: "", url: "" });
+const addLink = () => (config.value.links ??= []).push({label: "", url: ""});
 const galleryAlbumIds = () => (config.value.gallery_album_ids ??= []);
 const gallerySelected = (id: number) => galleryAlbumIds().includes(id);
 const toggleGallery = (id: number, selected: boolean) => {
@@ -26,116 +27,116 @@ const toggleGallery = (id: number, selected: boolean) => {
 <template>
     <div class="grid gap-3">
         <template v-if="type === 'rich_text' || type === 'custom_html'">
-            <RichTextField v-model="config.html" />
+            <RichTextField v-model="config.html"/>
         </template>
         <template v-else-if="type === 'hero'">
             <label class="field-label"
-                >Heading<input
-                    v-model="config.heading"
-                    required
-                    class="field-input"
+            >Heading<input
+                v-model="config.heading"
+                class="field-input"
+                required
             /></label>
             <label class="field-label"
-                >Body<textarea
-                    v-model="config.body"
-                    class="field-input min-h-24"
-                ></textarea>
+            >Body<textarea
+                v-model="config.body"
+                class="field-input min-h-24"
+            ></textarea>
             </label>
             <label class="field-label"
-                >Background image<select
-                    v-model.number="config.media_id"
-                    class="field-input"
-                >
-                    <option :value="null">None</option>
-                    <option
-                        v-for="asset in media.filter(
+            >Background image<select
+                v-model.number="config.media_id"
+                class="field-input"
+            >
+                <option :value="null">None</option>
+                <option
+                    v-for="asset in media.filter(
                             (item) => item.processing_status === 'ready',
                         )"
-                        :key="asset.id"
-                        :value="asset.id"
-                    >
-                        {{ asset.original_name }}
-                    </option>
-                </select></label
+                    :key="asset.id"
+                    :value="asset.id"
+                >
+                    {{ asset.original_name }}
+                </option>
+            </select></label
             >
         </template>
         <template v-else-if="type === 'image' || type === 'image_text'">
             <label class="field-label"
-                >Image<select
-                    v-model.number="config.media_id"
-                    required
-                    class="field-input"
-                >
-                    <option disabled :value="null">Select image</option>
-                    <option
-                        v-for="asset in media.filter(
+            >Image<select
+                v-model.number="config.media_id"
+                class="field-input"
+                required
+            >
+                <option :value="null" disabled>Select image</option>
+                <option
+                    v-for="asset in media.filter(
                             (item) => item.processing_status === 'ready',
                         )"
-                        :key="asset.id"
-                        :value="asset.id"
-                    >
-                        {{ asset.original_name }}
-                    </option>
-                </select></label
+                    :key="asset.id"
+                    :value="asset.id"
+                >
+                    {{ asset.original_name }}
+                </option>
+            </select></label
             >
             <label v-if="type === 'image'" class="field-label"
-                >Caption<input v-model="config.caption" class="field-input"
+            >Caption<input v-model="config.caption" class="field-input"
             /></label>
             <template v-else>
                 <label class="field-label"
-                    >Heading<input
-                        v-model="config.heading"
-                        required
-                        class="field-input"
+                >Heading<input
+                    v-model="config.heading"
+                    class="field-input"
+                    required
                 /></label>
                 <label class="field-label"
-                    >Body<textarea
-                        v-model="config.body"
-                        class="field-input min-h-24"
-                    ></textarea>
+                >Body<textarea
+                    v-model="config.body"
+                    class="field-input min-h-24"
+                ></textarea>
                 </label>
                 <label class="field-label"
-                    >Image side<select
-                        v-model="config.image_side"
-                        class="field-input"
-                    >
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </select></label
+                >Image side<select
+                    v-model="config.image_side"
+                    class="field-input"
+                >
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select></label
                 >
             </template>
         </template>
         <template v-else-if="type === 'call_to_action'">
             <label class="field-label"
-                >Heading<input
-                    v-model="config.heading"
-                    required
-                    class="field-input"
+            >Heading<input
+                v-model="config.heading"
+                class="field-input"
+                required
             /></label>
             <label class="field-label"
-                >Body<textarea
-                    v-model="config.body"
-                    class="field-input min-h-20"
-                ></textarea>
+            >Body<textarea
+                v-model="config.body"
+                class="field-input min-h-20"
+            ></textarea>
             </label>
             <div class="grid gap-3 sm:grid-cols-2">
                 <label class="field-label"
-                    >Button label<input
-                        v-model="config.label"
-                        required
-                        class="field-input" /></label
+                >Button label<input
+                    v-model="config.label"
+                    class="field-input"
+                    required/></label
                 ><label class="field-label"
-                    >Button link<input
-                        v-model="config.url"
-                        required
-                        class="field-input"
-                        placeholder="/contact or https://…"
-                /></label>
+            >Button link<input
+                v-model="config.url"
+                class="field-input"
+                placeholder="/contact or https://…"
+                required
+            /></label>
             </div>
         </template>
         <template v-else-if="type === 'link_list'">
             <label class="field-label"
-                >Heading<input v-model="config.heading" class="field-input"
+            >Heading<input v-model="config.heading" class="field-input"
             /></label>
             <div
                 v-for="(link, index) in config.links"
@@ -145,26 +146,27 @@ const toggleGallery = (id: number, selected: boolean) => {
                 <input
                     v-model="link.label"
                     aria-label="Link label"
-                    required
                     class="field-input"
                     placeholder="Label"
-                /><input
-                    v-model="link.url"
-                    aria-label="Link destination"
                     required
-                    class="field-input"
-                    placeholder="/page or https://…"
-                /><button
-                    type="button"
+                /><input
+                v-model="link.url"
+                aria-label="Link destination"
+                class="field-input"
+                placeholder="/page or https://…"
+                required
+            />
+                <button
                     class="secondary-button"
+                    type="button"
                     @click="config.links.splice(index, 1)"
                 >
                     Remove
                 </button>
             </div>
             <button
-                type="button"
                 class="secondary-button w-fit text-sm"
+                type="button"
                 @click="addLink"
             >
                 Add link
@@ -172,51 +174,51 @@ const toggleGallery = (id: number, selected: boolean) => {
         </template>
         <template v-else-if="type === 'events_placeholder'">
             <label class="field-label"
-                >Heading<input v-model="config.heading" class="field-input"
+            >Heading<input v-model="config.heading" class="field-input"
             /></label>
             <label class="field-label"
-                >Empty-state message<textarea
-                    v-model="config.body"
-                    class="field-input min-h-20"
-                ></textarea>
+            >Empty-state message<textarea
+                v-model="config.body"
+                class="field-input min-h-20"
+            ></textarea>
             </label>
             <label class="field-label"
-                >Maximum items<input
-                    v-model.number="config.maximum_items"
-                    type="number"
-                    min="1"
-                    max="20"
-                    class="field-input"
+            >Maximum items<input
+                v-model.number="config.maximum_items"
+                class="field-input"
+                max="20"
+                min="1"
+                type="number"
             /></label>
             <label class="flex items-center gap-2 text-sm"
-                ><input v-model="config.show_all_link" type="checkbox" /> Show
+            ><input v-model="config.show_all_link" type="checkbox"/> Show
                 complete event-list link</label
             >
         </template>
         <template v-else-if="type === 'contact_information'">
             <label class="field-label"
-                >Heading<input v-model="config.heading" class="field-input"
+            >Heading<input v-model="config.heading" class="field-input"
             /></label>
             <label class="field-label"
-                >Message<textarea
-                    v-model="config.body"
-                    class="field-input min-h-20"
-                ></textarea>
+            >Message<textarea
+                v-model="config.body"
+                class="field-input min-h-20"
+            ></textarea>
             </label>
             <label class="field-toggle"
-                ><input v-model="config.show_contact_form" type="checkbox" />
+            ><input v-model="config.show_contact_form" type="checkbox"/>
                 Enable contact form</label
             >
         </template>
         <template v-else-if="type === 'gallery_placeholder'">
             <label class="field-label"
-                >Heading<input v-model="config.heading" class="field-input"
+            >Heading<input v-model="config.heading" class="field-input"
             /></label>
             <label class="field-label"
-                >Message<textarea
-                    v-model="config.body"
-                    class="field-input min-h-20"
-                ></textarea>
+            >Message<textarea
+                v-model="config.body"
+                class="field-input min-h-20"
+            ></textarea>
             </label>
             <fieldset
                 class="rounded-lg border border-border/80 bg-muted/30 p-4"
@@ -232,8 +234,8 @@ const toggleGallery = (id: number, selected: boolean) => {
                         class="field-toggle"
                     >
                         <input
-                            type="checkbox"
                             :checked="gallerySelected(album.id)"
+                            type="checkbox"
                             @change="
                                 toggleGallery(
                                     album.id,
@@ -251,13 +253,13 @@ const toggleGallery = (id: number, selected: boolean) => {
         </template>
         <template v-else-if="placeholders.includes(type)">
             <label class="field-label"
-                >Heading<input v-model="config.heading" class="field-input"
+            >Heading<input v-model="config.heading" class="field-input"
             /></label>
             <label class="field-label"
-                >Message<textarea
-                    v-model="config.body"
-                    class="field-input min-h-20"
-                ></textarea>
+            >Message<textarea
+                v-model="config.body"
+                class="field-input min-h-20"
+            ></textarea>
             </label>
         </template>
     </div>

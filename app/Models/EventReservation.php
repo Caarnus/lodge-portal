@@ -9,11 +9,6 @@ class EventReservation extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => EventReservationStatus::class, 'responses' => 'array', 'cancelled_at' => 'datetime'];
-    }
-
     public function occurrence()
     {
         return $this->belongsTo(EventOccurrence::class, 'event_occurrence_id');
@@ -37,5 +32,10 @@ class EventReservation extends Model
     public function person()
     {
         return $this->belongsTo(Person::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => EventReservationStatus::class, 'responses' => 'array', 'cancelled_at' => 'datetime'];
     }
 }

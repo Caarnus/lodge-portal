@@ -1,10 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import InputError from "@/components/InputError.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { router, useForm } from "@inertiajs/vue3";
+import {router, useForm} from "@inertiajs/vue3";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 type GroupType = {
     id: number;
@@ -93,8 +93,8 @@ const removeType = (type: GroupType) => {
 <template>
     <main class="mx-auto w-full max-w-6xl space-y-10 p-4 sm:p-6 lg:p-8">
         <PageHeader
-            title="Lodge groups"
             description="Platform filters only. Groups never grant access or membership."
+            title="Lodge groups"
         />
 
         <section class="space-y-4">
@@ -104,53 +104,56 @@ const removeType = (type: GroupType) => {
                 @submit.prevent="createGroup"
             >
                 <label class="grid gap-1"
-                    >Type<select
-                        v-model.number="groupForm.lodge_group_type_id"
-                        class="field-input"
-                        required
-                    >
-                        <option value="" disabled>Select type</option>
-                        <option
-                            v-for="type in props.types.filter(
+                >Type<select
+                    v-model.number="groupForm.lodge_group_type_id"
+                    class="field-input"
+                    required
+                >
+                    <option disabled value="">Select type</option>
+                    <option
+                        v-for="type in props.types.filter(
                                 (item) => item.is_active,
                             )"
-                            :key="type.id"
-                            :value="type.id"
-                        >
-                            {{ type.name }}
-                        </option>
-                    </select></label
+                        :key="type.id"
+                        :value="type.id"
+                    >
+                        {{ type.name }}
+                    </option>
+                </select></label
                 ><label class="grid gap-1"
-                    >Name<input
-                        v-model="groupForm.name"
-                        class="field-input"
-                        required /></label
-                ><label class="grid gap-1"
-                    >Slug<input
-                        v-model="groupForm.slug"
-                        class="field-input"
-                        required /></label
-                ><label class="grid gap-1"
-                    >Description<input
-                        v-model="groupForm.description"
-                        class="field-input" /></label
-                ><label class="flex items-center gap-2 text-sm"
-                    ><input v-model="groupForm.is_active" type="checkbox" />
-                    Active</label
-                ><label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="groupForm.has_public_landing_page"
-                        type="checkbox"
-                    />
-                    Public landing page</label
-                ><button
-                    class="primary-button md:col-span-2"
+            >Name<input
+                v-model="groupForm.name"
+                class="field-input"
+                required/></label
+            ><label class="grid gap-1"
+            >Slug<input
+                v-model="groupForm.slug"
+                class="field-input"
+                required/></label
+            ><label class="grid gap-1"
+            >Description<input
+                v-model="groupForm.description"
+                class="field-input"/></label
+            ><label class="flex items-center gap-2 text-sm"
+            ><input v-model="groupForm.is_active" type="checkbox"/>
+                Active</label
+            ><label class="flex items-center gap-2 text-sm"
+            ><input
+                v-model="groupForm.has_public_landing_page"
+                type="checkbox"
+            />
+                Public landing page</label
+            >
+                <button
                     :disabled="groupForm.processing"
+                    class="primary-button md:col-span-2"
                 >
-                    Create group</button
-                ><InputError
-                    class="md:col-span-2"
+                    Create group
+                </button
+                >
+                <InputError
                     :message="Object.values(groupForm.errors)[0]"
+                    class="md:col-span-2"
                 />
             </form>
 
@@ -174,9 +177,9 @@ const removeType = (type: GroupType) => {
                                 !group.archived_at
                             "
                             :href="`/groups/${group.slug}`"
-                            target="_blank"
                             class="secondary-button"
-                            >Preview public page</a
+                            target="_blank"
+                        >Preview public page</a
                         >
                         <button
                             v-if="group.archived_at"
@@ -200,49 +203,53 @@ const removeType = (type: GroupType) => {
                     @submit.prevent="saveGroup(group)"
                 >
                     <label class="grid gap-1"
-                        >Type<select
-                            v-model.number="group.lodge_group_type_id"
-                            class="field-input"
-                        >
-                            <option
-                                v-for="type in props.types.filter(
+                    >Type<select
+                        v-model.number="group.lodge_group_type_id"
+                        class="field-input"
+                    >
+                        <option
+                            v-for="type in props.types.filter(
                                     (item) =>
                                         item.is_active ||
                                         item.id === group.lodge_group_type_id,
                                 )"
-                                :key="type.id"
-                                :value="type.id"
+                            :key="type.id"
+                            :value="type.id"
+                        >
+                            {{
+                                type.name
+                            }}
+                            <template v-if="!type.is_active">
+                                (inactive)
+                            </template
                             >
-                                {{ type.name
-                                }}<template v-if="!type.is_active">
-                                    (inactive)</template
-                                >
-                            </option>
-                        </select></label
+                        </option>
+                    </select></label
                     ><label class="grid gap-1"
-                        >Name<input
-                            v-model="group.name"
-                            class="field-input"
-                            required /></label
-                    ><label class="grid gap-1"
-                        >Slug<input
-                            v-model="group.slug"
-                            class="field-input"
-                            required /></label
-                    ><label class="grid gap-1"
-                        >Description<input
-                            v-model="group.description"
-                            class="field-input" /></label
-                    ><label class="flex items-center gap-2 text-sm"
-                        ><input v-model="group.is_active" type="checkbox" />
-                        Active</label
-                    ><label class="flex items-center gap-2 text-sm"
-                        ><input
-                            v-model="group.has_public_landing_page"
-                            type="checkbox"
-                        />
-                        Public landing page</label
-                    ><button class="secondary-button md:col-span-2">
+                >Name<input
+                    v-model="group.name"
+                    class="field-input"
+                    required/></label
+                ><label class="grid gap-1"
+                >Slug<input
+                    v-model="group.slug"
+                    class="field-input"
+                    required/></label
+                ><label class="grid gap-1"
+                >Description<input
+                    v-model="group.description"
+                    class="field-input"/></label
+                ><label class="flex items-center gap-2 text-sm"
+                ><input v-model="group.is_active" type="checkbox"/>
+                    Active</label
+                ><label class="flex items-center gap-2 text-sm"
+                ><input
+                    v-model="group.has_public_landing_page"
+                    type="checkbox"
+                />
+                    Public landing page</label
+                >
+                    <button class="secondary-button md:col-span-2">
                         Save group
                     </button>
                 </form>
@@ -260,15 +267,16 @@ const removeType = (type: GroupType) => {
                         >
                             <input
                                 v-model="group.lodge_ids"
-                                type="checkbox"
                                 :value="lodge.id"
+                                type="checkbox"
                             />
-                            {{ lodge.name }} #{{ lodge.number
+                            {{ lodge.name }} #{{
+                                lodge.number
                             }}<span
-                                v-if="lodge.status !== 'active'"
-                                class="text-muted-foreground"
-                                >({{ lodge.status }})</span
-                            >
+                            v-if="lodge.status !== 'active'"
+                            class="text-muted-foreground"
+                        >({{ lodge.status }})</span
+                        >
                         </label>
                     </div>
                     <button class="secondary-button">
@@ -286,33 +294,33 @@ const removeType = (type: GroupType) => {
             >
                 <input
                     v-model="typeForm.name"
-                    placeholder="Name"
                     class="field-input"
+                    placeholder="Name"
                     required
                 />
                 <input
                     v-model="typeForm.key"
-                    placeholder="Stable key (optional)"
                     class="field-input"
+                    placeholder="Stable key (optional)"
                 />
                 <input
                     v-model="typeForm.description"
-                    placeholder="Description"
                     class="field-input"
+                    placeholder="Description"
                 />
                 <input
                     v-model.number="typeForm.sort_order"
-                    type="number"
+                    class="field-input"
                     min="0"
                     placeholder="Order"
-                    class="field-input"
+                    type="number"
                 />
-                <button class="primary-button" :disabled="typeForm.processing">
+                <button :disabled="typeForm.processing" class="primary-button">
                     Add type
                 </button>
                 <InputError
-                    class="md:col-span-5"
                     :message="Object.values(typeForm.errors)[0]"
+                    class="md:col-span-5"
                 />
             </form>
             <form
@@ -321,12 +329,12 @@ const removeType = (type: GroupType) => {
                 class="grid gap-3 rounded-lg border border-border/80 bg-card p-4 md:grid-cols-[1fr_1fr_2fr_6rem_auto_auto_auto]"
                 @submit.prevent="saveType(type)"
             >
-                <input v-model="type.name" class="field-input" required />
+                <input v-model="type.name" class="field-input" required/>
                 <input
                     :value="type.key"
+                    aria-label="Stable key"
                     class="field-input"
                     disabled
-                    aria-label="Stable key"
                 />
                 <input
                     v-model="type.description"
@@ -335,23 +343,23 @@ const removeType = (type: GroupType) => {
                 />
                 <input
                     v-model.number="type.sort_order"
-                    type="number"
-                    min="0"
-                    class="field-input"
                     aria-label="Sort order"
+                    class="field-input"
+                    min="0"
+                    type="number"
                 />
                 <label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="type.is_active"
-                        type="checkbox"
-                        @change="toggleType(type)"
-                    />
+                ><input
+                    v-model="type.is_active"
+                    type="checkbox"
+                    @change="toggleType(type)"
+                />
                     Active</label
                 >
                 <button class="secondary-button">Save</button>
                 <button
-                    type="button"
                     class="secondary-button text-destructive hover:bg-destructive/10"
+                    type="button"
                     @click="removeType(type)"
                 >
                     Delete

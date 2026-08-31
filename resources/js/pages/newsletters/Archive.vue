@@ -1,14 +1,15 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
-import { formatLodgeDate } from "@/utils/date";
-import { Head, Link } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {formatLodgeDate} from "@/utils/date";
+import {Head, Link} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{ lodge: any; issues: any[] }>();
 const formatDate = (value: string | null) =>
     formatLodgeDate(value, props.lodge.date_display_format);
 </script>
 <template>
-    <Head title="Newsletters" />
+    <Head title="Newsletters"/>
     <main class="mx-auto max-w-4xl p-6">
         <h1 class="text-3xl font-bold">{{ lodge.name }} newsletters</h1>
         <div class="mt-6 divide-y rounded border">
@@ -17,7 +18,7 @@ const formatDate = (value: string | null) =>
                 :key="issue.id"
                 :href="`/lodges/${lodge.id}/newsletters/${issue.slug}`"
                 class="block p-4 hover:bg-muted"
-                ><strong>{{ issue.published.title }}</strong>
+            ><strong>{{ issue.published.title }}</strong>
                 <p class="text-sm text-muted-foreground">
                     {{ formatDate(issue.published.publication_date) }}
                 </p></Link

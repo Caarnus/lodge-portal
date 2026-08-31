@@ -39,20 +39,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token', 'two_factor_secret', 'two_factor_recovery_codes',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_platform_admin' => 'boolean', 'approved_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime',
-        ];
-    }
-
     public function lodges()
     {
         return $this->belongsToMany(Lodge::class, 'lodge_user_roles')->withPivot('role_id')->withTimestamps();
@@ -101,5 +87,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new QueuedResetPassword($token));
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_platform_admin' => 'boolean', 'approved_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime',
+        ];
     }
 }

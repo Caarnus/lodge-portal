@@ -15,7 +15,30 @@ use Illuminate\Support\Facades\DB;
 
 class RitualAchievementService
 {
-    public function __construct(private readonly RitualProgress $progress) {}
+    public function __construct(private readonly RitualProgress $progress)
+    {
+    }
+
+    public function reconcilePart(RitualPart $part): int
+    {
+        return $this->reconcilePeople(Person::query()->whereIn('id', PersonRitualProficiency::query()
+            ->select('person_id')
+            ->where('ritual_part_id', $part->id)
+            ->where('performed_for_credit', true)));
+    }
+
+    private function reconcilePeople(Builder $people): int
+    {
+        $count = 0;
+        $people->orderBy('id')->chunkById(100, function (Collection $people) use (&$count): void {
+            foreach ($people as $person) {
+                $this->reconcile($person);
+                $count++;
+            }
+        });
+
+        return $count;
+    }
 
     /** @return Collection<int, PersonRitualLevelAchievement> */
     public function reconcile(Person $person): Collection
@@ -57,14 +80,6 @@ class RitualAchievementService
         });
     }
 
-    public function reconcilePart(RitualPart $part): int
-    {
-        return $this->reconcilePeople(Person::query()->whereIn('id', PersonRitualProficiency::query()
-            ->select('person_id')
-            ->where('ritual_part_id', $part->id)
-            ->where('performed_for_credit', true)));
-    }
-
     public function reconcileCategory(RitualCategory $category): int
     {
         return $this->reconcilePeople(Person::query()->whereIn('id', PersonRitualProficiency::query()
@@ -78,18 +93,5 @@ class RitualAchievementService
         return $this->reconcilePeople(Person::query()->whereIn('id', PersonRitualProficiency::query()
             ->select('person_id')
             ->where('performed_for_credit', true)));
-    }
-
-    private function reconcilePeople(Builder $people): int
-    {
-        $count = 0;
-        $people->orderBy('id')->chunkById(100, function (Collection $people) use (&$count): void {
-            foreach ($people as $person) {
-                $this->reconcile($person);
-                $count++;
-            }
-        });
-
-        return $count;
     }
 }

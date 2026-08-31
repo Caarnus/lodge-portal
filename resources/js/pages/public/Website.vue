@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
 import PublicSection from "@/components/website/PublicSection.vue";
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
-import { Head } from "@inertiajs/vue3";
-import { computed } from "vue";
+import {Head} from "@inertiajs/vue3";
+import {computed} from "vue";
 
 const props = defineProps<{
     lodge: any;
@@ -32,7 +32,7 @@ const secondaryForeground = computed(() =>
 </script>
 
 <template>
-    <Head :title="`${page.title} — ${lodge.name}`" />
+    <Head :title="`${page.title} — ${lodge.name}`"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <div
             v-if="preview"
@@ -41,8 +41,8 @@ const secondaryForeground = computed(() =>
             Draft preview — public visitors cannot see these changes.
         </div>
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
@@ -50,12 +50,12 @@ const secondaryForeground = computed(() =>
                 <a
                     :href="`/l/${lodge.slug}`"
                     class="flex min-w-0 items-center gap-3 font-bold"
-                    ><img
-                        v-if="lodge.seal_path || lodge.logo_path"
-                        :src="`/storage/${lodge.seal_path || lodge.logo_path}`"
-                        alt=""
-                        class="size-12 object-contain"
-                    /><span class="truncate text-xl">{{ lodge.name }}</span></a
+                ><img
+                    v-if="lodge.seal_path || lodge.logo_path"
+                    :src="`/storage/${lodge.seal_path || lodge.logo_path}`"
+                    alt=""
+                    class="size-12 object-contain"
+                /><span class="truncate text-xl">{{ lodge.name }}</span></a
                 >
                 <div
                     class="ml-auto flex flex-wrap items-center justify-end gap-3"
@@ -70,7 +70,7 @@ const secondaryForeground = computed(() =>
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>
@@ -78,18 +78,18 @@ const secondaryForeground = computed(() =>
             <PublicSection
                 v-for="section in page.sections"
                 :key="section.id"
-                :section="section"
-                :lodge="lodge"
-                :media="media"
-                :officers="officers"
-                :past-masters="pastMasters"
                 :events="events"
                 :galleries="galleries"
                 :gallery-page-slug="page.is_home ? 'home' : page.slug"
-                :newsletters="newsletters"
+                :lodge="lodge"
+                :media="media"
                 :member-content="memberContent"
+                :newsletters="newsletters"
+                :officers="officers"
+                :past-masters="pastMasters"
                 :primary-foreground="primaryForeground"
                 :secondary-foreground="secondaryForeground"
+                :section="section"
             />
         </main>
         <footer

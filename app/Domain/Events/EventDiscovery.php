@@ -13,7 +13,6 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class EventDiscovery
@@ -30,19 +29,14 @@ class EventDiscovery
         $query = EventOccurrence::query()->with(['event.category:id,name', 'event.coverMediaAsset', 'lodge:id,name,number,slug'])
             ->where('status', EventOccurrenceStatus::Scheduled)
             ->whereBetween('starts_at', [$range['from'], $range['to']])
-            ->whereHas('lodge', fn (Builder $lodges) => $lodges->where('status', LodgeStatus::Active))
-            ->whereHas('event', fn (Builder $events) => $events->where('status', EventStatus::Published))
+            ->whereHas('lodge', fn(Builder $lodges) => $lodges->where('status', LodgeStatus::Active))
+            ->whereHas('event', fn(Builder $events) => $events->where('status', EventStatus::Published))
             ->orderBy('starts_at')->orderBy('id');
 
         $this->applyVisibility($query, $viewer, $protectedViewer);
         $this->applyFilters($query, $filters, $protectedViewer);
 
-        return $query->paginate(50)->through(fn (EventOccurrence $occurrence) => $this->card($occurrence));
-    }
-
-    public function isProtectedViewer(?User $viewer): bool
-    {
-        return $this->eligibility->isEligibleViewer($viewer);
+        return $query->paginate(50)->through(fn(EventOccurrence $occurrence) => $this->card($occurrence));
     }
 
     /** @return array{from: CarbonImmutable, to: CarbonImmutable} */
@@ -60,8 +54,8 @@ class EventDiscovery
     /** @param Builder<EventOccurrence> $query */
     private function applyVisibility(Builder $query, ?User $viewer, bool $protectedViewer): void
     {
-        if (! $protectedViewer || ! $viewer) {
-            $query->whereHas('event', fn (Builder $events) => $events->where('visibility', EventVisibility::Public));
+        if (!$protectedViewer || !$viewer) {
+            $query->whereHas('event', fn(Builder $events) => $events->where('visibility', EventVisibility::Public));
 
             return;
         }
@@ -84,11 +78,11 @@ class EventDiscovery
                             })
                             ->where(function ($qualification) use ($viewer): void {
                                 $qualification->whereNull('events.required_qualification')
-                                    ->orWhere(fn ($query) => $query->where('events.required_qualification', 'ea')->whereNotNull('masonic_degrees.id'))
-                                    ->orWhere(fn ($query) => $query->where('events.required_qualification', 'fc')->whereIn('masonic_degrees.key', ['fellow_craft', 'master_mason']))
-                                    ->orWhere(fn ($query) => $query->where('events.required_qualification', 'mm')->where('masonic_degrees.key', 'master_mason'))
-                                    ->orWhere(fn ($query) => $query->where('events.required_qualification', 'pm')->where('masonic_degrees.key', 'master_mason')
-                                        ->whereExists(fn ($terms) => $terms->selectRaw('1')->from('past_master_terms')->where('past_master_terms.person_id', $viewer->person_id)));
+                                    ->orWhere(fn($query) => $query->where('events.required_qualification', 'ea')->whereNotNull('masonic_degrees.id'))
+                                    ->orWhere(fn($query) => $query->where('events.required_qualification', 'fc')->whereIn('masonic_degrees.key', ['fellow_craft', 'master_mason']))
+                                    ->orWhere(fn($query) => $query->where('events.required_qualification', 'mm')->where('masonic_degrees.key', 'master_mason'))
+                                    ->orWhere(fn($query) => $query->where('events.required_qualification', 'pm')->where('masonic_degrees.key', 'master_mason')
+                                        ->whereExists(fn($terms) => $terms->selectRaw('1')->from('past_master_terms')->where('past_master_terms.person_id', $viewer->person_id)));
                             });
                     });
             });
@@ -101,33 +95,33 @@ class EventDiscovery
         if (filled($filters['group'] ?? null)) {
             $groups = LodgeGroup::query();
             $protectedViewer ? $groups->active() : $groups->discoverable();
-            $group = $groups->where(fn (Builder $items) => $items->where('slug', $filters['group'])->orWhere('id', is_numeric($filters['group']) ? (int) $filters['group'] : 0))->first();
-            if (! $group) {
+            $group = $groups->where(fn(Builder $items) => $items->where('slug', $filters['group'])->orWhere('id', is_numeric($filters['group']) ? (int)$filters['group'] : 0))->first();
+            if (!$group) {
                 throw ValidationException::withMessages(['group' => 'Select an available lodge group.']);
             }
-            $query->whereHas('lodge.lodgeGroups', fn (Builder $groups) => $groups->whereKey($group->id));
+            $query->whereHas('lodge.lodgeGroups', fn(Builder $groups) => $groups->whereKey($group->id));
         }
         if (filled($filters['lodge'] ?? null)) {
-            $lodge = Lodge::query()->where('status', LodgeStatus::Active)->where(fn (Builder $lodges) => $lodges->where('slug', $filters['lodge'])->orWhere('id', is_numeric($filters['lodge']) ? (int) $filters['lodge'] : 0))->first();
-            if (! $lodge) {
+            $lodge = Lodge::query()->where('status', LodgeStatus::Active)->where(fn(Builder $lodges) => $lodges->where('slug', $filters['lodge'])->orWhere('id', is_numeric($filters['lodge']) ? (int)$filters['lodge'] : 0))->first();
+            if (!$lodge) {
                 throw ValidationException::withMessages(['lodge' => 'Select an active lodge.']);
             }
             $query->where('lodge_id', $lodge->id);
         }
         if (filled($filters['category'] ?? null)) {
-            $query->whereHas('event.category', fn (Builder $categories) => $categories->where('is_active', true)->where('key', $filters['category']));
+            $query->whereHas('event.category', fn(Builder $categories) => $categories->where('is_active', true)->where('key', $filters['category']));
         }
         if (filled($filters['visibility'] ?? null)) {
-            if (! $protectedViewer && $filters['visibility'] !== EventVisibility::Public->value) {
+            if (!$protectedViewer && $filters['visibility'] !== EventVisibility::Public->value) {
                 throw ValidationException::withMessages(['visibility' => 'Sign in to filter protected events.']);
             }
-            $query->whereHas('event', fn (Builder $events) => $events->where('visibility', $filters['visibility']));
+            $query->whereHas('event', fn(Builder $events) => $events->where('visibility', $filters['visibility']));
         }
         if (filled($filters['qualification'] ?? null)) {
-            if (! $protectedViewer) {
+            if (!$protectedViewer) {
                 throw ValidationException::withMessages(['qualification' => 'Sign in to filter protected events.']);
             }
-            $query->whereHas('event', fn (Builder $events) => $events->where('required_qualification', $filters['qualification']));
+            $query->whereHas('event', fn(Builder $events) => $events->where('required_qualification', $filters['qualification']));
         }
     }
 
@@ -150,5 +144,10 @@ class EventDiscovery
             'lodge' => ['name' => $occurrence->lodge->name, 'number' => $occurrence->lodge->number, 'slug' => $occurrence->lodge->slug],
             'url' => "/l/{$occurrence->lodge->slug}/events/{$occurrence->id}",
         ];
+    }
+
+    public function isProtectedViewer(?User $viewer): bool
+    {
+        return $this->eligibility->isEligibleViewer($viewer);
     }
 }

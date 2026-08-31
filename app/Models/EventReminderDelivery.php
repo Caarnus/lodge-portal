@@ -9,18 +9,6 @@ class EventReminderDelivery extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'status' => ReminderDeliveryStatus::class,
-            'due_at' => 'datetime',
-            'claimed_at' => 'datetime',
-            'sent_at' => 'datetime',
-            'skipped_at' => 'datetime',
-            'failed_at' => 'datetime',
-        ];
-    }
-
     public function subscription()
     {
         return $this->belongsTo(EventReminderSubscription::class, 'event_reminder_subscription_id');
@@ -44,5 +32,17 @@ class EventReminderDelivery extends Model
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => ReminderDeliveryStatus::class,
+            'due_at' => 'datetime',
+            'claimed_at' => 'datetime',
+            'sent_at' => 'datetime',
+            'skipped_at' => 'datetime',
+            'failed_at' => 'datetime',
+        ];
     }
 }

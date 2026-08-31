@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lodge;
 use App\Models\NewsletterIssue;
 use App\Services\Audit;
-use App\Services\NewsletterPublisher;
 use App\Services\CommunicationDistributionService;
+use App\Services\NewsletterPublisher;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -35,6 +35,15 @@ class NewsletterController extends Controller
         return redirect()->route('lodges.newsletters.index', $lodge);
     }
 
+    private function validateIssue(Request $request, Lodge $lodge, ?NewsletterIssue $issue = null): array
+    {
+        return $request->validate([
+            'title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('newsletter_issues')->where(fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($issue?->id)],
+            'publication_date' => 'nullable|date', 'body_html' => 'nullable|string|max:100000',
+            'cover_media_asset_id' => 'nullable|integer', 'newsletter_document_id' => 'nullable|integer',
+        ]);
+    }
+
     public function edit(Request $request, Lodge $lodge, NewsletterIssue $issue, NewsletterPublisher $publisher)
     {
         $this->allowIssue($lodge, $issue, 'newsletters.manage');
@@ -46,6 +55,12 @@ class NewsletterController extends Controller
             'media' => $lodge->mediaAssets()->where('processing_status', 'ready')->orderByDesc('id')->get(),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'newsletters.publish'),
         ]);
+    }
+
+    private function allowIssue(Lodge $lodge, NewsletterIssue $issue, string $permission): void
+    {
+        abort_unless($issue->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, $permission);
     }
 
     public function update(Request $request, Lodge $lodge, NewsletterIssue $issue, NewsletterPublisher $publisher)
@@ -107,20 +122,5 @@ class NewsletterController extends Controller
         Audit::record('newsletter.issue_restored', $issue, $lodge);
 
         return back();
-    }
-
-    private function validateIssue(Request $request, Lodge $lodge, ?NewsletterIssue $issue = null): array
-    {
-        return $request->validate([
-            'title' => 'required|string|max:255', 'slug' => ['required', 'alpha_dash', 'max:160', Rule::unique('newsletter_issues')->where(fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))->ignore($issue?->id)],
-            'publication_date' => 'nullable|date', 'body_html' => 'nullable|string|max:100000',
-            'cover_media_asset_id' => 'nullable|integer', 'newsletter_document_id' => 'nullable|integer',
-        ]);
-    }
-
-    private function allowIssue(Lodge $lodge, NewsletterIssue $issue, string $permission): void
-    {
-        abort_unless($issue->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, $permission);
     }
 }

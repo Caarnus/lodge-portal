@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppBrandLogo from "@/components/AppBrandLogo.vue";
-import type { SharedData } from "@/types";
-import { Link, usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import type {SharedData} from "@/types";
+import {Link, usePage} from "@inertiajs/vue3";
+import {computed} from "vue";
 
 defineProps<{
     title?: string;
@@ -27,18 +27,19 @@ const lodge = computed(() => page.props.auth_lodge);
                         <template v-if="lodge">
                             <img
                                 v-if="lodge.seal_path || lodge.logo_path"
-                                :src="`/storage/${lodge.seal_path || lodge.logo_path}`"
                                 :alt="lodge.name"
+                                :src="`/storage/${lodge.seal_path || lodge.logo_path}`"
                                 class="size-16 object-contain"
                             />
                             <span class="text-center text-lg font-semibold">
-                                {{ lodge.name
+                                {{
+                                    lodge.name
                                 }}<template v-if="lodge.number">
                                     No. {{ lodge.number }}</template
-                                >
+                            >
                             </span>
                         </template>
-                        <AppBrandLogo v-else />
+                        <AppBrandLogo v-else/>
                         <span class="sr-only">{{ title }}</span>
                     </Link>
                     <div class="space-y-2 text-center">
@@ -48,7 +49,7 @@ const lodge = computed(() => page.props.auth_lodge);
                         </p>
                     </div>
                 </div>
-                <slot />
+                <slot/>
             </div>
         </div>
     </div>

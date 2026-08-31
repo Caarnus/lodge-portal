@@ -27,6 +27,28 @@ class EventVolunteerPositionController extends Controller
         return back();
     }
 
+    private function authorizeEvent(Request $request, Lodge $lodge, Event $event): void
+    {
+        abort_unless($event->lodge_id === $lodge->id, 404);
+        abort_unless($request->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
+    private function data(Request $request): array
+    {
+        return $request->validate(['event_occurrence_id' => ['nullable', 'integer'], 'name' => ['required', 'string', 'max:120'], 'description' => ['nullable', 'string', 'max:2000'], 'needed_count' => ['required', 'integer', 'min:1'], 'sort_order' => ['nullable', 'integer', 'min:0'], 'is_active' => ['nullable', 'boolean']]);
+    }
+
+    public function deactivate(Request $request, Lodge $lodge, Event $event, EventVolunteerPosition $position)
+    {
+        $this->authorizeEvent($request, $lodge, $event);
+        abort_unless($position->event_id === $event->id && $position->lodge_id === $lodge->id, 404);
+        $before = $position->toArray();
+        $position->update(['is_active' => false, 'updated_by' => $request->user()->id]);
+        Audit::record('volunteer_position.deactivated', $position, $lodge, $before, $position->fresh()->toArray());
+
+        return back();
+    }
+
     public function update(Request $request, Lodge $lodge, Event $event, EventVolunteerPosition $position)
     {
         $this->authorizeEvent($request, $lodge, $event);
@@ -51,17 +73,6 @@ class EventVolunteerPositionController extends Controller
         return back();
     }
 
-    public function deactivate(Request $request, Lodge $lodge, Event $event, EventVolunteerPosition $position)
-    {
-        $this->authorizeEvent($request, $lodge, $event);
-        abort_unless($position->event_id === $event->id && $position->lodge_id === $lodge->id, 404);
-        $before = $position->toArray();
-        $position->update(['is_active' => false, 'updated_by' => $request->user()->id]);
-        Audit::record('volunteer_position.deactivated', $position, $lodge, $before, $position->fresh()->toArray());
-
-        return back();
-    }
-
     public function destroy(Request $request, Lodge $lodge, Event $event, EventVolunteerPosition $position)
     {
         $this->authorizeEvent($request, $lodge, $event);
@@ -72,16 +83,5 @@ class EventVolunteerPositionController extends Controller
         Audit::record('volunteer_position.deleted', $position, $lodge, $before, null);
 
         return back();
-    }
-
-    private function authorizeEvent(Request $request, Lodge $lodge, Event $event): void
-    {
-        abort_unless($event->lodge_id === $lodge->id, 404);
-        abort_unless($request->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
-    }
-
-    private function data(Request $request): array
-    {
-        return $request->validate(['event_occurrence_id' => ['nullable', 'integer'], 'name' => ['required', 'string', 'max:120'], 'description' => ['nullable', 'string', 'max:2000'], 'needed_count' => ['required', 'integer', 'min:1'], 'sort_order' => ['nullable', 'integer', 'min:0'], 'is_active' => ['nullable', 'boolean']]);
     }
 }

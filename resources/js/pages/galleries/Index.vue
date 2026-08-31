@@ -1,15 +1,16 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import { Head } from "@inertiajs/vue3";
+import {Head} from "@inertiajs/vue3";
+
 defineProps<{ lodge: any; albums: any[]; navigation: any[] }>();
 </script>
 <template>
-    <Head :title="`Galleries — ${lodge.name}`" />
+    <Head :title="`Galleries — ${lodge.name}`"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
@@ -39,7 +40,7 @@ defineProps<{ lodge: any; albums: any[]; navigation: any[] }>();
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>

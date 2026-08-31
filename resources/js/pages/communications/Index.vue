@@ -1,26 +1,14 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
-import { formatLocalTimestamp } from "@/utils/date";
-import {
-    Dialog,
-    DialogHeader,
-    DialogScrollContent,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Head, router, useForm } from "@inertiajs/vue3";
-import {
-    ArrowDown,
-    ArrowUp,
-    ArrowUpDown,
-    Pencil,
-    Plus,
-    Search,
-    Trash2,
-} from "lucide-vue-next";
-import { computed, onMounted, reactive, ref, watch } from "vue";
-defineOptions({ layout: AppLayout });
+import {formatLocalTimestamp} from "@/utils/date";
+import {Dialog, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {Head, router, useForm} from "@inertiajs/vue3";
+import {ArrowDown, ArrowUp, ArrowUpDown, Pencil, Plus, Search, Trash2,} from "lucide-vue-next";
+import {computed, onMounted, reactive, ref, watch} from "vue";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: any;
     communications: any[];
@@ -34,7 +22,7 @@ const props = defineProps<{
         direction: string;
     };
 }>();
-const filters = reactive({ ...props.filters });
+const filters = reactive({...props.filters});
 let filterTimer: ReturnType<typeof setTimeout> | undefined;
 const applyFilters = () => {
     clearTimeout(filterTimer);
@@ -45,7 +33,7 @@ const applyFilters = () => {
         });
     }, 300);
 };
-watch(filters, applyFilters, { deep: true });
+watch(filters, applyFilters, {deep: true});
 const sort = (column: string) => {
     filters.direction =
         filters.sort === column && filters.direction === "asc" ? "desc" : "asc";
@@ -56,8 +44,8 @@ const sortIcon = (column: string) =>
     filters.sort !== column
         ? ArrowUpDown
         : filters.direction === "asc"
-          ? ArrowUp
-          : ArrowDown;
+            ? ArrowUp
+            : ArrowDown;
 const form = useForm({
     subject: "",
     body_html: "<p></p>",
@@ -154,8 +142,8 @@ const selectorSortIcon = (column: "name" | "type" | "details") =>
     selectorSortColumn.value !== column
         ? ArrowUpDown
         : selectorSortDirection.value === "asc"
-          ? ArrowUp
-          : ArrowDown;
+            ? ArrowUp
+            : ArrowDown;
 const openSelector = () => {
     selectorSearch.value = "";
     appliedSelectorSearch.value = "";
@@ -186,7 +174,7 @@ const submit = (sendNow: boolean) => {
     const options = {
         onSuccess: close,
     };
-    form.transform((data) => ({ ...data, send_now: sendNow }));
+    form.transform((data) => ({...data, send_now: sendNow}));
     if (editingId.value) {
         form.put(
             `/lodges/${props.lodge.id}/communications/manage/${editingId.value}`,
@@ -227,15 +215,16 @@ onMounted(() => {
 });
 </script>
 <template>
-    <Head title="Communications" />
+    <Head title="Communications"/>
     <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
         <PageHeader
-            title="Lodge communications"
             :description="`Create and manage messages for ${lodge.name}.`"
+            title="Lodge communications"
         >
             <template #actions>
                 <button class="primary-button shrink-0" @click="open()">
-                    <Plus class="mr-1 inline size-4" /> New message
+                    <Plus class="mr-1 inline size-4"/>
+                    New message
                 </button>
             </template>
         </PageHeader>
@@ -243,13 +232,15 @@ onMounted(() => {
             class="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 md:flex-row"
         >
             <label class="relative md:flex-1"
-                ><Search
-                    class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
+            >
+                <Search
+                    class="absolute left-3 top-3 size-4 text-muted-foreground"/>
+                <input
                     v-model="filters.search"
-                    type="search"
-                    placeholder="Search messages"
                     class="field-input w-full pl-9"
-            /></label>
+                    placeholder="Search messages"
+                    type="search"
+                /></label>
             <select v-model="filters.status" class="field-input md:w-48">
                 <option value="">All statuses</option>
                 <option value="draft">Draft</option>
@@ -263,106 +254,111 @@ onMounted(() => {
         >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
-                    <col />
-                    <col class="w-28" />
-                    <col class="w-24" />
-                    <col class="w-36" />
-                    <col class="w-36" />
-                    <col class="w-24" />
+                    <col/>
+                    <col class="w-28"/>
+                    <col class="w-24"/>
+                    <col class="w-36"/>
+                    <col class="w-36"/>
+                    <col class="w-24"/>
                 </colgroup>
                 <thead class="border-b bg-muted/40">
-                    <tr>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sort('subject')"
-                            >
-                                Title<component
-                                    :is="sortIcon('subject')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sort('recipient_count')"
-                            >
-                                Recipients<component
-                                    :is="sortIcon('recipient_count')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sort('status')"
-                            >
-                                Status<component
-                                    :is="sortIcon('status')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sort('created_at')"
-                            >
-                                Created<component
-                                    :is="sortIcon('created_at')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sort('sent_at')"
-                            >
-                                Sent<component
-                                    :is="sortIcon('sent_at')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <span class="sr-only">Actions</span>
-                        </th>
-                    </tr>
+                <tr>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sort('subject')"
+                        >
+                            Title
+                            <component
+                                :is="sortIcon('subject')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sort('recipient_count')"
+                        >
+                            Recipients
+                            <component
+                                :is="sortIcon('recipient_count')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sort('status')"
+                        >
+                            Status
+                            <component
+                                :is="sortIcon('status')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sort('created_at')"
+                        >
+                            Created
+                            <component
+                                :is="sortIcon('created_at')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sort('sent_at')"
+                        >
+                            Sent
+                            <component
+                                :is="sortIcon('sent_at')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <span class="sr-only">Actions</span>
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        v-for="item in communications"
-                        :key="item.id"
-                        class="border-b last:border-0"
-                    >
-                        <td class="p-3 font-medium">
-                            <button
-                                type="button"
-                                class="block w-full text-left hover:underline"
-                                :class="
+                <tr
+                    v-for="item in communications"
+                    :key="item.id"
+                    class="border-b last:border-0"
+                >
+                    <td class="p-3 font-medium">
+                        <button
+                            :aria-expanded="expandedSubjectId === item.id"
+                            :class="
                                     expandedSubjectId === item.id
                                         ? 'whitespace-normal break-words'
                                         : 'truncate'
                                 "
-                                :aria-expanded="expandedSubjectId === item.id"
-                                :title="
+                            :title="
                                     expandedSubjectId === item.id
                                         ? 'Collapse title'
                                         : 'Expand title'
                                 "
-                                @click="toggleSubject(item.id)"
-                            >
-                                {{ item.subject }}
-                            </button>
-                        </td>
-                        <td class="p-3">{{ item.recipient_count ?? 0 }}</td>
-                        <td class="p-3 capitalize">{{ item.status }}</td>
-                        <td class="p-3">{{ timestamp(item.created_at) }}</td>
-                        <td class="p-3">{{ timestamp(item.sent_at) }}</td>
-                        <td class="w-24 px-1 py-3 text-right">
+                            class="block w-full text-left hover:underline"
+                            type="button"
+                            @click="toggleSubject(item.id)"
+                        >
+                            {{ item.subject }}
+                        </button>
+                    </td>
+                    <td class="p-3">{{ item.recipient_count ?? 0 }}</td>
+                    <td class="p-3 capitalize">{{ item.status }}</td>
+                    <td class="p-3">{{ timestamp(item.created_at) }}</td>
+                    <td class="p-3">{{ timestamp(item.sent_at) }}</td>
+                    <td class="w-24 px-1 py-3 text-right">
                             <span
                                 class="inline-flex items-center gap-1 whitespace-nowrap"
                             >
@@ -371,7 +367,7 @@ onMounted(() => {
                                     title="Edit message"
                                     @click="open(item)"
                                 >
-                                    <Pencil class="size-4" />
+                                    <Pencil class="size-4"/>
                                 </button>
                                 <button
                                     v-if="item.status === 'draft'"
@@ -383,12 +379,12 @@ onMounted(() => {
                                         )
                                     "
                                 >
-                                    <Trash2 class="size-4" />
+                                    <Trash2 class="size-4"/>
                                 </button>
-                                <span v-else class="inline-block size-10" />
+                                <span v-else class="inline-block size-10"/>
                             </span>
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -425,7 +421,7 @@ onMounted(() => {
                         title="Edit message"
                         @click="open(item)"
                     >
-                        <Pencil class="size-4" />
+                        <Pencil class="size-4"/>
                     </button>
                     <button
                         v-if="item.status === 'draft'"
@@ -437,18 +433,21 @@ onMounted(() => {
                             )
                         "
                     >
-                        <Trash2 class="size-4" />
+                        <Trash2 class="size-4"/>
                     </button>
-                    <span v-else class="inline-block size-10" />
+                    <span v-else class="inline-block size-10"/>
                 </div>
             </article>
         </div>
         <Dialog :open="creating" @update:open="creating = $event">
             <DialogScrollContent class="w-[calc(100vw-2rem)] max-w-3xl">
                 <DialogHeader
-                    ><DialogTitle>{{
-                        editingId ? "Edit message" : "New message"
-                    }}</DialogTitle></DialogHeader
+                >
+                    <DialogTitle>{{
+                            editingId ? "Edit message" : "New message"
+                        }}
+                    </DialogTitle>
+                </DialogHeader
                 >
                 <form
                     v-if="!editingSent"
@@ -457,10 +456,11 @@ onMounted(() => {
                 >
                     <input
                         v-model="form.subject"
-                        required
-                        placeholder="Subject"
                         class="field-input"
-                    /><RichTextField v-model="form.body_html" />
+                        placeholder="Subject"
+                        required
+                    />
+                    <RichTextField v-model="form.body_html"/>
                     <fieldset class="grid gap-3 border-t pt-4">
                         <legend class="font-semibold">Recipients</legend>
                         <select
@@ -484,11 +484,11 @@ onMounted(() => {
                                     v-for="degree in degrees"
                                     :key="degree.key"
                                     class="mr-4 inline-flex items-center gap-2"
-                                    ><input
-                                        v-model="form.degree_keys"
-                                        type="checkbox"
-                                        :value="degree.key"
-                                    />{{ degree.name }}</label
+                                ><input
+                                    v-model="form.degree_keys"
+                                    :value="degree.key"
+                                    type="checkbox"
+                                />{{ degree.name }}</label
                                 >
                             </fieldset>
                             <fieldset>
@@ -499,18 +499,18 @@ onMounted(() => {
                                     v-for="status in statuses"
                                     :key="status.key"
                                     class="mr-4 inline-flex items-center gap-2"
-                                    ><input
-                                        v-model="form.membership_status_keys"
-                                        type="checkbox"
-                                        :value="status.key"
-                                    />{{ status.name }}</label
+                                ><input
+                                    v-model="form.membership_status_keys"
+                                    :value="status.key"
+                                    type="checkbox"
+                                />{{ status.name }}</label
                                 >
                             </fieldset>
                         </template>
                         <template v-if="form.audience_mode === 'selected'">
                             <button
-                                type="button"
                                 class="rounded border border-border bg-card px-3 py-2 text-left hover:bg-accent"
+                                type="button"
                                 @click="openSelector"
                             >
                                 Select people ({{
@@ -527,8 +527,8 @@ onMounted(() => {
                             Create draft
                         </button>
                         <button
-                            type="button"
                             class="primary-button"
+                            type="button"
                             @click="submit(true)"
                         >
                             Send now
@@ -536,7 +536,7 @@ onMounted(() => {
                     </div>
                 </form>
                 <section v-else class="space-y-4">
-                    <article class="public-rich-text" v-html="form.body_html" />
+                    <article class="public-rich-text" v-html="form.body_html"/>
                     <p>
                         Sent messages remain unchanged. Create an editable copy
                         to revise its text or recipients and send it again.
@@ -557,16 +557,20 @@ onMounted(() => {
         <Dialog :open="selectorOpen" @update:open="selectorOpen = $event">
             <DialogScrollContent class="max-w-4xl">
                 <DialogHeader
-                    ><DialogTitle>Select people</DialogTitle></DialogHeader
+                >
+                    <DialogTitle>Select people</DialogTitle>
+                </DialogHeader
                 >
                 <div class="flex flex-col gap-3 md:flex-row">
                     <label class="relative block md:flex-1"
-                        ><Search
-                            class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
+                    >
+                        <Search
+                            class="absolute left-3 top-3 size-4 text-muted-foreground"/>
+                        <input
                             v-model="selectorSearch"
                             class="field-input w-full pl-9"
                             placeholder="Search"
-                    /></label>
+                        /></label>
                     <select v-model="selectorType" class="field-input md:w-40">
                         <option value="all">All people</option>
                         <option value="member">Members</option>
@@ -578,57 +582,57 @@ onMounted(() => {
                 >
                     <table class="w-full text-left text-sm">
                         <thead class="sticky top-0 bg-muted">
-                            <tr>
-                                <th class="w-12 p-3"></th>
-                                <th class="p-3">
-                                    <button
-                                        class="inline-flex items-center gap-1"
-                                        @click="sortSelector('name')"
-                                    >
-                                        Name
-                                        <component
-                                            :is="selectorSortIcon('name')"
-                                            class="size-3"
-                                        />
-                                    </button>
-                                </th>
-                                <th class="p-3">
-                                    <button
-                                        class="inline-flex items-center gap-1"
-                                        @click="sortSelector('type')"
-                                    >
-                                        Type
-                                        <component
-                                            :is="selectorSortIcon('type')"
-                                            class="size-3"
-                                        />
-                                    </button>
-                                </th>
-                                <th class="p-3">
-                                    <button
-                                        class="inline-flex items-center gap-1"
-                                        @click="sortSelector('details')"
-                                    >
-                                        Details
-                                        <component
-                                            :is="selectorSortIcon('details')"
-                                            class="size-3"
-                                        />
-                                    </button>
-                                </th>
-                            </tr>
+                        <tr>
+                            <th class="w-12 p-3"></th>
+                            <th class="p-3">
+                                <button
+                                    class="inline-flex items-center gap-1"
+                                    @click="sortSelector('name')"
+                                >
+                                    Name
+                                    <component
+                                        :is="selectorSortIcon('name')"
+                                        class="size-3"
+                                    />
+                                </button>
+                            </th>
+                            <th class="p-3">
+                                <button
+                                    class="inline-flex items-center gap-1"
+                                    @click="sortSelector('type')"
+                                >
+                                    Type
+                                    <component
+                                        :is="selectorSortIcon('type')"
+                                        class="size-3"
+                                    />
+                                </button>
+                            </th>
+                            <th class="p-3">
+                                <button
+                                    class="inline-flex items-center gap-1"
+                                    @click="sortSelector('details')"
+                                >
+                                    Details
+                                    <component
+                                        :is="selectorSortIcon('details')"
+                                        class="size-3"
+                                    />
+                                </button>
+                            </th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="row in selectorRows"
-                                :key="`${row.kind}-${row.id}`"
-                                class="border-t"
-                            >
-                                <td class="p-3">
-                                    <input
-                                        type="checkbox"
-                                        :checked="isSelected(row)"
-                                        @change="
+                        <tr
+                            v-for="row in selectorRows"
+                            :key="`${row.kind}-${row.id}`"
+                            class="border-t"
+                        >
+                            <td class="p-3">
+                                <input
+                                    :checked="isSelected(row)"
+                                    type="checkbox"
+                                    @change="
                                             toggleSelected(
                                                 row,
                                                 (
@@ -636,14 +640,14 @@ onMounted(() => {
                                                 ).checked,
                                             )
                                         "
-                                    />
-                                </td>
-                                <td class="p-3 font-medium">
-                                    {{ row.name }}
-                                </td>
-                                <td class="p-3">{{ row.type }}</td>
-                                <td class="p-3">{{ row.details }}</td>
-                            </tr>
+                                />
+                            </td>
+                            <td class="p-3 font-medium">
+                                {{ row.name }}
+                            </td>
+                            <td class="p-3">{{ row.type }}</td>
+                            <td class="p-3">{{ row.details }}</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -652,21 +656,21 @@ onMounted(() => {
                         v-for="row in selectorRows"
                         :key="`${row.kind}-${row.id}`"
                         class="flex gap-3 rounded border p-3"
-                        ><input
-                            type="checkbox"
-                            :checked="isSelected(row)"
-                            @change="
+                    ><input
+                        :checked="isSelected(row)"
+                        type="checkbox"
+                        @change="
                                 toggleSelected(
                                     row,
                                     ($event.target as HTMLInputElement).checked,
                                 )
                             "
-                        /><span
-                            ><strong>{{ row.name }}</strong
-                            ><br /><small
-                                >{{ row.type }} · {{ row.details }}</small
-                            ></span
-                        ></label
+                    /><span
+                    ><strong>{{ row.name }}</strong
+                    ><br/><small
+                    >{{ row.type }} · {{ row.details }}</small
+                    ></span
+                    ></label
                     >
                 </div>
                 <button

@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import { formatLodgeDate } from "@/utils/date";
-import { Head } from "@inertiajs/vue3";
+import {formatLodgeDate} from "@/utils/date";
+import {Head} from "@inertiajs/vue3";
 
 const props = defineProps<{
     lodge: any;
@@ -17,11 +17,11 @@ const formatDate = (value: string | null) =>
 </script>
 
 <template>
-    <Head :title="`${version.title} — ${lodge.name}`" />
+    <Head :title="`${version.title} — ${lodge.name}`"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
@@ -51,14 +51,14 @@ const formatDate = (value: string | null) =>
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>
 
         <main class="mx-auto w-full max-w-4xl flex-1 px-5 py-10">
             <a :href="newsletterIndexUrl" class="text-sm font-medium underline"
-                >← All newsletters</a
+            >← All newsletters</a
             >
             <h1 class="mt-4 text-3xl font-bold">{{ version.title }}</h1>
             <p
@@ -70,14 +70,14 @@ const formatDate = (value: string | null) =>
             <img
                 v-if="version.cover_media_asset_id"
                 :src="`/lodges/${lodge.id}/newsletters/${issue.slug}/cover`"
-                class="mt-6 max-h-96 rounded-lg"
                 alt="Newsletter cover"
+                class="mt-6 max-h-96 rounded-lg"
             />
             <a
                 v-if="version.newsletter_document_id"
                 :href="`/lodges/${lodge.id}/newsletters/${issue.slug}/document`"
                 class="mt-6 inline-block font-medium underline"
-                >Download PDF</a
+            >Download PDF</a
             >
             <article
                 v-if="version.body_html"

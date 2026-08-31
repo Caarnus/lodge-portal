@@ -15,11 +15,6 @@ class LodgeCommunication extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => LodgeCommunicationStatus::class, 'degree_keys' => 'array', 'membership_status_keys' => 'array', 'membership_ids' => 'array', 'relation_person_ids' => 'array', 'send_requested_at' => 'datetime', 'sent_at' => 'datetime'];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -43,5 +38,10 @@ class LodgeCommunication extends Model
     public function distributionRuns()
     {
         return $this->hasMany(CommunicationDistributionRun::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => LodgeCommunicationStatus::class, 'degree_keys' => 'array', 'membership_status_keys' => 'array', 'membership_ids' => 'array', 'relation_person_ids' => 'array', 'send_requested_at' => 'datetime', 'sent_at' => 'datetime'];
     }
 }

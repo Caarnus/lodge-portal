@@ -29,11 +29,21 @@ class WebsiteController extends Controller
         return Inertia::render('website/Index', [
             'lodge' => $lodge,
             'pages' => $lodge->websitePages()->with(['draft', 'published'])->orderBy('id')->get(),
-            'deletedPages' => $lodge->websitePages()->onlyTrashed()->with(['versions' => fn ($query) => $query->whereIn('status', ['draft', 'published'])])->orderByDesc('deleted_at')->get(),
+            'deletedPages' => $lodge->websitePages()->onlyTrashed()->with(['versions' => fn($query) => $query->whereIn('status', ['draft', 'published'])])->orderByDesc('deleted_at')->get(),
             'media' => MediaAsset::query()->where('lodge_id', $lodge->id)->orderByDesc('id')->get(),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'website.publish'),
-            'sectionTypes' => $this->sectionTypes($catalog, (bool) $request->user()->is_platform_admin),
+            'sectionTypes' => $this->sectionTypes($catalog, (bool)$request->user()->is_platform_admin),
         ]);
+    }
+
+    private function sectionTypes(WebsiteSectionCatalog $catalog, bool $platformAdmin): array
+    {
+        $types = collect($catalog->labels());
+        if (!$platformAdmin) {
+            $types = $types->except('custom_html');
+        }
+
+        return $types->all();
     }
 
     public function store(Request $request, Lodge $lodge)
@@ -46,16 +56,43 @@ class WebsiteController extends Controller
         $page = DB::transaction(function () use ($data, $lodge, $request) {
             $page = WebsitePage::create(['lodge_id' => $lodge->id]);
             $page->versions()->create($data + [
-                'lodge_id' => $lodge->id,
-                'status' => WebsitePageStatus::Draft,
-                'created_by' => $request->user()->id,
-            ]);
+                    'lodge_id' => $lodge->id,
+                    'status' => WebsitePageStatus::Draft,
+                    'created_by' => $request->user()->id,
+                ]);
             Audit::record('website.page_created', $page, $lodge, null, $data);
 
             return $page;
         });
 
         return redirect()->route('lodges.website.pages.edit', [$lodge, $page]);
+    }
+
+    private function validatePage(Request $request, Lodge $lodge, ?WebsitePageVersion $version = null): array
+    {
+        return $request->validate([
+            'title' => 'required|string|max:150',
+            'slug' => [Rule::requiredIf(!$request->boolean('is_navigation_container')), 'nullable', 'alpha_dash', 'max:100', Rule::notIn(['events', 'calendar.ics', 'reservations', 'reminders']), Rule::unique('website_page_versions', 'slug')->where(fn($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
+            'is_home' => ['required', 'boolean', function ($attribute, $value, $fail) use ($lodge, $version) {
+                if ($value && WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('status', 'draft')->where('is_home', true)->when($version, fn($query) => $query->whereKeyNot($version->id))->exists()) {
+                    $fail('This lodge already has a draft home page.');
+                }
+            }],
+            'show_in_navigation' => 'required|boolean',
+            'is_navigation_container' => ['required', 'boolean', function ($attribute, $value, $fail) use ($request) {
+                if ($value && $request->boolean('is_home')) {
+                    $fail('The home page cannot be a navigation container.');
+                }
+            }],
+            'navigation_visibility' => ['nullable', Rule::in(['public', 'masons', 'lodge'])],
+            'navigation_order' => 'required|integer|min:0|max:100000',
+            'navigation_parent_page_id' => ['nullable', 'integer', Rule::exists('website_pages', 'id')->where(fn($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))],
+        ]);
+    }
+
+    private function containerSlug(): string
+    {
+        return 'container-' . Str::uuid();
     }
 
     public function edit(Request $request, Lodge $lodge, WebsitePage $page, WebsiteDrafts $drafts, WebsiteSectionCatalog $catalog)
@@ -68,11 +105,58 @@ class WebsiteController extends Controller
             'websitePage' => $page,
             'draft' => $draft->load('sections'),
             'parentPages' => $lodge->websitePages()->whereKeyNot($page->id)->with(['draft', 'published'])->get(),
-            'media' => MediaAsset::query()->where(fn ($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->orderByDesc('id')->get(),
-            'galleries' => $lodge->galleryAlbums()->whereHas('published')->with('published')->orderByDesc('id')->get()->map(fn (GalleryAlbum $album) => ['id' => $album->id, 'title' => $album->published->title]),
-            'sectionTypes' => $this->sectionTypes($catalog, (bool) $request->user()->is_platform_admin),
+            'media' => MediaAsset::query()->where(fn($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->orderByDesc('id')->get(),
+            'galleries' => $lodge->galleryAlbums()->whereHas('published')->with('published')->orderByDesc('id')->get()->map(fn(GalleryAlbum $album) => ['id' => $album->id, 'title' => $album->published->title]),
+            'sectionTypes' => $this->sectionTypes($catalog, (bool)$request->user()->is_platform_admin),
             'canPublish' => $request->user()->hasLodgePermission($lodge, 'website.publish'),
         ]);
+    }
+
+    private function allowPage(Lodge $lodge, WebsitePage $page, string $permission): void
+    {
+        abort_unless($page->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, $permission);
+    }
+
+    public function reorderNavigation(Request $request, Lodge $lodge)
+    {
+        $this->allowLodge($lodge, 'website.manage');
+        $data = $request->validate([
+            'pages' => ['required', 'array'],
+            'pages.*.id' => ['required', 'integer', 'distinct'],
+            'pages.*.navigation_parent_page_id' => ['nullable', 'integer'],
+            'pages.*.navigation_order' => ['required', 'integer', 'min:0', 'max:100000'],
+        ]);
+        $pages = $lodge->websitePages()->with(['draft', 'published'])->whereIn('id', collect($data['pages'])->pluck('id'))->get()->keyBy('id');
+        abort_unless($pages->count() === $lodge->websitePages()->count() && $pages->count() === count($data['pages']), 422);
+
+        $parents = collect($data['pages'])->mapWithKeys(fn(array $item) => [(int)$item['id'] => $item['navigation_parent_page_id'] ? (int)$item['navigation_parent_page_id'] : null]);
+        foreach ($parents as $pageId => $parentId) {
+            abort_if($parentId === $pageId || ($parentId !== null && !$parents->has($parentId)), 422);
+            if ($pages->get($pageId)->published && $parentId !== null && !$pages->get($parentId)->published) {
+                throw ValidationException::withMessages(['pages' => 'A published page can only be nested under another published page.']);
+            }
+            $seen = [$pageId];
+            while ($parentId !== null) {
+                abort_if(in_array($parentId, $seen, true), 422);
+                $seen[] = $parentId;
+                $parentId = $parents->get($parentId);
+            }
+        }
+
+        DB::transaction(function () use ($data, $pages) {
+            foreach ($data['pages'] as $item) {
+                $navigation = [
+                    'navigation_parent_page_id' => $item['navigation_parent_page_id'],
+                    'navigation_order' => $item['navigation_order'],
+                ];
+                $pages->get($item['id'])->draft?->update($navigation);
+                $pages->get($item['id'])->published?->update($navigation);
+            }
+        });
+        Audit::record('website.navigation_reordered', $lodge, $lodge, null, ['pages' => $data['pages']]);
+
+        return back();
     }
 
     public function update(Request $request, Lodge $lodge, WebsitePage $page)
@@ -94,49 +178,6 @@ class WebsiteController extends Controller
             $published->update($navigation);
             Audit::record('website.navigation_updated', $page, $lodge, $beforeNavigation, $published->fresh()->only(array_keys($navigation)));
         }
-
-        return back();
-    }
-
-    public function reorderNavigation(Request $request, Lodge $lodge, WebsiteDrafts $drafts)
-    {
-        $this->allowLodge($lodge, 'website.manage');
-        $data = $request->validate([
-            'pages' => ['required', 'array'],
-            'pages.*.id' => ['required', 'integer', 'distinct'],
-            'pages.*.navigation_parent_page_id' => ['nullable', 'integer'],
-            'pages.*.navigation_order' => ['required', 'integer', 'min:0', 'max:100000'],
-        ]);
-        $pages = $lodge->websitePages()->with('published')->whereIn('id', collect($data['pages'])->pluck('id'))->get()->keyBy('id');
-        abort_unless($pages->count() === $lodge->websitePages()->count() && $pages->count() === count($data['pages']), 422);
-
-        $parents = collect($data['pages'])->mapWithKeys(fn (array $item) => [(int) $item['id'] => $item['navigation_parent_page_id'] ? (int) $item['navigation_parent_page_id'] : null]);
-        foreach ($parents as $pageId => $parentId) {
-            abort_if($parentId === $pageId || ($parentId !== null && ! $parents->has($parentId)), 422);
-            if ($pages->get($pageId)->published && $parentId !== null && ! $pages->get($parentId)->published) {
-                throw ValidationException::withMessages(['pages' => 'A published page can only be nested under another published page.']);
-            }
-            $seen = [$pageId];
-            while ($parentId !== null) {
-                abort_if(in_array($parentId, $seen, true), 422);
-                $seen[] = $parentId;
-                $parentId = $parents->get($parentId);
-            }
-        }
-
-        DB::transaction(function () use ($data, $pages, $drafts, $request) {
-            foreach ($data['pages'] as $item) {
-                $drafts->for($pages->get($item['id']), $request->user())->update([
-                    'navigation_parent_page_id' => $item['navigation_parent_page_id'],
-                    'navigation_order' => $item['navigation_order'],
-                ]);
-                $pages->get($item['id'])->published?->update([
-                    'navigation_parent_page_id' => $item['navigation_parent_page_id'],
-                    'navigation_order' => $item['navigation_order'],
-                ]);
-            }
-        });
-        Audit::record('website.navigation_reordered', $lodge, $lodge, null, ['pages' => $data['pages']]);
 
         return back();
     }
@@ -204,7 +245,7 @@ class WebsiteController extends Controller
         foreach (['logo_media_id' => 'logo_path', 'seal_media_id' => 'seal_path'] as $field => $pathField) {
             if ($data[$field] ?? null) {
                 $asset = MediaAsset::query()->whereKey($data[$field])->where('lodge_id', $lodge->id)->where('processing_status', 'ready')->first();
-                if (! $asset) {
+                if (!$asset) {
                     throw ValidationException::withMessages([$field => 'Selected media is unavailable or still processing.']);
                 }
                 $data[$pathField] = $asset->derivative_path;
@@ -215,48 +256,5 @@ class WebsiteController extends Controller
         Audit::record('website.branding_updated', $lodge, $lodge, $before, $lodge->fresh()->only(['tag_line', 'primary_color', 'secondary_color', 'logo_path', 'seal_path']));
 
         return back();
-    }
-
-    private function validatePage(Request $request, Lodge $lodge, ?WebsitePageVersion $version = null): array
-    {
-        return $request->validate([
-            'title' => 'required|string|max:150',
-            'slug' => [Rule::requiredIf(! $request->boolean('is_navigation_container')), 'nullable', 'alpha_dash', 'max:100', Rule::notIn(['events', 'calendar.ics', 'reservations', 'reminders']), Rule::unique('website_page_versions', 'slug')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->where('status', 'draft'))->ignore($version?->id)],
-            'is_home' => ['required', 'boolean', function ($attribute, $value, $fail) use ($lodge, $version) {
-                if ($value && WebsitePageVersion::query()->where('lodge_id', $lodge->id)->where('status', 'draft')->where('is_home', true)->when($version, fn ($query) => $query->whereKeyNot($version->id))->exists()) {
-                    $fail('This lodge already has a draft home page.');
-                }
-            }],
-            'show_in_navigation' => 'required|boolean',
-            'is_navigation_container' => ['required', 'boolean', function ($attribute, $value, $fail) use ($request) {
-                if ($value && $request->boolean('is_home')) {
-                    $fail('The home page cannot be a navigation container.');
-                }
-            }],
-            'navigation_visibility' => ['nullable', Rule::in(['public', 'masons', 'lodge'])],
-            'navigation_order' => 'required|integer|min:0|max:100000',
-            'navigation_parent_page_id' => ['nullable', 'integer', Rule::exists('website_pages', 'id')->where(fn ($query) => $query->where('lodge_id', $lodge->id)->whereNull('deleted_at'))],
-        ]);
-    }
-
-    private function allowPage(Lodge $lodge, WebsitePage $page, string $permission): void
-    {
-        abort_unless($page->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, $permission);
-    }
-
-    private function containerSlug(): string
-    {
-        return 'container-'.Str::uuid();
-    }
-
-    private function sectionTypes(WebsiteSectionCatalog $catalog, bool $platformAdmin): array
-    {
-        $types = collect($catalog->labels());
-        if (! $platformAdmin) {
-            $types = $types->except('custom_html');
-        }
-
-        return $types->all();
     }
 }

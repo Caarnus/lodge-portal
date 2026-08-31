@@ -47,6 +47,23 @@ class EventReservationService
         });
     }
 
+    private function ensurePermitted(EventOccurrence $occurrence, ?User $user, array $data): void
+    {
+        $event = $occurrence->event;
+        if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || !$event->reservations_enabled || !$event->capacity) {
+            throw ValidationException::withMessages(['event' => 'Reservations are unavailable for this occurrence.']);
+        }
+        if ($user && !$this->eligibility->canReserve($user, $event)) {
+            abort(403);
+        }
+        if (!$user && (!$event->guest_reservations_enabled || !$this->eligibility->canView(null, $event))) {
+            abort(403);
+        }
+        if (($event->maximum_party_size ?? PHP_INT_MAX) < (int)($data['party_size'] ?? 1)) {
+            throw ValidationException::withMessages(['party_size' => 'This party size exceeds the event limit.']);
+        }
+    }
+
     private function validatedResponses(int $eventId, mixed $responses): array
     {
         if (!is_array($responses)) {
@@ -78,22 +95,5 @@ class EventReservationService
         }
 
         return $responses;
-    }
-
-    private function ensurePermitted(EventOccurrence $occurrence, ?User $user, array $data): void
-    {
-        $event = $occurrence->event;
-        if ($event->status !== EventStatus::Published || $occurrence->status !== EventOccurrenceStatus::Scheduled || !$event->reservations_enabled || !$event->capacity) {
-            throw ValidationException::withMessages(['event' => 'Reservations are unavailable for this occurrence.']);
-        }
-        if ($user && !$this->eligibility->canReserve($user, $event)) {
-            abort(403);
-        }
-        if (!$user && (!$event->guest_reservations_enabled || !$this->eligibility->canView(null, $event))) {
-            abort(403);
-        }
-        if (($event->maximum_party_size ?? PHP_INT_MAX) < (int)($data['party_size'] ?? 1)) {
-            throw ValidationException::withMessages(['party_size' => 'This party size exceeds the event limit.']);
-        }
     }
 }

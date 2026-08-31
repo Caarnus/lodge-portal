@@ -14,6 +14,16 @@ class PersonRitualProficiency extends Model
 
     protected $guarded = [];
 
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
+
+    public function part()
+    {
+        return $this->belongsTo(RitualPart::class, 'ritual_part_id');
+    }
+
     protected function casts(): array
     {
         return [
@@ -23,15 +33,5 @@ class PersonRitualProficiency extends Model
             'performed_for_credit' => 'boolean',
             'first_marked_proficient_on' => 'date',
         ];
-    }
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class);
-    }
-
-    public function part()
-    {
-        return $this->belongsTo(RitualPart::class, 'ritual_part_id');
     }
 }

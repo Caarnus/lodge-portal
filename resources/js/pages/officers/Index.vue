@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { SearchableSelect } from "@/components/ui/searchable-select";
+import {SearchableSelect} from "@/components/ui/searchable-select";
 import {
     Dialog,
     DialogDescription,
@@ -11,12 +11,12 @@ import {
     DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Head, router, usePage } from "@inertiajs/vue3";
-import { Save, UserMinus } from "lucide-vue-next";
+import {Head, router, usePage} from "@inertiajs/vue3";
+import {Save, UserMinus} from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { computed, reactive, ref, watch } from "vue";
+import {computed, reactive, ref, watch} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const vTooltip = Tooltip;
 const props = defineProps<{
     lodge: any;
@@ -60,7 +60,7 @@ watch(
             };
         }
     },
-    { immediate: true },
+    {immediate: true},
 );
 watch(prompt, (value) => {
     if (value) promptOpen.value = true;
@@ -68,12 +68,12 @@ watch(prompt, (value) => {
 
 const save = (position: any) => {
     const assignment = assignmentFor(position.id);
-    const data = { ...drafts[position.id], officer_position_id: position.id };
+    const data = {...drafts[position.id], officer_position_id: position.id};
     if (assignment)
         router.put(
             `/lodges/${props.lodge.id}/officers/${assignment.id}`,
             data,
-            { preserveScroll: true },
+            {preserveScroll: true},
         );
     else
         router.post(`/lodges/${props.lodge.id}/officers`, data, {
@@ -91,17 +91,17 @@ const remove = (position: any) => {
 </script>
 
 <template>
-    <Head :title="`${lodge.name} officers`" />
+    <Head :title="`${lodge.name} officers`"/>
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
         <PageHeader
-            title="Current officers"
             :description="`Assign a current member to each position for ${lodge.name}.`"
+            title="Current officers"
         />
         <WorkspaceTabs
             :lodge="lodge"
-            workspace="people"
             active="officers"
             class="mt-6"
+            workspace="people"
         />
 
         <Dialog :open="promptOpen" @update:open="promptOpen = $event">
@@ -115,7 +115,7 @@ const remove = (position: any) => {
                 </DialogHeader>
                 <p class="text-sm">
                     <template v-if="prompt.has_linked_user"
-                        >The officer assignment was saved separately from
+                    >The officer assignment was saved separately from
                         access. Review {{ prompt.person_name }}'s lodge roles
                         now.<span
                             v-if="
@@ -126,9 +126,11 @@ const remove = (position: any) => {
                             Another officer assignment remains, so retaining the
                             Officer role is recommended.</span
                         ></template
-                    ><template v-else
-                        >{{ prompt.person_name }} has no linked account. Invite
-                        and link an account before assigning a role.</template
+                    >
+                    <template v-else
+                    >{{ prompt.person_name }} has no linked account. Invite
+                        and link an account before assigning a role.
+                    </template
                     >
                 </p>
                 <DialogFooter>
@@ -136,12 +138,14 @@ const remove = (position: any) => {
                         class="secondary-button"
                         @click="promptOpen = false"
                     >
-                        Not now</button
-                    ><a
+                        Not now
+                    </button
+                    >
+                    <a
                         v-if="prompt.has_linked_user"
                         :href="`/lodges/${lodge.id}/role-assignments`"
                         class="primary-button"
-                        >Manage access</a
+                    >Manage access</a
                     >
                 </DialogFooter>
             </DialogScrollContent>
@@ -154,8 +158,8 @@ const remove = (position: any) => {
                 class="hidden grid-cols-[minmax(10rem,1fr)_minmax(14rem,1.5fr)_repeat(3,minmax(7rem,.7fr))_5.5rem] gap-4 bg-muted px-4 py-3 text-sm font-semibold text-muted-foreground md:grid"
             >
                 <span>Position</span><span>Member</span><span>Public</span
-                ><span>Public email</span><span>Public phone</span
-                ><span class="sr-only">Actions</span>
+            ><span>Public email</span><span>Public phone</span
+            ><span class="sr-only">Actions</span>
             </div>
             <div
                 v-for="position in positions"
@@ -165,59 +169,59 @@ const remove = (position: any) => {
                 <p class="font-medium">{{ position.name }}</p>
                 <SearchableSelect
                     v-model="drafts[position.id].membership_id"
-                    :options="memberOptions"
-                    placeholder="Unassigned"
-                    filter-placeholder="Filter members"
                     :ariaLabel="`${position.name} member`"
+                    :options="memberOptions"
                     empty-label="No members match this filter."
+                    filter-placeholder="Filter members"
+                    placeholder="Unassigned"
                 />
                 <label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="drafts[position.id].is_public"
-                        type="checkbox"
-                    />
+                ><input
+                    v-model="drafts[position.id].is_public"
+                    type="checkbox"
+                />
                     <span>Show officer</span></label
                 >
                 <label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="drafts[position.id].show_email"
-                        type="checkbox"
-                    />
+                ><input
+                    v-model="drafts[position.id].show_email"
+                    type="checkbox"
+                />
                     <span>Show email</span></label
                 >
                 <label class="flex items-center gap-2 text-sm"
-                    ><input
-                        v-model="drafts[position.id].show_phone"
-                        type="checkbox"
-                    />
+                ><input
+                    v-model="drafts[position.id].show_phone"
+                    type="checkbox"
+                />
                     <span>Show phone</span></label
                 >
                 <div class="flex justify-end gap-1">
                     <button
-                        type="button"
-                        :disabled="!drafts[position.id].membership_id"
-                        :aria-label="`Save ${position.name}`"
-                        class="icon-button disabled:opacity-40"
                         v-tooltip.left="{
                             value: 'Save assignment',
                             showDelay: 2000,
                         }"
+                        :aria-label="`Save ${position.name}`"
+                        :disabled="!drafts[position.id].membership_id"
+                        class="icon-button disabled:opacity-40"
+                        type="button"
                         @click="save(position)"
                     >
-                        <Save class="size-4" />
+                        <Save class="size-4"/>
                     </button>
                     <button
                         v-if="assignmentFor(position.id)"
-                        type="button"
-                        :aria-label="`Remove ${position.name} assignment`"
-                        class="icon-button text-destructive hover:bg-destructive/10"
                         v-tooltip.left="{
                             value: 'Remove assignment',
                             showDelay: 2000,
                         }"
+                        :aria-label="`Remove ${position.name} assignment`"
+                        class="icon-button text-destructive hover:bg-destructive/10"
+                        type="button"
                         @click="remove(position)"
                     >
-                        <UserMinus class="size-4" />
+                        <UserMinus class="size-4"/>
                     </button>
                 </div>
             </div>

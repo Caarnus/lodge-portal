@@ -59,6 +59,34 @@ class PersonRelationshipController extends Controller
         return back();
     }
 
+    private function rejectDuplicate(PersonRelationship $candidate): void
+    {
+        $type = RelationshipType::findOrFail($candidate->relationship_type_id);
+        $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
+        $duplicate = PersonRelationship::query()->when($candidate->exists, fn(Builder $query) => $query->whereKeyNot($candidate->id))
+            ->where(function (Builder $query) use ($candidate, $type, $inverseId) {
+                $query->where(fn(Builder $direct) => $direct
+                    ->where('person_one_id', $candidate->person_one_id)
+                    ->where('person_two_id', $candidate->person_two_id)
+                    ->where('relationship_type_id', $candidate->relationship_type_id));
+                if ($inverseId) {
+                    $query->orWhere(fn(Builder $reverse) => $reverse
+                        ->where('person_one_id', $candidate->person_two_id)
+                        ->where('person_two_id', $candidate->person_one_id)
+                        ->where('relationship_type_id', $inverseId));
+                }
+                if ($type->is_symmetric) {
+                    $query->orWhere(fn(Builder $reverse) => $reverse
+                        ->where('person_one_id', $candidate->person_two_id)
+                        ->where('person_two_id', $candidate->person_one_id)
+                        ->where('relationship_type_id', $candidate->relationship_type_id));
+                }
+            })->exists();
+        if ($duplicate) {
+            throw ValidationException::withMessages(['related_person_id' => 'That relationship is already recorded.']);
+        }
+    }
+
     public function destroy(Request $request, Lodge $lodge, PersonRelationship $relationship, PersonAccess $access)
     {
         abort_unless($access->canManageRelationship($request->user(), $lodge, $relationship), 403);
@@ -86,33 +114,5 @@ class PersonRelationshipController extends Controller
         Audit::record('relationship.updated', $relationship, $lodge, $before, $relationship->fresh()->toArray());
 
         return back();
-    }
-
-    private function rejectDuplicate(PersonRelationship $candidate): void
-    {
-        $type = RelationshipType::findOrFail($candidate->relationship_type_id);
-        $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
-        $duplicate = PersonRelationship::query()->when($candidate->exists, fn(Builder $query) => $query->whereKeyNot($candidate->id))
-            ->where(function (Builder $query) use ($candidate, $type, $inverseId) {
-                $query->where(fn(Builder $direct) => $direct
-                    ->where('person_one_id', $candidate->person_one_id)
-                    ->where('person_two_id', $candidate->person_two_id)
-                    ->where('relationship_type_id', $candidate->relationship_type_id));
-                if ($inverseId) {
-                    $query->orWhere(fn(Builder $reverse) => $reverse
-                        ->where('person_one_id', $candidate->person_two_id)
-                        ->where('person_two_id', $candidate->person_one_id)
-                        ->where('relationship_type_id', $inverseId));
-                }
-                if ($type->is_symmetric) {
-                    $query->orWhere(fn(Builder $reverse) => $reverse
-                        ->where('person_one_id', $candidate->person_two_id)
-                        ->where('person_two_id', $candidate->person_one_id)
-                        ->where('relationship_type_id', $candidate->relationship_type_id));
-                }
-            })->exists();
-        if ($duplicate) {
-            throw ValidationException::withMessages(['related_person_id' => 'That relationship is already recorded.']);
-        }
     }
 }

@@ -1,8 +1,8 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { Primitive, type PrimitiveProps } from "radix-vue";
-import type { HTMLAttributes } from "vue";
-import { buttonVariants, type ButtonVariants } from ".";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {Primitive, type PrimitiveProps} from "radix-vue";
+import type {HTMLAttributes} from "vue";
+import {buttonVariants, type ButtonVariants} from ".";
 
 interface Props extends PrimitiveProps {
     variant?: ButtonVariants["variant"];
@@ -21,6 +21,6 @@ const props = withDefaults(defineProps<Props>(), {
         :as-child="asChild"
         :class="cn(buttonVariants({ variant, size }), props.class)"
     >
-        <slot />
+        <slot/>
     </Primitive>
 </template>

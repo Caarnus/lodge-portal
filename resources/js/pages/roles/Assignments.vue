@@ -1,13 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import { Plus, Trash2 } from "lucide-vue-next";
+import {Head, Link, router} from "@inertiajs/vue3";
+import {Plus, Trash2} from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { reactive, ref, watch } from "vue";
+import {reactive, ref, watch} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const vTooltip = Tooltip;
 const props = defineProps<{
     lodge: any;
@@ -31,8 +31,8 @@ watch(search, () => {
         () =>
             router.get(
                 `/lodges/${props.lodge.id}/role-assignments`,
-                { search: search.value || undefined },
-                { preserveState: true, replace: true },
+                {search: search.value || undefined},
+                {preserveState: true, replace: true},
             ),
         450,
     );
@@ -49,7 +49,7 @@ const assign = (userId: number) => {
     if (!roleId) return;
     router.post(
         `/lodges/${props.lodge.id}/role-assignments`,
-        { user_id: userId, role_id: roleId },
+        {user_id: userId, role_id: roleId},
         {
             preserveScroll: true,
             onSuccess: () => {
@@ -61,36 +61,39 @@ const assign = (userId: number) => {
 const remove = (userId: number, roleId: number) =>
     confirm("Remove this role assignment?") &&
     router.delete(`/lodges/${props.lodge.id}/role-assignments`, {
-        data: { user_id: userId, role_id: roleId },
+        data: {user_id: userId, role_id: roleId},
         preserveScroll: true,
     });
 </script>
 
 <template>
-    <Head :title="`${lodge.name} role assignments`" />
+    <Head :title="`${lodge.name} role assignments`"/>
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
-        <PageHeader title="Role assignments" :description="lodge.name">
+        <PageHeader :description="lodge.name" title="Role assignments">
             <template #actions
-                ><Link
+            >
+                <Link
                     :href="`/lodges/${lodge.id}/roles`"
                     class="secondary-button"
-                    >Edit role definitions</Link
-                ></template
+                >Edit role definitions
+                </Link
+                >
+            </template
             >
         </PageHeader>
         <WorkspaceTabs
             :lodge="lodge"
-            workspace="people"
             active="roles"
             class="mt-6"
+            workspace="people"
         />
         <label class="mt-6 block max-w-xl"
-            ><span class="text-sm font-medium">Find a linked account</span
-            ><input
-                v-model="search"
-                type="search"
-                class="field-input mt-1"
-                placeholder="Search by name or email"
+        ><span class="text-sm font-medium">Find a linked account</span
+        ><input
+            v-model="search"
+            class="field-input mt-1"
+            placeholder="Search by name or email"
+            type="search"
         /></label>
         <p class="mt-3 text-sm text-muted-foreground">
             Showing {{ users.from ?? 0 }}–{{ users.to ?? 0 }} of
@@ -115,23 +118,24 @@ const remove = (userId: number, roleId: number) =>
                         v-for="item in rolesFor(user.id)"
                         :key="item.role_id"
                         class="inline-flex items-center gap-1 rounded-full bg-muted py-1 pl-3 pr-1 text-sm"
-                        >{{ item.role?.name
+                    >{{
+                            item.role?.name
                         }}<button
-                            type="button"
-                            :aria-label="`Remove ${item.role?.name} from ${user.name}`"
-                            class="inline-flex size-7 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
                             v-tooltip.top="{
                                 value: 'Remove role',
                                 showDelay: 2000,
                             }"
+                            :aria-label="`Remove ${item.role?.name} from ${user.name}`"
+                            class="inline-flex size-7 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
+                            type="button"
                             @click="remove(user.id, item.role_id)"
                         >
-                            <Trash2 class="size-3.5" /></button></span
+                            <Trash2 class="size-3.5"/></button></span
                     ><span
-                        v-if="!rolesFor(user.id).length"
-                        class="text-sm text-muted-foreground"
-                        >No lodge role</span
-                    >
+                    v-if="!rolesFor(user.id).length"
+                    class="text-sm text-muted-foreground"
+                >No lodge role</span
+                >
                 </div>
                 <div class="flex gap-2">
                     <select
@@ -143,27 +147,29 @@ const remove = (userId: number, roleId: number) =>
                         <option
                             v-for="role in roles"
                             :key="role.id"
-                            :value="role.id"
                             :disabled="
                                 rolesFor(user.id).some(
                                     (item) => item.role_id === role.id,
                                 )
                             "
+                            :value="role.id"
                         >
                             {{ role.name }}
-                        </option></select
-                    ><button
-                        type="button"
-                        :disabled="!selectedRoles[user.id]"
-                        :aria-label="`Assign role to ${user.name}`"
-                        class="primary-button size-10 p-0 disabled:opacity-40"
+                        </option>
+                    </select
+                    >
+                    <button
                         v-tooltip.left="{
                             value: 'Assign role',
                             showDelay: 2000,
                         }"
+                        :aria-label="`Assign role to ${user.name}`"
+                        :disabled="!selectedRoles[user.id]"
+                        class="primary-button size-10 p-0 disabled:opacity-40"
+                        type="button"
                         @click="assign(user.id)"
                     >
-                        <Plus class="size-4" />
+                        <Plus class="size-4"/>
                     </button>
                 </div>
             </div>
@@ -176,21 +182,21 @@ const remove = (userId: number, roleId: number) =>
         </div>
         <nav
             v-if="users.links.length > 3"
-            class="mt-4 flex flex-wrap gap-2"
             aria-label="Role assignment pages"
+            class="mt-4 flex flex-wrap gap-2"
         >
             <Link
                 v-for="link in users.links"
                 :key="link.label"
-                :href="link.url || '#'"
-                preserve-state
-                preserve-scroll
-                class="secondary-button text-sm"
                 :class="{
                     'bg-primary text-primary-foreground': link.active,
                     'pointer-events-none opacity-40': !link.url,
                 }"
-                ><span v-html="link.label"
+                :href="link.url || '#'"
+                class="secondary-button text-sm"
+                preserve-scroll
+                preserve-state
+            ><span v-html="link.label"
             /></Link>
         </nav>
     </main>

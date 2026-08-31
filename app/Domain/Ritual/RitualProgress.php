@@ -14,50 +14,6 @@ use Illuminate\Validation\ValidationException;
 
 class RitualProgress
 {
-    public function currentTotal(Person $person): int
-    {
-        return (int) PersonRitualProficiency::query()
-            ->join('ritual_parts', 'ritual_parts.id', '=', 'person_ritual_proficiencies.ritual_part_id')
-            ->join('ritual_categories', 'ritual_categories.id', '=', 'ritual_parts.ritual_category_id')
-            ->where('person_ritual_proficiencies.person_id', $person->id)
-            ->where('person_ritual_proficiencies.performed_for_credit', true)
-            ->where('ritual_parts.is_active', true)
-            ->where('ritual_categories.is_active', true)
-            ->where('ritual_parts.counts_toward_program', true)
-            ->whereNotNull('ritual_parts.point_value')
-            ->where('ritual_parts.point_value', '>', 0)
-            ->sum('ritual_parts.point_value');
-    }
-
-    /** @return Collection<int, PersonRitualProficiency> */
-    public function creditedActiveParts(Person $person): Collection
-    {
-        return $this->creditedParts($person)
-            ->filter(fn (PersonRitualProficiency $proficiency) => $this->isActivePointBearingPart($proficiency->part));
-    }
-
-    /** @return Collection<int, PersonRitualProficiency> */
-    public function creditedRetiredParts(Person $person): Collection
-    {
-        return $this->creditedParts($person)
-            ->filter(fn (PersonRitualProficiency $proficiency) => $proficiency->part?->counts_toward_program)
-            ->reject(fn (PersonRitualProficiency $proficiency) => $this->isActivePointBearingPart($proficiency->part));
-    }
-
-    /** @return Collection<int, PersonRitualProficiency> */
-    public function proficientNonPointParts(Person $person): Collection
-    {
-        return PersonRitualProficiency::query()
-            ->with('part.category')
-            ->where('person_id', $person->id)
-            ->where('status', RitualProficiencyStatus::Proficient)
-            ->whereHas('part', fn ($query) => $query
-                ->where('is_active', true)
-                ->where('counts_toward_program', false)
-                ->whereHas('category', fn ($category) => $category->where('is_active', true)))
-            ->get();
-    }
-
     public function projection(Person $person): array
     {
         $currentTotal = $this->currentTotal($person);
@@ -88,6 +44,70 @@ class RitualProgress
         ];
     }
 
+    public function currentTotal(Person $person): int
+    {
+        return (int)PersonRitualProficiency::query()
+            ->join('ritual_parts', 'ritual_parts.id', '=', 'person_ritual_proficiencies.ritual_part_id')
+            ->join('ritual_categories', 'ritual_categories.id', '=', 'ritual_parts.ritual_category_id')
+            ->where('person_ritual_proficiencies.person_id', $person->id)
+            ->where('person_ritual_proficiencies.performed_for_credit', true)
+            ->where('ritual_parts.is_active', true)
+            ->where('ritual_categories.is_active', true)
+            ->where('ritual_parts.counts_toward_program', true)
+            ->whereNotNull('ritual_parts.point_value')
+            ->where('ritual_parts.point_value', '>', 0)
+            ->sum('ritual_parts.point_value');
+    }
+
+    /** @return Collection<int, PersonRitualProficiency> */
+    public function creditedActiveParts(Person $person): Collection
+    {
+        return $this->creditedParts($person)
+            ->filter(fn(PersonRitualProficiency $proficiency) => $this->isActivePointBearingPart($proficiency->part));
+    }
+
+    /** @return Collection<int, PersonRitualProficiency> */
+    private function creditedParts(Person $person): Collection
+    {
+        return PersonRitualProficiency::query()
+            ->with('part.category')
+            ->where('person_id', $person->id)
+            ->where('performed_for_credit', true)
+            ->get();
+    }
+
+    private function isActivePointBearingPart(?RitualPart $part): bool
+    {
+        return $part !== null
+            && $part->is_active
+            && $part->category?->is_active
+            && $part->counts_toward_program
+            && $part->point_value !== null
+            && $part->point_value > 0;
+    }
+
+    /** @return Collection<int, PersonRitualProficiency> */
+    public function creditedRetiredParts(Person $person): Collection
+    {
+        return $this->creditedParts($person)
+            ->filter(fn(PersonRitualProficiency $proficiency) => $proficiency->part?->counts_toward_program)
+            ->reject(fn(PersonRitualProficiency $proficiency) => $this->isActivePointBearingPart($proficiency->part));
+    }
+
+    /** @return Collection<int, PersonRitualProficiency> */
+    public function proficientNonPointParts(Person $person): Collection
+    {
+        return PersonRitualProficiency::query()
+            ->with('part.category')
+            ->where('person_id', $person->id)
+            ->where('status', RitualProficiencyStatus::Proficient)
+            ->whereHas('part', fn($query) => $query
+                ->where('is_active', true)
+                ->where('counts_toward_program', false)
+                ->whereHas('category', fn($category) => $category->where('is_active', true)))
+            ->get();
+    }
+
     public function updateProficiency(Person $person, RitualPart $part, array $data): ?PersonRitualProficiency
     {
         return DB::transaction(function () use ($person, $part, $data) {
@@ -116,7 +136,7 @@ class RitualProgress
             if ($attributes['first_marked_proficient_on']?->isFuture()) {
                 throw ValidationException::withMessages(['first_marked_proficient_on' => 'The first proficient date cannot be in the future.']);
             }
-            if (mb_strlen((string) $attributes['notes']) > 2000) {
+            if (mb_strlen((string)$attributes['notes']) > 2000) {
                 throw ValidationException::withMessages(['notes' => 'Private notes may not exceed 2,000 characters.']);
             }
 
@@ -148,26 +168,6 @@ class RitualProgress
         });
     }
 
-    /** @return Collection<int, PersonRitualProficiency> */
-    private function creditedParts(Person $person): Collection
-    {
-        return PersonRitualProficiency::query()
-            ->with('part.category')
-            ->where('person_id', $person->id)
-            ->where('performed_for_credit', true)
-            ->get();
-    }
-
-    private function isActivePointBearingPart(?RitualPart $part): bool
-    {
-        return $part !== null
-            && $part->is_active
-            && $part->category?->is_active
-            && $part->counts_toward_program
-            && $part->point_value !== null
-            && $part->point_value > 0;
-    }
-
     private function normalizedAttributes(?PersonRitualProficiency $proficiency, array $data): array
     {
         $status = $data['status'] ?? $proficiency?->status ?? RitualProficiencyStatus::NotKnown;
@@ -176,9 +176,9 @@ class RitualProgress
 
         return [
             'status' => $status,
-            'interested_in_learning' => (bool) ($data['interested_in_learning'] ?? $proficiency?->interested_in_learning ?? false),
-            'willing_to_assist' => (bool) ($data['willing_to_assist'] ?? $proficiency?->willing_to_assist ?? false),
-            'performed_for_credit' => (bool) ($data['performed_for_credit'] ?? $proficiency?->performed_for_credit ?? false),
+            'interested_in_learning' => (bool)($data['interested_in_learning'] ?? $proficiency?->interested_in_learning ?? false),
+            'willing_to_assist' => (bool)($data['willing_to_assist'] ?? $proficiency?->willing_to_assist ?? false),
+            'performed_for_credit' => (bool)($data['performed_for_credit'] ?? $proficiency?->performed_for_credit ?? false),
             'first_marked_proficient_on' => $date ? \Illuminate\Support\Carbon::parse($date) : null,
             'notes' => isset($data['notes']) ? ($data['notes'] === '' ? null : $data['notes']) : $proficiency?->notes,
         ];

@@ -15,11 +15,6 @@ class GalleryAlbumVersion extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => ContentVersionStatus::class, 'visibility' => GalleryVisibility::class, 'published_at' => 'datetime'];
-    }
-
     public function album()
     {
         return $this->belongsTo(GalleryAlbum::class, 'gallery_album_id');
@@ -48,5 +43,10 @@ class GalleryAlbumVersion extends Model
     public function publisher()
     {
         return $this->belongsTo(User::class, 'published_by');
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => ContentVersionStatus::class, 'visibility' => GalleryVisibility::class, 'published_at' => 'datetime'];
     }
 }

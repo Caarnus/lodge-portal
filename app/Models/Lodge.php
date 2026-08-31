@@ -14,11 +14,6 @@ class Lodge extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => LodgeStatus::class];
-    }
-
     public function users()
     {
         return $this->belongsToMany(User::class, 'lodge_user_roles')->withPivot('role_id')->withTimestamps();
@@ -132,5 +127,10 @@ class Lodge extends Model
     public function communicationDeliveries()
     {
         return $this->hasMany(CommunicationDelivery::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => LodgeStatus::class];
     }
 }

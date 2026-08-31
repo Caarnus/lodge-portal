@@ -1,10 +1,11 @@
-<script setup lang="ts">
-import { Head, useForm } from "@inertiajs/vue3";
+<script lang="ts" setup>
+import {Head, useForm} from "@inertiajs/vue3";
+
 defineProps<{ lodge: any; token: string }>();
 const form = useForm({});
 </script>
 <template>
-    <Head title="Verify newsletter request" />
+    <Head title="Verify newsletter request"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <main class="mx-auto w-full max-w-xl flex-1 p-6">
             <h1 class="text-3xl font-bold">Verify request</h1>

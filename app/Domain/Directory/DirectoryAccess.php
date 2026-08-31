@@ -15,6 +15,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DirectoryAccess
 {
+    public function canView(User $user, Lodge $lodge, Person $person, DirectoryAudience $audience): bool
+    {
+        return $this->canBrowse($user, $lodge, $audience)
+            && $this->visibleQuery($lodge, $audience)->whereKey($person->id)->exists();
+    }
+
     public function canBrowse(User $user, Lodge $lodge, DirectoryAudience $audience = DirectoryAudience::OwnLodge): bool
     {
         if ($lodge->status !== LodgeStatus::Active || $user->approval_status !== 'approved' || !$user->hasVerifiedEmail()) {
@@ -34,10 +40,36 @@ class DirectoryAccess
             && $this->activeMembershipQuery(Membership::query(), $lodge)->where('person_id', $person->id)->exists();
     }
 
-    public function canView(User $user, Lodge $lodge, Person $person, DirectoryAudience $audience): bool
+    private function activeMembershipQuery(Builder|Relation $query, ?Lodge $lodge = null): Builder|Relation
     {
-        return $this->canBrowse($user, $lodge, $audience)
-            && $this->visibleQuery($lodge, $audience)->whereKey($person->id)->exists();
+        return $query->whereNull('end_date')
+            ->whereHas('status', fn(Builder $status) => $status->where('key', 'active'))
+            ->whereHas('lodge', fn(Builder $membershipLodge) => $membershipLodge->where('status', LodgeStatus::Active))
+            ->when($lodge, fn(Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
+    }
+
+    public function visibleQuery(Lodge $lodge, DirectoryAudience $audience): Builder
+    {
+        return $this->withProjectionRelationships(
+            $audience === DirectoryAudience::OwnLodge
+                ? $this->ownLodgeQuery($lodge)
+                : $this->participatingLodgesQuery(),
+            $lodge,
+            $audience,
+        );
+    }
+
+    private function withProjectionRelationships(Builder $query, Lodge $lodge, DirectoryAudience $audience): Builder
+    {
+        return $query->with([
+            'directoryPrivacySetting',
+            'memberships' => function (Relation $memberships) use ($lodge, $audience) {
+                $this->activeMembershipQuery(
+                    $memberships,
+                    $audience === DirectoryAudience::OwnLodge ? $lodge : null,
+                )->with(['degree', 'lodge:id,name,number,slug']);
+            },
+        ]);
     }
 
     public function ownLodgeQuery(Lodge $lodge): Builder
@@ -51,22 +83,19 @@ class DirectoryAccess
             });
     }
 
+    private function baseSubjectQuery(): Builder
+    {
+        return Person::query()
+            ->whereNull('merged_at')
+            ->where('is_deceased', false)
+            ->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships));
+    }
+
     public function participatingLodgesQuery(): Builder
     {
         return $this->baseSubjectQuery()
             ->whereHas('directoryPrivacySetting', fn(Builder $setting) => $setting
                 ->where('scope', DirectoryVisibilityScope::ParticipatingLodges));
-    }
-
-    public function visibleQuery(Lodge $lodge, DirectoryAudience $audience): Builder
-    {
-        return $this->withProjectionRelationships(
-            $audience === DirectoryAudience::OwnLodge
-                ? $this->ownLodgeQuery($lodge)
-                : $this->participatingLodgesQuery(),
-            $lodge,
-            $audience,
-        );
     }
 
     public function findVisible(Lodge $lodge, Person $person, DirectoryAudience $audience): ?Person
@@ -102,72 +131,6 @@ class DirectoryAccess
             ->orderBy('id')
             ->paginate($perPage)
             ->through(fn(Person $person) => $this->project($person, $lodge, $audience));
-    }
-
-    public function project(Person $person, Lodge $lodge, DirectoryAudience $audience): array
-    {
-        $privacy = $person->directoryPrivacySetting;
-        $showEmail = (bool)$privacy?->show_email;
-        $showPhone = (bool)$privacy?->show_phone;
-        $showAddress = (bool)$privacy?->show_address;
-        $showDegree = (bool)$privacy?->show_degree;
-
-        return [
-            'id' => $person->id,
-            'display_name' => $person->display_name,
-            'email' => $showEmail ? $person->email : null,
-            'phone' => $showPhone ? $person->phone : null,
-            'address' => $showAddress ? [
-                'line_1' => $person->mailing_address_line_1,
-                'line_2' => $person->mailing_address_line_2,
-                'city' => $person->mailing_city,
-                'state' => $person->mailing_state,
-                'postal_code' => $person->mailing_postal_code,
-            ] : null,
-            'degree' => $showDegree ? $this->degreeName($person, $lodge, $audience) : null,
-            'profile_photo_url' => $privacy?->show_profile_photo
-            && $person->profile_photo_status === 'ready'
-            && $person->profile_photo_derivative_path
-                ? route('lodges.directory.photo', ['lodge' => $lodge, 'person' => $person, 'audience' => $audience->value])
-                : null,
-            'affiliations' => $audience === DirectoryAudience::ParticipatingLodges
-                ? $person->memberships->map(fn (Membership $membership) => [
-                    'id' => $membership->lodge->id,
-                    'name' => $membership->lodge->name,
-                    'number' => $membership->lodge->number,
-                    'slug' => $membership->lodge->slug,
-                ])->values()->all()
-                : [],
-        ];
-    }
-
-    private function baseSubjectQuery(): Builder
-    {
-        return Person::query()
-            ->whereNull('merged_at')
-            ->where('is_deceased', false)
-            ->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships));
-    }
-
-    private function activeMembershipQuery(Builder|Relation $query, ?Lodge $lodge = null): Builder|Relation
-    {
-        return $query->whereNull('end_date')
-            ->whereHas('status', fn(Builder $status) => $status->where('key', 'active'))
-            ->whereHas('lodge', fn(Builder $membershipLodge) => $membershipLodge->where('status', LodgeStatus::Active))
-            ->when($lodge, fn(Builder $memberships) => $memberships->where('lodge_id', $lodge->id));
-    }
-
-    private function withProjectionRelationships(Builder $query, Lodge $lodge, DirectoryAudience $audience): Builder
-    {
-        return $query->with([
-            'directoryPrivacySetting',
-            'memberships' => function (Relation $memberships) use ($lodge, $audience) {
-                $this->activeMembershipQuery(
-                    $memberships,
-                    $audience === DirectoryAudience::OwnLodge ? $lodge : null,
-                )->with(['degree', 'lodge:id,name,number,slug']);
-            },
-        ]);
     }
 
     private function applySearch(Builder $people, string $query): void
@@ -208,18 +171,6 @@ class DirectoryAccess
         $people->where($this->highestActiveDegreeIdQuery(), '=', $degreeId);
     }
 
-    private function applyGroupFilter(Builder $people, string $group): void
-    {
-        $groupId = \App\Models\LodgeGroup::query()->active()
-            ->where(fn (Builder $groups) => $groups->where('slug', $group)->orWhere('id', is_numeric($group) ? (int) $group : 0))
-            ->value('id');
-        if (! $groupId) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['group' => 'Select an active lodge group.']);
-        }
-        $people->whereHas('memberships', fn (Builder $memberships) => $this->activeMembershipQuery($memberships)
-            ->whereHas('lodge.lodgeGroups', fn (Builder $groups) => $groups->whereKey($groupId)));
-    }
-
     private function highestActiveDegreeIdQuery(): Builder
     {
         return Membership::query()->select('memberships.masonic_degree_id')
@@ -233,6 +184,55 @@ class DirectoryAccess
             ->orderByDesc('masonic_degrees.sort_order')
             ->orderByDesc('memberships.masonic_degree_id')
             ->limit(1);
+    }
+
+    private function applyGroupFilter(Builder $people, string $group): void
+    {
+        $groupId = \App\Models\LodgeGroup::query()->active()
+            ->where(fn(Builder $groups) => $groups->where('slug', $group)->orWhere('id', is_numeric($group) ? (int)$group : 0))
+            ->value('id');
+        if (!$groupId) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['group' => 'Select an active lodge group.']);
+        }
+        $people->whereHas('memberships', fn(Builder $memberships) => $this->activeMembershipQuery($memberships)
+            ->whereHas('lodge.lodgeGroups', fn(Builder $groups) => $groups->whereKey($groupId)));
+    }
+
+    public function project(Person $person, Lodge $lodge, DirectoryAudience $audience): array
+    {
+        $privacy = $person->directoryPrivacySetting;
+        $showEmail = (bool)$privacy?->show_email;
+        $showPhone = (bool)$privacy?->show_phone;
+        $showAddress = (bool)$privacy?->show_address;
+        $showDegree = (bool)$privacy?->show_degree;
+
+        return [
+            'id' => $person->id,
+            'display_name' => $person->display_name,
+            'email' => $showEmail ? $person->email : null,
+            'phone' => $showPhone ? $person->phone : null,
+            'address' => $showAddress ? [
+                'line_1' => $person->mailing_address_line_1,
+                'line_2' => $person->mailing_address_line_2,
+                'city' => $person->mailing_city,
+                'state' => $person->mailing_state,
+                'postal_code' => $person->mailing_postal_code,
+            ] : null,
+            'degree' => $showDegree ? $this->degreeName($person, $lodge, $audience) : null,
+            'profile_photo_url' => $privacy?->show_profile_photo
+            && $person->profile_photo_status === 'ready'
+            && $person->profile_photo_derivative_path
+                ? route('lodges.directory.photo', ['lodge' => $lodge, 'person' => $person, 'audience' => $audience->value])
+                : null,
+            'affiliations' => $audience === DirectoryAudience::ParticipatingLodges
+                ? $person->memberships->map(fn(Membership $membership) => [
+                    'id' => $membership->lodge->id,
+                    'name' => $membership->lodge->name,
+                    'number' => $membership->lodge->number,
+                    'slug' => $membership->lodge->slug,
+                ])->values()->all()
+                : [],
+        ];
     }
 
     private function degreeName(Person $person, Lodge $lodge, DirectoryAudience $audience): ?string

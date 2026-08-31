@@ -1,7 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import LodgeForm from "../platform/LodgeForm.vue";
-defineOptions({ layout: AppLayout });
+
+defineOptions({layout: AppLayout});
 defineProps<{
     lodge: any;
     canManageEvents: boolean;
@@ -12,5 +13,5 @@ defineProps<{
 }>();
 </script>
 <template>
-    <LodgeForm :lodge="lodge" :action="`/lodges/${lodge.id}/settings`"/>
+    <LodgeForm :action="`/lodges/${lodge.id}/settings`" :lodge="lodge"/>
 </template>

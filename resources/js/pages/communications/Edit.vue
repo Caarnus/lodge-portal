@@ -1,9 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: any;
     communication: any;
@@ -38,18 +39,18 @@ const send = () => {
 };
 </script>
 <template>
-    <Head :title="communication.subject" />
+    <Head :title="communication.subject"/>
     <main class="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
         <PageHeader
-            :title="
-                communication.status === 'draft'
-                    ? 'Edit message'
-                    : communication.subject
-            "
             :description="
                 communication.status === 'draft'
                     ? 'Update the message and its recipients.'
                     : 'Sent messages are preserved for the archive.'
+            "
+            :title="
+                communication.status === 'draft'
+                    ? 'Edit message'
+                    : communication.subject
             "
         >
             <template #actions>
@@ -71,12 +72,12 @@ const send = () => {
             "
         >
             <label class="field-label"
-                >Subject<input
-                    v-model="form.subject"
-                    required
-                    class="field-input"
+            >Subject<input
+                v-model="form.subject"
+                class="field-input"
+                required
             /></label>
-            <RichTextField v-model="form.body_html" />
+            <RichTextField v-model="form.body_html"/>
             <fieldset class="grid gap-3 border-t pt-4">
                 <legend class="font-semibold">Recipients</legend>
                 <select v-model="form.audience_mode" class="field-input">
@@ -88,69 +89,69 @@ const send = () => {
                 </select>
                 <template v-if="form.audience_mode === 'filtered'">
                     <label class="field-label"
-                        >Degrees<select
-                            v-model="form.degree_keys"
-                            multiple
-                            class="field-input"
+                    >Degrees<select
+                        v-model="form.degree_keys"
+                        class="field-input"
+                        multiple
+                    >
+                        <option
+                            v-for="degree in degrees"
+                            :key="degree"
+                            :value="degree"
                         >
-                            <option
-                                v-for="degree in degrees"
-                                :key="degree"
-                                :value="degree"
-                            >
-                                {{ degree }}
-                            </option>
-                        </select></label
+                            {{ degree }}
+                        </option>
+                    </select></label
                     >
                     <label class="field-label"
-                        >Membership statuses<select
-                            v-model="form.membership_status_keys"
-                            multiple
-                            class="field-input"
+                    >Membership statuses<select
+                        v-model="form.membership_status_keys"
+                        class="field-input"
+                        multiple
+                    >
+                        <option
+                            v-for="status in statuses"
+                            :key="status"
+                            :value="status"
                         >
-                            <option
-                                v-for="status in statuses"
-                                :key="status"
-                                :value="status"
-                            >
-                                {{ status }}
-                            </option>
-                        </select></label
+                            {{ status }}
+                        </option>
+                    </select></label
                     >
                 </template>
                 <template v-if="form.audience_mode === 'selected'">
                     <label class="field-label"
-                        >Members<select
-                            v-model="form.membership_ids"
-                            multiple
-                            class="field-input"
+                    >Members<select
+                        v-model="form.membership_ids"
+                        class="field-input"
+                        multiple
+                    >
+                        <option
+                            v-for="membership in memberships"
+                            :key="membership.id"
+                            :value="membership.id"
                         >
-                            <option
-                                v-for="membership in memberships"
-                                :key="membership.id"
-                                :value="membership.id"
-                            >
-                                {{ membership.person.display_name }} —
-                                {{ membership.degree?.name }} /
-                                {{ membership.status?.name }}
-                            </option>
-                        </select></label
+                            {{ membership.person.display_name }} —
+                            {{ membership.degree?.name }} /
+                            {{ membership.status?.name }}
+                        </option>
+                    </select></label
                     >
                     <label class="field-label"
-                        >Relations<select
-                            v-model="form.relation_person_ids"
-                            multiple
-                            class="field-input"
+                    >Relations<select
+                        v-model="form.relation_person_ids"
+                        class="field-input"
+                        multiple
+                    >
+                        <option
+                            v-for="relation in relations"
+                            :key="relation.person_id"
+                            :value="relation.person_id"
                         >
-                            <option
-                                v-for="relation in relations"
-                                :key="relation.person_id"
-                                :value="relation.person_id"
-                            >
-                                {{ relation.name }} — {{ relation.type }} of
-                                {{ relation.related_to }}
-                            </option>
-                        </select></label
+                            {{ relation.name }} — {{ relation.type }} of
+                            {{ relation.related_to }}
+                        </option>
+                    </select></label
                     >
                 </template>
             </fieldset>

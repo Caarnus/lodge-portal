@@ -1,11 +1,11 @@
-<script setup lang="ts">
-import { useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+<script lang="ts" setup>
+import {useForm} from "@inertiajs/vue3";
+import {ref} from "vue";
 
 // Components
 import HeadingSmall from "@/components/HeadingSmall.vue";
 import InputError from "@/components/InputError.vue";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogClose,
@@ -16,8 +16,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 
 const passwordInput = ref<HTMLInputElement | null>(null);
 
@@ -45,8 +45,8 @@ const closeModal = () => {
 <template>
     <div class="space-y-6">
         <HeadingSmall
-            title="Delete account"
             description="Delete your account and all of its resources"
+            title="Delete account"
         />
         <div
             class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
@@ -65,8 +65,9 @@ const closeModal = () => {
                     <form class="space-y-6" @submit="deleteUser">
                         <DialogHeader class="space-y-3">
                             <DialogTitle
-                                >Are you sure you want to delete your
-                                account?</DialogTitle
+                            >Are you sure you want to delete your
+                                account?
+                            </DialogTitle
                             >
                             <DialogDescription>
                                 Once your account is deleted, all of its
@@ -78,18 +79,18 @@ const closeModal = () => {
                         </DialogHeader>
 
                         <div class="grid gap-2">
-                            <Label for="password" class="sr-only"
-                                >Password</Label
+                            <Label class="sr-only" for="password"
+                            >Password</Label
                             >
                             <Input
                                 id="password"
-                                type="password"
-                                name="password"
                                 ref="passwordInput"
                                 v-model="form.password"
+                                name="password"
                                 placeholder="Password"
+                                type="password"
                             />
-                            <InputError :message="form.errors.password" />
+                            <InputError :message="form.errors.password"/>
                         </div>
 
                         <DialogFooter>
@@ -100,8 +101,8 @@ const closeModal = () => {
                             </DialogClose>
 
                             <Button
-                                variant="destructive"
                                 :disabled="form.processing"
+                                variant="destructive"
                             >
                                 <button type="submit">Delete account</button>
                             </Button>

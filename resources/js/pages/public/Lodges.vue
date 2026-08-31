@@ -1,10 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppearanceTabs from "@/components/AppearanceTabs.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Head, Link, router, useForm, usePage } from "@inertiajs/vue3";
-import type { SharedData } from "@/types";
+import {Badge} from "@/components/ui/badge";
+import {Card, CardContent} from "@/components/ui/card";
+import {Head, Link, router, useForm, usePage} from "@inertiajs/vue3";
+import type {SharedData} from "@/types";
 
 type Group = { id: number; name: string; slug: string };
 type GroupType = { id: number; key: string; name: string };
@@ -55,33 +55,38 @@ const search = () =>
 </script>
 
 <template>
-    <Head title="WorkingTools lodges" />
+    <Head title="WorkingTools lodges"/>
     <main class="min-h-dvh bg-background px-5 py-8 text-foreground sm:py-12">
         <div class="mx-auto max-w-6xl">
             <header class="flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <Link href="/" class="text-lg font-semibold"
-                        >WorkingTools lodges</Link
-                    ><Link href="/events" class="text-sm underline"
-                        >Events</Link
+                    <Link class="text-lg font-semibold" href="/"
+                    >WorkingTools lodges
+                    </Link
+                    >
+                    <Link class="text-sm underline" href="/events"
+                    >Events
+                    </Link
                     >
                 </div>
                 <div class="flex items-center gap-3">
-                    <AppearanceTabs compact /><Link
+                    <AppearanceTabs compact/>
+                    <Link
                         :href="
                             page.props.auth.user
                                 ? route('dashboard')
                                 : route('login')
                         "
                         class="rounded-md border bg-background px-3 py-2 text-sm font-medium"
-                        >{{ page.props.auth.user ? "Portal" : "Log in" }}</Link
+                    >{{ page.props.auth.user ? "Portal" : "Log in" }}
+                    </Link
                     >
                 </div>
             </header>
             <section class="py-10 sm:py-14">
                 <PageHeader
-                    title="Find a WorkingTools lodge"
                     description="Browse every active lodge. Meeting details and published websites appear when available."
+                    title="Find a WorkingTools lodge"
                 />
             </section>
             <form
@@ -90,20 +95,20 @@ const search = () =>
             >
                 <input
                     v-model="filters.query"
+                    aria-label="Lodge name or number"
                     class="field-input"
                     placeholder="Lodge name or number"
-                    aria-label="Lodge name or number"
                 />
                 <input
                     v-model="filters.city"
+                    aria-label="City"
                     class="field-input"
                     placeholder="City"
-                    aria-label="City"
                 />
                 <select
                     v-model="filters.group"
-                    class="field-input"
                     aria-label="Lodge group"
+                    class="field-input"
                 >
                     <option value="">All public groups</option>
                     <option
@@ -116,8 +121,8 @@ const search = () =>
                 </select>
                 <select
                     v-model="filters.group_type"
-                    class="field-input"
                     aria-label="Lodge group type"
+                    class="field-input"
                 >
                     <option value="">All group types</option>
                     <option
@@ -128,7 +133,7 @@ const search = () =>
                         {{ type.name }}
                     </option>
                 </select>
-                <button class="primary-button" :disabled="filters.processing">
+                <button :disabled="filters.processing" class="primary-button">
                     Search
                 </button>
             </form>
@@ -140,7 +145,8 @@ const search = () =>
                     v-for="lodge in props.lodges.data"
                     :key="lodge.id"
                     class="shadow-sm"
-                    ><CardContent class="p-5">
+                >
+                    <CardContent class="p-5">
                         <div class="flex gap-4">
                             <img
                                 v-if="lodge.logo_url"
@@ -150,9 +156,12 @@ const search = () =>
                             />
                             <div>
                                 <h2 class="text-lg font-semibold">
-                                    {{ lodge.name
-                                    }}<template v-if="lodge.number">
-                                        No. {{ lodge.number }}</template
+                                    {{
+                                        lodge.name
+                                    }}
+                                    <template v-if="lodge.number">
+                                        No. {{ lodge.number }}
+                                    </template
                                     >
                                 </h2>
                                 <p class="text-sm text-muted-foreground">
@@ -176,9 +185,11 @@ const search = () =>
                                     <a
                                         :href="`mailto:${lodge.public_email}`"
                                         class="underline"
-                                        >{{ lodge.public_email }}</a
-                                    ><template v-if="lodge.public_phone">
-                                        · {{ lodge.public_phone }}</template
+                                    >{{ lodge.public_email }}</a
+                                    >
+                                    <template v-if="lodge.public_phone">
+                                        · {{ lodge.public_phone }}
+                                    </template
                                     >
                                 </dd>
                             </div>
@@ -188,21 +199,25 @@ const search = () =>
                                 v-for="group in lodge.groups"
                                 :key="group.id"
                                 variant="secondary"
-                                ><Link :href="`/groups/${group.slug}`">{{
-                                    group.name
-                                }}</Link></Badge
+                            >
+                                <Link :href="`/groups/${group.slug}`">{{
+                                        group.name
+                                    }}
+                                </Link>
+                            </Badge
                             >
                         </div>
                         <a
                             v-if="lodge.homepage_url"
                             :href="lodge.homepage_url"
                             class="mt-4 inline-block text-sm font-medium underline"
-                            >Visit lodge website</a
+                        >Visit lodge website</a
                         >
                         <p v-else class="mt-4 text-sm text-muted-foreground">
                             Website not published.
                         </p>
-                    </CardContent></Card
+                    </CardContent>
+                </Card
                 >
             </section>
             <p
@@ -213,18 +228,18 @@ const search = () =>
             </p>
             <nav
                 v-if="props.lodges.last_page > 1"
-                class="mt-6 flex flex-wrap gap-2"
                 aria-label="Lodge directory pages"
+                class="mt-6 flex flex-wrap gap-2"
             >
                 <a
                     v-for="link in props.lodges.links"
                     :key="link.label"
-                    :href="link.url ?? '#'"
                     :class="[
                         'rounded-md border border-border/80 bg-card px-3 py-2 text-sm',
                         link.active ? 'bg-primary text-primary-foreground' : '',
                         !link.url ? 'pointer-events-none opacity-50' : '',
                     ]"
+                    :href="link.url ?? '#'"
                     v-html="link.label"
                 />
             </nav>

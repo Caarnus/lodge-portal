@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLogoIcon from "@/components/AppLogoIcon.vue";
-import type { SharedData } from "@/types";
-import { Link, usePage } from "@inertiajs/vue3";
+import type {SharedData} from "@/types";
+import {Link, usePage} from "@inertiajs/vue3";
 
 const page = usePage<SharedData>();
 const name = page.props.name;
@@ -20,7 +20,7 @@ defineProps<{
         <div
             class="relative hidden h-full flex-col bg-primary p-10 text-primary-foreground lg:flex"
         >
-            <div class="absolute inset-0 bg-primary/95" />
+            <div class="absolute inset-0 bg-primary/95"/>
             <Link
                 :href="route('home')"
                 class="relative z-20 flex items-center text-lg font-medium"
@@ -44,14 +44,14 @@ defineProps<{
                 class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]"
             >
                 <div class="flex flex-col space-y-2 text-center">
-                    <h1 class="text-xl font-medium tracking-tight" v-if="title">
+                    <h1 v-if="title" class="text-xl font-medium tracking-tight">
                         {{ title }}
                     </h1>
-                    <p class="text-sm text-muted-foreground" v-if="description">
+                    <p v-if="description" class="text-sm text-muted-foreground">
                         {{ description }}
                     </p>
                 </div>
-                <slot />
+                <slot/>
             </div>
         </div>
     </div>

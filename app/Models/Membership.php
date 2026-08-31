@@ -13,17 +13,16 @@ class Membership extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
+    protected static function booted(): void
     {
-        return [
-            'is_award_of_gold' => 'boolean',
-            'entered_apprentice_date' => 'date',
-            'fellow_craft_date' => 'date',
-            'master_mason_date' => 'date',
-            'affiliation_date' => 'date',
-            'demit_withdrawal_date' => 'date',
-            'end_date' => 'date',
-        ];
+        static::created(fn(Membership $membership) => $membership->communicationPreference()->firstOrCreate([
+            'lodge_id' => $membership->lodge_id,
+        ]));
+    }
+
+    public function communicationPreference()
+    {
+        return $this->hasOne(MembershipCommunicationPreference::class);
     }
 
     public function lodge()
@@ -56,11 +55,6 @@ class Membership extends Model
         return $this->hasMany(OfficerAssignment::class);
     }
 
-    public function communicationPreference()
-    {
-        return $this->hasOne(MembershipCommunicationPreference::class);
-    }
-
     public function communicationDeliveries()
     {
         return $this->hasMany(CommunicationDelivery::class);
@@ -71,10 +65,16 @@ class Membership extends Model
         return $this->end_date === null && $this->status?->key === 'active';
     }
 
-    protected static function booted(): void
+    protected function casts(): array
     {
-        static::created(fn(Membership $membership) => $membership->communicationPreference()->firstOrCreate([
-            'lodge_id' => $membership->lodge_id,
-        ]));
+        return [
+            'is_award_of_gold' => 'boolean',
+            'entered_apprentice_date' => 'date',
+            'fellow_craft_date' => 'date',
+            'master_mason_date' => 'date',
+            'affiliation_date' => 'date',
+            'demit_withdrawal_date' => 'date',
+            'end_date' => 'date',
+        ];
     }
 }

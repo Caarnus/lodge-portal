@@ -1,19 +1,18 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import type { PrimitiveProps } from "radix-vue";
-import { Primitive } from "radix-vue";
-import type { HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import type {PrimitiveProps} from "radix-vue";
+import {Primitive} from "radix-vue";
+import type {HTMLAttributes} from "vue";
 
 const props = defineProps<
     PrimitiveProps & {
-        class?: HTMLAttributes["class"];
-    }
+    class?: HTMLAttributes["class"];
+}
 >();
 </script>
 
 <template>
     <Primitive
-        data-sidebar="group-action"
         :as="as"
         :as-child="asChild"
         :class="
@@ -25,7 +24,8 @@ const props = defineProps<
                 props.class,
             )
         "
+        data-sidebar="group-action"
     >
-        <slot />
+        <slot/>
     </Primitive>
 </template>

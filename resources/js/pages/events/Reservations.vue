@@ -1,12 +1,12 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { formatLocalTimestamp } from "@/utils/date";
-import { Link } from "@inertiajs/vue3";
-import { Search, X } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import {formatLocalTimestamp} from "@/utils/date";
+import {Link} from "@inertiajs/vue3";
+import {Search, X} from "lucide-vue-next";
+import {computed, ref} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: { id: number; name: string };
     event: { id: number; title: string };
@@ -59,8 +59,8 @@ const sortLabel = (column: typeof sort.value) =>
 <template>
     <main class="mx-auto max-w-6xl space-y-5 p-4 md:p-6">
         <PageHeader
-            :title="`Reservations: ${event.title}`"
             :description="formatLocalTimestamp(occurrence.starts_at)"
+            :title="`Reservations: ${event.title}`"
         >
             <template #actions>
                 <Link
@@ -76,44 +76,45 @@ const sortLabel = (column: typeof sort.value) =>
                 <label class="field-label">
                     <span class="sr-only">Search reservations</span>
                     <span class="relative"
-                        ><Search
-                            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                            aria-hidden="true" /><input
-                            v-model="search"
-                            type="search"
-                            class="field-input pl-9"
-                            placeholder="Search name, email, or phone"
+                    ><Search
+                        aria-hidden="true"
+                        class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><input
+                        v-model="search"
+                        class="field-input pl-9"
+                        placeholder="Search name, email, or phone"
+                        type="search"
                     /></span>
                 </label>
                 <label class="field-label"
-                    ><span class="sr-only">Status</span
-                    ><select v-model="status" class="field-input">
-                        <option value="">All statuses</option>
-                        <option
-                            v-for="value in [
+                ><span class="sr-only">Status</span
+                ><select v-model="status" class="field-input">
+                    <option value="">All statuses</option>
+                    <option
+                        v-for="value in [
                                 ...new Set(
                                     reservations.data.map(
                                         (item) => item.status,
                                     ),
                                 ),
                             ]"
-                            :key="value"
-                            :value="value"
-                        >
-                            {{ value }}
-                        </option>
-                    </select></label
+                        :key="value"
+                        :value="value"
+                    >
+                        {{ value }}
+                    </option>
+                </select></label
                 >
                 <button
                     v-if="search || status"
-                    type="button"
                     class="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                    type="button"
                     @click="
                         search = '';
                         status = '';
                     "
                 >
-                    <X class="size-4" aria-hidden="true" /> Clear
+                    <X aria-hidden="true" class="size-4"/>
+                    Clear
                 </button>
             </div>
         </section>
@@ -122,64 +123,64 @@ const sortLabel = (column: typeof sort.value) =>
         >
             <table class="w-full table-fixed text-left text-sm">
                 <thead class="bg-muted/50">
-                    <tr>
-                        <th class="w-[22%] px-4 py-3">
-                            <button
-                                type="button"
-                                class="font-medium hover:text-primary"
-                                @click="toggleSort('name')"
-                            >
-                                Name{{ sortLabel("name") }}
-                            </button>
-                        </th>
-                        <th class="w-[25%] px-4 py-3 font-medium">Email</th>
-                        <th class="w-[18%] px-4 py-3 font-medium">Phone</th>
-                        <th class="w-[15%] px-4 py-3">
-                            <button
-                                type="button"
-                                class="font-medium hover:text-primary"
-                                @click="toggleSort('party_size')"
-                            >
-                                People{{ sortLabel("party_size") }}
-                            </button>
-                        </th>
-                        <th class="w-[20%] px-4 py-3">
-                            <button
-                                type="button"
-                                class="font-medium hover:text-primary"
-                                @click="toggleSort('status')"
-                            >
-                                Status{{ sortLabel("status") }}
-                            </button>
-                        </th>
-                    </tr>
+                <tr>
+                    <th class="w-[22%] px-4 py-3">
+                        <button
+                            class="font-medium hover:text-primary"
+                            type="button"
+                            @click="toggleSort('name')"
+                        >
+                            Name{{ sortLabel("name") }}
+                        </button>
+                    </th>
+                    <th class="w-[25%] px-4 py-3 font-medium">Email</th>
+                    <th class="w-[18%] px-4 py-3 font-medium">Phone</th>
+                    <th class="w-[15%] px-4 py-3">
+                        <button
+                            class="font-medium hover:text-primary"
+                            type="button"
+                            @click="toggleSort('party_size')"
+                        >
+                            People{{ sortLabel("party_size") }}
+                        </button>
+                    </th>
+                    <th class="w-[20%] px-4 py-3">
+                        <button
+                            class="font-medium hover:text-primary"
+                            type="button"
+                            @click="toggleSort('status')"
+                        >
+                            Status{{ sortLabel("status") }}
+                        </button>
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        v-for="reservation in rows"
-                        :key="reservation.id"
-                        class="border-t border-border"
+                <tr
+                    v-for="reservation in rows"
+                    :key="reservation.id"
+                    class="border-t border-border"
+                >
+                    <td class="truncate px-4 py-3 font-medium">
+                        {{ reservation.name }}
+                    </td>
+                    <td class="truncate px-4 py-3">
+                        {{ reservation.email }}
+                    </td>
+                    <td class="px-4 py-3">{{ reservation.phone }}</td>
+                    <td class="px-4 py-3">{{ reservation.party_size }}</td>
+                    <td class="px-4 py-3 capitalize">
+                        {{ reservation.status }}
+                    </td>
+                </tr>
+                <tr v-if="!rows.length">
+                    <td
+                        class="px-4 py-8 text-center text-muted-foreground"
+                        colspan="5"
                     >
-                        <td class="truncate px-4 py-3 font-medium">
-                            {{ reservation.name }}
-                        </td>
-                        <td class="truncate px-4 py-3">
-                            {{ reservation.email }}
-                        </td>
-                        <td class="px-4 py-3">{{ reservation.phone }}</td>
-                        <td class="px-4 py-3">{{ reservation.party_size }}</td>
-                        <td class="px-4 py-3 capitalize">
-                            {{ reservation.status }}
-                        </td>
-                    </tr>
-                    <tr v-if="!rows.length">
-                        <td
-                            colspan="5"
-                            class="px-4 py-8 text-center text-muted-foreground"
-                        >
-                            No reservations match these filters.
-                        </td>
-                    </tr>
+                        No reservations match these filters.
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -192,8 +193,8 @@ const sortLabel = (column: typeof sort.value) =>
                 <div class="flex items-start justify-between gap-3">
                     <h2 class="font-medium">{{ reservation.name }}</h2>
                     <span class="text-sm capitalize text-muted-foreground">{{
-                        reservation.status
-                    }}</span>
+                            reservation.status
+                        }}</span>
                 </div>
                 <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                     <div class="col-span-2">

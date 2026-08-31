@@ -13,11 +13,6 @@ class MembershipCommunicationPreference extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['receives_lodge_email' => 'boolean', 'receives_print_newsletter' => 'boolean'];
-    }
-
     public function membership()
     {
         return $this->belongsTo(Membership::class);
@@ -31,5 +26,10 @@ class MembershipCommunicationPreference extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    protected function casts(): array
+    {
+        return ['receives_lodge_email' => 'boolean', 'receives_print_newsletter' => 'boolean'];
     }
 }

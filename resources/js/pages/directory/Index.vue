@@ -1,15 +1,15 @@
-<script setup lang="ts">
-import { Head, Link, router } from "@inertiajs/vue3";
-import { computed, ref, watch } from "vue";
+<script lang="ts" setup>
+import {Head, Link, router} from "@inertiajs/vue3";
+import {computed, ref, watch} from "vue";
 
 import PageHeader from "@/components/PageHeader.vue";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import AppLayout from "@/layouts/AppLayout.vue";
-import type { BreadcrumbItem } from "@/types";
+import type {BreadcrumbItem} from "@/types";
 
 interface Person {
     id: number;
@@ -60,7 +60,7 @@ const degree = ref(props.filters.degree ? String(props.filters.degree) : "");
 const group = ref(props.filters.group);
 let debounce: ReturnType<typeof setTimeout> | undefined;
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: "Directory", href: `/lodges/${props.lodge.id}/directory` },
+    {title: "Directory", href: `/lodges/${props.lodge.id}/directory`},
 ];
 const countText = computed(
     () =>
@@ -80,7 +80,7 @@ const visit = (page?: number) => {
                     : undefined,
             page,
         },
-        { preserveState: true, preserveScroll: true, replace: true },
+        {preserveState: true, preserveScroll: true, replace: true},
     );
 };
 
@@ -92,7 +92,7 @@ watch([query, audience, degree, group], () => {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`${lodge.name} directory`" />
+        <Head :title="`${lodge.name} directory`"/>
         <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
             <PageHeader
                 :title="`${lodge.name} directory`"
@@ -106,11 +106,11 @@ watch([query, audience, degree, group], () => {
                 <div class="grid gap-2">
                     <Label for="directory-search">Search members</Label
                     ><Input
-                        id="directory-search"
-                        v-model="query"
-                        autocomplete="off"
-                        placeholder="Name, shared email, or shared phone"
-                    />
+                    id="directory-search"
+                    v-model="query"
+                    autocomplete="off"
+                    placeholder="Name, shared email, or shared phone"
+                />
                 </div>
                 <div
                     v-if="audience === 'participating_lodges'"
@@ -118,53 +118,53 @@ watch([query, audience, degree, group], () => {
                 >
                     <Label for="directory-group">Lodge group</Label
                     ><select
-                        id="directory-group"
-                        v-model="group"
-                        class="field-input"
+                    id="directory-group"
+                    v-model="group"
+                    class="field-input"
+                >
+                    <option value="">All active groups</option>
+                    <option
+                        v-for="item in groups"
+                        :key="item.id"
+                        :value="item.slug"
                     >
-                        <option value="">All active groups</option>
-                        <option
-                            v-for="item in groups"
-                            :key="item.id"
-                            :value="item.slug"
-                        >
-                            {{ item.name }}
-                        </option>
-                    </select>
+                        {{ item.name }}
+                    </option>
+                </select>
                 </div>
                 <div class="grid gap-2">
                     <Label for="directory-audience">Audience</Label
                     ><select
-                        id="directory-audience"
-                        v-model="audience"
-                        class="field-input"
-                    >
-                        <option value="own_lodge">My lodge</option>
-                        <option value="participating_lodges">
-                            WorkingTools lodges
-                        </option>
-                    </select>
+                    id="directory-audience"
+                    v-model="audience"
+                    class="field-input"
+                >
+                    <option value="own_lodge">My lodge</option>
+                    <option value="participating_lodges">
+                        WorkingTools lodges
+                    </option>
+                </select>
                 </div>
                 <div class="grid gap-2">
                     <Label for="directory-degree">Degree</Label
                     ><select
-                        id="directory-degree"
-                        v-model="degree"
-                        class="field-input"
+                    id="directory-degree"
+                    v-model="degree"
+                    class="field-input"
+                >
+                    <option value="">All degrees</option>
+                    <option
+                        v-for="item in degrees"
+                        :key="item.id"
+                        :value="String(item.id)"
                     >
-                        <option value="">All degrees</option>
-                        <option
-                            v-for="item in degrees"
-                            :key="item.id"
-                            :value="String(item.id)"
-                        >
-                            {{ item.name }}
-                        </option>
-                    </select>
+                        {{ item.name }}
+                    </option>
+                </select>
                 </div>
             </form>
 
-            <p class="text-sm text-muted-foreground" aria-live="polite">
+            <p aria-live="polite" class="text-sm text-muted-foreground">
                 {{ countText }}
             </p>
             <div
@@ -180,14 +180,14 @@ watch([query, audience, degree, group], () => {
                         <div class="flex gap-3">
                             <img
                                 v-if="person.profile_photo_url"
-                                :src="person.profile_photo_url"
                                 :alt="`${person.display_name} profile photo`"
+                                :src="person.profile_photo_url"
                                 class="size-12 rounded-full object-cover"
                             />
                             <div
                                 v-else
-                                class="flex size-12 items-center justify-center rounded-full bg-muted text-sm"
                                 aria-hidden="true"
+                                class="flex size-12 items-center justify-center rounded-full bg-muted text-sm"
                             >
                                 {{ person.display_name.slice(0, 1) }}
                             </div>
@@ -202,7 +202,8 @@ watch([query, audience, degree, group], () => {
                                             })
                                         "
                                         class="underline-offset-4 hover:underline"
-                                        >{{ person.display_name }}</Link
+                                    >{{ person.display_name }}
+                                    </Link
                                     >
                                 </h2>
                                 <p
@@ -272,22 +273,26 @@ watch([query, audience, degree, group], () => {
             </p>
             <nav
                 v-if="people.last_page > 1"
-                class="flex items-center justify-between"
                 aria-label="Directory pages"
+                class="flex items-center justify-between"
             >
                 <Button
-                    variant="outline"
                     :disabled="!people.prev_page_url"
-                    @click="visit(people.current_page - 1)"
-                    >Previous</Button
-                ><span class="text-sm"
-                    >Page {{ people.current_page }} of
-                    {{ people.last_page }}</span
-                ><Button
                     variant="outline"
+                    @click="visit(people.current_page - 1)"
+                >Previous
+                </Button
+                >
+                <span class="text-sm"
+                >Page {{ people.current_page }} of
+                    {{ people.last_page }}</span
+                >
+                <Button
                     :disabled="!people.next_page_url"
+                    variant="outline"
                     @click="visit(people.current_page + 1)"
-                    >Next</Button
+                >Next
+                </Button
                 >
             </nav>
         </main>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     Dialog,
     DialogContent,
@@ -7,7 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { computed, ref, watch } from "vue";
+import {computed, ref, watch} from "vue";
 
 type Frequency = "none" | "daily" | "weekly" | "monthly" | "yearly";
 type EndMode = "never" | "count" | "until";
@@ -27,13 +27,13 @@ const endMode = ref<EndMode>("never");
 const count = ref(12);
 const until = ref("");
 const days = [
-    { key: "MO", label: "Mon" },
-    { key: "TU", label: "Tue" },
-    { key: "WE", label: "Wed" },
-    { key: "TH", label: "Thu" },
-    { key: "FR", label: "Fri" },
-    { key: "SA", label: "Sat" },
-    { key: "SU", label: "Sun" },
+    {key: "MO", label: "Mon"},
+    {key: "TU", label: "Tue"},
+    {key: "WE", label: "Wed"},
+    {key: "TH", label: "Thu"},
+    {key: "FR", label: "Fri"},
+    {key: "SA", label: "Sat"},
+    {key: "SU", label: "Sun"},
 ];
 
 const startDate = computed(() =>
@@ -42,9 +42,9 @@ const startDate = computed(() =>
 const summary = computed(() => {
     if (frequency.value === "none") return "Does not repeat";
     const singular =
-        { daily: "day", weekly: "week", monthly: "month", yearly: "year" }[
+        {daily: "day", weekly: "week", monthly: "month", yearly: "year"}[
             frequency.value
-        ] ?? frequency.value;
+            ] ?? frequency.value;
     const every =
         interval.value === 1
             ? `Every ${singular}`
@@ -53,16 +53,16 @@ const summary = computed(() => {
         frequency.value === "weekly" && weekdays.value.length
             ? ` on ${weekdays.value.map((day) => days.find((item) => item.key === day)?.label).join(", ")}`
             : frequency.value === "monthly" && monthlyMode.value === "day"
-              ? ` on day ${monthDay.value}`
-              : frequency.value === "monthly"
-                ? ` on the ${ordinalLabel(ordinal.value)} ${days.find((day) => day.key === ordinalWeekday.value)?.label}`
-                : "";
+                ? ` on day ${monthDay.value}`
+                : frequency.value === "monthly"
+                    ? ` on the ${ordinalLabel(ordinal.value)} ${days.find((day) => day.key === ordinalWeekday.value)?.label}`
+                    : "";
     const ending =
         endMode.value === "count"
             ? `, ${count.value} times`
             : endMode.value === "until" && until.value
-              ? `, through ${new Date(`${until.value}T00:00:00`).toLocaleDateString()}`
-              : "";
+                ? `, through ${new Date(`${until.value}T00:00:00`).toLocaleDateString()}`
+                : "";
     return `${every}${detail}${ending}`;
 });
 
@@ -137,7 +137,7 @@ const ordinalLabel = (value: string) =>
         "4": "fourth",
         "-1": "last",
     })[value] ?? value;
-watch(() => props.modelValue, parse, { immediate: true });
+watch(() => props.modelValue, parse, {immediate: true});
 watch(open, (value) => {
     if (value) parse();
 });
@@ -152,9 +152,10 @@ watch(frequency, (value) => {
     <div class="space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <span class="text-sm font-medium">Repeats</span
-            ><button
-                type="button"
+            >
+            <button
                 class="cursor-pointer rounded-md border px-3 py-2 text-sm"
+                type="button"
                 @click="open = true"
             >
                 {{ modelValue ? "Edit recurrence" : "Set recurrence" }}
@@ -165,83 +166,90 @@ watch(frequency, (value) => {
         </p>
     </div>
     <Dialog :open="open" @update:open="open = $event"
-        ><DialogContent
+    >
+        <DialogContent
             class="max-h-[calc(100vh-3rem)] max-w-xl overflow-y-auto"
-            ><DialogHeader
-                ><DialogTitle>Build a recurring schedule</DialogTitle
-                ><DialogDescription
-                    >Choose how this event repeats. The schedule follows the
-                    event’s selected time zone.</DialogDescription
-                ></DialogHeader
+        >
+            <DialogHeader
+            >
+                <DialogTitle>Build a recurring schedule
+                </DialogTitle
+                >
+                <DialogDescription
+                >Choose how this event repeats. The schedule follows the
+                    event’s selected time zone.
+                </DialogDescription
+                >
+            </DialogHeader
             >
             <div class="space-y-5 py-3">
                 <label class="block text-sm font-medium"
-                    >Repeat<select
-                        v-model="frequency"
-                        class="mt-1 w-full rounded-md border bg-background p-2"
-                    >
-                        <option value="none">Does not repeat</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Yearly</option>
-                    </select></label
-                ><label
-                    v-if="frequency !== 'none'"
-                    class="block text-sm font-medium"
-                    >Every<input
-                        v-model.number="interval"
-                        type="number"
-                        min="1"
-                        max="99"
-                        class="mt-1 w-28 rounded-md border bg-background p-2"
-                    />
-                    <span class="font-normal">{{ frequency }}</span></label
+                >Repeat<select
+                    v-model="frequency"
+                    class="mt-1 w-full rounded-md border bg-background p-2"
                 >
+                    <option value="none">Does not repeat</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select></label
+                ><label
+                v-if="frequency !== 'none'"
+                class="block text-sm font-medium"
+            >Every<input
+                v-model.number="interval"
+                class="mt-1 w-28 rounded-md border bg-background p-2"
+                max="99"
+                min="1"
+                type="number"
+            />
+                <span class="font-normal">{{ frequency }}</span></label
+            >
                 <div v-if="frequency === 'weekly'">
                     <p class="text-sm font-medium">On these days</p>
                     <div class="mt-2 flex flex-wrap gap-2">
                         <label
                             v-for="day in days"
                             :key="day.key"
-                            class="cursor-pointer rounded-md border px-3 py-2 text-sm"
                             :class="
                                 weekdays.includes(day.key)
                                     ? 'border-primary bg-primary text-primary-foreground'
                                     : ''
                             "
-                            ><input
-                                v-model="weekdays"
-                                :value="day.key"
-                                type="checkbox"
-                                class="sr-only"
-                            />{{ day.label }}</label
+                            class="cursor-pointer rounded-md border px-3 py-2 text-sm"
+                        ><input
+                            v-model="weekdays"
+                            :value="day.key"
+                            class="sr-only"
+                            type="checkbox"
+                        />{{ day.label }}</label
                         >
                     </div>
                 </div>
                 <div v-if="frequency === 'monthly'" class="space-y-3">
                     <label class="flex items-center gap-2 text-sm"
-                        ><input
-                            v-model="monthlyMode"
-                            value="day"
-                            type="radio"
-                        />
+                    ><input
+                        v-model="monthlyMode"
+                        type="radio"
+                        value="day"
+                    />
                         Day of month</label
                     ><input
-                        v-if="monthlyMode === 'day'"
-                        v-model.number="monthDay"
-                        type="number"
-                        min="1"
-                        max="31"
-                        class="w-28 rounded-md border bg-background p-2"
-                    /><label class="flex items-center gap-2 text-sm"
-                        ><input
-                            v-model="monthlyMode"
-                            value="weekday"
-                            type="radio"
-                        />
-                        Ordinal weekday</label
-                    >
+                    v-if="monthlyMode === 'day'"
+                    v-model.number="monthDay"
+                    class="w-28 rounded-md border bg-background p-2"
+                    max="31"
+                    min="1"
+                    type="number"
+                /><label class="flex items-center gap-2 text-sm"
+                ><input
+                    v-model="monthlyMode"
+                    type="radio"
+                    value="weekday"
+                />
+                    Ordinal weekday</label
+                >
                     <div v-if="monthlyMode === 'weekday'" class="flex gap-2">
                         <select
                             v-model="ordinal"
@@ -251,62 +259,69 @@ watch(frequency, (value) => {
                             <option value="2">Second</option>
                             <option value="3">Third</option>
                             <option value="4">Fourth</option>
-                            <option value="-1">Last</option></select
+                            <option value="-1">Last</option>
+                        </select
                         ><select
-                            v-model="ordinalWeekday"
-                            class="rounded-md border bg-background p-2"
+                        v-model="ordinalWeekday"
+                        class="rounded-md border bg-background p-2"
+                    >
+                        <option
+                            v-for="day in days"
+                            :key="day.key"
+                            :value="day.key"
                         >
-                            <option
-                                v-for="day in days"
-                                :key="day.key"
-                                :value="day.key"
-                            >
-                                {{ day.label }}
-                            </option>
-                        </select>
+                            {{ day.label }}
+                        </option>
+                    </select>
                     </div>
                 </div>
                 <div v-if="frequency !== 'none'" class="space-y-2">
                     <p class="text-sm font-medium">Ends</p>
                     <label class="mr-4 text-sm"
-                        ><input v-model="endMode" value="never" type="radio" />
+                    ><input v-model="endMode" type="radio" value="never"/>
                         Never</label
                     ><label class="mr-4 text-sm"
-                        ><input v-model="endMode" value="count" type="radio" />
-                        After</label
-                    ><input
-                        v-if="endMode === 'count'"
-                        v-model.number="count"
-                        type="number"
-                        min="1"
-                        class="ml-2 w-20 rounded-md border bg-background p-2"
-                    /><label class="mr-4 text-sm"
-                        ><input v-model="endMode" value="until" type="radio" />
-                        On date</label
-                    ><input
-                        v-if="endMode === 'until'"
-                        v-model="until"
-                        type="date"
-                        class="mt-2 rounded-md border bg-background p-2"
-                    />
+                ><input v-model="endMode" type="radio" value="count"/>
+                    After</label
+                ><input
+                    v-if="endMode === 'count'"
+                    v-model.number="count"
+                    class="ml-2 w-20 rounded-md border bg-background p-2"
+                    min="1"
+                    type="number"
+                /><label class="mr-4 text-sm"
+                ><input v-model="endMode" type="radio" value="until"/>
+                    On date</label
+                ><input
+                    v-if="endMode === 'until'"
+                    v-model="until"
+                    class="mt-2 rounded-md border bg-background p-2"
+                    type="date"
+                />
                 </div>
                 <p class="rounded-md bg-muted p-3 text-sm">{{ summary }}</p>
             </div>
             <DialogFooter
-                ><button
-                    type="button"
+            >
+                <button
                     class="cursor-pointer rounded-md border px-4 py-2"
+                    type="button"
                     @click="open = false"
                 >
-                    Cancel</button
-                ><button
-                    type="button"
+                    Cancel
+                </button
+                >
+                <button
                     class="cursor-pointer rounded-md bg-primary px-4 py-2 text-primary-foreground"
+                    type="button"
                     @click="apply"
                 >
                     Apply schedule
-                </button></DialogFooter
-            ></DialogContent
-        ></Dialog
+                </button>
+            </DialogFooter
+            >
+        </DialogContent
+        >
+    </Dialog
     >
 </template>

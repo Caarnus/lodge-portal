@@ -35,6 +35,12 @@ class EventVolunteerController extends Controller
         return Inertia::render('events/Volunteers', compact('lodge', 'event', 'occurrence', 'positions', 'members'));
     }
 
+    private function authorize(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence): void
+    {
+        abort_unless($event->lodge_id === $lodge->id && $occurrence->event_id === $event->id && $occurrence->lodge_id === $lodge->id, 404);
+        abort_unless($request->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
     public function store(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence, VolunteerCommitmentService $service, VolunteerEligibility $eligibility)
     {
         $this->authorize($request, $lodge, $event, $occurrence);
@@ -55,11 +61,5 @@ class EventVolunteerController extends Controller
         $service->withdraw($commitment, $request->user(), true);
 
         return back();
-    }
-
-    private function authorize(Request $request, Lodge $lodge, Event $event, EventOccurrence $occurrence): void
-    {
-        abort_unless($event->lodge_id === $lodge->id && $occurrence->event_id === $event->id && $occurrence->lodge_id === $lodge->id, 404);
-        abort_unless($request->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
     }
 }

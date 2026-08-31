@@ -24,6 +24,23 @@ class RruleRecurrenceExpander implements RecurrenceExpander
         return substr($ruleLine, strlen('RRULE:'));
     }
 
+    private function rule(string $rule, CarbonImmutable $startsAt, string $timeZone): RRule
+    {
+        $normalized = trim($rule);
+        $isFullRfcRule = str_starts_with($normalized, 'DTSTART:') || str_contains($normalized, "\nRRULE:");
+        if (!$isFullRfcRule && !str_starts_with($normalized, 'RRULE:')) {
+            $normalized = 'RRULE:' . $normalized;
+        }
+
+        try {
+            return $isFullRfcRule
+                ? new RRule($normalized)
+                : new RRule($normalized, $startsAt->setTimezone(new DateTimeZone($timeZone))->toDateTime());
+        } catch (\Throwable $exception) {
+            throw new InvalidArgumentException('The recurrence rule is invalid.', previous: $exception);
+        }
+    }
+
     public function expand(Event $event, CarbonImmutable $from, CarbonImmutable $through, int $limit = 1000): array
     {
         $startsAt = CarbonImmutable::instance($event->first_starts_at)->setTimezone($event->time_zone);
@@ -53,11 +70,6 @@ class RruleRecurrenceExpander implements RecurrenceExpander
         );
     }
 
-    public function describe(string $rule, CarbonImmutable $startsAt, string $timeZone): string
-    {
-        return $this->rule($rule, $startsAt, $timeZone)->humanReadable();
-    }
-
     private function candidate(CarbonImmutable $localStart, int $duration): OccurrenceCandidate
     {
         return new OccurrenceCandidate(
@@ -68,20 +80,8 @@ class RruleRecurrenceExpander implements RecurrenceExpander
         );
     }
 
-    private function rule(string $rule, CarbonImmutable $startsAt, string $timeZone): RRule
+    public function describe(string $rule, CarbonImmutable $startsAt, string $timeZone): string
     {
-        $normalized = trim($rule);
-        $isFullRfcRule = str_starts_with($normalized, 'DTSTART:') || str_contains($normalized, "\nRRULE:");
-        if (!$isFullRfcRule && !str_starts_with($normalized, 'RRULE:')) {
-            $normalized = 'RRULE:' . $normalized;
-        }
-
-        try {
-            return $isFullRfcRule
-                ? new RRule($normalized)
-                : new RRule($normalized, $startsAt->setTimezone(new DateTimeZone($timeZone))->toDateTime());
-        } catch (\Throwable $exception) {
-            throw new InvalidArgumentException('The recurrence rule is invalid.', previous: $exception);
-        }
+        return $this->rule($rule, $startsAt, $timeZone)->humanReadable();
     }
 }

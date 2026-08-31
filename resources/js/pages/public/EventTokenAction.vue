@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { Head, Link, useForm } from "@inertiajs/vue3";
+<script lang="ts" setup>
+import {Head, Link, useForm} from "@inertiajs/vue3";
 
 const props = defineProps<{
     lodge: { name: string; slug: string; city: string; state: string };
@@ -18,13 +18,14 @@ const action =
 </script>
 
 <template>
-    <Head :title="label" />
+    <Head :title="label"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <main class="mx-auto w-full max-w-lg flex-1 p-6">
             <Link
                 :href="`/l/${lodge.slug}/events`"
                 class="text-sm text-primary underline"
-                >{{ lodge.name }} events</Link
+            >{{ lodge.name }} events
+            </Link
             >
             <section class="mt-6 rounded-xl border bg-card p-6">
                 <h1 class="text-2xl font-semibold">{{ label }}</h1>
@@ -40,11 +41,14 @@ const action =
                         :disabled="form.processing"
                         class="rounded-md bg-destructive px-4 py-2 font-medium text-destructive-foreground"
                     >
-                        Confirm</button
-                    ><Link
+                        Confirm
+                    </button
+                    >
+                    <Link
                         :href="`/l/${lodge.slug}/events`"
                         class="rounded-md border px-4 py-2 font-medium"
-                        >Keep current status</Link
+                    >Keep current status
+                    </Link
                     >
                 </form>
             </section>

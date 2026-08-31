@@ -1,14 +1,14 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { Separator, type SeparatorProps } from "radix-vue";
-import { computed, type HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {Separator, type SeparatorProps} from "radix-vue";
+import {computed, type HTMLAttributes} from "vue";
 
 const props = defineProps<
     SeparatorProps & { class?: HTMLAttributes["class"]; label?: string }
 >();
 
 const delegatedProps = computed(() => {
-    const { class: _, ...delegated } = props;
+    const {class: _, ...delegated} = props;
 
     return delegated;
 });
@@ -16,7 +16,6 @@ const delegatedProps = computed(() => {
 
 <template>
     <Separator
-        v-bind="delegatedProps"
         :class="
             cn(
                 'relative shrink-0 bg-border',
@@ -26,6 +25,7 @@ const delegatedProps = computed(() => {
                 props.class,
             )
         "
+        v-bind="delegatedProps"
     >
         <span
             v-if="props.label"
@@ -37,7 +37,7 @@ const delegatedProps = computed(() => {
                         : 'h-[1px] px-2 py-1',
                 )
             "
-            >{{ props.label }}</span
+        >{{ props.label }}</span
         >
     </Separator>
 </template>

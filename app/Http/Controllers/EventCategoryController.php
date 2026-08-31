@@ -27,6 +27,11 @@ class EventCategoryController extends Controller
         ]);
     }
 
+    private function allow(Lodge $lodge): void
+    {
+        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
     public function update(Request $request, Lodge $lodge)
     {
         $this->allow($lodge);
@@ -40,10 +45,5 @@ class EventCategoryController extends Controller
         Audit::record('event.categories.updated', $lodge, $lodge, ['category_ids' => $before], ['category_ids' => $ids]);
 
         return back()->with('notice', 'Event categories updated.');
-    }
-
-    private function allow(Lodge $lodge): void
-    {
-        abort_unless(request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
     }
 }

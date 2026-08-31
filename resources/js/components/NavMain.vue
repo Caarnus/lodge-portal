@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -6,8 +6,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { type NavItem, type SharedData } from "@/types";
-import { Link, usePage } from "@inertiajs/vue3";
+import {type NavItem, type SharedData} from "@/types";
+import {Link, usePage} from "@inertiajs/vue3";
 
 defineProps<{
     items: NavItem[];
@@ -23,20 +23,20 @@ const page = usePage<SharedData>();
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton
-                    as-child
                     :is-active="!item.external && item.href === page.url"
+                    as-child
                 >
                     <a
                         v-if="item.external"
                         :href="item.href"
-                        target="_blank"
                         rel="noopener noreferrer"
+                        target="_blank"
                     >
-                        <component :is="item.icon" />
+                        <component :is="item.icon"/>
                         <span>{{ item.title }}</span>
                     </a>
                     <Link v-else :href="item.href">
-                        <component :is="item.icon" />
+                        <component :is="item.icon"/>
                         <span>{{ item.title }}</span>
                     </Link>
                 </SidebarMenuButton>

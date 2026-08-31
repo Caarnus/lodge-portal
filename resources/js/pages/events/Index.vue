@@ -1,15 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import EventEditor from "@/pages/events/Edit.vue";
-import {
-    Dialog,
-    DialogHeader,
-    DialogScrollContent,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { formatLocalTimestamp } from "@/utils/date";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import {Dialog, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {formatLocalTimestamp} from "@/utils/date";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
 import {
     ArrowDown,
     ArrowUp,
@@ -21,9 +16,9 @@ import {
     SlidersHorizontal,
     X,
 } from "lucide-vue-next";
-import { nextTick, reactive, ref, watch } from "vue";
+import {nextTick, reactive, ref, watch} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: { id: number; name: string };
     events: {
@@ -64,7 +59,7 @@ const props = defineProps<{
     members: Array<{ id: number; display_name: string }>;
     eventEditor: any | null;
 }>();
-const filters = reactive({ ...props.filters });
+const filters = reactive({...props.filters});
 const filtersOpen = ref(false);
 let filterTimer: ReturnType<typeof setTimeout> | undefined;
 const applyFilters = () =>
@@ -79,7 +74,7 @@ const applyFilters = () =>
             direction:
                 filters.direction === "desc" ? undefined : filters.direction,
         },
-        { preserveState: true, preserveScroll: true, replace: true },
+        {preserveState: true, preserveScroll: true, replace: true},
     );
 watch(
     () => filters.search,
@@ -102,8 +97,8 @@ const sortIcon = (column: string) =>
     filters.sort !== column
         ? ArrowUpDown
         : filters.direction === "asc"
-          ? ArrowUp
-          : ArrowDown;
+            ? ArrowUp
+            : ArrowDown;
 const resetFilters = () => {
     Object.assign(filters, {
         search: "",
@@ -125,8 +120,8 @@ const editorUrl = (modal?: string | number) =>
     "/events" +
     (modal === undefined ? "" : "?modal=" + encodeURIComponent(String(modal)));
 const openEditor = (modal: "create" | number) =>
-    router.get(editorUrl(modal), {}, { preserveScroll: true });
-const closeEditor = () => router.get(editorUrl(), {}, { preserveScroll: true });
+    router.get(editorUrl(modal), {}, {preserveScroll: true});
+const closeEditor = () => router.get(editorUrl(), {}, {preserveScroll: true});
 const rosterEvent = ref<any>(null);
 const rosterType = ref<"reservations" | "volunteers">("reservations");
 const showRoster = (event: any, type: "reservations" | "volunteers") => {
@@ -143,16 +138,16 @@ const removeVolunteer = (item: any) => {
     router.patch(
         `/lodges/${props.lodge.id}/events/${rosterEvent.value.id}/occurrences/${occurrence.id}/volunteers/${item.id}/remove`,
         {},
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
-const volunteerForm = useForm({ position_id: "", person_id: "" });
+const volunteerForm = useForm({position_id: "", person_id: ""});
 const addVolunteer = () => {
     const occurrence = rosterEvent.value?.occurrence;
     if (!occurrence) return;
     volunteerForm.post(
         `/lodges/${props.lodge.id}/events/${rosterEvent.value.id}/occurrences/${occurrence.id}/volunteers`,
-        { preserveScroll: true, onSuccess: () => volunteerForm.reset() },
+        {preserveScroll: true, onSuccess: () => volunteerForm.reset()},
     );
 };
 const retryReminder = (id: number) => {
@@ -161,38 +156,39 @@ const retryReminder = (id: number) => {
         router.post(
             `/lodges/${props.lodge.id}/events/${rosterEvent.value.id}/occurrences/${occurrence.id}/volunteer-reminders/${id}/retry`,
             {},
-            { preserveScroll: true },
+            {preserveScroll: true},
         );
 };
 </script>
 
 <template>
-    <Head title="Events" />
+    <Head title="Events"/>
     <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
         <PageHeader
-            title="Events"
             :description="`Manage events for ${lodge.name}.`"
+            title="Events"
         >
             <template #actions>
                 <button
-                    type="button"
                     class="primary-button"
+                    type="button"
                     @click="openEditor('create')"
                 >
-                    <Plus class="mr-1 size-4" /> Create event
+                    <Plus class="mr-1 size-4"/>
+                    Create event
                 </button>
             </template>
         </PageHeader>
         <section class="rounded-lg border border-border/80 bg-muted">
             <button
-                type="button"
-                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
                 :aria-expanded="filtersOpen"
                 aria-controls="event-filters"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
+                type="button"
                 @click="filtersOpen = !filtersOpen"
             >
                 <span class="inline-flex items-center gap-2"
-                    ><SlidersHorizontal class="size-4" /> Search and
+                ><SlidersHorizontal class="size-4"/> Search and
                     filters</span
                 >
                 <span
@@ -203,7 +199,7 @@ const retryReminder = (id: number) => {
                         filters.category
                     "
                     class="text-sm text-muted-foreground"
-                    >Filters applied</span
+                >Filters applied</span
                 >
             </button>
             <form
@@ -213,13 +209,15 @@ const retryReminder = (id: number) => {
                 @submit.prevent
             >
                 <label class="relative"
-                    ><Search
-                        class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
+                >
+                    <Search
+                        class="absolute left-3 top-3 size-4 text-muted-foreground"/>
+                    <input
                         v-model="filters.search"
-                        type="search"
                         class="field-input pl-9"
                         placeholder="Search events"
-                /></label>
+                        type="search"
+                    /></label>
                 <select v-model="filters.status" class="field-input">
                     <option value="">All statuses</option>
                     <option value="draft">Draft</option>
@@ -244,12 +242,12 @@ const retryReminder = (id: number) => {
                     </option>
                 </select>
                 <button
-                    type="button"
                     class="icon-button"
                     title="Clear filters"
+                    type="button"
                     @click="resetFilters"
                 >
-                    <X class="size-4" />
+                    <X class="size-4"/>
                 </button>
             </form>
         </section>
@@ -259,133 +257,133 @@ const retryReminder = (id: number) => {
         >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
-                    <col />
-                    <col class="w-36" />
-                    <col class="w-24" />
-                    <col class="w-28" />
-                    <col class="w-40" />
-                    <col class="w-24" />
+                    <col/>
+                    <col class="w-36"/>
+                    <col class="w-24"/>
+                    <col class="w-28"/>
+                    <col class="w-40"/>
+                    <col class="w-24"/>
                 </colgroup>
                 <thead class="bg-muted/50 text-muted-foreground">
-                    <tr>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sortBy('title')"
-                            >
-                                Event
-                                <component
-                                    :is="sortIcon('title')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sortBy('first_starts_at')"
-                            >
-                                Starts
-                                <component
-                                    :is="sortIcon('first_starts_at')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="p-3">
-                            <button
-                                class="inline-flex items-center gap-1 whitespace-nowrap"
-                                @click="sortBy('status')"
-                            >
-                                Status
-                                <component
-                                    :is="sortIcon('status')"
-                                    class="size-3"
-                                />
-                            </button>
-                        </th>
-                        <th class="px-4 py-3">Occurrences</th>
-                        <th class="px-4 py-3">Single occurrence</th>
-                        <th class="px-4 py-3"></th>
-                    </tr>
+                <tr>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sortBy('title')"
+                        >
+                            Event
+                            <component
+                                :is="sortIcon('title')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sortBy('first_starts_at')"
+                        >
+                            Starts
+                            <component
+                                :is="sortIcon('first_starts_at')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="p-3">
+                        <button
+                            class="inline-flex items-center gap-1 whitespace-nowrap"
+                            @click="sortBy('status')"
+                        >
+                            Status
+                            <component
+                                :is="sortIcon('status')"
+                                class="size-3"
+                            />
+                        </button>
+                    </th>
+                    <th class="px-4 py-3">Occurrences</th>
+                    <th class="px-4 py-3">Single occurrence</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        v-for="event in events.data"
-                        :key="event.id"
-                        class="border-t border-border/60 transition-colors hover:bg-muted/35"
-                    >
-                        <td class="p-3">
+                <tr
+                    v-for="event in events.data"
+                    :key="event.id"
+                    class="border-t border-border/60 transition-colors hover:bg-muted/35"
+                >
+                    <td class="p-3">
+                        <p
+                            :title="event.title"
+                            class="truncate font-medium"
+                        >
+                            {{ event.title }}
+                        </p>
+                        <p class="truncate text-xs text-muted-foreground">
+                            {{ event.category?.name ?? "Uncategorized" }}
+                        </p>
+                    </td>
+                    <td class="p-3">
+                        {{ timestamp(event.first_starts_at) }}
+                    </td>
+                    <td class="p-3 capitalize">{{ event.status }}</td>
+                    <td class="px-4 py-3">
+                        <Link
+                            :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
+                            class="text-primary underline"
+                        >
+                            {{ event.occurrence_count }}
+                        </Link>
+                    </td>
+                    <td class="px-4 py-3 text-xs">
+                        <template v-if="event.occurrence">
                             <p
-                                class="truncate font-medium"
-                                :title="event.title"
-                            >
-                                {{ event.title }}
-                            </p>
-                            <p class="truncate text-xs text-muted-foreground">
-                                {{ event.category?.name ?? "Uncategorized" }}
-                            </p>
-                        </td>
-                        <td class="p-3">
-                            {{ timestamp(event.first_starts_at) }}
-                        </td>
-                        <td class="p-3 capitalize">{{ event.status }}</td>
-                        <td class="px-4 py-3">
-                            <Link
-                                :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
-                                class="text-primary underline"
-                            >
-                                {{ event.occurrence_count }}
-                            </Link>
-                        </td>
-                        <td class="px-4 py-3 text-xs">
-                            <template v-if="event.occurrence">
-                                <p
-                                    v-if="
+                                v-if="
                                         event.occurrence.reservation_count !==
                                         null
                                     "
-                                >
-                                    <button
-                                        type="button"
-                                        class="cursor-pointer text-primary underline"
-                                        @click="
+                            >
+                                <button
+                                    class="cursor-pointer text-primary underline"
+                                    type="button"
+                                    @click="
                                             showRoster(event, 'reservations')
                                         "
-                                    >
-                                        Reservations:
-                                        {{ event.occurrence.reservation_count }}
-                                    </button>
-                                </p>
-                                <p>
-                                    <button
-                                        type="button"
-                                        class="cursor-pointer text-primary underline"
-                                        @click="showRoster(event, 'volunteers')"
-                                    >
-                                        Staffing:
-                                        {{
-                                            event.occurrence.volunteer_filled
-                                        }}/{{
-                                            event.occurrence.volunteer_needed
-                                        }}
-                                    </button>
-                                </p>
-                            </template>
-                            <span v-else class="text-muted-foreground">—</span>
-                        </td>
-                        <td class="w-24 px-1 py-3 text-right">
-                            <button
-                                type="button"
-                                title="Edit event"
-                                aria-label="Edit event"
-                                class="icon-button"
-                                @click="openEditor(event.id)"
-                            >
-                                <Pencil class="size-4" aria-hidden="true" />
-                            </button>
-                        </td>
-                    </tr>
+                                >
+                                    Reservations:
+                                    {{ event.occurrence.reservation_count }}
+                                </button>
+                            </p>
+                            <p>
+                                <button
+                                    class="cursor-pointer text-primary underline"
+                                    type="button"
+                                    @click="showRoster(event, 'volunteers')"
+                                >
+                                    Staffing:
+                                    {{
+                                        event.occurrence.volunteer_filled
+                                    }}/{{
+                                        event.occurrence.volunteer_needed
+                                    }}
+                                </button>
+                            </p>
+                        </template>
+                        <span v-else class="text-muted-foreground">—</span>
+                    </td>
+                    <td class="w-24 px-1 py-3 text-right">
+                        <button
+                            aria-label="Edit event"
+                            class="icon-button"
+                            title="Edit event"
+                            type="button"
+                            @click="openEditor(event.id)"
+                        >
+                            <Pencil aria-hidden="true" class="size-4"/>
+                        </button>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -426,15 +424,15 @@ const retryReminder = (id: number) => {
                 <div v-if="event.occurrence" class="mt-3 text-sm">
                     <button
                         v-if="event.occurrence.reservation_count !== null"
-                        type="button"
                         class="mr-3 text-primary underline"
+                        type="button"
                         @click="showRoster(event, 'reservations')"
                     >
                         Reservations: {{ event.occurrence.reservation_count }}
                     </button>
                     <button
-                        type="button"
                         class="text-primary underline"
+                        type="button"
                         @click="showRoster(event, 'volunteers')"
                     >
                         Staffing: {{ event.occurrence.volunteer_filled }}/{{
@@ -447,15 +445,17 @@ const retryReminder = (id: number) => {
                         :href="occurrencesUrl(event)"
                         class="icon-button"
                         title="Manage occurrences"
-                        ><CalendarDays class="size-4"
-                    /></Link>
+                    >
+                        <CalendarDays class="size-4"
+                        />
+                    </Link>
                     <button
-                        type="button"
                         class="icon-button"
                         title="Edit event"
+                        type="button"
                         @click="openEditor(event.id)"
                     >
-                        <Pencil class="size-4" />
+                        <Pencil class="size-4"/>
                     </button>
                 </div>
             </article>
@@ -472,11 +472,14 @@ const retryReminder = (id: number) => {
         >
             <DialogScrollContent class="max-w-xl">
                 <DialogHeader
-                    ><DialogTitle>{{
-                        rosterType === "reservations"
-                            ? "Reservation roster"
-                            : "Volunteer roster"
-                    }}</DialogTitle></DialogHeader
+                >
+                    <DialogTitle>{{
+                            rosterType === "reservations"
+                                ? "Reservation roster"
+                                : "Volunteer roster"
+                        }}
+                    </DialogTitle>
+                </DialogHeader
                 >
                 <div
                     v-if="rosterType === 'reservations'"
@@ -510,8 +513,8 @@ const retryReminder = (id: number) => {
                     >
                         <select
                             v-model="volunteerForm.position_id"
-                            required
                             class="rounded border bg-background p-2"
+                            required
                         >
                             <option value="">Position</option>
                             <option
@@ -522,23 +525,26 @@ const retryReminder = (id: number) => {
                                 :value="position.id"
                             >
                                 {{ position.name }}
-                            </option></select
+                            </option>
+                        </select
                         ><select
-                            v-model="volunteerForm.person_id"
-                            required
-                            class="rounded border bg-background p-2"
+                        v-model="volunteerForm.person_id"
+                        class="rounded border bg-background p-2"
+                        required
+                    >
+                        <option value="">Member</option>
+                        <option
+                            v-for="member in members"
+                            :key="member.id"
+                            :value="member.id"
                         >
-                            <option value="">Member</option>
-                            <option
-                                v-for="member in members"
-                                :key="member.id"
-                                :value="member.id"
-                            >
-                                {{ member.display_name }}
-                            </option></select
-                        ><button
-                            type="submit"
+                            {{ member.display_name }}
+                        </option>
+                    </select
+                    >
+                        <button
                             class="rounded bg-primary px-3 py-2 text-primary-foreground"
+                            type="submit"
                         >
                             Add volunteer
                         </button>
@@ -568,30 +574,32 @@ const retryReminder = (id: number) => {
                             class="mt-2 flex flex-wrap items-center justify-between gap-2 border-t pt-2"
                         >
                             <span
-                                >{{ item.name }} — {{ item.status
+                            >{{ item.name }} — {{
+                                    item.status
                                 }}<span v-if="item.reminder">
-                                    · Reminder: {{ item.reminder.status
+                                    · Reminder: {{
+                                        item.reminder.status
                                     }}<span v-if="item.reminder.last_error">
                                         — {{ item.reminder.last_error }}</span
-                                    ></span
+                                ></span
                                 ></span
                             ><span
-                                ><button
-                                    v-if="item.status === 'committed'"
-                                    type="button"
-                                    class="mr-2 text-destructive underline"
-                                    @click="removeVolunteer(item)"
-                                >
+                        ><button
+                            v-if="item.status === 'committed'"
+                            class="mr-2 text-destructive underline"
+                            type="button"
+                            @click="removeVolunteer(item)"
+                        >
                                     Remove</button
-                                ><button
-                                    v-if="item.reminder?.status === 'failed'"
-                                    type="button"
-                                    class="underline"
-                                    @click="retryReminder(item.reminder.id)"
-                                >
+                        ><button
+                            v-if="item.reminder?.status === 'failed'"
+                            class="underline"
+                            type="button"
+                            @click="retryReminder(item.reminder.id)"
+                        >
                                     Retry reminder
                                 </button></span
-                            >
+                        >
                         </div>
                     </section>
                 </div>
@@ -610,17 +618,17 @@ const retryReminder = (id: number) => {
                 </DialogHeader>
                 <EventEditor
                     v-if="eventEditor"
-                    :lodge="eventEditor.lodge"
-                    :event="eventEditor.event"
                     :categories="eventEditor.categories"
+                    :event="eventEditor.event"
+                    :lodge="eventEditor.lodge"
                     :media="eventEditor.media"
-                    :reservation-fields="eventEditor.reservationFields"
+                    :occurrences="eventEditor.occurrences"
                     :reminder-rules="eventEditor.reminderRules"
                     :reminder-subscription-count="
                         eventEditor.reminderSubscriptionCount
                     "
+                    :reservation-fields="eventEditor.reservationFields"
                     :volunteer-positions="eventEditor.volunteerPositions"
-                    :occurrences="eventEditor.occurrences"
                     embedded
                     @saved="closeEditor"
                 />

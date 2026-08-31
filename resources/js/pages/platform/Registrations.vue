@@ -1,15 +1,15 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import ExpandableText from "@/components/ExpandableText.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
-import { Head, router } from "@inertiajs/vue3";
-import { Check, X } from "lucide-vue-next";
+import {Head, router} from "@inertiajs/vue3";
+import {Check, X} from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { ref } from "vue";
+import {ref} from "vue";
 
 const vTooltip = Tooltip;
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 interface Registration {
     id: number;
@@ -40,10 +40,10 @@ const decide = (id: number, decision: "approved" | "rejected") => {
 </script>
 
 <template>
-    <Head title="Registrations" />
+    <Head title="Registrations"/>
 
     <main class="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
-        <PageHeader title="Pending registrations" />
+        <PageHeader title="Pending registrations"/>
 
         <div
             class="mt-6 overflow-hidden rounded-lg border border-border/80 bg-card"
@@ -56,47 +56,47 @@ const decide = (id: number, decision: "approved" | "rejected") => {
                 <div class="min-w-0 space-y-1">
                     <ExpandableText
                         :text="registration.name"
-                        label="registrant name"
                         class="font-semibold"
+                        label="registrant name"
                     />
                     <ExpandableText
                         :text="registration.email"
-                        label="email address"
                         class="text-sm text-muted-foreground"
+                        label="email address"
                     />
                     <ExpandableText
                         :text="registration.home_lodge?.name"
-                        label="home lodge"
                         class="text-sm text-muted-foreground"
+                        label="home lodge"
                     />
                 </div>
 
                 <div class="flex shrink-0 gap-2">
                     <button
-                        type="button"
-                        :aria-label="`Approve ${registration.name}`"
-                        :disabled="processingId === registration.id"
-                        class="icon-button border-primary bg-primary text-primary-foreground hover:bg-primary/90 disabled:cursor-wait disabled:opacity-50"
                         v-tooltip.top="{
                             value: `Approve ${registration.name}`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`Approve ${registration.name}`"
+                        :disabled="processingId === registration.id"
+                        class="icon-button border-primary bg-primary text-primary-foreground hover:bg-primary/90 disabled:cursor-wait disabled:opacity-50"
+                        type="button"
                         @click="decide(registration.id, 'approved')"
                     >
-                        <Check class="size-5" aria-hidden="true" />
+                        <Check aria-hidden="true" class="size-5"/>
                     </button>
                     <button
-                        type="button"
-                        :aria-label="`Reject ${registration.name}`"
-                        :disabled="processingId === registration.id"
-                        class="icon-button border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:cursor-wait disabled:opacity-50"
                         v-tooltip.top="{
                             value: `Reject ${registration.name}`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`Reject ${registration.name}`"
+                        :disabled="processingId === registration.id"
+                        class="icon-button border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:cursor-wait disabled:opacity-50"
+                        type="button"
                         @click="decide(registration.id, 'rejected')"
                     >
-                        <X class="size-5" aria-hidden="true" />
+                        <X aria-hidden="true" class="size-5"/>
                     </button>
                 </div>
             </div>

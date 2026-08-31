@@ -36,15 +36,14 @@ class WebsiteSectionController extends Controller
         return back();
     }
 
-    public function update(Request $request, Lodge $lodge, WebsitePage $page, WebsiteSection $section, WebsiteSectionCatalog $catalog)
+    private function allow(Lodge $lodge, WebsitePage $page, ?WebsiteSection $section = null): void
     {
-        $this->allow($lodge, $page, $section);
-        $input = $request->validate(['configuration' => 'required|array']);
-        $before = $section->toArray();
-        $section->update(['configuration' => $catalog->validate($section->type, $input['configuration'], $lodge, (bool)$request->user()->is_platform_admin)]);
-        Audit::record('website.section_updated', $section, $lodge, $before, $section->fresh()->toArray());
-
-        return back();
+        abort_unless($page->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, 'website.manage');
+        if ($section) {
+            $draftId = $page->draft()->value('id');
+            abort_unless($section->lodge_id === $lodge->id && $section->website_page_version_id === $draftId, 404);
+        }
     }
 
     public function move(Request $request, Lodge $lodge, WebsitePage $page, WebsiteSection $section)
@@ -69,6 +68,17 @@ class WebsiteSectionController extends Controller
         return back();
     }
 
+    public function update(Request $request, Lodge $lodge, WebsitePage $page, WebsiteSection $section, WebsiteSectionCatalog $catalog)
+    {
+        $this->allow($lodge, $page, $section);
+        $input = $request->validate(['configuration' => 'required|array']);
+        $before = $section->toArray();
+        $section->update(['configuration' => $catalog->validate($section->type, $input['configuration'], $lodge, (bool)$request->user()->is_platform_admin)]);
+        Audit::record('website.section_updated', $section, $lodge, $before, $section->fresh()->toArray());
+
+        return back();
+    }
+
     public function destroy(Lodge $lodge, WebsitePage $page, WebsiteSection $section)
     {
         $this->allow($lodge, $page, $section);
@@ -77,15 +87,5 @@ class WebsiteSectionController extends Controller
         Audit::record('website.section_deleted', $section, $lodge, $before, null);
 
         return back();
-    }
-
-    private function allow(Lodge $lodge, WebsitePage $page, ?WebsiteSection $section = null): void
-    {
-        abort_unless($page->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'website.manage');
-        if ($section) {
-            $draftId = $page->draft()->value('id');
-            abort_unless($section->lodge_id === $lodge->id && $section->website_page_version_id === $draftId, 404);
-        }
     }
 }

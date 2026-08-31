@@ -18,7 +18,7 @@ class RitualController extends Controller
     {
         $person = $self->personFor(request()->user());
         return Inertia::render('ritual/Index', [
-            'categories' => RitualCategory::query()->with(['parts' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(),
+            'categories' => RitualCategory::query()->with(['parts' => fn($query) => $query->where('is_active', true)->orderBy('sort_order')])->where('is_active', true)->orderBy('sort_order')->get(),
             'proficiencies' => $person->ritualProficiencies()->get()->keyBy('ritual_part_id'),
             'settings' => $person->ritualSetting ?? ['visibility_scope' => 'hidden', 'public_availability_note' => null],
             'availability' => $person->ritualAvailabilities()->where('is_enabled', true)->get(['day_of_week', 'daypart']),
@@ -34,6 +34,15 @@ class RitualController extends Controller
         return to_route('ritual.index');
     }
 
-    public function updateSettings(RitualSettingUpdateRequest $request, RitualSelfService $self): RedirectResponse { $self->updateSettings($request->user(), $request->validated()); return to_route('ritual.index'); }
-    public function updateAvailability(RitualAvailabilityUpdateRequest $request, RitualSelfService $self): RedirectResponse { $self->replaceAvailability($request->user(), $request->validated('windows')); return to_route('ritual.index'); }
+    public function updateSettings(RitualSettingUpdateRequest $request, RitualSelfService $self): RedirectResponse
+    {
+        $self->updateSettings($request->user(), $request->validated());
+        return to_route('ritual.index');
+    }
+
+    public function updateAvailability(RitualAvailabilityUpdateRequest $request, RitualSelfService $self): RedirectResponse
+    {
+        $self->replaceAvailability($request->user(), $request->validated('windows'));
+        return to_route('ritual.index');
+    }
 }

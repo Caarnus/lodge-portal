@@ -38,16 +38,6 @@ class FamilyNewsletterSubscriptionController extends Controller
         return back();
     }
 
-    public function reject(Request $request, Lodge $lodge, FamilyNewsletterRequest $familyRequest)
-    {
-        $this->allowLodge($lodge, 'communications.recipients');
-        abort_unless($familyRequest->lodge_id === $lodge->id, 404);
-        $familyRequest->update(['status' => DistributionRequestStatus::Rejected, 'reviewed_by' => $request->user()->id, 'reviewed_at' => now(), 'review_note' => $request->validate(['review_note' => 'nullable|string|max:2000'])['review_note'] ?? null]);
-        Audit::record('family_newsletter_request.rejected', $familyRequest, $lodge, null, ['id' => $familyRequest->id]);
-
-        return back();
-    }
-
     public function update(Request $request, Lodge $lodge, FamilyNewsletterSubscription $subscription, FamilyNewsletterEligibility $eligibility)
     {
         $this->allowLodge($lodge, 'communications.recipients');
@@ -56,6 +46,16 @@ class FamilyNewsletterSubscriptionController extends Controller
         $eligibility->assertEligible($lodge, $subscription->recipient, $subscription->sponsor, $subscription->relationship, $data['receives_email'], $data['receives_print']);
         $subscription->update($data + ['updated_by' => $request->user()->id]);
         Audit::record('family_newsletter_subscription.updated', $subscription, $lodge);
+
+        return back();
+    }
+
+    public function reject(Request $request, Lodge $lodge, FamilyNewsletterRequest $familyRequest)
+    {
+        $this->allowLodge($lodge, 'communications.recipients');
+        abort_unless($familyRequest->lodge_id === $lodge->id, 404);
+        $familyRequest->update(['status' => DistributionRequestStatus::Rejected, 'reviewed_by' => $request->user()->id, 'reviewed_at' => now(), 'review_note' => $request->validate(['review_note' => 'nullable|string|max:2000'])['review_note'] ?? null]);
+        Audit::record('family_newsletter_request.rejected', $familyRequest, $lodge, null, ['id' => $familyRequest->id]);
 
         return back();
     }

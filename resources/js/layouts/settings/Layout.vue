@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Heading from "@/components/Heading.vue";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { type NavItem } from "@/types";
-import { Link } from "@inertiajs/vue3";
+import {Button} from "@/components/ui/button";
+import {Separator} from "@/components/ui/separator";
+import {type NavItem} from "@/types";
+import {Link} from "@inertiajs/vue3";
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -30,8 +30,8 @@ const currentPath = window.location.pathname;
 <template>
     <div class="px-4 py-6">
         <Heading
-            title="Settings"
             description="Manage your profile and account settings"
+            title="Settings"
         />
 
         <div
@@ -42,12 +42,12 @@ const currentPath = window.location.pathname;
                     <Button
                         v-for="item in sidebarNavItems"
                         :key="item.href"
-                        variant="ghost"
                         :class="[
                             'w-full justify-start',
                             { 'bg-muted': currentPath === item.href },
                         ]"
                         as-child
+                        variant="ghost"
                     >
                         <Link :href="item.href">
                             {{ item.title }}
@@ -56,11 +56,11 @@ const currentPath = window.location.pathname;
                 </nav>
             </aside>
 
-            <Separator class="my-6 md:hidden" />
+            <Separator class="my-6 md:hidden"/>
 
             <div class="flex-1 md:max-w-2xl">
                 <section class="max-w-xl space-y-12">
-                    <slot />
+                    <slot/>
                 </section>
             </div>
         </div>

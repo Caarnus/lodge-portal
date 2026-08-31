@@ -1,20 +1,20 @@
-<script setup lang="ts">
-import { useAppearance } from "@/composables/useAppearance";
-import { Monitor, Moon, Sun } from "lucide-vue-next";
+<script lang="ts" setup>
+import {useAppearance} from "@/composables/useAppearance";
+import {Monitor, Moon, Sun} from "lucide-vue-next";
 
 interface Props {
     class?: string;
     compact?: boolean;
 }
 
-const { class: containerClass = "", compact = false } = defineProps<Props>();
+const {class: containerClass = "", compact = false} = defineProps<Props>();
 
-const { appearance, updateAppearance } = useAppearance();
+const {appearance, updateAppearance} = useAppearance();
 
 const tabs = [
-    { value: "light", Icon: Sun, label: "Light" },
-    { value: "dark", Icon: Moon, label: "Dark" },
-    { value: "system", Icon: Monitor, label: "System" },
+    {value: "light", Icon: Sun, label: "Light"},
+    {value: "dark", Icon: Moon, label: "Dark"},
+    {value: "system", Icon: Monitor, label: "System"},
 ] as const;
 </script>
 
@@ -24,8 +24,6 @@ const tabs = [
             v-for="{ value, Icon, label } in tabs"
             :key="value"
             :aria-label="`${label} appearance`"
-            :title="`${label} appearance`"
-            @click="updateAppearance(value)"
             :class="[
                 'flex items-center rounded-md py-1.5 transition-colors',
                 compact ? 'justify-center px-2' : 'px-3.5',
@@ -33,6 +31,8 @@ const tabs = [
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground',
             ]"
+            :title="`${label} appearance`"
+            @click="updateAppearance(value)"
         >
             <component
                 :is="Icon"

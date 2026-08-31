@@ -15,17 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class GalleryPublisher
 {
-    public function __construct(private readonly MediaExposureService $media) {}
-
-    public function create(Lodge $lodge, User $user, array $data): GalleryAlbum
+    public function __construct(private readonly MediaExposureService $media)
     {
-        return DB::transaction(function () use ($lodge, $user, $data) {
-            $album = GalleryAlbum::create(['lodge_id' => $lodge->id, 'slug' => $data['slug'], 'created_by' => $user->id]);
-            $album->versions()->create($this->data($lodge, $user, $data));
-            Audit::record('gallery.album_created', $album, $lodge);
-
-            return $album;
-        });
     }
 
     public function draftFor(GalleryAlbum $album, User $user): GalleryAlbumVersion
@@ -57,12 +48,42 @@ class GalleryPublisher
         });
     }
 
+    public function create(Lodge $lodge, User $user, array $data): GalleryAlbum
+    {
+        return DB::transaction(function () use ($lodge, $user, $data) {
+            $album = GalleryAlbum::create(['lodge_id' => $lodge->id, 'slug' => $data['slug'], 'created_by' => $user->id]);
+            $album->versions()->create($this->data($lodge, $user, $data));
+            Audit::record('gallery.album_created', $album, $lodge);
+
+            return $album;
+        });
+    }
+
+    private function data(Lodge $lodge, User $user, array $data, bool $create = true): array
+    {
+        $cover = $data['cover_photo_id'] ?? null;
+
+        return array_filter(
+            [
+                'lodge_id' => $lodge->id,
+                'status' => ContentVersionStatus::Draft,
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'visibility' => $data['visibility'] ?? GalleryVisibility::Public,
+                'cover_photo_id' => $cover,
+                'created_by' => $create ? $user->id : null,
+            ],
+            fn($value, $key) => $create || $key !== 'created_by' || $value !== null,
+            ARRAY_FILTER_USE_BOTH,
+        );
+    }
+
     public function update(GalleryAlbum $album, Lodge $lodge, User $user, array $data): GalleryAlbumVersion
     {
         return DB::transaction(function () use ($album, $lodge, $user, $data) {
             $album = GalleryAlbum::query()->lockForUpdate()->findOrFail($album->id);
             $draft = $this->draftFor($album, $user);
-            if (($data['cover_photo_id'] ?? null) && ! $draft->photos()->whereKey($data['cover_photo_id'])->exists()) {
+            if (($data['cover_photo_id'] ?? null) && !$draft->photos()->whereKey($data['cover_photo_id'])->exists()) {
                 throw ValidationException::withMessages(['cover_photo_id' => 'Cover photo must belong to this album draft.']);
             }
             $before = $draft->toArray();
@@ -79,7 +100,7 @@ class GalleryPublisher
         return DB::transaction(function () use ($album, $user) {
             $album = GalleryAlbum::query()->lockForUpdate()->findOrFail($album->id);
             $draft = $album->draft()->with('photos.mediaAsset')->lockForUpdate()->firstOrFail();
-            if (! $draft->photos->count()) {
+            if (!$draft->photos->count()) {
                 throw ValidationException::withMessages(['photos' => 'Add at least one photo before publishing.']);
             }
             foreach ($draft->photos as $photo) {
@@ -118,24 +139,5 @@ class GalleryPublisher
             }
             $published->update(['status' => ContentVersionStatus::Archived]);
         });
-    }
-
-    private function data(Lodge $lodge, User $user, array $data, bool $create = true): array
-    {
-        $cover = $data['cover_photo_id'] ?? null;
-
-        return array_filter(
-            [
-                'lodge_id' => $lodge->id,
-                'status' => ContentVersionStatus::Draft,
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'visibility' => $data['visibility'] ?? GalleryVisibility::Public,
-                'cover_photo_id' => $cover,
-                'created_by' => $create ? $user->id : null,
-            ],
-            fn ($value, $key) => $create || $key !== 'created_by' || $value !== null,
-            ARRAY_FILTER_USE_BOTH,
-        );
     }
 }

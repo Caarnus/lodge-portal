@@ -1,14 +1,14 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import ExpandableText from "@/components/ExpandableText.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
-import { ExternalLink, Pencil, Plus } from "lucide-vue-next";
+import {Head, Link} from "@inertiajs/vue3";
+import {ExternalLink, Pencil, Plus} from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
 
 const vTooltip = Tooltip;
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 interface Lodge {
     id: number;
@@ -27,19 +27,22 @@ const location = (lodge: Lodge) =>
 </script>
 
 <template>
-    <Head title="Lodges" />
+    <Head title="Lodges"/>
 
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
         <PageHeader title="Lodges">
             <template #actions
-                ><Link
-                    href="/platform/lodges/create"
+            >
+                <Link
+                    v-tooltip.left="{ value: 'Create lodge', showDelay: 2000 }"
                     aria-label="Create lodge"
                     class="primary-button size-10 shrink-0 p-0"
-                    v-tooltip.left="{ value: 'Create lodge', showDelay: 2000 }"
+                    href="/platform/lodges/create"
                 >
-                    <Plus class="size-5" aria-hidden="true" /> </Link
-            ></template>
+                    <Plus aria-hidden="true" class="size-5"/>
+                </Link
+                >
+            </template>
         </PageHeader>
 
         <div
@@ -62,57 +65,57 @@ const location = (lodge: Lodge) =>
                 <div class="min-w-0">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
-                        >Lodge</span
+                    >Lodge</span
                     >
                     <ExpandableText
                         :text="`${lodge.name} No. ${lodge.number}`"
-                        label="lodge name"
                         class="font-medium"
+                        label="lodge name"
                     />
                 </div>
                 <div class="min-w-0">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
-                        >Location</span
+                    >Location</span
                     >
-                    <ExpandableText :text="location(lodge)" label="location" />
+                    <ExpandableText :text="location(lodge)" label="location"/>
                 </div>
                 <div class="min-w-0">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
-                        >Status</span
+                    >Status</span
                     >
                     <ExpandableText
                         :text="lodge.status"
-                        label="status"
                         class="capitalize"
+                        label="status"
                     />
                 </div>
                 <div class="row-start-1 flex justify-end gap-1 sm:col-start-4">
                     <a
                         v-if="lodge.public_site_url"
-                        :href="lodge.public_site_url"
-                        target="_blank"
-                        rel="noopener"
-                        :aria-label="`Visit ${lodge.name} public site`"
-                        class="icon-button text-muted-foreground"
                         v-tooltip.left="{
                             value: `Visit ${lodge.name} public site`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`Visit ${lodge.name} public site`"
+                        :href="lodge.public_site_url"
+                        class="icon-button text-muted-foreground"
+                        rel="noopener"
+                        target="_blank"
                     >
-                        <ExternalLink class="size-4" aria-hidden="true" />
+                        <ExternalLink aria-hidden="true" class="size-4"/>
                     </a>
                     <Link
-                        :href="`/platform/lodges/${lodge.id}/edit`"
-                        :aria-label="`Edit ${lodge.name}`"
-                        class="icon-button text-muted-foreground"
                         v-tooltip.left="{
                             value: `Edit ${lodge.name}`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`Edit ${lodge.name}`"
+                        :href="`/platform/lodges/${lodge.id}/edit`"
+                        class="icon-button text-muted-foreground"
                     >
-                        <Pencil class="size-4" aria-hidden="true" />
+                        <Pencil aria-hidden="true" class="size-4"/>
                     </Link>
                 </div>
             </div>

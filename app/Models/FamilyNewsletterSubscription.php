@@ -13,11 +13,6 @@ class FamilyNewsletterSubscription extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['receives_email' => 'boolean', 'receives_print' => 'boolean', 'requested_at' => 'datetime', 'unsubscribed_at' => 'datetime'];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -56,5 +51,10 @@ class FamilyNewsletterSubscription extends Model
     public function deliveries()
     {
         return $this->hasMany(CommunicationDelivery::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['receives_email' => 'boolean', 'receives_print' => 'boolean', 'requested_at' => 'datetime', 'unsubscribed_at' => 'datetime'];
     }
 }

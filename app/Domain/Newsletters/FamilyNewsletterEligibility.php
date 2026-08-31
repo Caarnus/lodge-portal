@@ -13,6 +13,17 @@ class FamilyNewsletterEligibility
 {
     private const RELATIONSHIP_KEYS = ['spouse', 'child', 'parent', 'widow_widower', 'guardian'];
 
+    public function eligible(FamilyNewsletterSubscription $subscription): bool
+    {
+        try {
+            $this->assertEligible($subscription->lodge, $subscription->recipient, $subscription->sponsor, $subscription->relationship, $subscription->receives_email, $subscription->receives_print);
+
+            return $subscription->status === 'active';
+        } catch (ValidationException) {
+            return false;
+        }
+    }
+
     public function assertEligible(Lodge $lodge, Person $recipient, Person $sponsor, PersonRelationship $relationship, bool $email, bool $print): void
     {
         if (!$email && !$print) {
@@ -35,17 +46,6 @@ class FamilyNewsletterEligibility
         }
         if ($print && (!filled($recipient->mailing_address_line_1) || !filled($recipient->mailing_city) || !filled($recipient->mailing_state) || !filled($recipient->mailing_postal_code))) {
             throw ValidationException::withMessages(['receives_print' => 'Recipient needs a complete mailing address.']);
-        }
-    }
-
-    public function eligible(FamilyNewsletterSubscription $subscription): bool
-    {
-        try {
-            $this->assertEligible($subscription->lodge, $subscription->recipient, $subscription->sponsor, $subscription->relationship, $subscription->receives_email, $subscription->receives_print);
-
-            return $subscription->status === 'active';
-        } catch (ValidationException) {
-            return false;
         }
     }
 

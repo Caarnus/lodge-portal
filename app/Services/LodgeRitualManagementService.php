@@ -13,7 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class LodgeRitualManagementService
 {
-    public function __construct(private readonly RitualProgress $progress) {}
+    public function __construct(private readonly RitualProgress $progress)
+    {
+    }
 
     public function update(Lodge $lodge, Membership $membership, array $data): void
     {
@@ -22,8 +24,8 @@ class LodgeRitualManagementService
                 ->whereKey($membership->id)
                 ->where('lodge_id', $lodge->id)
                 ->whereNull('end_date')
-                ->whereHas('status', fn ($query) => $query->where('key', 'active'))
-                ->whereHas('person', fn ($query) => $query->where('is_deceased', false)->whereNull('merged_at'))
+                ->whereHas('status', fn($query) => $query->where('key', 'active'))
+                ->whereHas('person', fn($query) => $query->where('is_deceased', false)->whereNull('merged_at'))
                 ->lockForUpdate()
                 ->firstOrFail();
             $person = Person::query()->lockForUpdate()->findOrFail($membership->person_id);
@@ -31,14 +33,14 @@ class LodgeRitualManagementService
                 ->with('category')
                 ->whereIn('id', collect($data['parts'])->pluck('ritual_part_id'))
                 ->where('is_active', true)
-                ->whereHas('category', fn ($query) => $query->where('is_active', true))
+                ->whereHas('category', fn($query) => $query->where('is_active', true))
                 ->get()
                 ->keyBy('id');
 
             if ($parts->count() !== count($data['parts'])) {
                 throw ValidationException::withMessages(['parts' => 'Only active ritual parts may be updated.']);
             }
-            if (collect($data['windows'])->map(fn ($window) => $window['day_of_week'].'|'.$window['daypart'])->unique()->count() !== count($data['windows'])) {
+            if (collect($data['windows'])->map(fn($window) => $window['day_of_week'] . '|' . $window['daypart'])->unique()->count() !== count($data['windows'])) {
                 throw ValidationException::withMessages(['windows' => 'Availability windows must be unique.']);
             }
 

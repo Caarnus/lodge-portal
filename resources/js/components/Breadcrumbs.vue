@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -7,7 +7,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import type { BreadcrumbItemType } from "@/types";
+import type {BreadcrumbItemType} from "@/types";
 
 defineProps<{
     breadcrumbs: BreadcrumbItemType[];
@@ -26,7 +26,7 @@ defineProps<{
                         {{ item.title }}
                     </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator v-if="index !== breadcrumbs.length - 1" />
+                <BreadcrumbSeparator v-if="index !== breadcrumbs.length - 1"/>
             </template>
         </BreadcrumbList>
     </Breadcrumb>

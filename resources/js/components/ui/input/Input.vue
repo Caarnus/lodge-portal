@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { useVModel } from "@vueuse/core";
-import type { HTMLAttributes, InputHTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {useVModel} from "@vueuse/core";
+import type {HTMLAttributes, InputHTMLAttributes} from "vue";
 
 const props = defineProps<{
     defaultValue?: string | number;
@@ -30,19 +30,19 @@ const modelValue = useVModel(props, "modelValue", emits, {
 <template>
     <input
         v-model="modelValue"
-        :type="props.type"
         :autocomplete="props.autocomplete"
         :autofocus="props.autofocus"
-        :name="props.name"
-        :readonly="props.readonly"
-        :required="props.required"
-        :tabindex="props.tabindex"
-        :placeholder="props.placeholder"
         :class="
             cn(
                 'flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
                 props.class,
             )
         "
+        :name="props.name"
+        :placeholder="props.placeholder"
+        :readonly="props.readonly"
+        :required="props.required"
+        :tabindex="props.tabindex"
+        :type="props.type"
     />
 </template>

@@ -63,6 +63,13 @@ class ProcessProfilePhoto implements ShouldQueue
         return $bytes;
     }
 
+    private function assertPixels(int $width, int $height): void
+    {
+        if ($width < 1 || $height < 1 || $width * $height > (int)config('website.max_pixels', 60_000_000)) {
+            throw new \RuntimeException('Image exceeds the 60-megapixel decoded image limit.');
+        }
+    }
+
     private function gd(string $source): string
     {
         $details = @getimagesize($source);
@@ -88,12 +95,5 @@ class ProcessProfilePhoto implements ShouldQueue
         imagedestroy($output);
 
         return $bytes;
-    }
-
-    private function assertPixels(int $width, int $height): void
-    {
-        if ($width < 1 || $height < 1 || $width * $height > (int)config('website.max_pixels', 60_000_000)) {
-            throw new \RuntimeException('Image exceeds the 60-megapixel decoded image limit.');
-        }
     }
 }

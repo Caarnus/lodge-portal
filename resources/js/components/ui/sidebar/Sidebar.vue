@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Sheet from "@/components/ui/sheet/Sheet.vue";
 import SheetContent from "@/components/ui/sheet/SheetContent.vue";
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "vue";
-import { SIDEBAR_WIDTH_MOBILE, useSidebar } from "./utils";
+import {cn} from "@/lib/utils";
+import type {HTMLAttributes} from "vue";
+import {SIDEBAR_WIDTH_MOBILE, useSidebar} from "./utils";
 
 defineOptions({
     inheritAttrs: false,
@@ -23,7 +23,7 @@ const props = withDefaults(
     },
 );
 
-const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+const {isMobile, state, openMobile, setOpenMobile} = useSidebar();
 </script>
 
 <template>
@@ -37,7 +37,7 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
         "
         v-bind="$attrs"
     >
-        <slot />
+        <slot/>
     </div>
 
     <Sheet
@@ -47,27 +47,27 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
         @update:open="setOpenMobile"
     >
         <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
             :side="side"
-            class="w-[var(--sidebar-width)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             :style="{
                 '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
             }"
+            class="w-[var(--sidebar-width)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            data-mobile="true"
+            data-sidebar="sidebar"
         >
             <div class="flex h-full w-full flex-col">
-                <slot />
+                <slot/>
             </div>
         </SheetContent>
     </Sheet>
 
     <div
         v-else
-        class="group peer hidden md:block"
-        :data-state="state"
         :data-collapsible="state === 'collapsed' ? collapsible : ''"
-        :data-variant="variant"
         :data-side="side"
+        :data-state="state"
+        :data-variant="variant"
+        class="group peer hidden md:block"
     >
         <!-- This is what handles the sidebar gap on desktop  -->
         <div
@@ -99,10 +99,10 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
             v-bind="$attrs"
         >
             <div
-                data-sidebar="sidebar"
                 class="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+                data-sidebar="sidebar"
             >
-                <slot />
+                <slot/>
             </div>
         </div>
     </div>

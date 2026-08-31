@@ -1,24 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    Dialog,
-    DialogHeader,
-    DialogScrollContent,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Head, useForm } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Dialog, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {Head, useForm} from "@inertiajs/vue3";
+import {computed, ref} from "vue";
 
 type Proficiency = {
     ritual_part_id: number;
@@ -134,7 +123,7 @@ const openEditor = (member: Member) => {
             };
         }),
     );
-    form.windows = member.availability.map((window) => ({ ...window }));
+    form.windows = member.availability.map((window) => ({...window}));
     form.clearErrors();
     editing.value = member;
 };
@@ -145,10 +134,10 @@ const hasWindow = (day: number, daypart: string) =>
 const toggleWindow = (day: number, daypart: string) => {
     form.windows = hasWindow(day, daypart)
         ? form.windows.filter(
-              (window) =>
-                  window.day_of_week !== day || window.daypart !== daypart,
-          )
-        : [...form.windows, { day_of_week: day, daypart }];
+            (window) =>
+                window.day_of_week !== day || window.daypart !== daypart,
+        )
+        : [...form.windows, {day_of_week: day, daypart}];
 };
 const save = () => {
     if (editing.value)
@@ -174,7 +163,7 @@ const completionClass = (part: PartForm) =>
 </script>
 
 <template>
-    <Head :title="`${lodge.name} Ritual Management`" />
+    <Head :title="`${lodge.name} Ritual Management`"/>
     <AppLayout
         :breadcrumbs="[
             {
@@ -189,33 +178,35 @@ const completionClass = (part: PartForm) =>
     >
         <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
             <PageHeader
-                title="Ritual management"
                 :description="`Manage current ${lodge.name} members’ ritual work and broad availability. Private notes are not shown or changed.`"
+                title="Ritual management"
             />
-            <WorkspaceTabs :lodge="lodge" workspace="people" active="ritual" />
+            <WorkspaceTabs :lodge="lodge" active="ritual" workspace="people"/>
             <Card
-                ><CardContent
+            >
+                <CardContent
                     class="grid gap-3 pt-6 md:grid-cols-[minmax(0,1fr)_16rem]"
-                    ><label class="field-label"
-                        >Member name<input
-                            v-model="query"
-                            class="field-input"
-                            placeholder="Filter members" /></label
-                    ><label class="field-label"
-                        >Show<select v-model="status" class="field-input">
-                            <option value="with_records">
-                                Members with ritual records
-                            </option>
-                            <option value="all">All current members</option>
-                            <option value="learning">Learning a part</option>
-                            <option value="proficient">Proficient</option>
-                            <option value="completed">
-                                Completed in open lodge
-                            </option>
-                            <option value="willing">Willing to assist</option>
-                        </select></label
-                    ></CardContent
-                ></Card
+                ><label class="field-label"
+                >Member name<input
+                    v-model="query"
+                    class="field-input"
+                    placeholder="Filter members"/></label
+                ><label class="field-label"
+                >Show<select v-model="status" class="field-input">
+                    <option value="with_records">
+                        Members with ritual records
+                    </option>
+                    <option value="all">All current members</option>
+                    <option value="learning">Learning a part</option>
+                    <option value="proficient">Proficient</option>
+                    <option value="completed">
+                        Completed in open lodge
+                    </option>
+                    <option value="willing">Willing to assist</option>
+                </select></label
+                ></CardContent
+                >
+            </Card
             >
             <p class="text-sm text-muted-foreground">
                 {{ rows.length }} of {{ memberships.length }} current members
@@ -223,178 +214,202 @@ const completionClass = (part: PartForm) =>
             </p>
             <div class="space-y-3 md:hidden">
                 <Card v-for="member in rows" :key="member.membership_id"
-                    ><CardHeader class="pb-3"
-                        ><CardTitle class="text-base">{{
-                            member.display_name
-                        }}</CardTitle
-                        ><CardDescription
-                            >{{ member.proficiency_count }} parts ·
+                >
+                    <CardHeader class="pb-3"
+                    >
+                        <CardTitle class="text-base">{{
+                                member.display_name
+                            }}
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >{{ member.proficiency_count }} parts ·
                             {{ member.current_total }} points ·
                             {{ member.completed_count }}
-                            completed</CardDescription
-                        ></CardHeader
-                    ><CardContent
+                            completed
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent
                         class="flex items-center justify-between gap-3"
-                        ><div class="flex flex-wrap gap-2">
+                    >
+                        <div class="flex flex-wrap gap-2">
                             <Badge
                                 :variant="
                                     member.visibility_scope === 'hidden'
                                         ? 'muted'
                                         : 'default'
                                 "
-                                >{{
+                            >{{
                                     visibilityLabel(member.visibility_scope)
-                                }}</Badge
-                            ><Badge variant="secondary">{{
-                                member.has_linked_account
-                                    ? "Linked"
-                                    : "No account"
-                            }}</Badge>
+                                }}
+                            </Badge
+                            >
+                            <Badge variant="secondary">{{
+                                    member.has_linked_account
+                                        ? "Linked"
+                                        : "No account"
+                                }}
+                            </Badge>
                         </div>
                         <Button
-                            variant="outline"
                             size="sm"
+                            variant="outline"
                             @click="openEditor(member)"
-                            >Edit</Button
-                        ></CardContent
-                    ></Card
+                        >Edit
+                        </Button
+                        >
+                    </CardContent
+                    >
+                </Card
                 >
             </div>
             <Card class="hidden md:block"
-                ><CardContent class="overflow-x-auto p-0"
-                    ><table class="w-full min-w-[900px] text-left text-sm">
+            >
+                <CardContent class="overflow-x-auto p-0"
+                >
+                    <table class="w-full min-w-[900px] text-left text-sm">
                         <thead
                             class="border-b bg-muted text-xs uppercase tracking-wide text-muted-foreground"
                         >
-                            <tr>
-                                <th class="p-3">
-                                    <button
-                                        type="button"
-                                        class="font-bold hover:text-foreground"
-                                        @click="sortBy('display_name')"
-                                    >
-                                        MEMBER {{ sortIcon("display_name") }}
-                                    </button>
-                                </th>
-                                <th class="p-3 text-center">
-                                    <button
-                                        type="button"
-                                        class="font-bold hover:text-foreground"
-                                        @click="sortBy('proficiency_count')"
-                                    >
-                                        PARTS
-                                        {{ sortIcon("proficiency_count") }}
-                                    </button>
-                                </th>
-                                <th class="p-3 text-center">
-                                    <button
-                                        type="button"
-                                        class="font-bold hover:text-foreground"
-                                        @click="sortBy('completed_count')"
-                                    >
-                                        COMPLETED
-                                        {{ sortIcon("completed_count") }}
-                                    </button>
-                                </th>
-                                <th class="p-3 text-center">
-                                    <button
-                                        type="button"
-                                        class="font-bold hover:text-foreground"
-                                        @click="sortBy('current_total')"
-                                    >
-                                        POINTS {{ sortIcon("current_total") }}
-                                    </button>
-                                </th>
-                                <th class="p-3 text-center">
-                                    <button
-                                        type="button"
-                                        class="font-bold hover:text-foreground"
-                                        @click="sortBy('willing_count')"
-                                    >
-                                        WILLING {{ sortIcon("willing_count") }}
-                                    </button>
-                                </th>
-                                <th class="p-3">VISIBILITY</th>
-                                <th class="p-3">ACCOUNT</th>
-                                <th class="w-24 p-3">
-                                    <span class="sr-only">Actions</span>
-                                </th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">
+                                <button
+                                    class="font-bold hover:text-foreground"
+                                    type="button"
+                                    @click="sortBy('display_name')"
+                                >
+                                    MEMBER {{ sortIcon("display_name") }}
+                                </button>
+                            </th>
+                            <th class="p-3 text-center">
+                                <button
+                                    class="font-bold hover:text-foreground"
+                                    type="button"
+                                    @click="sortBy('proficiency_count')"
+                                >
+                                    PARTS
+                                    {{ sortIcon("proficiency_count") }}
+                                </button>
+                            </th>
+                            <th class="p-3 text-center">
+                                <button
+                                    class="font-bold hover:text-foreground"
+                                    type="button"
+                                    @click="sortBy('completed_count')"
+                                >
+                                    COMPLETED
+                                    {{ sortIcon("completed_count") }}
+                                </button>
+                            </th>
+                            <th class="p-3 text-center">
+                                <button
+                                    class="font-bold hover:text-foreground"
+                                    type="button"
+                                    @click="sortBy('current_total')"
+                                >
+                                    POINTS {{ sortIcon("current_total") }}
+                                </button>
+                            </th>
+                            <th class="p-3 text-center">
+                                <button
+                                    class="font-bold hover:text-foreground"
+                                    type="button"
+                                    @click="sortBy('willing_count')"
+                                >
+                                    WILLING {{ sortIcon("willing_count") }}
+                                </button>
+                            </th>
+                            <th class="p-3">VISIBILITY</th>
+                            <th class="p-3">ACCOUNT</th>
+                            <th class="w-24 p-3">
+                                <span class="sr-only">Actions</span>
+                            </th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="member in rows"
-                                :key="member.membership_id"
-                                class="border-b border-border/50 last:border-0"
-                            >
-                                <td class="p-3 font-medium">
-                                    {{ member.display_name }}
-                                </td>
-                                <td class="p-3 text-center">
-                                    {{ member.proficiency_count
-                                    }}<span
-                                        v-if="
+                        <tr
+                            v-for="member in rows"
+                            :key="member.membership_id"
+                            class="border-b border-border/50 last:border-0"
+                        >
+                            <td class="p-3 font-medium">
+                                {{ member.display_name }}
+                            </td>
+                            <td class="p-3 text-center">
+                                {{
+                                    member.proficiency_count
+                                }}<span
+                                v-if="
                                             member.learning_count ||
                                             member.proficient_count
                                         "
-                                        class="block text-xs text-muted-foreground"
-                                        >{{ member.learning_count }} learning ·
+                                class="block text-xs text-muted-foreground"
+                            >{{ member.learning_count }} learning ·
                                         {{ member.proficient_count }}
                                         proficient</span
-                                    >
-                                </td>
-                                <td class="p-3 text-center">
-                                    {{ member.completed_count }}
-                                </td>
-                                <td class="p-3 text-center">
-                                    {{ member.current_total }}
-                                </td>
-                                <td class="p-3 text-center">
-                                    {{ member.willing_count }}
-                                </td>
-                                <td class="p-3">
-                                    <Badge
-                                        :variant="
+                            >
+                            </td>
+                            <td class="p-3 text-center">
+                                {{ member.completed_count }}
+                            </td>
+                            <td class="p-3 text-center">
+                                {{ member.current_total }}
+                            </td>
+                            <td class="p-3 text-center">
+                                {{ member.willing_count }}
+                            </td>
+                            <td class="p-3">
+                                <Badge
+                                    :variant="
                                             member.visibility_scope === 'hidden'
                                                 ? 'muted'
                                                 : 'default'
                                         "
-                                        >{{
-                                            visibilityLabel(
-                                                member.visibility_scope,
-                                            )
-                                        }}</Badge
-                                    >
-                                </td>
-                                <td class="p-3 text-muted-foreground">
-                                    {{
-                                        member.has_linked_account
-                                            ? "Linked"
-                                            : "No linked account"
+                                >{{
+                                        visibilityLabel(
+                                            member.visibility_scope,
+                                        )
                                     }}
-                                </td>
-                                <td class="p-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        @click="openEditor(member)"
-                                        >Edit</Button
-                                    >
-                                </td>
-                            </tr>
+                                </Badge
+                                >
+                            </td>
+                            <td class="p-3 text-muted-foreground">
+                                {{
+                                    member.has_linked_account
+                                        ? "Linked"
+                                        : "No linked account"
+                                }}
+                            </td>
+                            <td class="p-3">
+                                <Button
+                                    size="sm"
+                                    type="button"
+                                    variant="outline"
+                                    @click="openEditor(member)"
+                                >Edit
+                                </Button
+                                >
+                            </td>
+                        </tr>
                         </tbody>
-                    </table></CardContent
-                ></Card
+                    </table>
+                </CardContent
+                >
+            </Card
             >
         </main>
     </AppLayout>
     <Dialog :open="!!editing" @update:open="!$event && (editing = null)">
         <DialogScrollContent class="w-[calc(100vw-2rem)] max-w-6xl">
             <DialogHeader
-                ><DialogTitle
-                    >Edit ritual work — {{ editing?.display_name }}</DialogTitle
-                ></DialogHeader
+            >
+                <DialogTitle
+                >Edit ritual work — {{ editing?.display_name }}
+                </DialogTitle
+                >
+            </DialogHeader
             >
             <form class="space-y-6" @submit.prevent="save">
                 <section class="rounded-lg bg-muted/20 p-5">
@@ -425,56 +440,56 @@ const completionClass = (part: PartForm) =>
                                     class="grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] xl:items-end"
                                 >
                                     <label class="block w-full"
-                                        >Status<select
-                                            v-model="entry.status"
-                                            class="mt-1 block w-full rounded border p-2"
-                                            :class="statusSelectClass(entry)"
-                                        >
-                                            <option value="not_known">
-                                                Not known
-                                            </option>
-                                            <option value="learning">
-                                                Learning
-                                            </option>
-                                            <option value="proficient">
-                                                Proficient
-                                            </option>
-                                        </select></label
+                                    >Status<select
+                                        v-model="entry.status"
+                                        :class="statusSelectClass(entry)"
+                                        class="mt-1 block w-full rounded border p-2"
+                                    >
+                                        <option value="not_known">
+                                            Not known
+                                        </option>
+                                        <option value="learning">
+                                            Learning
+                                        </option>
+                                        <option value="proficient">
+                                            Proficient
+                                        </option>
+                                    </select></label
                                     >
                                     <label
                                         class="flex min-h-10 items-center gap-2 rounded border border-muted-foreground/25 bg-muted/40 px-3 py-2"
-                                        ><input
-                                            v-model="
+                                    ><input
+                                        v-model="
                                                 entry.interested_in_learning
                                             "
-                                            type="checkbox"
-                                        />
+                                        type="checkbox"
+                                    />
                                         Interested in learning</label
                                     >
                                     <label
                                         class="flex min-h-10 items-center gap-2 rounded border border-muted-foreground/25 bg-muted/40 px-3 py-2"
-                                        ><input
-                                            v-model="entry.willing_to_assist"
-                                            type="checkbox"
-                                            :disabled="
+                                    ><input
+                                        v-model="entry.willing_to_assist"
+                                        :disabled="
                                                 entry.status !== 'proficient'
                                             "
-                                        />
+                                        type="checkbox"
+                                    />
                                         Willing to assist</label
                                     >
                                     <label
-                                        class="rounded border px-3 py-2"
                                         :class="completionClass(entry)"
-                                        ><span class="flex items-center gap-2"
-                                            ><input
-                                                v-model="
+                                        class="rounded border px-3 py-2"
+                                    ><span class="flex items-center gap-2"
+                                    ><input
+                                        v-model="
                                                     entry.performed_for_credit
                                                 "
-                                                type="checkbox"
-                                            />
+                                        type="checkbox"
+                                    />
                                             Open-lodge credit</span
-                                        ><span
-                                            v-if="
+                                    ><span
+                                        v-if="
                                                 entry.performed_for_credit &&
                                                 !editing?.proficiencies.some(
                                                     (saved) =>
@@ -483,23 +498,23 @@ const completionClass = (part: PartForm) =>
                                                         saved.performed_for_credit,
                                                 )
                                             "
-                                            class="mt-2 flex items-center gap-2 text-xs"
-                                            ><input
-                                                v-model="
+                                        class="mt-2 flex items-center gap-2 text-xs"
+                                    ><input
+                                        v-model="
                                                     entry.confirm_performed_for_credit
                                                 "
-                                                type="checkbox"
-                                            />
+                                        type="checkbox"
+                                    />
                                             Confirm open-lodge performance</span
-                                        ></label
+                                    ></label
                                     >
                                     <label class="block w-full"
-                                        >First proficient<input
-                                            v-model="
+                                    >First proficient<input
+                                        v-model="
                                                 entry.first_marked_proficient_on
                                             "
-                                            type="date"
-                                            class="mt-1 block w-full rounded border p-2"
+                                        class="mt-1 block w-full rounded border p-2"
+                                        type="date"
                                     /></label>
                                 </div>
                             </div>
@@ -515,44 +530,44 @@ const completionClass = (part: PartForm) =>
                     <div class="mt-3 overflow-x-auto">
                         <table class="w-full min-w-[600px] text-sm">
                             <thead>
-                                <tr>
-                                    <th class="p-2 text-left">Day</th>
-                                    <th
-                                        v-for="daypart in dayparts"
-                                        :key="daypart"
-                                        class="p-2 text-center capitalize"
-                                    >
-                                        {{ daypart }}
-                                    </th>
-                                </tr>
+                            <tr>
+                                <th class="p-2 text-left">Day</th>
+                                <th
+                                    v-for="daypart in dayparts"
+                                    :key="daypart"
+                                    class="p-2 text-center capitalize"
+                                >
+                                    {{ daypart }}
+                                </th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <tr
-                                    v-for="(weekday, index) in weekdays"
-                                    :key="weekday"
+                            <tr
+                                v-for="(weekday, index) in weekdays"
+                                :key="weekday"
+                            >
+                                <th class="p-2 text-left font-medium">
+                                    {{ weekday }}
+                                </th>
+                                <td
+                                    v-for="daypart in dayparts"
+                                    :key="daypart"
+                                    class="p-2 text-center"
                                 >
-                                    <th class="p-2 text-left font-medium">
-                                        {{ weekday }}
-                                    </th>
-                                    <td
-                                        v-for="daypart in dayparts"
-                                        :key="daypart"
-                                        class="p-2 text-center"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            :checked="
-                                                hasWindow(index + 1, daypart)
-                                            "
-                                            :aria-label="
+                                    <input
+                                        :aria-label="
                                                 weekday + ' ' + daypart
                                             "
-                                            @change="
+                                        :checked="
+                                                hasWindow(index + 1, daypart)
+                                            "
+                                        type="checkbox"
+                                        @change="
                                                 toggleWindow(index + 1, daypart)
                                             "
-                                        />
-                                    </td>
-                                </tr>
+                                    />
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -566,15 +581,17 @@ const completionClass = (part: PartForm) =>
                 </p>
                 <div class="flex justify-end gap-3">
                     <button
-                        type="button"
                         class="rounded border px-4 py-2"
+                        type="button"
                         @click="editing = null"
                     >
-                        Cancel</button
-                    ><button
-                        type="submit"
-                        class="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+                        Cancel
+                    </button
+                    >
+                    <button
                         :disabled="form.processing"
+                        class="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+                        type="submit"
                     >
                         Save changes
                     </button>

@@ -1,15 +1,15 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import InputError from "@/components/InputError.vue";
 import TextLink from "@/components/TextLink.vue";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import AuthBase from "@/layouts/AuthLayout.vue";
-import type { SharedData } from "@/types";
-import { Head, useForm, usePage } from "@inertiajs/vue3";
-import { LoaderCircle } from "lucide-vue-next";
-import { computed } from "vue";
+import type {SharedData} from "@/types";
+import {Head, useForm, usePage} from "@inertiajs/vue3";
+import {LoaderCircle} from "lucide-vue-next";
+import {computed} from "vue";
 
 defineProps<{
     status?: string;
@@ -34,14 +34,14 @@ const submit = () => {
 
 <template>
     <AuthBase
-        :title="lodge ? `Log in to ${lodge.name}` : 'Log in to your account'"
         :description="
             lodge
                 ? `Use your ${lodge.name} member account.`
                 : 'Enter your email and password below to log in'
         "
+        :title="lodge ? `Log in to ${lodge.name}` : 'Log in to your account'"
     >
-        <Head title="Log in" />
+        <Head title="Log in"/>
 
         <div
             v-if="status"
@@ -50,21 +50,21 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
+        <form class="flex flex-col gap-6" @submit.prevent="submit">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
                     <Input
                         id="email"
-                        type="email"
-                        required
-                        autofocus
+                        v-model="form.email"
                         :tabindex="1"
                         autocomplete="email"
-                        v-model="form.email"
+                        autofocus
                         placeholder="email@example.com"
+                        required
+                        type="email"
                     />
-                    <InputError :message="form.errors.email" />
+                    <InputError :message="form.errors.email"/>
                 </div>
 
                 <div class="grid gap-2">
@@ -73,26 +73,26 @@ const submit = () => {
                         <TextLink
                             v-if="canResetPassword"
                             :href="route('password.request')"
-                            class="text-sm"
                             :tabindex="5"
+                            class="text-sm"
                         >
                             Forgot password?
                         </TextLink>
                     </div>
                     <Input
                         id="password"
-                        type="password"
-                        required
+                        v-model="form.password"
                         :tabindex="2"
                         autocomplete="current-password"
-                        v-model="form.password"
                         placeholder="Password"
+                        required
+                        type="password"
                     />
-                    <InputError :message="form.errors.password" />
+                    <InputError :message="form.errors.password"/>
                 </div>
 
                 <div class="flex items-center justify-between" tabindex="3">
-                    <Label for="remember" class="flex items-center space-x-3">
+                    <Label class="flex items-center space-x-3" for="remember">
                         <Checkbox
                             id="remember"
                             v-model:checked="form.remember"
@@ -103,10 +103,10 @@ const submit = () => {
                 </div>
 
                 <Button
-                    type="submit"
-                    class="mt-4 w-full"
-                    :tabindex="4"
                     :disabled="form.processing"
+                    :tabindex="4"
+                    class="mt-4 w-full"
+                    type="submit"
                 >
                     <LoaderCircle
                         v-if="form.processing"
@@ -119,7 +119,8 @@ const submit = () => {
             <div class="text-center text-sm text-muted-foreground">
                 Don't have an account?
                 <TextLink :href="route('register')" :tabindex="5"
-                    >Sign up</TextLink
+                >Sign up
+                </TextLink
                 >
             </div>
         </form>

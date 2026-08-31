@@ -1,21 +1,8 @@
-<script setup lang="ts">
-import {
-    Dialog,
-    DialogDescription,
-    DialogHeader,
-    DialogScrollContent,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { router, useForm } from "@inertiajs/vue3";
-import {
-    Check,
-    ImagePlus,
-    Pencil,
-    RotateCcw,
-    Trash2,
-    X,
-} from "lucide-vue-next";
-import { ref } from "vue";
+<script lang="ts" setup>
+import {Dialog, DialogDescription, DialogHeader, DialogScrollContent, DialogTitle,} from "@/components/ui/dialog";
+import {router, useForm} from "@inertiajs/vue3";
+import {Check, ImagePlus, Pencil, RotateCcw, Trash2, X,} from "lucide-vue-next";
+import {ref} from "vue";
 
 const props = defineProps<{ lodge: any; media: any[]; open: boolean }>();
 const emit = defineEmits<{ "update:open": [value: boolean] }>();
@@ -48,7 +35,7 @@ const saveAltText = (asset: any) => {
     error.value = "";
     router.put(
         `/lodges/${props.lodge.id}/website/media/${asset.id}`,
-        { alt_text: altText.value },
+        {alt_text: altText.value},
         {
             preserveScroll: true,
             onSuccess: () => (editingId.value = null),
@@ -63,7 +50,7 @@ const retry = (asset: any) =>
     router.post(
         `/lodges/${props.lodge.id}/website/media/${asset.id}/retry`,
         {},
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 const remove = (asset: any) => {
     error.value = "";
@@ -93,10 +80,10 @@ const remove = (asset: any) => {
                 <label class="field-label">
                     Image file
                     <input
-                        required
-                        type="file"
                         accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
                         class="file-input"
+                        required
+                        type="file"
                         @change="
                             upload.file =
                                 ($event.target as HTMLInputElement)
@@ -108,15 +95,16 @@ const remove = (asset: any) => {
                     Alternative text
                     <input
                         v-model="upload.alt_text"
-                        required
                         class="field-input"
+                        required
                     />
                 </label>
                 <button
-                    class="primary-button self-end"
                     :disabled="upload.processing"
+                    class="primary-button self-end"
                 >
-                    <ImagePlus class="mr-1 size-4" /> Upload image
+                    <ImagePlus class="mr-1 size-4"/>
+                    Upload image
                 </button>
             </form>
             <p
@@ -132,120 +120,127 @@ const remove = (asset: any) => {
             >
                 <table class="w-full table-fixed text-left text-sm">
                     <colgroup>
-                        <col class="w-20" />
-                        <col class="w-44" />
-                        <col />
-                        <col class="w-24" />
-                        <col class="w-32" />
+                        <col class="w-20"/>
+                        <col class="w-44"/>
+                        <col/>
+                        <col class="w-24"/>
+                        <col class="w-32"/>
                     </colgroup>
                     <thead class="border-b bg-muted/40">
-                        <tr>
-                            <th class="p-3 font-medium text-muted-foreground">
-                                Image
-                            </th>
-                            <th class="p-3 font-medium text-muted-foreground">
-                                File
-                            </th>
-                            <th class="p-3 font-medium text-muted-foreground">
-                                Alternative text
-                            </th>
-                            <th class="p-3 font-medium text-muted-foreground">
-                                Status
-                            </th>
-                            <th class="p-3">
-                                <span class="sr-only">Actions</span>
-                            </th>
-                        </tr>
+                    <tr>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Image
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            File
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Alternative text
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Status
+                        </th>
+                        <th class="p-3">
+                            <span class="sr-only">Actions</span>
+                        </th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr
-                            v-for="asset in media"
-                            :key="asset.id"
-                            class="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/35"
+                    <tr
+                        v-for="asset in media"
+                        :key="asset.id"
+                        class="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/35"
+                    >
+                        <td class="p-2">
+                            <img
+                                v-if="asset.url"
+                                :alt="asset.alt_text"
+                                :src="asset.url"
+                                class="size-14 rounded object-cover"
+                            /><span
+                            v-else
+                            class="inline-flex size-14 items-center justify-center rounded bg-muted text-xs text-muted-foreground"
+                        >Pending</span
                         >
-                            <td class="p-2">
-                                <img
-                                    v-if="asset.url"
-                                    :src="asset.url"
-                                    :alt="asset.alt_text"
-                                    class="size-14 rounded object-cover"
-                                /><span
-                                    v-else
-                                    class="inline-flex size-14 items-center justify-center rounded bg-muted text-xs text-muted-foreground"
-                                    >Pending</span
-                                >
-                            </td>
-                            <td
-                                class="truncate p-3"
-                                :title="asset.original_name"
+                        </td>
+                        <td
+                            :title="asset.original_name"
+                            class="truncate p-3"
+                        >
+                            {{ asset.original_name }}
+                        </td>
+                        <td class="p-3">
+                            <div
+                                v-if="editingId === asset.id"
+                                class="flex gap-2"
                             >
-                                {{ asset.original_name }}
-                            </td>
-                            <td class="p-3">
-                                <div
-                                    v-if="editingId === asset.id"
-                                    class="flex gap-2"
+                                <input
+                                    v-model="altText"
+                                    class="field-input"
+                                />
+                                <button
+                                    aria-label="Save alternative text"
+                                    class="icon-button"
+                                    type="button"
+                                    @click="saveAltText(asset)"
                                 >
-                                    <input
-                                        v-model="altText"
-                                        class="field-input"
-                                    /><button
-                                        type="button"
-                                        class="icon-button"
-                                        aria-label="Save alternative text"
-                                        @click="saveAltText(asset)"
-                                    >
-                                        <Check class="size-4" /></button
-                                    ><button
-                                        type="button"
-                                        class="icon-button"
-                                        aria-label="Cancel"
-                                        @click="editingId = null"
-                                    >
-                                        <X class="size-4" />
-                                    </button>
-                                </div>
-                                <span
-                                    v-else
-                                    class="block truncate"
-                                    :title="asset.alt_text"
-                                    >{{ asset.alt_text }}</span
+                                    <Check class="size-4"/>
+                                </button
                                 >
-                            </td>
-                            <td class="p-3 capitalize">
-                                {{ asset.processing_status }}
-                            </td>
-                            <td class="p-3">
-                                <div class="flex min-w-32 justify-end gap-1">
-                                    <button
-                                        v-if="editingId !== asset.id"
-                                        type="button"
-                                        class="icon-button"
-                                        aria-label="Edit alternative text"
-                                        @click="editAltText(asset)"
-                                    >
-                                        <Pencil class="size-4" /></button
-                                    ><button
-                                        v-if="
+                                <button
+                                    aria-label="Cancel"
+                                    class="icon-button"
+                                    type="button"
+                                    @click="editingId = null"
+                                >
+                                    <X class="size-4"/>
+                                </button>
+                            </div>
+                            <span
+                                v-else
+                                :title="asset.alt_text"
+                                class="block truncate"
+                            >{{ asset.alt_text }}</span
+                            >
+                        </td>
+                        <td class="p-3 capitalize">
+                            {{ asset.processing_status }}
+                        </td>
+                        <td class="p-3">
+                            <div class="flex min-w-32 justify-end gap-1">
+                                <button
+                                    v-if="editingId !== asset.id"
+                                    aria-label="Edit alternative text"
+                                    class="icon-button"
+                                    type="button"
+                                    @click="editAltText(asset)"
+                                >
+                                    <Pencil class="size-4"/>
+                                </button
+                                >
+                                <button
+                                    v-if="
                                             asset.processing_status === 'failed'
                                         "
-                                        type="button"
-                                        class="icon-button"
-                                        aria-label="Retry processing"
-                                        @click="retry(asset)"
-                                    >
-                                        <RotateCcw class="size-4" /></button
-                                    ><button
-                                        type="button"
-                                        class="icon-button border-destructive/50 text-destructive hover:bg-destructive/10"
-                                        aria-label="Delete image"
-                                        @click="remove(asset)"
-                                    >
-                                        <Trash2 class="size-4" />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                                    aria-label="Retry processing"
+                                    class="icon-button"
+                                    type="button"
+                                    @click="retry(asset)"
+                                >
+                                    <RotateCcw class="size-4"/>
+                                </button
+                                >
+                                <button
+                                    aria-label="Delete image"
+                                    class="icon-button border-destructive/50 text-destructive hover:bg-destructive/10"
+                                    type="button"
+                                    @click="remove(asset)"
+                                >
+                                    <Trash2 class="size-4"/>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -258,14 +253,14 @@ const remove = (asset: any) => {
                     <div class="flex gap-3">
                         <img
                             v-if="asset.url"
-                            :src="asset.url"
                             :alt="asset.alt_text"
+                            :src="asset.url"
                             class="size-16 rounded object-cover"
                         /><span
-                            v-else
-                            class="inline-flex size-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground"
-                            >Pending</span
-                        >
+                        v-else
+                        class="inline-flex size-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground"
+                    >Pending</span
+                    >
                         <div class="min-w-0 flex-1">
                             <p class="truncate font-medium">
                                 {{ asset.original_name }}
@@ -294,19 +289,21 @@ const remove = (asset: any) => {
                     >
                         <button
                             v-if="asset.processing_status === 'failed'"
-                            type="button"
-                            class="icon-button"
                             aria-label="Retry processing"
+                            class="icon-button"
+                            type="button"
                             @click="retry(asset)"
                         >
-                            <RotateCcw class="size-4" /></button
-                        ><button
-                            type="button"
-                            class="icon-button border-destructive/50 text-destructive hover:bg-destructive/10"
+                            <RotateCcw class="size-4"/>
+                        </button
+                        >
+                        <button
                             aria-label="Delete image"
+                            class="icon-button border-destructive/50 text-destructive hover:bg-destructive/10"
+                            type="button"
                             @click="remove(asset)"
                         >
-                            <Trash2 class="size-4" />
+                            <Trash2 class="size-4"/>
                         </button>
                     </div>
                 </article>

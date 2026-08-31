@@ -7,12 +7,39 @@ use App\Models\RitualCategory;
 use App\Models\RitualPart;
 use App\Models\RitualProgramLevel;
 use App\Services\Audit;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class RitualReferenceService
 {
+    public function createCategory(array $data): RitualCategory
+    {
+        return RitualCategory::create(array_merge($data, [
+            'key' => $this->key($data['key'] ?? $data['name']),
+            'sort_order' => $data['sort_order'] ?? ((int)RitualCategory::max('sort_order') + 10),
+            'is_active' => true,
+        ]));
+    }
+
+    private function key(string $value): string
+    {
+        return Str::of($value)->slug('_')->limit(100, '')->toString();
+    }
+
+    public function updateCategory(RitualCategory $category, array $data): RitualCategory
+    {
+        $impact = $category->is_active !== (bool)$data['is_active'];
+        $affected = $this->impactCount($category);
+        $this->requireConfirmation($impact, $data, $affected);
+        unset($data['confirm_impact'], $data['key']);
+        $before = $category->only(['name', 'description', 'masonic_degree_id', 'sort_order', 'is_active']);
+        $category->update($data);
+        if ($impact) app(RitualAchievementService::class)->reconcileCategory($category);
+        Audit::record('ritual.category_updated', $category, null, $before, ['affected_person_count' => $impact ? $affected : 0]);
+
+        return $category->fresh();
+    }
+
     public function impactCount(RitualCategory|RitualPart|RitualProgramLevel $reference): int
     {
         if ($reference instanceof RitualPart) {
@@ -26,27 +53,11 @@ class RitualReferenceService
         return PersonRitualProficiency::query()->where('performed_for_credit', true)->distinct('person_id')->count('person_id');
     }
 
-    public function createCategory(array $data): RitualCategory
+    private function requireConfirmation(bool $impact, array $data, int $affected): void
     {
-        return RitualCategory::create(array_merge($data, [
-            'key' => $this->key($data['key'] ?? $data['name']),
-            'sort_order' => $data['sort_order'] ?? ((int) RitualCategory::max('sort_order') + 10),
-            'is_active' => true,
-        ]));
-    }
-
-    public function updateCategory(RitualCategory $category, array $data): RitualCategory
-    {
-        $impact = $category->is_active !== (bool) $data['is_active'];
-        $affected = $this->impactCount($category);
-        $this->requireConfirmation($impact, $data, $affected);
-        unset($data['confirm_impact'], $data['key']);
-        $before = $category->only(['name', 'description', 'masonic_degree_id', 'sort_order', 'is_active']);
-        $category->update($data);
-        if ($impact) app(RitualAchievementService::class)->reconcileCategory($category);
-        Audit::record('ritual.category_updated', $category, null, $before, ['affected_person_count' => $impact ? $affected : 0]);
-
-        return $category->fresh();
+        if ($impact && empty($data['confirm_impact'])) {
+            throw ValidationException::withMessages(['confirm_impact' => "Confirm this change. It affects {$affected} credited member records."]);
+        }
     }
 
     public function createPart(array $data): RitualPart
@@ -56,17 +67,17 @@ class RitualReferenceService
 
         return RitualPart::create(array_merge($data, [
             'key' => $this->key($data['key'] ?? $data['name']),
-            'sort_order' => $data['sort_order'] ?? ((int) RitualPart::where('ritual_category_id', $data['ritual_category_id'])->max('sort_order') + 10),
+            'sort_order' => $data['sort_order'] ?? ((int)RitualPart::where('ritual_category_id', $data['ritual_category_id'])->max('sort_order') + 10),
             'is_active' => true,
         ]));
     }
 
     public function updatePart(RitualPart $part, array $data): RitualPart
     {
-        $impact = $part->is_active !== (bool) $data['is_active']
-            || $part->counts_toward_program !== (bool) $data['counts_toward_program']
-            || $part->ritual_category_id !== (int) $data['ritual_category_id']
-            || (int) $part->point_value !== (int) ($data['point_value'] ?? 0);
+        $impact = $part->is_active !== (bool)$data['is_active']
+            || $part->counts_toward_program !== (bool)$data['counts_toward_program']
+            || $part->ritual_category_id !== (int)$data['ritual_category_id']
+            || (int)$part->point_value !== (int)($data['point_value'] ?? 0);
         $affected = $this->impactCount($part);
         $this->requireConfirmation($impact, $data, $affected);
         unset($data['confirm_impact'], $data['key']);
@@ -83,14 +94,14 @@ class RitualReferenceService
     {
         return RitualProgramLevel::create(array_merge($data, [
             'key' => $this->key($data['key'] ?? $data['name']),
-            'sort_order' => $data['sort_order'] ?? ((int) RitualProgramLevel::max('sort_order') + 10),
+            'sort_order' => $data['sort_order'] ?? ((int)RitualProgramLevel::max('sort_order') + 10),
             'is_active' => true,
         ]));
     }
 
     public function updateLevel(RitualProgramLevel $level, array $data): RitualProgramLevel
     {
-        $impact = (int) $level->point_threshold !== (int) $data['point_threshold'] || $level->is_active !== (bool) $data['is_active'];
+        $impact = (int)$level->point_threshold !== (int)$data['point_threshold'] || $level->is_active !== (bool)$data['is_active'];
         $affected = $this->impactCount($level);
         $this->requireConfirmation($impact, $data, $affected);
         unset($data['confirm_impact'], $data['key']);
@@ -100,17 +111,5 @@ class RitualReferenceService
         Audit::record('ritual.level_updated', $level, null, $before, ['affected_person_count' => $impact ? $affected : 0]);
 
         return $level->fresh();
-    }
-
-    private function key(string $value): string
-    {
-        return Str::of($value)->slug('_')->limit(100, '')->toString();
-    }
-
-    private function requireConfirmation(bool $impact, array $data, int $affected): void
-    {
-        if ($impact && empty($data['confirm_impact'])) {
-            throw ValidationException::withMessages(['confirm_impact' => "Confirm this change. It affects {$affected} credited member records."]);
-        }
     }
 }

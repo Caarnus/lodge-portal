@@ -40,24 +40,6 @@ class LodgeController extends Controller
         return Inertia::render('platform/Lodges', ['lodges' => $lodges]);
     }
 
-    public function create()
-    {
-        return Inertia::render('platform/LodgeForm', []);
-    }
-
-    public function store(LodgeRequest $r, LodgeRoleCatalog $roles)
-    {
-        $data = $r->safe()->except('logo');
-        if ($r->hasFile('logo')) {
-            $data['logo_path'] = $r->file('logo')->store('lodges', 'public');
-        }
-        $lodge = Lodge::create($data);
-        $roles->ensureFor($lodge);
-        Audit::record('lodge.created', $lodge, $lodge, null, $lodge->toArray());
-
-        return redirect()->route('platform.lodges.edit', $lodge);
-    }
-
     public function edit(Lodge $lodge)
     {
         $admins = $lodge->users()
@@ -75,15 +57,13 @@ class LodgeController extends Controller
         ]);
     }
 
-    public function update(LodgeRequest $r, Lodge $lodge)
+    public function features(Request $r, Lodge $lodge)
     {
-        $before = $lodge->toArray();
-        $data = $r->safe()->except('logo');
-        if ($r->hasFile('logo')) {
-            $data['logo_path'] = $r->file('logo')->store('lodges', 'public');
+        $ids = $r->validate(['features' => 'array', 'features.*' => 'integer|exists:features,id'])['features'] ?? [];
+        foreach (Feature::all() as $f) {
+            $lodge->features()->syncWithoutDetaching([$f->id => ['enabled' => in_array($f->id, $ids)]]);
         }
-        $lodge->update($data);
-        Audit::record('lodge.updated', $lodge, $lodge, $before, $lodge->fresh()->toArray());
+        Audit::record('lodge.features_updated', $lodge, $lodge, null, ['feature_ids' => $ids]);
 
         return back();
     }
@@ -111,14 +91,34 @@ class LodgeController extends Controller
         return back();
     }
 
-    public function features(Request $r, Lodge $lodge)
+    public function update(LodgeRequest $r, Lodge $lodge)
     {
-        $ids = $r->validate(['features' => 'array', 'features.*' => 'integer|exists:features,id'])['features'] ?? [];
-        foreach (Feature::all() as $f) {
-            $lodge->features()->syncWithoutDetaching([$f->id => ['enabled' => in_array($f->id, $ids)]]);
+        $before = $lodge->toArray();
+        $data = $r->safe()->except('logo');
+        if ($r->hasFile('logo')) {
+            $data['logo_path'] = $r->file('logo')->store('lodges', 'public');
         }
-        Audit::record('lodge.features_updated', $lodge, $lodge, null, ['feature_ids' => $ids]);
+        $lodge->update($data);
+        Audit::record('lodge.updated', $lodge, $lodge, $before, $lodge->fresh()->toArray());
 
         return back();
+    }
+
+    public function store(LodgeRequest $r, LodgeRoleCatalog $roles)
+    {
+        $data = $r->safe()->except('logo');
+        if ($r->hasFile('logo')) {
+            $data['logo_path'] = $r->file('logo')->store('lodges', 'public');
+        }
+        $lodge = Lodge::create($data);
+        $roles->ensureFor($lodge);
+        Audit::record('lodge.created', $lodge, $lodge, null, $lodge->toArray());
+
+        return redirect()->route('platform.lodges.edit', $lodge);
+    }
+
+    public function create()
+    {
+        return Inertia::render('platform/LodgeForm', []);
     }
 }

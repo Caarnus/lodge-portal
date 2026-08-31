@@ -9,11 +9,11 @@ use App\Models\EventVolunteerCommitment;
 use App\Models\FamilyNewsletterSubscription;
 use App\Models\Person;
 use App\Models\PersonDirectoryPrivacySetting;
+use App\Models\PersonRelationship;
 use App\Models\PersonRitualAvailability;
 use App\Models\PersonRitualLevelAchievement;
 use App\Models\PersonRitualProficiency;
 use App\Models\PersonRitualSetting;
-use App\Models\PersonRelationship;
 use App\Models\RelationshipType;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -125,22 +125,6 @@ class PersonMergeService
         }
     }
 
-    private function equivalent(PersonRelationship $current, int $one, int $two): ?PersonRelationship
-    {
-        $type = RelationshipType::findOrFail($current->relationship_type_id);
-        $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
-
-        return PersonRelationship::query()->whereKeyNot($current->id)->where(function ($query) use ($one, $two, $current, $type, $inverseId) {
-            $query->where(fn($direct) => $direct->where('person_one_id', $one)->where('person_two_id', $two)->where('relationship_type_id', $current->relationship_type_id));
-            if ($inverseId) {
-                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $inverseId));
-            }
-            if ($type->is_symmetric) {
-                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $current->relationship_type_id));
-            }
-        })->first();
-    }
-
     /** @return array{settings:string,proficiencies_moved:int,proficiencies_merged:int,availability_moved:int,availability_merged:int,achievements_moved:int,achievements_merged:int} */
     private function mergeRitualData(Person $source, Person $survivor): array
     {
@@ -226,5 +210,21 @@ class PersonMergeService
     {
         $rank = [RitualProficiencyStatus::NotKnown->value => 0, RitualProficiencyStatus::Learning->value => 1, RitualProficiencyStatus::Proficient->value => 2];
         return $rank[$one->value] >= $rank[$two->value] ? $one : $two;
+    }
+
+    private function equivalent(PersonRelationship $current, int $one, int $two): ?PersonRelationship
+    {
+        $type = RelationshipType::findOrFail($current->relationship_type_id);
+        $inverseId = RelationshipType::query()->where('key', $type->inverse_key)->value('id');
+
+        return PersonRelationship::query()->whereKeyNot($current->id)->where(function ($query) use ($one, $two, $current, $type, $inverseId) {
+            $query->where(fn($direct) => $direct->where('person_one_id', $one)->where('person_two_id', $two)->where('relationship_type_id', $current->relationship_type_id));
+            if ($inverseId) {
+                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $inverseId));
+            }
+            if ($type->is_symmetric) {
+                $query->orWhere(fn($reverse) => $reverse->where('person_one_id', $two)->where('person_two_id', $one)->where('relationship_type_id', $current->relationship_type_id));
+            }
+        })->first();
     }
 }

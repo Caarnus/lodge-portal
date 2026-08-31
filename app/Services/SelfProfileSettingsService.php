@@ -36,6 +36,13 @@ class SelfProfileSettingsService
         });
     }
 
+    private function privacyValues(PersonDirectoryPrivacySetting $setting): array
+    {
+        return Arr::only($setting->toArray(), [
+            'scope', 'show_email', 'show_phone', 'show_address', 'show_profile_photo', 'show_degree',
+        ]);
+    }
+
     public function updateCommunicationPreference(User $actor, int $membershipId, bool $receivesLodgeEmail, bool $receivesPrintNewsletter): MembershipCommunicationPreference
     {
         $person = $this->profiles->personFor($actor);
@@ -73,12 +80,5 @@ class SelfProfileSettingsService
 
             return $preference->fresh();
         });
-    }
-
-    private function privacyValues(PersonDirectoryPrivacySetting $setting): array
-    {
-        return Arr::only($setting->toArray(), [
-            'scope', 'show_email', 'show_phone', 'show_address', 'show_profile_photo', 'show_degree',
-        ]);
     }
 }

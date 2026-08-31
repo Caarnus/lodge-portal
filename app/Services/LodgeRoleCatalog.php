@@ -32,13 +32,6 @@ class LodgeRoleCatalog
         'communications.recipients' => 'Manage newsletter recipients and print preferences',
     ];
 
-    public function seedPermissions(): void
-    {
-        foreach (self::PERMISSIONS as $key => $name) {
-            Permission::updateOrCreate(['key' => $key], ['name' => $name]);
-        }
-    }
-
     public function ensureFor(Lodge $lodge): void
     {
         $this->seedPermissions();
@@ -48,7 +41,7 @@ class LodgeRoleCatalog
 
         foreach (['Administrator', 'Officer', 'Member', 'Non-member'] as $name) {
             $role = Role::query()->where('lodge_id', $lodge->id)->where('name', $name)->first();
-            if ($role && ! $role->is_system) {
+            if ($role && !$role->is_system) {
                 continue;
             }
             $role ??= Role::create(['lodge_id' => $lodge->id, 'name' => $name, 'is_system' => true]);
@@ -62,6 +55,13 @@ class LodgeRoleCatalog
             } else {
                 $role->permissions()->sync([]);
             }
+        }
+    }
+
+    public function seedPermissions(): void
+    {
+        foreach (self::PERMISSIONS as $key => $name) {
+            Permission::updateOrCreate(['key' => $key], ['name' => $name]);
         }
     }
 }

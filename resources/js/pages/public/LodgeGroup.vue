@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppearanceTabs from "@/components/AppearanceTabs.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Card, CardContent } from "@/components/ui/card";
-import { Head, Link, usePage } from "@inertiajs/vue3";
-import type { SharedData } from "@/types";
+import {Card, CardContent} from "@/components/ui/card";
+import {Head, Link, usePage} from "@inertiajs/vue3";
+import type {SharedData} from "@/types";
 
 defineProps<{
     group: {
@@ -19,43 +19,52 @@ const page = usePage<SharedData>();
 </script>
 
 <template>
-    <Head :title="group.name" />
+    <Head :title="group.name"/>
     <main class="min-h-dvh bg-background px-5 py-8 text-foreground sm:py-12">
         <div class="mx-auto max-w-5xl">
             <header class="flex items-center justify-between gap-4">
-                <Link href="/lodges" class="text-lg font-semibold"
-                    >WorkingTools lodges</Link
+                <Link class="text-lg font-semibold" href="/lodges"
+                >WorkingTools lodges
+                </Link
                 >
                 <div class="flex gap-3">
-                    <AppearanceTabs compact /><Link
+                    <AppearanceTabs compact/>
+                    <Link
                         :href="
                             page.props.auth.user
                                 ? route('dashboard')
                                 : route('login')
                         "
                         class="rounded border bg-background px-3 py-2 text-sm"
-                        >{{ page.props.auth.user ? "Portal" : "Log in" }}</Link
+                    >{{ page.props.auth.user ? "Portal" : "Log in" }}
+                    </Link
                     >
                 </div>
             </header>
             <section class="py-10">
                 <PageHeader
+                    :description="group.description ?? undefined"
                     :eyebrow="group.type"
                     :title="group.name"
-                    :description="group.description ?? undefined"
-                    ><template #actions
-                        ><div class="flex gap-3">
+                >
+                    <template #actions
+                    >
+                        <div class="flex gap-3">
                             <Link
                                 :href="`/lodges?group=${group.slug}`"
                                 class="secondary-button"
-                                >Browse these lodges</Link
-                            ><a
+                            >Browse these lodges
+                            </Link
+                            >
+                            <a
                                 :href="`/events?group=${group.slug}`"
                                 class="secondary-button"
-                                >View events</a
+                            >View events</a
                             >
-                        </div></template
-                    ></PageHeader
+                        </div>
+                    </template
+                    >
+                </PageHeader
                 >
             </section>
             <section>
@@ -65,11 +74,16 @@ const page = usePage<SharedData>();
                     class="mt-4 grid gap-4 sm:grid-cols-2"
                 >
                     <Card v-for="lodge in lodges" :key="lodge.id"
-                        ><CardContent class="p-5"
-                            ><h3 class="font-semibold">
-                                {{ lodge.name
-                                }}<template v-if="lodge.number">
-                                    No. {{ lodge.number }}</template
+                    >
+                        <CardContent class="p-5"
+                        >
+                            <h3 class="font-semibold">
+                                {{
+                                    lodge.name
+                                }}
+                                <template v-if="lodge.number">
+                                    No. {{ lodge.number }}
+                                </template
                                 >
                             </h3>
                             <p class="mt-1 text-sm text-muted-foreground">
@@ -85,9 +99,10 @@ const page = usePage<SharedData>();
                                 v-if="lodge.homepage_url"
                                 :href="lodge.homepage_url"
                                 class="mt-3 inline-block text-sm underline"
-                                >Lodge website</a
+                            >Lodge website</a
                             ></CardContent
-                        ></Card
+                        >
+                    </Card
                     >
                 </div>
                 <p
@@ -105,7 +120,7 @@ const page = usePage<SharedData>();
                         :key="event.id"
                         :href="event.url"
                         class="rounded-xl border border-border/80 bg-card p-4 transition-colors hover:bg-muted/50"
-                        ><p class="font-semibold">{{ event.title }}</p>
+                    ><p class="font-semibold">{{ event.title }}</p>
                         <p class="mt-1 text-sm text-muted-foreground">
                             {{ event.lodge.name }} No.
                             {{ event.lodge.number }} · {{ event.starts_at }}

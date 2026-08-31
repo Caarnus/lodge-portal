@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LodgeGroup;
 use App\Services\PublicLodgeDirectory;
 use Inertia\Inertia;
 

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
     --color-background: #f7f8fa;
@@ -81,16 +82,19 @@ body .bg-gray-50,
 body .bg-neutral-50 {
     background-color: var(--color-card);
 }
+
 body .bg-slate-100,
 body .bg-gray-100,
 body .bg-neutral-100 {
     background-color: var(--color-muted);
 }
+
 body .bg-slate-200,
 body .bg-gray-200,
 body .bg-neutral-200 {
     background-color: var(--color-accent);
 }
+
 body .border-slate-200,
 body .border-slate-300,
 body .border-gray-200,
@@ -99,6 +103,7 @@ body .border-neutral-200,
 body .border-neutral-300 {
     border-color: var(--color-border);
 }
+
 body .text-slate-400,
 body .text-slate-500,
 body .text-slate-600,
@@ -110,6 +115,7 @@ body .text-neutral-500,
 body .text-neutral-600 {
     color: var(--color-muted-foreground);
 }
+
 body .text-slate-700,
 body .text-slate-800,
 body .text-slate-900,
@@ -123,6 +129,7 @@ body .text-neutral-900,
 body .text-black {
     color: var(--color-foreground);
 }
+
 body .hover\:bg-slate-50:hover,
 body .hover\:bg-slate-100:hover,
 body .hover\:bg-gray-50:hover,
@@ -131,6 +138,7 @@ body .hover\:bg-neutral-100:hover,
 body .hover\:bg-neutral-200:hover {
     background-color: var(--color-accent);
 }
+
 body .hover\:text-slate-900:hover,
 body .hover\:text-slate-950:hover,
 body .hover\:text-neutral-800:hover,
@@ -144,30 +152,37 @@ body .hover\:text-black:hover {
 html.dark .bg-white {
     background-color: var(--color-card);
 }
+
 html.dark .bg-slate-50 {
     background-color: var(--color-background);
 }
+
 html.dark .bg-slate-100 {
     background-color: var(--color-muted);
 }
+
 html.dark .border,
 html.dark .border-slate-200,
 html.dark .border-slate-300 {
     border-color: var(--color-border);
 }
+
 html.dark .text-slate-900,
 html.dark .text-slate-800,
 html.dark .text-slate-700 {
     color: var(--color-foreground);
 }
+
 html.dark .text-slate-600,
 html.dark .text-slate-500 {
     color: var(--color-muted-foreground);
 }
+
 html.dark .hover\:bg-slate-50:hover,
 html.dark .hover\:bg-slate-100:hover {
     background-color: var(--color-accent);
 }
+
 html.dark input,
 html.dark select,
 html.dark textarea {
@@ -175,6 +190,7 @@ html.dark textarea {
     color: var(--color-foreground);
     border-color: var(--color-input);
 }
+
 html.dark .public-rich-text p {
     color: var(--color-muted-foreground);
 }
@@ -185,6 +201,7 @@ html.dark .public-rich-text p {
     z-index: 1100;
     max-width: 16rem;
 }
+
 [data-pc-name="tooltip"] [data-pc-section="text"] {
     border-radius: var(--radius-md);
     background: var(--color-slate-900);
@@ -196,6 +213,7 @@ html.dark .public-rich-text p {
     word-break: break-word;
     box-shadow: 0 4px 12px rgb(15 23 42 / 18%);
 }
+
 [data-pc-name="tooltip"] [data-pc-section="arrow"] {
     display: none;
 }
@@ -204,63 +222,83 @@ html.dark .public-rich-text p {
     .icon-button {
         @apply inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-30;
     }
+
     .field-label {
         @apply grid gap-1 text-sm font-medium;
     }
+
     .field-input {
         @apply w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
     }
+
     .file-input {
         @apply w-full cursor-pointer rounded-md border border-input bg-background text-sm text-foreground file:mr-3 file:border-0 file:border-r file:border-input file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
     }
+
     .field-toggle {
         @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground md:mt-6;
     }
+
     input[type="checkbox"] {
         @apply size-4 shrink-0 rounded border-input bg-background accent-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:accent-blue-400;
     }
+
     .primary-button {
         @apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
+
     .secondary-button {
         @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-border/80 bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
+
     .checkbox-field {
         @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground;
     }
+
     .admin-warning {
         @apply rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100;
     }
+
     .person-status-icon {
         @apply text-slate-600 dark:text-white;
     }
+
     .person-award-icon {
         @apply text-amber-500 dark:text-amber-300;
     }
+
     .person-account-linked-icon {
         @apply text-green-700 dark:text-green-400;
     }
+
     .person-account-unlinked-icon {
         @apply text-slate-400 dark:text-slate-500;
     }
+
     .public-rich-text h1 {
         @apply mb-5 text-4xl font-bold;
     }
+
     .public-rich-text h2 {
         @apply mb-4 mt-8 text-3xl font-bold;
     }
+
     .public-rich-text h3 {
         @apply mb-3 mt-6 text-2xl font-semibold;
     }
+
     .public-rich-text p {
         @apply my-4 leading-7 text-slate-700;
     }
+
     .public-rich-text ul {
         @apply my-4 list-disc space-y-2 pl-6;
     }
+
     .public-rich-text ol {
         @apply my-4 list-decimal space-y-2 pl-6;
     }
+
     .public-rich-text a {
         @apply underline;
     }
@@ -271,10 +309,12 @@ html.dark .public-rich-text p {
     border-radius: 0.375rem;
     overflow: hidden;
 }
+
 [data-pc-name="editor"] [data-pc-section="toolbar"] {
     border-bottom: 1px solid var(--color-slate-300);
     background: var(--color-slate-50);
 }
+
 [data-pc-name="editor"] [data-pc-section="content"] {
     background: white;
 }

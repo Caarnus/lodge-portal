@@ -11,11 +11,6 @@ class EventVolunteerPosition extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['needed_count' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean'];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -34,5 +29,10 @@ class EventVolunteerPosition extends Model
     public function commitments()
     {
         return $this->hasMany(EventVolunteerCommitment::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['needed_count' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean'];
     }
 }

@@ -1,8 +1,8 @@
-<script setup lang="ts">
-import type { AuthenticatedSharedData } from "@/types";
+<script lang="ts" setup>
+import type {AuthenticatedSharedData} from "@/types";
 import TabBar from "@/components/TabBar.vue";
-import { usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import {usePage} from "@inertiajs/vue3";
+import {computed} from "vue";
 
 const props = defineProps<{
     lodge: { id: number };
@@ -86,8 +86,8 @@ const tabs = computed(() => {
 <template>
     <TabBar
         v-if="tabs.length > 1"
-        :tabs="tabs"
         :active="active"
         :ariaLabel="`${workspace} workspace`"
+        :tabs="tabs"
     />
 </template>

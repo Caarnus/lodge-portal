@@ -14,11 +14,6 @@ class NewsletterIssueVersion extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => ContentVersionStatus::class, 'publication_date' => 'date', 'published_at' => 'datetime'];
-    }
-
     public function issue()
     {
         return $this->belongsTo(NewsletterIssue::class, 'newsletter_issue_id');
@@ -52,5 +47,10 @@ class NewsletterIssueVersion extends Model
     public function distributionRuns()
     {
         return $this->hasMany(CommunicationDistributionRun::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => ContentVersionStatus::class, 'publication_date' => 'date', 'published_at' => 'datetime'];
     }
 }

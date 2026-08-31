@@ -13,11 +13,6 @@ class RitualCategory extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['is_active' => 'boolean'];
-    }
-
     public function degree()
     {
         return $this->belongsTo(MasonicDegree::class, 'masonic_degree_id');
@@ -26,5 +21,10 @@ class RitualCategory extends Model
     public function parts()
     {
         return $this->hasMany(RitualPart::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
     }
 }

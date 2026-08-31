@@ -11,7 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class WebsitePublisher
 {
-    public function __construct(private readonly WebsiteSectionCatalog $catalog) {}
+    public function __construct(private readonly WebsiteSectionCatalog $catalog)
+    {
+    }
 
     public function publish(WebsitePage $page, User $user): WebsitePageVersion
     {
@@ -23,9 +25,9 @@ class WebsitePublisher
                 $this->catalog->validate($section->type, $section->configuration, $page->lodge, true);
             }
 
-            $slugConflict = ! $draft->is_navigation_container && WebsitePageVersion::query()->where('lodge_id', $page->lodge_id)
-                ->where('status', WebsitePageStatus::Published)->where('slug', $draft->slug)
-                ->where('website_page_id', '!=', $page->id)->exists();
+            $slugConflict = !$draft->is_navigation_container && WebsitePageVersion::query()->where('lodge_id', $page->lodge_id)
+                    ->where('status', WebsitePageStatus::Published)->where('slug', $draft->slug)
+                    ->where('website_page_id', '!=', $page->id)->exists();
             if ($slugConflict) {
                 throw ValidationException::withMessages(['slug' => 'Another published page uses this slug.']);
             }
@@ -53,6 +55,30 @@ class WebsitePublisher
         });
     }
 
+    private function validateNavigation(WebsitePageVersion $draft): void
+    {
+        $seen = [$draft->website_page_id];
+        $parentId = $draft->navigation_parent_page_id;
+        while ($parentId) {
+            if (in_array($parentId, $seen, true)) {
+                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Navigation cannot contain a cycle.']);
+            }
+            $seen[] = $parentId;
+            $parent = WebsitePage::query()->whereKey($parentId)->where('lodge_id', $draft->lodge_id)->first();
+            if (!$parent) {
+                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Navigation parent is unavailable.']);
+            }
+            $parentVersion = $parent->published()->first();
+            if (!$parentVersion) {
+                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Publish the navigation parent before this page.']);
+            }
+            if ($draft->show_in_navigation && !$parentVersion->show_in_navigation) {
+                throw ValidationException::withMessages(['navigation_parent_page_id' => 'A visible page cannot be nested below a hidden navigation parent.']);
+            }
+            $parentId = $parentVersion?->navigation_parent_page_id;
+        }
+    }
+
     public function unpublish(WebsitePage $page): void
     {
         DB::transaction(function () use ($page) {
@@ -73,29 +99,5 @@ class WebsitePublisher
             $published->update(['status' => WebsitePageStatus::Archived]);
             Audit::record('website.page_unpublished', $page, $page->lodge, $before, null);
         });
-    }
-
-    private function validateNavigation(WebsitePageVersion $draft): void
-    {
-        $seen = [$draft->website_page_id];
-        $parentId = $draft->navigation_parent_page_id;
-        while ($parentId) {
-            if (in_array($parentId, $seen, true)) {
-                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Navigation cannot contain a cycle.']);
-            }
-            $seen[] = $parentId;
-            $parent = WebsitePage::query()->whereKey($parentId)->where('lodge_id', $draft->lodge_id)->first();
-            if (! $parent) {
-                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Navigation parent is unavailable.']);
-            }
-            $parentVersion = $parent->published()->first();
-            if (! $parentVersion) {
-                throw ValidationException::withMessages(['navigation_parent_page_id' => 'Publish the navigation parent before this page.']);
-            }
-            if ($draft->show_in_navigation && ! $parentVersion->show_in_navigation) {
-                throw ValidationException::withMessages(['navigation_parent_page_id' => 'A visible page cannot be nested below a hidden navigation parent.']);
-            }
-            $parentId = $parentVersion?->navigation_parent_page_id;
-        }
     }
 }

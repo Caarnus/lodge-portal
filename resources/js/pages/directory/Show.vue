@@ -1,11 +1,11 @@
-<script setup lang="ts">
-import { Head, Link } from "@inertiajs/vue3";
+<script lang="ts" setup>
+import {Head, Link} from "@inertiajs/vue3";
 
 import HeadingSmall from "@/components/HeadingSmall.vue";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import {Badge} from "@/components/ui/badge";
+import {Card, CardContent} from "@/components/ui/card";
 import AppLayout from "@/layouts/AppLayout.vue";
-import type { BreadcrumbItem } from "@/types";
+import type {BreadcrumbItem} from "@/types";
 
 interface Props {
     lodge: { id: number; name: string; number: string | null };
@@ -31,16 +31,17 @@ interface Props {
         }>;
     };
 }
+
 const props = defineProps<Props>();
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: "Directory", href: `/lodges/${props.lodge.id}/directory` },
-    { title: props.person.display_name, href: "#" },
+    {title: "Directory", href: `/lodges/${props.lodge.id}/directory`},
+    {title: props.person.display_name, href: "#"},
 ];
 </script>
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`${person.display_name} · Directory`" />
+        <Head :title="`${person.display_name} · Directory`"/>
         <main class="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
             <Link
                 :href="
@@ -50,23 +51,25 @@ const breadcrumbs: BreadcrumbItem[] = [
                     })
                 "
                 class="text-sm underline underline-offset-4"
-                >Back to directory</Link
+            >Back to directory
+            </Link
             >
             <Card
-                ><CardContent class="p-6">
+            >
+                <CardContent class="p-6">
                     <div class="flex items-center gap-4">
                         <img
                             v-if="person.profile_photo_url"
-                            :src="person.profile_photo_url"
                             :alt="`${person.display_name} profile photo`"
+                            :src="person.profile_photo_url"
                             class="size-20 rounded-full object-cover"
                         />
                         <div>
                             <HeadingSmall
-                                :title="person.display_name"
                                 :description="
                                     person.degree ?? 'Directory member'
                                 "
+                                :title="person.display_name"
                             />
                         </div>
                     </div>
@@ -118,7 +121,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                             </dd>
                         </div>
                     </dl>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
         </main>
     </AppLayout>

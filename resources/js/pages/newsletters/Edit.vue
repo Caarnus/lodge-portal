@@ -1,11 +1,12 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
-import { normalizeSlug } from "@/utils/slug";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {normalizeSlug} from "@/utils/slug";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: any;
     issue: any;
@@ -23,10 +24,10 @@ const form = useForm({
     cover_media_asset_id: props.draft.cover_media_asset_id,
     newsletter_document_id: props.draft.newsletter_document_id,
 });
-const upload = useForm<{ file: File | null }>({ file: null });
+const upload = useForm<{ file: File | null }>({file: null});
 </script>
 <template>
-    <Head :title="`Edit ${draft.title}`" />
+    <Head :title="`Edit ${draft.title}`"/>
     <main
         :class="
             embedded
@@ -48,10 +49,11 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 <div class="flex gap-3">
                     <a
                         :href="`/lodges/${lodge.id}/newsletters/manage/${issue.id}/preview`"
-                        target="_blank"
                         class="secondary-button"
-                        >Preview</a
-                    ><button
+                        target="_blank"
+                    >Preview</a
+                    >
+                    <button
                         v-if="canPublish"
                         class="primary-button"
                         @click="
@@ -68,8 +70,8 @@ const upload = useForm<{ file: File | null }>({ file: null });
         <WorkspaceTabs
             v-if="!embedded"
             :lodge="lodge"
-            workspace="content"
             active="newsletters"
+            workspace="content"
         />
         <header v-else class="flex justify-between">
             <div>
@@ -77,17 +79,19 @@ const upload = useForm<{ file: File | null }>({ file: null });
                     v-if="!embedded"
                     :href="`/lodges/${lodge.id}/newsletters/manage`"
                     class="text-sm underline"
-                    >← Newsletters</Link
+                >← Newsletters
+                </Link
                 >
                 <h1 class="text-3xl font-bold">{{ draft.title }}</h1>
             </div>
             <div class="flex gap-3">
                 <a
                     :href="`/lodges/${lodge.id}/newsletters/manage/${issue.id}/preview`"
-                    target="_blank"
                     class="underline"
-                    >Preview</a
-                ><button
+                    target="_blank"
+                >Preview</a
+                >
+                <button
                     v-if="canPublish"
                     class="primary-button"
                     @click="
@@ -110,51 +114,51 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 "
             >
                 <label
-                    >Title<input
-                        v-model="form.title"
-                        required
-                        class="field-input" /></label
+                >Title<input
+                    v-model="form.title"
+                    class="field-input"
+                    required/></label
                 ><label
-                    >Slug<input
-                        v-model="form.slug"
-                        @input="form.slug = normalizeSlug(form.slug)"
-                        required
-                        class="field-input" /></label
-                ><label
-                    >Publication date<input
-                        v-model="form.publication_date"
-                        type="date"
-                        class="field-input" /></label
-                ><label
-                    >Cover<select
-                        v-model.number="form.cover_media_asset_id"
-                        class="field-input"
-                    >
-                        <option :value="null">None</option>
-                        <option
-                            v-for="item in media"
-                            :key="item.id"
-                            :value="item.id"
-                        >
-                            {{ item.original_name }}
-                        </option>
-                    </select></label
-                ><label
-                    >PDF<select
-                        v-model.number="form.newsletter_document_id"
-                        class="field-input"
-                    >
-                        <option :value="null">None</option>
-                        <option
-                            v-for="item in documents"
-                            :key="item.id"
-                            :value="item.id"
-                        >
-                            {{ item.original_name }}
-                        </option>
-                    </select></label
+            >Slug<input
+                v-model="form.slug"
+                class="field-input"
+                required
+                @input="form.slug = normalizeSlug(form.slug)"/></label
+            ><label
+            >Publication date<input
+                v-model="form.publication_date"
+                class="field-input"
+                type="date"/></label
+            ><label
+            >Cover<select
+                v-model.number="form.cover_media_asset_id"
+                class="field-input"
+            >
+                <option :value="null">None</option>
+                <option
+                    v-for="item in media"
+                    :key="item.id"
+                    :value="item.id"
                 >
-                <RichTextField v-model="form.body_html" class="min-w-0" />
+                    {{ item.original_name }}
+                </option>
+            </select></label
+            ><label
+            >PDF<select
+                v-model.number="form.newsletter_document_id"
+                class="field-input"
+            >
+                <option :value="null">None</option>
+                <option
+                    v-for="item in documents"
+                    :key="item.id"
+                    :value="item.id"
+                >
+                    {{ item.original_name }}
+                </option>
+            </select></label
+            >
+                <RichTextField v-model="form.body_html" class="min-w-0"/>
                 <p
                     v-if="Object.keys(form.errors).length"
                     class="text-destructive"
@@ -176,16 +180,17 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 "
             >
                 <input
-                    required
-                    type="file"
                     accept="application/pdf,.pdf"
                     class="file-input"
+                    required
+                    type="file"
                     @change="
                         upload.file =
                             ($event.target as HTMLInputElement).files?.[0] ??
                             null
                     "
-                /><button class="secondary-button">Upload</button>
+                />
+                <button class="secondary-button">Upload</button>
             </form>
         </section>
     </main>

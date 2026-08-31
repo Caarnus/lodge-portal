@@ -1,14 +1,14 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { Primitive, type PrimitiveProps } from "radix-vue";
-import type { HTMLAttributes } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {Primitive, type PrimitiveProps} from "radix-vue";
+import type {HTMLAttributes} from "vue";
 
 const props = withDefaults(
     defineProps<
         PrimitiveProps & {
-            showOnHover?: boolean;
-            class?: HTMLAttributes["class"];
-        }
+        showOnHover?: boolean;
+        class?: HTMLAttributes["class"];
+    }
     >(),
     {
         as: "button",
@@ -18,7 +18,8 @@ const props = withDefaults(
 
 <template>
     <Primitive
-        data-sidebar="menu-action"
+        :as="as"
+        :as-child="asChild"
         :class="
             cn(
                 'absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0',
@@ -33,9 +34,8 @@ const props = withDefaults(
                 props.class,
             )
         "
-        :as="as"
-        :as-child="asChild"
+        data-sidebar="menu-action"
     >
-        <slot />
+        <slot/>
     </Primitive>
 </template>

@@ -19,6 +19,11 @@ class EventReservationFieldController extends Controller
         return back();
     }
 
+    private function allow(Lodge $lodge, Event $event): void
+    {
+        abort_unless($event->lodge_id === $lodge->id && request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
     public function destroy(Lodge $lodge, Event $event, EventReservationField $field)
     {
         $this->allow($lodge, $event);
@@ -26,10 +31,5 @@ class EventReservationFieldController extends Controller
         $field->update(['is_active' => false]);
 
         return back();
-    }
-
-    private function allow(Lodge $lodge, Event $event): void
-    {
-        abort_unless($event->lodge_id === $lodge->id && request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
     }
 }

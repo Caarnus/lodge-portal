@@ -1,16 +1,16 @@
-<script setup lang="ts">
-import { TransitionRoot } from "@headlessui/vue";
-import { Head, Link, useForm, usePage } from "@inertiajs/vue3";
+<script lang="ts" setup>
+import {TransitionRoot} from "@headlessui/vue";
+import {Head, Link, useForm, usePage} from "@inertiajs/vue3";
 
 import DeleteUser from "@/components/DeleteUser.vue";
 import HeadingSmall from "@/components/HeadingSmall.vue";
 import InputError from "@/components/InputError.vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import AppLayout from "@/layouts/AppLayout.vue";
 import SettingsLayout from "@/layouts/settings/Layout.vue";
-import { type AuthenticatedSharedData, type BreadcrumbItem } from "@/types";
+import {type AuthenticatedSharedData, type BreadcrumbItem} from "@/types";
 
 interface Props {
     mustVerifyEmail: boolean;
@@ -73,8 +73,8 @@ const submit = () => {
     });
 };
 
-const privacyForm = useForm({ ...props.directoryPrivacy });
-const photoForm = useForm<{ photo: File | null }>({ photo: null });
+const privacyForm = useForm({...props.directoryPrivacy});
+const photoForm = useForm<{ photo: File | null }>({photo: null});
 
 const savePrivacy = () => {
     privacyForm.put(route("profile.directory-privacy.update"), {
@@ -94,39 +94,39 @@ const saveCommunication = (
         route("profile.communication-preference.update", {
             membership: membershipId,
         }),
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 
 const uploadPhoto = () => {
-    photoForm.post(route("profile.photo.store"), { preserveScroll: true });
+    photoForm.post(route("profile.photo.store"), {preserveScroll: true});
 };
 </script>
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="Profile settings" />
+        <Head title="Profile settings"/>
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall
-                    title="Profile information"
                     description="Update your preferred name and contact information. These changes update your shared member profile."
+                    title="Profile information"
                 />
 
-                <form @submit.prevent="submit" class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <div class="grid gap-2">
                         <Label for="preferred_name">Preferred name</Label>
                         <Input
                             id="preferred_name"
-                            class="mt-1 block w-full"
                             v-model="form.preferred_name"
                             autocomplete="given-name"
+                            class="mt-1 block w-full"
                             placeholder="Preferred first name"
                         />
                         <InputError
-                            class="mt-2"
                             :message="form.errors.preferred_name"
+                            class="mt-2"
                         />
                     </div>
 
@@ -134,32 +134,32 @@ const uploadPhoto = () => {
                         <Label for="email">Email address</Label>
                         <Input
                             id="email"
-                            type="email"
-                            class="mt-1 block w-full"
                             v-model="form.email"
-                            required
                             autocomplete="username"
+                            class="mt-1 block w-full"
                             placeholder="Email address"
+                            required
+                            type="email"
                         />
-                        <InputError class="mt-2" :message="form.errors.email" />
+                        <InputError :message="form.errors.email" class="mt-2"/>
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="phone">Phone</Label>
                         <Input
                             id="phone"
-                            class="mt-1 block w-full"
                             v-model="form.phone"
                             autocomplete="tel"
+                            class="mt-1 block w-full"
                             placeholder="Phone number"
                         />
-                        <InputError class="mt-2" :message="form.errors.phone" />
+                        <InputError :message="form.errors.phone" class="mt-2"/>
                     </div>
 
                     <div class="space-y-4">
                         <div>
                             <Label for="mailing_address_line_1"
-                                >Mailing address</Label
+                            >Mailing address</Label
                             >
                             <p class="mt-1 text-sm text-muted-foreground">
                                 Address changes apply to your shared member
@@ -214,7 +214,7 @@ const uploadPhoto = () => {
                             </div>
                             <div class="grid gap-2">
                                 <Label for="mailing_postal_code"
-                                    >ZIP code</Label
+                                >ZIP code</Label
                                 >
                                 <Input
                                     id="mailing_postal_code"
@@ -233,9 +233,9 @@ const uploadPhoto = () => {
                             Your email address is unverified.
                             <Link
                                 :href="route('verification.send')"
-                                method="post"
                                 as="button"
                                 class="focus:outline-hidden rounded-md text-sm text-muted-foreground underline hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                method="post"
                             >
                                 Click here to re-send the verification email.
                             </Link>
@@ -268,10 +268,10 @@ const uploadPhoto = () => {
 
             <section class="mt-10 space-y-6 border-t pt-8">
                 <HeadingSmall
-                    title="Directory privacy"
                     description="Control how your member profile appears in directories. Family information is never shared by the directory."
+                    title="Directory privacy"
                 />
-                <form @submit.prevent="savePrivacy" class="space-y-5">
+                <form class="space-y-5" @submit.prevent="savePrivacy">
                     <fieldset class="space-y-3">
                         <legend class="text-sm font-medium">
                             Directory visibility
@@ -279,12 +279,12 @@ const uploadPhoto = () => {
                         <label class="flex gap-3 text-sm">
                             <input
                                 v-model="privacyForm.scope"
-                                value="hidden"
-                                type="radio"
                                 name="directory-scope"
+                                type="radio"
+                                value="hidden"
                             />
                             <span
-                                ><strong>Hidden</strong><br />Removes you from
+                            ><strong>Hidden</strong><br/>Removes you from
                                 ordinary directories, not authorized lodge
                                 records.</span
                             >
@@ -292,12 +292,12 @@ const uploadPhoto = () => {
                         <label class="flex gap-3 text-sm">
                             <input
                                 v-model="privacyForm.scope"
-                                value="own_lodge"
-                                type="radio"
                                 name="directory-scope"
+                                type="radio"
+                                value="own_lodge"
                             />
                             <span
-                                ><strong>My lodges</strong><br />Visible to
+                            ><strong>My lodges</strong><br/>Visible to
                                 every lodge where you have a current active
                                 membership.</span
                             >
@@ -305,17 +305,17 @@ const uploadPhoto = () => {
                         <label class="flex gap-3 text-sm">
                             <input
                                 v-model="privacyForm.scope"
-                                value="participating_lodges"
-                                type="radio"
                                 name="directory-scope"
+                                type="radio"
+                                value="participating_lodges"
                             />
                             <span
-                                ><strong>WorkingTools lodges</strong><br />Opt
+                            ><strong>WorkingTools lodges</strong><br/>Opt
                                 in to directory sharing across WorkingTools
                                 lodges.</span
                             >
                         </label>
-                        <InputError :message="privacyForm.errors.scope" />
+                        <InputError :message="privacyForm.errors.scope"/>
                     </fieldset>
                     <fieldset class="space-y-2">
                         <legend class="text-sm font-medium">
@@ -325,51 +325,52 @@ const uploadPhoto = () => {
                             These choices apply to both directory audiences.
                         </p>
                         <label class="flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="privacyForm.show_email"
-                                type="checkbox"
-                            />
+                        ><input
+                            v-model="privacyForm.show_email"
+                            type="checkbox"
+                        />
                             Email</label
                         >
                         <label class="flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="privacyForm.show_phone"
-                                type="checkbox"
-                            />
+                        ><input
+                            v-model="privacyForm.show_phone"
+                            type="checkbox"
+                        />
                             Phone</label
                         >
                         <label class="flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="privacyForm.show_address"
-                                type="checkbox"
-                            />
+                        ><input
+                            v-model="privacyForm.show_address"
+                            type="checkbox"
+                        />
                             Mailing address</label
                         >
                         <label class="flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="privacyForm.show_profile_photo"
-                                type="checkbox"
-                            />
+                        ><input
+                            v-model="privacyForm.show_profile_photo"
+                            type="checkbox"
+                        />
                             Profile photo</label
                         >
                         <label class="flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="privacyForm.show_degree"
-                                type="checkbox"
-                            />
+                        ><input
+                            v-model="privacyForm.show_degree"
+                            type="checkbox"
+                        />
                             Degree</label
                         >
                     </fieldset>
                     <Button :disabled="privacyForm.processing"
-                        >Save privacy</Button
+                    >Save privacy
+                    </Button
                     >
                 </form>
             </section>
 
             <section class="mt-10 space-y-6 border-t pt-8">
                 <HeadingSmall
-                    title="Lodge communications"
                     description="Choose email and mailed-newsletter preferences for each active lodge membership."
+                    title="Lodge communications"
                 />
                 <p
                     v-if="communicationPreferences.length === 0"
@@ -384,10 +385,11 @@ const uploadPhoto = () => {
                 >
                     <div>
                         <p class="font-medium">
-                            {{ preference.lodge_name
+                            {{
+                                preference.lodge_name
                             }}<span v-if="preference.lodge_number">
                                 · {{ preference.lodge_number }}</span
-                            >
+                        >
                         </p>
                         <p class="text-sm text-muted-foreground">
                             Lodge email for this membership.
@@ -410,8 +412,8 @@ const uploadPhoto = () => {
                     <label class="flex items-center gap-2 text-sm">
                         <input
                             :checked="preference.receives_print_newsletter"
-                            type="checkbox"
                             :disabled="!preference.has_complete_mailing_address"
+                            type="checkbox"
                             @change="
                                 saveCommunication(
                                     preference.membership_id,
@@ -434,8 +436,8 @@ const uploadPhoto = () => {
 
             <section class="mt-10 space-y-6 border-t pt-8">
                 <HeadingSmall
-                    title="Profile photo"
                     description="Your photo is stored privately and is processed before it can be shown."
+                    title="Profile photo"
                 />
                 <img
                     v-if="photo.ready"
@@ -448,8 +450,8 @@ const uploadPhoto = () => {
                         photo.status === 'pending' ||
                         photo.status === 'processing'
                     "
-                    class="text-sm text-muted-foreground"
                     aria-live="polite"
+                    class="text-sm text-muted-foreground"
                 >
                     Your photo is being prepared. Refresh this page in a moment.
                 </p>
@@ -461,43 +463,45 @@ const uploadPhoto = () => {
                     Photo processing failed. Choose another image and try again.
                 </p>
                 <form
-                    @submit.prevent="uploadPhoto"
                     class="flex flex-col gap-3 sm:flex-row sm:items-end"
+                    @submit.prevent="uploadPhoto"
                 >
                     <div class="grid gap-2">
                         <Label for="profile-photo">Choose a photo</Label>
                         <Input
                             id="profile-photo"
-                            type="file"
                             accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                             class="file-input"
+                            type="file"
                             @input="
                                 photoForm.photo =
                                     ($event.target as HTMLInputElement)
                                         .files?.[0] ?? null
                             "
                         />
-                        <InputError :message="photoForm.errors.photo" />
+                        <InputError :message="photoForm.errors.photo"/>
                     </div>
                     <Button :disabled="photoForm.processing || !photoForm.photo"
-                        >Upload photo</Button
+                    >Upload photo
+                    </Button
                     >
                     <Button
                         v-if="photo.status"
+                        :disabled="photoForm.processing"
                         type="button"
                         variant="outline"
-                        :disabled="photoForm.processing"
                         @click="
                             photoForm.delete(route('profile.photo.destroy'), {
                                 preserveScroll: true,
                             })
                         "
-                        >Remove photo</Button
+                    >Remove photo
+                    </Button
                     >
                 </form>
             </section>
 
-            <DeleteUser />
+            <DeleteUser/>
         </SettingsLayout>
     </AppLayout>
 </template>

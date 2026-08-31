@@ -1,12 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
-import { normalizeSlug } from "@/utils/slug";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { ImagePlus } from "lucide-vue-next";
-import { ref } from "vue";
-defineOptions({ layout: AppLayout });
+import {normalizeSlug} from "@/utils/slug";
+import {Head, Link, router, useForm} from "@inertiajs/vue3";
+import {ImagePlus} from "lucide-vue-next";
+import {ref} from "vue";
+
+defineOptions({layout: AppLayout});
 const props = defineProps<{
     lodge: any;
     album: any;
@@ -23,7 +24,7 @@ const form = useForm({
     visibility: props.draft.visibility,
     cover_photo_id: props.draft.cover_photo_id,
 });
-const add = useForm({ media_asset_id: null as number | null });
+const add = useForm({media_asset_id: null as number | null});
 const publishError = ref("");
 const publish = () => {
     publishError.value = "";
@@ -44,7 +45,7 @@ const save = () =>
     });
 </script>
 <template>
-    <Head :title="`Edit ${draft.title}`" />
+    <Head :title="`Edit ${draft.title}`"/>
     <main
         :class="
             embedded
@@ -65,8 +66,8 @@ const save = () =>
             <template #actions>
                 <button
                     v-if="canPublish"
-                    type="button"
                     class="primary-button"
+                    type="button"
                     @click="publish"
                 >
                     Publish
@@ -76,8 +77,8 @@ const save = () =>
         <WorkspaceTabs
             v-if="!embedded"
             :lodge="lodge"
-            workspace="content"
             active="galleries"
+            workspace="content"
         />
         <header v-else class="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -85,14 +86,15 @@ const save = () =>
                     v-if="!embedded"
                     :href="`/lodges/${lodge.id}/galleries/manage`"
                     class="text-sm font-medium underline"
-                    >← Galleries</Link
+                >← Galleries
+                </Link
                 >
                 <h1 class="text-2xl font-semibold">{{ draft.title }}</h1>
             </div>
             <button
                 v-if="canPublish"
-                type="button"
                 class="primary-button"
+                type="button"
                 @click="publish"
             >
                 Publish
@@ -112,14 +114,14 @@ const save = () =>
             <h2 class="text-lg font-medium md:col-span-2">Gallery details</h2>
             <label class="field-label md:col-span-2">
                 Title
-                <input v-model="form.title" required class="field-input" />
+                <input v-model="form.title" class="field-input" required/>
             </label>
             <label class="field-label">
                 Slug
                 <input
                     v-model="form.slug"
-                    required
                     class="field-input"
+                    required
                     @input="form.slug = normalizeSlug(form.slug)"
                 />
             </label>
@@ -155,7 +157,7 @@ const save = () =>
                 </select>
             </label>
             <div class="flex justify-end md:col-span-2">
-                <button class="primary-button" :disabled="form.processing">
+                <button :disabled="form.processing" class="primary-button">
                     Save draft
                 </button>
             </div>
@@ -167,11 +169,12 @@ const save = () =>
                     class="flex w-full flex-wrap gap-2 md:w-auto md:flex-nowrap"
                 >
                     <button
-                        type="button"
                         class="secondary-button"
+                        type="button"
                         @click="emit('openMedia')"
                     >
-                        <ImagePlus class="mr-1 size-4" /> Media library
+                        <ImagePlus class="mr-1 size-4"/>
+                        Media library
                     </button>
                     <form
                         class="flex min-w-0 flex-1 gap-2 md:flex-none"
@@ -195,8 +198,8 @@ const save = () =>
                             </option>
                         </select>
                         <button
-                            class="secondary-button"
                             :disabled="add.processing"
+                            class="secondary-button"
                         >
                             Add
                         </button>
@@ -214,8 +217,8 @@ const save = () =>
                 >
                     <img
                         v-if="photo.media_asset.url"
-                        :src="photo.media_asset.url"
                         :alt="photo.media_asset.alt_text"
+                        :src="photo.media_asset.url"
                         class="aspect-square w-full object-cover"
                     />
                     <div class="grid gap-2 p-3">
@@ -236,8 +239,8 @@ const save = () =>
                         />
                         <div class="flex justify-end">
                             <button
-                                type="button"
                                 class="secondary-button border-destructive/50 text-destructive hover:bg-destructive/10"
+                                type="button"
                                 @click="
                                     router.delete(
                                         `/lodges/${lodge.id}/galleries/manage/${album.id}/photos/${photo.id}`,

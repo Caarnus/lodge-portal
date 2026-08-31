@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { EditorContent, useEditor } from "@tiptap/vue-3";
+<script lang="ts" setup>
+import {EditorContent, useEditor} from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import {
     Bold,
@@ -16,10 +16,10 @@ import {
     Undo2,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { nextTick, ref, watch } from "vue";
+import {nextTick, ref, watch} from "vue";
 
 const vTooltip = Tooltip;
-const model = defineModel<string>({ default: "" });
+const model = defineModel<string>({default: ""});
 const updatingModel = ref(false);
 const editingHtml = ref(false);
 const htmlSource = ref("");
@@ -27,14 +27,14 @@ const editor = useEditor({
     content: model.value || "<p></p>",
     extensions: [
         StarterKit.configure({
-            heading: { levels: [2, 3] },
-            link: { openOnClick: false, defaultProtocol: "https" },
+            heading: {levels: [2, 3]},
+            link: {openOnClick: false, defaultProtocol: "https"},
         }),
     ],
     editorProps: {
-        attributes: { class: "min-h-56 p-3.5 outline-none" },
+        attributes: {class: "min-h-56 p-3.5 outline-none"},
     },
-    onUpdate: ({ editor: currentEditor }) => {
+    onUpdate: ({editor: currentEditor}) => {
         updatingModel.value = true;
         model.value = currentEditor.getHTML();
         nextTick(() => {
@@ -69,7 +69,7 @@ const setLink = () => {
         .chain()
         .focus()
         .extendMarkRange("link")
-        .setLink({ href: url.trim() })
+        .setLink({href: url.trim()})
         .run();
 };
 
@@ -101,157 +101,157 @@ const buttonClass = (active = false) => [
     >
         <div
             v-if="editor && !editingHtml"
+            aria-label="Rich text formatting"
             class="flex w-full min-w-0 flex-wrap gap-1 border-b border-border/80 bg-muted p-2"
             role="toolbar"
-            aria-label="Rich text formatting"
         >
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Heading', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('heading', { level: 2 }))"
                 aria-label="Heading"
-                v-tooltip.top="{ value: 'Heading', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="
                     editor.chain().focus().toggleHeading({ level: 2 }).run()
                 "
+                @mousedown.prevent
             >
-                <Heading2 class="size-4" />
+                <Heading2 class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Subheading', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('heading', { level: 3 }))"
                 aria-label="Subheading"
-                v-tooltip.top="{ value: 'Subheading', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="
                     editor.chain().focus().toggleHeading({ level: 3 }).run()
                 "
+                @mousedown.prevent
             >
-                <Heading3 class="size-4" />
+                <Heading3 class="size-4"/>
             </button>
             <span
-                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
+                class="mx-1 border-l border-border/80"
             ></span>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Bold', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('bold'))"
                 aria-label="Bold"
-                v-tooltip.top="{ value: 'Bold', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="editor.chain().focus().toggleBold().run()"
+                @mousedown.prevent
             >
-                <Bold class="size-4" />
+                <Bold class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Italic', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('italic'))"
                 aria-label="Italic"
-                v-tooltip.top="{ value: 'Italic', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="editor.chain().focus().toggleItalic().run()"
+                @mousedown.prevent
             >
-                <Italic class="size-4" />
+                <Italic class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Underline', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('underline'))"
                 aria-label="Underline"
-                v-tooltip.top="{ value: 'Underline', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="editor.chain().focus().toggleUnderline().run()"
+                @mousedown.prevent
             >
-                <Underline class="size-4" />
+                <Underline class="size-4"/>
             </button>
             <span
-                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
+                class="mx-1 border-l border-border/80"
             ></span>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Numbered list', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('orderedList'))"
                 aria-label="Numbered list"
-                v-tooltip.top="{ value: 'Numbered list', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="editor.chain().focus().toggleOrderedList().run()"
+                @mousedown.prevent
             >
-                <ListOrdered class="size-4" />
+                <ListOrdered class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Bulleted list', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('bulletList'))"
                 aria-label="Bulleted list"
-                v-tooltip.top="{ value: 'Bulleted list', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="editor.chain().focus().toggleBulletList().run()"
+                @mousedown.prevent
             >
-                <List class="size-4" />
+                <List class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Link', showDelay: 2000 }"
                 :class="buttonClass(editor.isActive('link'))"
                 aria-label="Link"
-                v-tooltip.top="{ value: 'Link', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="setLink"
+                @mousedown.prevent
             >
-                <Link2 class="size-4" />
+                <Link2 class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Edit HTML', showDelay: 2000 }"
                 :class="buttonClass()"
                 aria-label="Edit HTML"
-                v-tooltip.top="{ value: 'Edit HTML', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="openHtmlEditor"
+                @mousedown.prevent
             >
-                <CodeXml class="size-4" />
+                <CodeXml class="size-4"/>
             </button>
             <button
-                type="button"
+                v-tooltip.top="{ value: 'Clear formatting', showDelay: 2000 }"
                 :class="buttonClass()"
                 aria-label="Clear formatting"
-                v-tooltip.top="{ value: 'Clear formatting', showDelay: 2000 }"
-                @mousedown.prevent
+                type="button"
                 @click="
                     editor.chain().focus().unsetAllMarks().clearNodes().run()
                 "
+                @mousedown.prevent
             >
-                <RemoveFormatting class="size-4" />
+                <RemoveFormatting class="size-4"/>
             </button>
             <span
-                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
+                class="mx-1 border-l border-border/80"
             ></span>
             <button
-                type="button"
-                :disabled="!editor.can().chain().focus().undo().run()"
-                :class="buttonClass()"
-                aria-label="Undo"
                 v-tooltip.top="{ value: 'Undo', showDelay: 2000 }"
-                @mousedown.prevent
+                :class="buttonClass()"
+                :disabled="!editor.can().chain().focus().undo().run()"
+                aria-label="Undo"
+                type="button"
                 @click="editor.chain().focus().undo().run()"
+                @mousedown.prevent
             >
-                <Undo2 class="size-4" />
+                <Undo2 class="size-4"/>
             </button>
             <button
-                type="button"
-                :disabled="!editor.can().chain().focus().redo().run()"
-                :class="buttonClass()"
-                aria-label="Redo"
                 v-tooltip.top="{ value: 'Redo', showDelay: 2000 }"
-                @mousedown.prevent
+                :class="buttonClass()"
+                :disabled="!editor.can().chain().focus().redo().run()"
+                aria-label="Redo"
+                type="button"
                 @click="editor.chain().focus().redo().run()"
+                @mousedown.prevent
             >
-                <Redo2 class="size-4" />
+                <Redo2 class="size-4"/>
             </button>
         </div>
         <textarea
             v-if="editingHtml"
             v-model="htmlSource"
+            aria-label="HTML source"
             class="field-input block min-h-56 w-full max-w-none resize-y rounded-none border-0 font-mono text-xs focus-visible:rounded-none"
             style="inline-size: 100%; box-sizing: border-box"
-            aria-label="HTML source"
         ></textarea>
         <EditorContent
             v-else
@@ -263,13 +263,13 @@ const buttonClass = (active = false) => [
             class="flex justify-end gap-2 border-t border-border/80 bg-muted p-2"
         >
             <button
-                type="button"
                 class="secondary-button"
+                type="button"
                 @click="editingHtml = false"
             >
                 Cancel
             </button>
-            <button type="button" class="primary-button" @click="applyHtml">
+            <button class="primary-button" type="button" @click="applyHtml">
                 Apply HTML
             </button>
         </div>
@@ -282,6 +282,7 @@ const buttonClass = (active = false) => [
     font-size: 1.5rem;
     font-weight: 700;
 }
+
 .rich-text-content :deep(.ProseMirror) {
     display: block;
     inline-size: 100%;
@@ -290,24 +291,29 @@ const buttonClass = (active = false) => [
     box-sizing: border-box;
     overflow-wrap: anywhere;
 }
+
 .rich-text-content :deep(h3) {
     margin: 0.65rem 0 0.35rem;
     font-size: 1.25rem;
     font-weight: 650;
 }
+
 .rich-text-content :deep(p) {
     margin: 0.45rem 0;
 }
+
 .rich-text-content :deep(ul) {
     margin: 0.5rem 0;
     list-style: disc;
     padding-left: 1.5rem;
 }
+
 .rich-text-content :deep(ol) {
     margin: 0.5rem 0;
     list-style: decimal;
     padding-left: 1.5rem;
 }
+
 .rich-text-content :deep(a) {
     color: rgb(29 78 216);
     text-decoration: underline;

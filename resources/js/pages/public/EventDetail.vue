@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import InputError from "@/components/InputError.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
-import { computed } from "vue";
+import {Head, Link, useForm} from "@inertiajs/vue3";
+import {computed} from "vue";
 
 type Viewer = { name: string; email: string } | null;
 type StaffingPosition = {
@@ -114,22 +114,22 @@ const reservationForm = useForm<{
 const subscribe = () =>
     form.post(
         `/l/${props.lodge.slug}/events/${props.occurrence.event_id}/reminders`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 const reserve = () =>
     reservationForm.post(
         `/l/${props.lodge.slug}/events/${props.occurrence.id}/reservations`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 const volunteer = (position: StaffingPosition) =>
-    useForm({ position_id: position.id }).post(
+    useForm({position_id: position.id}).post(
         `/l/${props.lodge.slug}/events/${props.occurrence.id}/volunteer-commitments`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 const withdrawVolunteer = (position: StaffingPosition) =>
     useForm({}).patch(
         `/l/${props.lodge.slug}/events/${props.occurrence.id}/volunteer-commitments/${position.commitment_id}/withdraw`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 const subscriptionError = computed(() => {
     const errors = form.errors as Record<string, string>;
@@ -139,18 +139,18 @@ const subscriptionError = computed(() => {
 </script>
 
 <template>
-    <Head :title="`${occurrence.title} — ${lodge.name}`" />
+    <Head :title="`${occurrence.title} — ${lodge.name}`"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
             >
                 <a :href="`/l/${lodge.slug}`" class="text-xl font-bold">{{
-                    lodge.name
-                }}</a>
+                        lodge.name
+                    }}</a>
                 <div class="ml-auto flex flex-wrap items-center gap-3">
                     <nav>
                         <ul class="flex flex-wrap gap-1">
@@ -162,7 +162,7 @@ const subscriptionError = computed(() => {
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>
@@ -170,7 +170,8 @@ const subscriptionError = computed(() => {
             <Link
                 :href="`/l/${lodge.slug}/events`"
                 class="text-sm text-primary underline"
-                >All events</Link
+            >All events
+            </Link
             >
             <img
                 v-if="occurrence.cover_image"
@@ -204,19 +205,19 @@ const subscriptionError = computed(() => {
                 <a
                     :href="`/l/${lodge.slug}/events/${occurrence.id}.ics`"
                     class="text-primary underline"
-                    >Download calendar file</a
+                >Download calendar file</a
                 ><a
-                    v-if="occurrence.is_recurring"
-                    :href="`/l/${lodge.slug}/events/${occurrence.event_id}/series.ics`"
-                    class="text-primary underline"
-                    >Download series calendar</a
-                ><a
-                    :href="googleCalendarUrl"
-                    target="_blank"
-                    rel="noopener"
-                    class="text-primary underline"
-                    >Add to Google Calendar</a
-                >
+                v-if="occurrence.is_recurring"
+                :href="`/l/${lodge.slug}/events/${occurrence.event_id}/series.ics`"
+                class="text-primary underline"
+            >Download series calendar</a
+            ><a
+                :href="googleCalendarUrl"
+                class="text-primary underline"
+                rel="noopener"
+                target="_blank"
+            >Add to Google Calendar</a
+            >
             </p>
             <section
                 v-if="staffing"
@@ -249,8 +250,10 @@ const subscriptionError = computed(() => {
                         class="mt-2 cursor-pointer rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
                         @click="volunteer(position)"
                     >
-                        Volunteer</button
-                    ><button
+                        Volunteer
+                    </button
+                    >
+                    <button
                         v-else-if="position.can_withdraw"
                         class="mt-2 cursor-pointer underline"
                         @click="withdrawVolunteer(position)"
@@ -273,120 +276,142 @@ const subscriptionError = computed(() => {
                     @submit.prevent="reserve"
                 >
                     <label
-                        >Name<input
-                            v-model="reservationForm.name"
-                            required
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><InputError
-                            :message="reservationForm.errors.name" /></label
+                    >Name<input
+                        v-model="reservationForm.name"
+                        class="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                        required/>
+                        <InputError
+                            :message="reservationForm.errors.name"/>
+                    </label
                     ><label
-                        >Email<input
-                            v-model="reservationForm.email"
-                            type="email"
-                            required
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><InputError
-                            :message="reservationForm.errors.email" /></label
-                    ><label
-                        >Phone<input
-                            v-model="reservationForm.phone"
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /></label
-                    ><label
-                        >People<input
-                            v-model.number="reservationForm.party_size"
-                            type="number"
-                            min="1"
-                            required
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><InputError
-                            :message="
+                >Email<input
+                    v-model="reservationForm.email"
+                    class="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                    required
+                    type="email"/>
+                    <InputError
+                        :message="reservationForm.errors.email"/>
+                </label
+                ><label
+                >Phone<input
+                    v-model="reservationForm.phone"
+                    class="mt-1 w-full rounded-md border bg-background px-3 py-2"/></label
+                ><label
+                >People<input
+                    v-model.number="reservationForm.party_size"
+                    class="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                    min="1"
+                    required
+                    type="number"/>
+                    <InputError
+                        :message="
                                 reservationForm.errors.party_size
-                            " /></label
-                    ><template
+                            "/>
+                </label
+                >
+                    <template
                         v-for="field in occurrence.reservation_fields"
                         :key="field.key"
-                        ><label
-                            v-if="field.type === 'short_text'"
-                            class="sm:col-span-2"
-                            >{{ field.label
-                            }}<input
-                                v-model="reservationForm.responses[field.key]"
-                                :required="field.is_required"
-                                class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><small
-                                v-if="field.help_text"
-                                class="mt-1 block text-muted-foreground"
-                                >{{ field.help_text }}</small
-                            ><InputError
-                                :message="
-                                    reservationForm.errors[
-                                        `responses.${field.key}`
-                                    ]
-                                " /></label
-                        ><label
-                            v-else-if="field.type === 'long_text'"
-                            class="sm:col-span-2"
-                            >{{ field.label
-                            }}<textarea
-                                v-model="reservationForm.responses[field.key]"
-                                :required="field.is_required"
-                                class="mt-1 min-h-24 w-full rounded-md border bg-background px-3 py-2" /><small
-                                v-if="field.help_text"
-                                class="mt-1 block text-muted-foreground"
-                                >{{ field.help_text }}</small
-                            ><InputError
-                                :message="
-                                    reservationForm.errors[
-                                        `responses.${field.key}`
-                                    ]
-                                " /></label
-                        ><label
-                            v-else-if="field.type === 'select'"
-                            class="sm:col-span-2"
-                            >{{ field.label
-                            }}<select
-                                v-model="reservationForm.responses[field.key]"
-                                :required="field.is_required"
-                                class="mt-1 w-full rounded-md border bg-background px-3 py-2"
-                            >
-                                <option value="">Choose one</option>
-                                <option
-                                    v-for="option in field.options ?? []"
-                                    :key="option"
-                                    :value="option"
-                                >
-                                    {{ option }}
-                                </option></select
-                            ><small
-                                v-if="field.help_text"
-                                class="mt-1 block text-muted-foreground"
-                                >{{ field.help_text }}</small
-                            ><InputError
-                                :message="
-                                    reservationForm.errors[
-                                        `responses.${field.key}`
-                                    ]
-                                " /></label
-                        ><label
-                            v-else
-                            class="sm:col-span-2 flex items-center gap-2"
-                            ><input
-                                v-model="reservationForm.responses[field.key]"
-                                type="checkbox" />
-                            {{ field.label
-                            }}<span v-if="field.is_required">(required)</span
-                            ><InputError
-                                :message="
-                                    reservationForm.errors[
-                                        `responses.${field.key}`
-                                    ]
-                                " /></label></template
                     ><label
+                        v-if="field.type === 'short_text'"
+                        class="sm:col-span-2"
+                    >{{
+                            field.label
+                        }}<input
+                            v-model="reservationForm.responses[field.key]"
+                            :required="field.is_required"
+                            class="mt-1 w-full rounded-md border bg-background px-3 py-2"/><small
+                            v-if="field.help_text"
+                            class="mt-1 block text-muted-foreground"
+                        >{{ field.help_text }}</small
+                        >
+                        <InputError
+                            :message="
+                                    reservationForm.errors[
+                                        `responses.${field.key}`
+                                    ]
+                                "/>
+                    </label
+                    ><label
+                        v-else-if="field.type === 'long_text'"
+                        class="sm:col-span-2"
+                    >{{
+                            field.label
+                        }}<textarea
+                            v-model="reservationForm.responses[field.key]"
+                            :required="field.is_required"
+                            class="mt-1 min-h-24 w-full rounded-md border bg-background px-3 py-2"/><small
+                            v-if="field.help_text"
+                            class="mt-1 block text-muted-foreground"
+                        >{{ field.help_text }}</small
+                        >
+                        <InputError
+                            :message="
+                                    reservationForm.errors[
+                                        `responses.${field.key}`
+                                    ]
+                                "/>
+                    </label
+                    ><label
+                        v-else-if="field.type === 'select'"
+                        class="sm:col-span-2"
+                    >{{
+                            field.label
+                        }}<select
+                            v-model="reservationForm.responses[field.key]"
+                            :required="field.is_required"
+                            class="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                        >
+                            <option value="">Choose one</option>
+                            <option
+                                v-for="option in field.options ?? []"
+                                :key="option"
+                                :value="option"
+                            >
+                                {{ option }}
+                            </option>
+                        </select
+                        ><small
+                            v-if="field.help_text"
+                            class="mt-1 block text-muted-foreground"
+                        >{{ field.help_text }}</small
+                        >
+                        <InputError
+                            :message="
+                                    reservationForm.errors[
+                                        `responses.${field.key}`
+                                    ]
+                                "/>
+                    </label
+                    ><label
+                        v-else
+                        class="sm:col-span-2 flex items-center gap-2"
+                    ><input
+                        v-model="reservationForm.responses[field.key]"
+                        type="checkbox"/>
+                        {{
+                            field.label
+                        }}<span v-if="field.is_required">(required)</span
+                        >
+                        <InputError
+                            :message="
+                                    reservationForm.errors[
+                                        `responses.${field.key}`
+                                    ]
+                                "/>
+                    </label></template
+                    >
+                    <label
                         v-if="canSubscribe"
                         class="sm:col-span-2 flex items-center gap-2"
-                        ><input
-                            v-model="reservationForm.subscribe_to_reminders"
-                            type="checkbox"
-                        />
+                    ><input
+                        v-model="reservationForm.subscribe_to_reminders"
+                        type="checkbox"
+                    />
                         Also subscribe me to reminders. This is separate from my
                         reservation.</label
-                    ><button
+                    >
+                    <button
                         :disabled="reservationForm.processing"
                         class="cursor-pointer rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground"
                     >
@@ -414,20 +439,24 @@ const subscriptionError = computed(() => {
                     @submit.prevent="subscribe"
                 >
                     <label
-                        >Name<input
-                            v-model="form.name"
-                            autocomplete="name"
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><InputError
-                            :message="form.errors.name" /></label
+                    >Name<input
+                        v-model="form.name"
+                        autocomplete="name"
+                        class="mt-1 w-full rounded-md border bg-background px-3 py-2"/>
+                        <InputError
+                            :message="form.errors.name"/>
+                    </label
                     ><label
-                        >Email<input
-                            v-model="form.email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            class="mt-1 w-full rounded-md border bg-background px-3 py-2" /><InputError
-                            :message="form.errors.email"
-                    /></label>
+                >Email<input
+                    v-model="form.email"
+                    autocomplete="email"
+                    class="mt-1 w-full rounded-md border bg-background px-3 py-2"
+                    required
+                    type="email"/>
+                    <InputError
+                        :message="form.errors.email"
+                    />
+                </label>
                     <fieldset
                         v-if="occurrence.is_recurring"
                         class="sm:col-span-2"
@@ -436,20 +465,20 @@ const subscriptionError = computed(() => {
                             Reminder scope
                         </legend>
                         <label class="mt-2 flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="form.scope"
-                                type="radio"
-                                value="occurrence"
-                            />
+                        ><input
+                            v-model="form.scope"
+                            type="radio"
+                            value="occurrence"
+                        />
                             This occurrence only</label
                         ><label class="mt-2 flex items-center gap-2 text-sm"
-                            ><input
-                                v-model="form.scope"
-                                type="radio"
-                                value="series"
-                            />
-                            This event series</label
-                        >
+                    ><input
+                        v-model="form.scope"
+                        type="radio"
+                        value="series"
+                    />
+                        This event series</label
+                    >
                     </fieldset>
                     <InputError
                         :message="subscriptionError"
@@ -457,9 +486,9 @@ const subscriptionError = computed(() => {
                     />
                     <div class="sm:col-span-2">
                         <button
-                            type="submit"
                             :disabled="form.processing"
                             class="cursor-pointer rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                            type="submit"
                         >
                             Request reminders
                         </button>

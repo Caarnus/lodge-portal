@@ -13,11 +13,6 @@ class PersonRitualLevelAchievement extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['achieved_at' => 'datetime'];
-    }
-
     public function person()
     {
         return $this->belongsTo(Person::class);
@@ -26,5 +21,10 @@ class PersonRitualLevelAchievement extends Model
     public function level()
     {
         return $this->belongsTo(RitualProgramLevel::class, 'ritual_program_level_id');
+    }
+
+    protected function casts(): array
+    {
+        return ['achieved_at' => 'datetime'];
     }
 }

@@ -1,12 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import InputError from "@/components/InputError.vue";
 import TextLink from "@/components/TextLink.vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import AuthBase from "@/layouts/AuthLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
-import { LoaderCircle } from "lucide-vue-next";
+import {Head, useForm} from "@inertiajs/vue3";
+import {LoaderCircle} from "lucide-vue-next";
+
 defineProps<{ lodges: Array<{ id: number; name: string; number: string }> }>();
 
 const form = useForm({
@@ -26,22 +27,22 @@ const submit = () => {
 
 <template>
     <AuthBase
-        title="Create an account"
         description="Enter your details below to create your account"
+        title="Create an account"
     >
-        <Head title="Register" />
+        <Head title="Register"/>
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
+        <form class="flex flex-col gap-6" @submit.prevent="submit">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="home_lodge_id">Home lodge</Label>
                     <select
                         id="home_lodge_id"
-                        required
                         v-model="form.home_lodge_id"
                         class="rounded-md border bg-background px-3 py-2"
+                        required
                     >
-                        <option value="" disabled>Select your lodge</option>
+                        <option disabled value="">Select your lodge</option>
                         <option
                             v-for="lodge in lodges"
                             :key="lodge.id"
@@ -50,71 +51,71 @@ const submit = () => {
                             {{ lodge.name }} No. {{ lodge.number }}
                         </option>
                     </select>
-                    <InputError :message="form.errors.home_lodge_id" />
+                    <InputError :message="form.errors.home_lodge_id"/>
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
                     <Input
                         id="name"
-                        type="text"
-                        required
-                        autofocus
+                        v-model="form.name"
                         :tabindex="1"
                         autocomplete="name"
-                        v-model="form.name"
+                        autofocus
                         placeholder="Full name"
+                        required
+                        type="text"
                     />
-                    <InputError :message="form.errors.name" />
+                    <InputError :message="form.errors.name"/>
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
                     <Input
                         id="email"
-                        type="email"
-                        required
+                        v-model="form.email"
                         :tabindex="2"
                         autocomplete="email"
-                        v-model="form.email"
                         placeholder="email@example.com"
+                        required
+                        type="email"
                     />
-                    <InputError :message="form.errors.email" />
+                    <InputError :message="form.errors.email"/>
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="password">Password</Label>
                     <Input
                         id="password"
-                        type="password"
-                        required
+                        v-model="form.password"
                         :tabindex="3"
                         autocomplete="new-password"
-                        v-model="form.password"
                         placeholder="Password"
+                        required
+                        type="password"
                     />
-                    <InputError :message="form.errors.password" />
+                    <InputError :message="form.errors.password"/>
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="password_confirmation">Confirm password</Label>
                     <Input
                         id="password_confirmation"
-                        type="password"
-                        required
+                        v-model="form.password_confirmation"
                         :tabindex="4"
                         autocomplete="new-password"
-                        v-model="form.password_confirmation"
                         placeholder="Confirm password"
+                        required
+                        type="password"
                     />
-                    <InputError :message="form.errors.password_confirmation" />
+                    <InputError :message="form.errors.password_confirmation"/>
                 </div>
 
                 <Button
-                    type="submit"
-                    class="mt-2 w-full"
-                    :tabindex="5"
                     :disabled="form.processing"
+                    :tabindex="5"
+                    class="mt-2 w-full"
+                    type="submit"
                 >
                     <LoaderCircle
                         v-if="form.processing"
@@ -128,9 +129,10 @@ const submit = () => {
                 Already have an account?
                 <TextLink
                     :href="route('login')"
-                    class="underline underline-offset-4"
                     :tabindex="6"
-                    >Log in</TextLink
+                    class="underline underline-offset-4"
+                >Log in
+                </TextLink
                 >
             </div>
         </form>

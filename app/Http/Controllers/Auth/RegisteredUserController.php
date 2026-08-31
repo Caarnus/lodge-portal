@@ -20,14 +20,6 @@ use Inertia\Response;
 class RegisteredUserController extends Controller
 {
     /**
-     * Show the registration page.
-     */
-    public function create(): Response
-    {
-        return Inertia::render('auth/Register', ['lodges' => Lodge::where('status', 'active')->orderBy('name')->get(['id', 'name', 'number'])]);
-    }
-
-    /**
      * Handle an incoming registration request.
      *
      * @throws ValidationException
@@ -62,5 +54,13 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         return to_route('pending');
+    }
+
+    /**
+     * Show the registration page.
+     */
+    public function create(): Response
+    {
+        return Inertia::render('auth/Register', ['lodges' => Lodge::where('status', 'active')->orderBy('name')->get(['id', 'name', 'number'])]);
     }
 }

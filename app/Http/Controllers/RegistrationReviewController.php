@@ -11,12 +11,6 @@ use Inertia\Inertia;
 
 class RegistrationReviewController extends Controller
 {
-    private function allow(User $u)
-    {
-        $actor = request()->user();
-        abort_unless($actor->is_platform_admin || ($u->home_lodge_id && $actor->hasLodgePermission($u->homeLodge, 'registration.review')), 403);
-    }
-
     public function index()
     {
         $u = request()->user();
@@ -45,5 +39,11 @@ class RegistrationReviewController extends Controller
         $user->notify(new RegistrationDecision($data['decision'], $user->homeLodge?->name, $data['reason'] ?? null));
 
         return back();
+    }
+
+    private function allow(User $u)
+    {
+        $actor = request()->user();
+        abort_unless($actor->is_platform_admin || ($u->home_lodge_id && $actor->hasLodgePermission($u->homeLodge, 'registration.review')), 403);
     }
 }

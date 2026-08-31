@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PublicAccountControls from "@/components/website/PublicAccountControls.vue";
 import PublicNavigationItem from "@/components/website/PublicNavigationItem.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import {Head, Link, router} from "@inertiajs/vue3";
 
 const props = defineProps<{
     lodge: any;
@@ -19,24 +19,24 @@ const date = (value: string, timeZone: string) =>
 const changeRange = (event: Event) =>
     router.get(
         `/l/${props.lodge.slug}/events`,
-        { range: (event.target as HTMLSelectElement).value },
-        { preserveScroll: true },
+        {range: (event.target as HTMLSelectElement).value},
+        {preserveScroll: true},
     );
 </script>
 
 <template>
-    <Head :title="`Events — ${lodge.name}`" />
+    <Head :title="`Events — ${lodge.name}`"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <header
-            class="border-b"
             :style="{ borderColor: lodge.secondary_color }"
+            class="border-b"
         >
             <div
                 class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-5 py-4"
             >
                 <a :href="`/l/${lodge.slug}`" class="font-bold text-xl">{{
-                    lodge.name
-                }}</a>
+                        lodge.name
+                    }}</a>
                 <div class="ml-auto flex flex-wrap items-center gap-3">
                     <nav>
                         <ul class="flex flex-wrap gap-1">
@@ -48,7 +48,7 @@ const changeRange = (event: Event) =>
                             />
                         </ul>
                     </nav>
-                    <PublicAccountControls />
+                    <PublicAccountControls/>
                 </div>
             </div>
         </header>
@@ -62,19 +62,19 @@ const changeRange = (event: Event) =>
                     </p>
                 </div>
                 <label class="text-sm font-medium"
-                    >Show events<select
-                        :value="range"
-                        class="mt-1 block cursor-pointer rounded-md border bg-background px-3 py-2 text-base"
-                        @change="changeRange"
+                >Show events<select
+                    :value="range"
+                    class="mt-1 block cursor-pointer rounded-md border bg-background px-3 py-2 text-base"
+                    @change="changeRange"
+                >
+                    <option
+                        v-for="option in rangeOptions"
+                        :key="option.key"
+                        :value="option.key"
                     >
-                        <option
-                            v-for="option in rangeOptions"
-                            :key="option.key"
-                            :value="option.key"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </select></label
+                        {{ option.label }}
+                    </option>
+                </select></label
                 >
             </div>
             <div
@@ -102,7 +102,7 @@ const changeRange = (event: Event) =>
                         <span
                             v-if="occurrence.visibility !== 'public'"
                             class="mt-2 inline-block rounded-full bg-muted px-2 py-1 text-xs font-medium"
-                            >Members only</span
+                        >Members only</span
                         >
                         <h2 class="mt-1 text-2xl font-bold">
                             {{ occurrence.title }}
@@ -121,7 +121,8 @@ const changeRange = (event: Event) =>
                         <Link
                             :href="`/l/${lodge.slug}/events/${occurrence.id}`"
                             class="mt-5 inline-block text-sm font-medium text-primary underline"
-                            >View event</Link
+                        >View event
+                        </Link
                         >
                     </div>
                 </article>

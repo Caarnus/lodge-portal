@@ -13,11 +13,6 @@ use Inertia\Inertia;
 
 class PublicFamilyNewsletterRequestController extends Controller
 {
-    public function create(Lodge $lodge)
-    {
-        return Inertia::render('public/NewsletterRequest', ['lodge' => $lodge]);
-    }
-
     public function store(Request $request, Lodge $lodge)
     {
         $data = $request->validate(['requester_name' => 'required|string|max:255', 'requester_email' => 'nullable|email|max:255', 'receives_email' => 'required|boolean', 'receives_print' => 'required|boolean', 'mailing_address_line_1' => 'nullable|string|max:255', 'mailing_address_line_2' => 'nullable|string|max:255', 'mailing_city' => 'nullable|string|max:100', 'mailing_state' => 'nullable|string|size:2', 'mailing_postal_code' => 'nullable|string|max:16', 'claimed_relationship' => 'nullable|string|max:120', 'claimed_related_member_name' => 'nullable|string|max:255', 'website' => 'nullable|max:0']);
@@ -39,6 +34,11 @@ class PublicFamilyNewsletterRequestController extends Controller
         Audit::record('family_newsletter_request.created', $record, $lodge, null, ['id' => $record->id]);
 
         return back()->with('notice', 'Your request has been received. Check your email if verification is required.');
+    }
+
+    public function create(Lodge $lodge)
+    {
+        return Inertia::render('public/NewsletterRequest', ['lodge' => $lodge]);
     }
 
     public function verify(Lodge $lodge, string $token)

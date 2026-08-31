@@ -9,11 +9,6 @@ class EventReminderSubscription extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => ReminderSubscriptionStatus::class, 'unsubscribed_at' => 'datetime'];
-    }
-
     public function event()
     {
         return $this->belongsTo(Event::class);
@@ -42,5 +37,10 @@ class EventReminderSubscription extends Model
     public function deliveries()
     {
         return $this->hasMany(EventReminderDelivery::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => ReminderSubscriptionStatus::class, 'unsubscribed_at' => 'datetime'];
     }
 }

@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import {Head, useForm} from "@inertiajs/vue3";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 defineProps<{
     lodge: any;
     requests: any[];
@@ -32,11 +32,11 @@ const formFor = (request: any) => {
 };
 </script>
 <template>
-    <Head title="Newsletter recipients" />
+    <Head title="Newsletter recipients"/>
     <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
         <PageHeader
-            title="Newsletter recipients"
             description="Review family subscription requests and active delivery recipients."
+            title="Newsletter recipients"
         />
         <section class="rounded-lg border border-border bg-card p-5">
             <h2 class="text-xl font-semibold">Requests awaiting review</h2>
@@ -65,8 +65,8 @@ const formFor = (request: any) => {
                 >
                     <select
                         v-model.number="formFor(request).recipient_person_id"
-                        required
                         class="field-input"
+                        required
                     >
                         <option :value="null">Recipient person</option>
                         <option
@@ -75,46 +75,49 @@ const formFor = (request: any) => {
                             :value="person.id"
                         >
                             {{ person.name }}
-                        </option></select
+                        </option>
+                    </select
                     ><select
-                        v-model.number="formFor(request).sponsoring_person_id"
-                        required
-                        class="field-input"
+                    v-model.number="formFor(request).sponsoring_person_id"
+                    class="field-input"
+                    required
+                >
+                    <option :value="null">Sponsor person</option>
+                    <option
+                        v-for="person in people"
+                        :key="person.id"
+                        :value="person.id"
                     >
-                        <option :value="null">Sponsor person</option>
-                        <option
-                            v-for="person in people"
-                            :key="person.id"
-                            :value="person.id"
-                        >
-                            {{ person.name }}
-                        </option></select
-                    ><select
-                        v-model.number="formFor(request).person_relationship_id"
-                        required
-                        class="field-input"
+                        {{ person.name }}
+                    </option>
+                </select
+                ><select
+                    v-model.number="formFor(request).person_relationship_id"
+                    class="field-input"
+                    required
+                >
+                    <option :value="null">Qualifying relationship</option>
+                    <option
+                        v-for="relationship in relationships"
+                        :key="relationship.id"
+                        :value="relationship.id"
                     >
-                        <option :value="null">Qualifying relationship</option>
-                        <option
-                            v-for="relationship in relationships"
-                            :key="relationship.id"
-                            :value="relationship.id"
-                        >
-                            {{ relationship.type.name }}
-                        </option></select
-                    ><label
-                        ><input
-                            v-model="formFor(request).receives_email"
-                            type="checkbox"
-                        />
-                        Email</label
-                    ><label
-                        ><input
-                            v-model="formFor(request).receives_print"
-                            type="checkbox"
-                        />
-                        Print</label
-                    >
+                        {{ relationship.type.name }}
+                    </option>
+                </select
+                ><label
+                ><input
+                    v-model="formFor(request).receives_email"
+                    type="checkbox"
+                />
+                    Email</label
+                ><label
+                ><input
+                    v-model="formFor(request).receives_print"
+                    type="checkbox"
+                />
+                    Print</label
+                >
                     <button class="primary-button w-fit">Approve</button>
                 </form>
                 <button

@@ -16,8 +16,8 @@ use App\Http\Controllers\FamilyNewsletterSubscriptionController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\LodgeCommunicationController;
 use App\Http\Controllers\LodgeCommunicationSettingController;
-use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeRitualController;
+use App\Http\Controllers\LodgeRoleController;
 use App\Http\Controllers\LodgeSettingsController;
 use App\Http\Controllers\MediaAssetController;
 use App\Http\Controllers\MemberNewsletterController;
@@ -51,10 +51,10 @@ use App\Http\Controllers\PublicLodgeGroupController;
 use App\Http\Controllers\PublicReminderUnsubscribeController;
 use App\Http\Controllers\PublicReservationCancellationController;
 use App\Http\Controllers\PublicWebsiteController;
-use App\Http\Controllers\RegistrationReviewController;
 use App\Http\Controllers\RegionalEventController;
-use App\Http\Controllers\RitualController;
+use App\Http\Controllers\RegistrationReviewController;
 use App\Http\Controllers\RitualAssistanceController;
+use App\Http\Controllers\RitualController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteSectionController;
 use App\Models\Lodge;
@@ -100,7 +100,7 @@ Route::middleware(['auth', 'verified', 'approved'])->prefix('lodges/{lodge}')->n
     Route::get('communications/{communication}', [LodgeCommunicationController::class, 'show'])->whereNumber('communication')->name('show');
 });
 
-Route::get('pending', fn () => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
+Route::get('pending', fn() => Inertia::render('auth/Pending', []))->middleware('auth')->name('pending');
 Route::get('lodges', [PublicLodgeDirectoryController::class, 'index'])->name('public.lodges.index');
 Route::get('events', [RegionalEventController::class, 'index'])->name('public.regional-events.index');
 Route::get('groups/{slug}', [PublicLodgeGroupController::class, 'show'])->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->name('public.lodge-groups.show');
@@ -177,7 +177,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     });
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
     Route::get('platform/accounts', [AccountController::class, 'index'])->name('platform.accounts.index')->middleware('platform-admin');
-    Route::get('platform/ui-review', fn () => Inertia::render('platform/UiReview'))
+    Route::get('platform/ui-review', fn() => Inertia::render('platform/UiReview'))
         ->name('platform.ui-review.index')
         ->middleware('platform-admin');
     Route::delete('platform/accounts/{user}', [AccountController::class, 'destroy'])->name('platform.accounts.destroy')->middleware('platform-admin');
@@ -244,7 +244,7 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     Route::delete('lodges/{lodge}/events/{event}/reservation-fields/{field}', [EventReservationFieldController::class, 'destroy'])->name('lodges.events.reservation-fields.destroy');
     Route::post('lodges/{lodge}/activate', function (Request $r, Lodge $lodge) {
         abort_unless($r->user()->is_platform_admin || DB::table('lodge_user_roles')
-            ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);
+                ->where('user_id', $r->user()->id)->where('lodge_id', $lodge->id)->exists(), 403);
         $r->user()->update(['current_lodge_id' => $lodge->id]);
 
         return back();
@@ -297,5 +297,5 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     });
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

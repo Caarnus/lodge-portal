@@ -15,11 +15,6 @@ class CommunicationDelivery extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['channel' => DeliveryChannel::class, 'status' => CommunicationDeliveryStatus::class, 'claimed_at' => 'datetime', 'attempted_at' => 'datetime', 'sent_at' => 'datetime', 'prepared_at' => 'datetime', 'mailed_at' => 'datetime'];
-    }
-
     public function lodge()
     {
         return $this->belongsTo(Lodge::class);
@@ -43,5 +38,10 @@ class CommunicationDelivery extends Model
     public function person()
     {
         return $this->belongsTo(Person::class);
+    }
+
+    protected function casts(): array
+    {
+        return ['channel' => DeliveryChannel::class, 'status' => CommunicationDeliveryStatus::class, 'claimed_at' => 'datetime', 'attempted_at' => 'datetime', 'sent_at' => 'datetime', 'prepared_at' => 'datetime', 'mailed_at' => 'datetime'];
     }
 }

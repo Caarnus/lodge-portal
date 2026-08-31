@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "vue";
-import { badgeVariants, type BadgeVariants } from ".";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import type {HTMLAttributes} from "vue";
+import {badgeVariants, type BadgeVariants} from ".";
 
 const props = defineProps<{
     variant?: BadgeVariants["variant"];
@@ -10,5 +10,5 @@ const props = defineProps<{
 </script>
 
 <template>
-    <span :class="cn(badgeVariants({ variant }), props.class)"><slot /></span>
+    <span :class="cn(badgeVariants({ variant }), props.class)"><slot/></span>
 </template>

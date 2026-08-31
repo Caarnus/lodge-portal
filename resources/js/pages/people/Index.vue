@@ -1,10 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import PersonModal from "@/components/people/PersonModal.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
-import { formatPhone } from "@/lib/phone";
-import { Head, router } from "@inertiajs/vue3";
+import {formatPhone} from "@/lib/phone";
+import {Head, router} from "@inertiajs/vue3";
 import {
     ArrowDown,
     ArrowUp,
@@ -22,9 +22,9 @@ import {
     X,
 } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
-import { nextTick, reactive, ref, watch } from "vue";
+import {nextTick, reactive, ref, watch} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const vTooltip = Tooltip;
 
 interface Filters {
@@ -53,7 +53,7 @@ const props = defineProps<{
     canManageRoles: boolean;
     canManageCommunicationPreferences: boolean;
 }>();
-const filters = reactive<Filters>({ ...props.filters });
+const filters = reactive<Filters>({...props.filters});
 const selectedPerson = ref<any | null>(null);
 const modalOpen = ref(false);
 const modalMode = ref<"view" | "edit">("view");
@@ -76,7 +76,7 @@ const applyFilters = () =>
             direction:
                 filters.direction === "asc" ? undefined : filters.direction,
         },
-        { preserveState: true, preserveScroll: true, replace: true },
+        {preserveState: true, preserveScroll: true, replace: true},
     );
 
 watch(
@@ -102,7 +102,7 @@ watch(
             applyFilters();
         }
     },
-    { deep: true },
+    {deep: true},
 );
 watch(
     () => props.people,
@@ -157,25 +157,28 @@ const memberRelationships = (person: any) =>
 </script>
 
 <template>
-    <Head :title="`${lodge.name} people`" />
+    <Head :title="`${lodge.name} people`"/>
     <main class="mx-auto w-full max-w-6xl p-4 md:p-6">
-        <PageHeader title="People" :description="lodge.name">
+        <PageHeader :description="lodge.name" title="People">
             <template #actions
-                ><button
+            >
+                <button
                     v-if="canManage"
                     class="primary-button shrink-0"
                     @click="openPerson(null, 'edit')"
                 >
-                    <Plus class="mr-1 size-4" /> Add person
-                </button></template
+                    <Plus class="mr-1 size-4"/>
+                    Add person
+                </button>
+            </template
             >
         </PageHeader>
 
         <WorkspaceTabs
             :lodge="lodge"
-            workspace="people"
             active="people"
             class="mt-6"
+            workspace="people"
         />
 
         <p class="admin-warning mt-4">
@@ -187,19 +190,19 @@ const memberRelationships = (person: any) =>
 
         <section class="mt-6 rounded-lg border border-border/80 bg-card">
             <button
-                type="button"
-                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
                 :aria-expanded="filtersOpen"
                 aria-controls="people-filters"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
+                type="button"
                 @click="filtersOpen = !filtersOpen"
             >
                 <span class="inline-flex items-center gap-2"
-                    ><SlidersHorizontal class="size-4" /> Search and
+                ><SlidersHorizontal class="size-4"/> Search and
                     filters</span
                 >
                 <ChevronDown
-                    class="size-4 transition-transform"
                     :class="filtersOpen && 'rotate-180'"
+                    class="size-4 transition-transform"
                 />
             </button>
             <form
@@ -209,11 +212,11 @@ const memberRelationships = (person: any) =>
                 @submit.prevent
             >
                 <label class="min-w-0"
-                    ><span class="text-sm font-medium">Search</span
-                    ><input
-                        v-model="filters.search"
-                        class="field-input mt-1"
-                        placeholder="Name, email, phone, city, or member no."
+                ><span class="text-sm font-medium">Search</span
+                ><input
+                    v-model="filters.search"
+                    class="field-input mt-1"
+                    placeholder="Name, email, phone, city, or member no."
                 /></label>
                 <fieldset>
                     <legend class="text-sm font-medium">Status</legend>
@@ -225,11 +228,12 @@ const memberRelationships = (person: any) =>
                         >
                             <input
                                 v-model="filters.status"
-                                type="checkbox"
                                 :value="item.id"
+                                type="checkbox"
                             />
                             <span
-                                >{{ item.name
+                            >{{
+                                    item.name
                                 }}{{
                                     item.is_active ? "" : " (inactive)"
                                 }}</span
@@ -247,11 +251,12 @@ const memberRelationships = (person: any) =>
                         >
                             <input
                                 v-model="filters.degree"
-                                type="checkbox"
                                 :value="item.id"
+                                type="checkbox"
                             />
                             <span
-                                >{{ item.name
+                            >{{
+                                    item.name
                                 }}{{
                                     item.is_active ? "" : " (inactive)"
                                 }}</span
@@ -262,7 +267,7 @@ const memberRelationships = (person: any) =>
                 <div class="space-y-2">
                     <span class="text-sm font-medium">Lodge honors</span>
                     <label class="checkbox-field">
-                        <input v-model="filters.past_master" type="checkbox" />
+                        <input v-model="filters.past_master" type="checkbox"/>
                         <span>Past Master</span>
                     </label>
                     <label class="checkbox-field">
@@ -274,29 +279,29 @@ const memberRelationships = (person: any) =>
                     </label>
                 </div>
                 <label
-                    ><span class="text-sm font-medium">Account</span
-                    ><select v-model="filters.account" class="field-input mt-1">
-                        <option value="all">Any account</option>
-                        <option value="linked">Linked</option>
-                        <option value="unlinked">Not linked</option>
-                    </select></label
+                ><span class="text-sm font-medium">Account</span
+                ><select v-model="filters.account" class="field-input mt-1">
+                    <option value="all">Any account</option>
+                    <option value="linked">Linked</option>
+                    <option value="unlinked">Not linked</option>
+                </select></label
                 >
                 <label
-                    ><span class="text-sm font-medium">Record type</span
-                    ><select v-model="filters.scope" class="field-input mt-1">
-                        <option value="all">Members and relatives</option>
-                        <option value="members">Members only</option>
-                        <option value="related">Related people only</option>
-                    </select></label
+                ><span class="text-sm font-medium">Record type</span
+                ><select v-model="filters.scope" class="field-input mt-1">
+                    <option value="all">Members and relatives</option>
+                    <option value="members">Members only</option>
+                    <option value="related">Related people only</option>
+                </select></label
                 >
                 <button
-                    type="button"
-                    class="icon-button mt-6"
-                    aria-label="Clear filters"
                     v-tooltip.top="{ value: 'Clear filters', showDelay: 2000 }"
+                    aria-label="Clear filters"
+                    class="icon-button mt-6"
+                    type="button"
                     @click="resetFilters"
                 >
-                    <X class="size-4" />
+                    <X class="size-4"/>
                 </button>
             </form>
         </section>
@@ -311,16 +316,19 @@ const memberRelationships = (person: any) =>
                     class="flex items-center gap-1 text-left"
                     @click="sortBy('name')"
                 >
-                    Name<ArrowUp
+                    Name
+                    <ArrowUp
                         v-if="
                             filters.sort === 'name' &&
                             filters.direction === 'asc'
                         "
                         class="size-3.5"
-                    /><ArrowDown
+                    />
+                    <ArrowDown
                         v-else-if="filters.sort === 'name'"
                         class="size-3.5"
-                    /><ArrowUpDown
+                    />
+                    <ArrowUpDown
                         v-else
                         class="size-3.5 text-muted-foreground"
                     />
@@ -329,16 +337,19 @@ const memberRelationships = (person: any) =>
                     class="flex items-center gap-1 text-left"
                     @click="sortBy('membership')"
                 >
-                    Membership<ArrowUp
+                    Membership
+                    <ArrowUp
                         v-if="
                             filters.sort === 'membership' &&
                             filters.direction === 'asc'
                         "
                         class="size-3.5"
-                    /><ArrowDown
+                    />
+                    <ArrowDown
                         v-else-if="filters.sort === 'membership'"
                         class="size-3.5"
-                    /><ArrowUpDown
+                    />
+                    <ArrowUpDown
                         v-else
                         class="size-3.5 text-muted-foreground"
                     />
@@ -347,16 +358,19 @@ const memberRelationships = (person: any) =>
                     class="flex items-center gap-1 text-left"
                     @click="sortBy('location')"
                 >
-                    City / State<ArrowUp
+                    City / State
+                    <ArrowUp
                         v-if="
                             filters.sort === 'location' &&
                             filters.direction === 'asc'
                         "
                         class="size-3.5"
-                    /><ArrowDown
+                    />
+                    <ArrowDown
                         v-else-if="filters.sort === 'location'"
                         class="size-3.5"
-                    /><ArrowUpDown
+                    />
+                    <ArrowUpDown
                         v-else
                         class="size-3.5 text-muted-foreground"
                     />
@@ -378,8 +392,8 @@ const memberRelationships = (person: any) =>
                         {{ formatPhone(person.phone) || "No phone" }}
                     </p>
                     <p
-                        class="hidden truncate text-xs text-muted-foreground md:block"
                         :title="person.email || 'No email'"
+                        class="hidden truncate text-xs text-muted-foreground md:block"
                     >
                         {{ person.email || "No email" }}
                     </p>
@@ -395,7 +409,7 @@ const memberRelationships = (person: any) =>
                 <div class="min-w-0 text-sm">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
-                        >Membership</span
+                    >Membership</span
                     >
                     <p>
                         {{
@@ -421,7 +435,7 @@ const memberRelationships = (person: any) =>
                         <span
                             v-if="person.past_master_terms?.length"
                             class="rounded bg-muted px-1.5 py-0.5 text-xs"
-                            >PM
+                        >PM
                             {{
                                 person.past_master_terms
                                     .map((term: any) => term.year)
@@ -434,7 +448,7 @@ const memberRelationships = (person: any) =>
                     <div class="min-w-0 text-sm">
                         <span
                             class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                            >Phone</span
+                        >Phone</span
                         >
                         <p class="wrap-break-word">
                             {{ formatPhone(person.phone) || "—" }}
@@ -443,7 +457,7 @@ const memberRelationships = (person: any) =>
                     <div class="min-w-0 text-sm">
                         <span
                             class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                            >City / State</span
+                        >City / State</span
                         >
                         <p class="wrap-break-word">
                             {{ location(person) || "—" }}
@@ -453,14 +467,14 @@ const memberRelationships = (person: any) =>
                 <div class="min-w-0 text-sm md:hidden">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                        >Email</span
+                    >Email</span
                     >
                     <p class="break-all">{{ person.email || "—" }}</p>
                 </div>
                 <div class="hidden min-w-0 text-sm md:block">
                     <span
                         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
-                        >City / State</span
+                    >City / State</span
                     >
                     <p class="wrap-break-word">{{ location(person) || "—" }}</p>
                 </div>
@@ -470,87 +484,87 @@ const memberRelationships = (person: any) =>
                     <div class="flex min-w-38 items-center justify-end gap-2">
                         <span
                             v-if="person.is_deceased"
-                            class="person-status-icon inline-flex size-8 items-center justify-center"
-                            role="img"
-                            aria-label="Deceased"
                             v-tooltip.left="{
                                 value: 'Deceased',
                                 showDelay: 2000,
                             }"
+                            aria-label="Deceased"
+                            class="person-status-icon inline-flex size-8 items-center justify-center"
+                            role="img"
                         >
-                            <Church class="size-4" />
+                            <Church class="size-4"/>
                         </span>
                         <span
                             v-if="membership(person)?.is_award_of_gold"
-                            class="person-award-icon inline-flex size-8 items-center justify-center"
-                            role="img"
-                            aria-label="Award of Gold"
                             v-tooltip.left="{
                                 value: 'Award of Gold',
                                 showDelay: 2000,
                             }"
+                            aria-label="Award of Gold"
+                            class="person-award-icon inline-flex size-8 items-center justify-center"
+                            role="img"
                         >
-                            <Award class="size-4" />
+                            <Award class="size-4"/>
                         </span>
                         <span
                             v-if="person.past_master_terms?.length"
-                            class="person-status-icon inline-flex size-8 items-center justify-center"
-                            role="img"
-                            aria-label="Past Master"
                             v-tooltip.left="{
                                 value: 'Past Master',
                                 showDelay: 2000,
                             }"
+                            aria-label="Past Master"
+                            class="person-status-icon inline-flex size-8 items-center justify-center"
+                            role="img"
                         >
-                            <DraftingCompass class="size-4" />
+                            <DraftingCompass class="size-4"/>
                         </span>
                         <span
-                            class="inline-flex size-8 items-center justify-center"
-                            role="img"
-                            :aria-label="
-                                person.user
-                                    ? 'Account linked'
-                                    : 'No linked account'
-                            "
                             v-tooltip.left="{
                                 value: person.user
                                     ? 'Account linked'
                                     : 'No linked account',
                                 showDelay: 2000,
                             }"
-                            ><Link2
-                                v-if="person.user"
-                                class="person-account-linked-icon size-4" /><Link2Off
-                                v-else
-                                class="person-account-unlinked-icon size-4"
+                            :aria-label="
+                                person.user
+                                    ? 'Account linked'
+                                    : 'No linked account'
+                            "
+                            class="inline-flex size-8 items-center justify-center"
+                            role="img"
+                        ><Link2
+                            v-if="person.user"
+                            class="person-account-linked-icon size-4"/><Link2Off
+                            v-else
+                            class="person-account-unlinked-icon size-4"
                         /></span>
                     </div>
                     <button
-                        type="button"
-                        :aria-label="`View ${person.display_name}`"
-                        class="icon-button"
                         v-tooltip.left="{
                             value: `View ${person.display_name}`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`View ${person.display_name}`"
+                        class="icon-button"
+                        type="button"
                         @click="openPerson(person, 'view')"
                     >
-                        <Eye class="size-4" />
+                        <Eye class="size-4"/>
                     </button>
                     <button
                         v-if="person.can_manage"
-                        type="button"
-                        :aria-label="`Edit ${person.display_name}`"
-                        class="icon-button"
                         v-tooltip.left="{
                             value: `Edit ${person.display_name}`,
                             showDelay: 2000,
                         }"
+                        :aria-label="`Edit ${person.display_name}`"
+                        class="icon-button"
+                        type="button"
                         @click="openPerson(person, 'edit')"
                     >
-                        <Pencil class="size-4" />
+                        <Pencil class="size-4"/>
                     </button>
-                    <span v-else class="inline-block size-10" />
+                    <span v-else class="inline-block size-10"/>
                 </div>
             </div>
             <p
@@ -563,19 +577,19 @@ const memberRelationships = (person: any) =>
     </main>
 
     <PersonModal
-        v-model:open="modalOpen"
         v-model:mode="modalMode"
-        :lodge="lodge"
-        :person="selectedPerson"
-        :membership-types="membershipTypes"
-        :membership-statuses="membershipStatuses"
-        :degrees="degrees"
-        :relationship-types="relationshipTypes"
+        v-model:open="modalOpen"
         :available-people="availablePeople"
-        :can-manage-memberships="canManageMemberships"
-        :can-manage-roles="canManageRoles"
         :can-manage-communication-preferences="
             canManageCommunicationPreferences
         "
+        :can-manage-memberships="canManageMemberships"
+        :can-manage-roles="canManageRoles"
+        :degrees="degrees"
+        :lodge="lodge"
+        :membership-statuses="membershipStatuses"
+        :membership-types="membershipTypes"
+        :person="selectedPerson"
+        :relationship-types="relationshipTypes"
     />
 </template>

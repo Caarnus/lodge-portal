@@ -1,25 +1,14 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import AppearanceTabs from "@/components/AppearanceTabs.vue";
 import InputError from "@/components/InputError.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import TabBar from "@/components/TabBar.vue";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Collapsible, CollapsibleContent, CollapsibleTrigger,} from "@/components/ui/collapsible";
 import {
     Dialog,
     DialogContent,
@@ -37,16 +26,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress, ProgressSummary } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Progress, ProgressSummary} from "@/components/ui/progress";
+import {Skeleton} from "@/components/ui/skeleton";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from "@/components/ui/tooltip";
 import {
     Check,
     ChevronDown,
@@ -57,21 +41,21 @@ import {
     Package,
     Pencil,
     Plus,
+    Rocket,
     ShoppingCart,
     Trash2,
-    Rocket,
 } from "lucide-vue-next";
-import { ref } from "vue";
+import {ref} from "vue";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 
 const checked = ref(false);
 const name = ref("");
 const reviewSectionOpen = ref(true);
 const reviewTabs = [
-    { key: "overview", label: "Overview", href: "/platform/ui-review" },
-    { key: "members", label: "Members", href: "/platform/ui-review" },
-    { key: "settings", label: "Settings", href: "/platform/ui-review" },
+    {key: "overview", label: "Overview", href: "/platform/ui-review"},
+    {key: "members", label: "Members", href: "/platform/ui-review"},
+    {key: "settings", label: "Settings", href: "/platform/ui-review"},
 ];
 const lodges = [
     {
@@ -157,16 +141,16 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
     status === "Active"
         ? "default"
         : status === "Draft"
-          ? "secondary"
-          : "muted";
+            ? "secondary"
+            : "muted";
 </script>
 
 <template>
     <main class="mx-auto w-full max-w-6xl space-y-10 p-4 sm:p-6 lg:p-8">
         <PageHeader
+            description="Live reference for portal patterns. Use before new screen work; update shared UI components here first."
             eyebrow="Platform reference"
             title="UI review"
-            description="Live reference for portal patterns. Use before new screen work; update shared UI components here first."
         >
             <template #actions>
                 <div class="space-y-1">
@@ -175,12 +159,12 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                     >
                         Compare appearance
                     </p>
-                    <AppearanceTabs />
+                    <AppearanceTabs/>
                 </div>
             </template>
         </PageHeader>
 
-        <section class="space-y-4" aria-labelledby="foundation-heading">
+        <section aria-labelledby="foundation-heading" class="space-y-4">
             <div>
                 <h2 id="foundation-heading" class="text-xl font-semibold">
                     Design foundations
@@ -191,7 +175,8 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                 </p>
             </div>
             <Card
-                ><CardContent
+            >
+                <CardContent
                     class="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-4"
                 >
                     <div
@@ -226,11 +211,12 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             Quiet grouping and copy
                         </p>
                     </div>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
         </section>
 
-        <section class="space-y-4" aria-labelledby="type-heading">
+        <section aria-labelledby="type-heading" class="space-y-4">
             <div>
                 <h2 id="type-heading" class="text-xl font-semibold">
                     Typography and status
@@ -240,7 +226,8 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                 </p>
             </div>
             <Card
-                ><CardContent class="grid gap-6 p-6 md:grid-cols-2">
+            >
+                <CardContent class="grid gap-6 p-6 md:grid-cols-2">
                     <div class="space-y-3">
                         <h1 class="text-2xl font-bold">Page title</h1>
                         <h2 class="text-xl font-semibold">Section heading</h2>
@@ -248,19 +235,28 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             Supporting text uses muted foreground.
                         </p>
                         <a
-                            href="#controls"
                             class="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                            >Text link</a
+                            href="#controls"
+                        >Text link</a
                         >
                     </div>
                     <div class="space-y-3">
                         <div class="flex flex-wrap gap-2">
-                            <Badge>Active</Badge
-                            ><Badge variant="secondary">Draft</Badge
-                            ><Badge variant="muted">Inactive</Badge
-                            ><Badge variant="warning">Pending</Badge
-                            ><Badge variant="destructive"
-                                >Needs attention</Badge
+                            <Badge>Active
+                            </Badge
+                            >
+                            <Badge variant="secondary">Draft
+                            </Badge
+                            >
+                            <Badge variant="muted">Inactive
+                            </Badge
+                            >
+                            <Badge variant="warning">Pending
+                            </Badge
+                            >
+                            <Badge variant="destructive"
+                            >Needs attention
+                            </Badge
                             >
                         </div>
                         <div
@@ -270,14 +266,15 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             recover.
                         </div>
                     </div>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
         </section>
 
         <section
             id="controls"
-            class="space-y-4"
             aria-labelledby="controls-heading"
+            class="space-y-4"
         >
             <div>
                 <h2 id="controls-heading" class="text-xl font-semibold">
@@ -289,26 +286,46 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                 </p>
             </div>
             <Card
-                ><CardContent class="space-y-6 p-6">
+            >
+                <CardContent class="space-y-6 p-6">
                     <div class="flex flex-wrap gap-3">
-                        <Button><Plus /> Create lodge</Button
-                        ><Button variant="outline">Save draft</Button
-                        ><Button variant="secondary">Secondary</Button
-                        ><Button variant="ghost">Ghost</Button
-                        ><Button variant="destructive"><Trash2 /> Delete</Button
-                        ><Button size="sm">Small</Button
-                        ><Button size="icon" aria-label="More actions"
-                            ><MoreHorizontal /></Button
-                        ><Button disabled>Disabled</Button>
+                        <Button>
+                            <Plus/>
+                            Create lodge
+                        </Button
+                        >
+                        <Button variant="outline">Save draft
+                        </Button
+                        >
+                        <Button variant="secondary">Secondary
+                        </Button
+                        >
+                        <Button variant="ghost">Ghost
+                        </Button
+                        >
+                        <Button variant="destructive">
+                            <Trash2/>
+                            Delete
+                        </Button
+                        >
+                        <Button size="sm">Small
+                        </Button
+                        >
+                        <Button aria-label="More actions" size="icon"
+                        >
+                            <MoreHorizontal/>
+                        </Button
+                        >
+                        <Button disabled>Disabled</Button>
                     </div>
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="space-y-2">
                             <Label for="review-name">Lodge name</Label
                             ><Input
-                                id="review-name"
-                                v-model="name"
-                                placeholder="Example Lodge No. 42"
-                            />
+                            id="review-name"
+                            v-model="name"
+                            placeholder="Example Lodge No. 42"
+                        />
                             <p class="text-xs text-muted-foreground">
                                 Helpful text describes expected value.
                             </p>
@@ -316,44 +333,47 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                         <div class="space-y-2">
                             <Label for="review-invalid">Meeting schedule</Label
                             ><Input
-                                id="review-invalid"
-                                aria-invalid="true"
-                                class="border-destructive focus-visible:ring-destructive"
-                                value=""
-                                placeholder="First Tuesday"
-                            /><InputError
+                            id="review-invalid"
+                            aria-invalid="true"
+                            class="border-destructive focus-visible:ring-destructive"
+                            placeholder="First Tuesday"
+                            value=""
+                        />
+                            <InputError
                                 message="Meeting schedule is required."
                             />
                         </div>
                         <div class="space-y-2">
                             <Label for="review-select">Lodge type</Label
                             ><select
-                                id="review-select"
-                                class="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
-                            >
-                                <option>Blue lodge</option>
-                                <option>Research lodge</option>
-                            </select>
+                            id="review-select"
+                            class="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
+                        >
+                            <option>Blue lodge</option>
+                            <option>Research lodge</option>
+                        </select>
                         </div>
                         <label
                             class="flex items-center gap-3 rounded-md border border-border/80 bg-card p-3 text-sm"
-                            ><Checkbox v-model:checked="checked" />
+                        >
+                            <Checkbox v-model:checked="checked"/>
                             <span
-                                ><span class="block font-medium"
-                                    >Publish page</span
-                                ><span class="text-muted-foreground"
-                                    >Visible to public visitors.</span
-                                ></span
+                            ><span class="block font-medium"
+                            >Publish page</span
+                            ><span class="text-muted-foreground"
+                            >Visible to public visitors.</span
+                            ></span
                             ></label
                         >
                     </div>
-                </CardContent></Card
+                </CardContent>
+            </Card
             >
         </section>
 
         <section
-            class="space-y-4"
             aria-labelledby="navigation-patterns-heading"
+            class="space-y-4"
         >
             <div>
                 <h2
@@ -402,24 +422,24 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             >
                                 <CollapsibleTrigger as-child>
                                     <button
-                                        type="button"
                                         class="flex w-full items-center justify-between gap-3 p-4 text-left"
+                                        type="button"
                                     >
                                         <span>
                                             <span class="block font-medium"
-                                                >Category details</span
+                                            >Category details</span
                                             >
                                             <span
                                                 class="block text-sm text-muted-foreground"
-                                                >Three records</span
+                                            >Three records</span
                                             >
                                         </span>
                                         <ChevronDown
-                                            class="size-4 shrink-0 transition-transform"
                                             :class="
                                                 reviewSectionOpen &&
                                                 'rotate-180'
                                             "
+                                            class="size-4 shrink-0 transition-transform"
                                         />
                                     </button>
                                 </CollapsibleTrigger>
@@ -454,10 +474,10 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             />
                             <span>
                                 <strong class="font-medium"
-                                    >Reorder pages</strong
+                                >Reorder pages</strong
                                 >
                                 <span class="block text-muted-foreground"
-                                    >Drag to a line between pages.</span
+                                >Drag to a line between pages.</span
                                 >
                             </span>
                         </div>
@@ -467,10 +487,10 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             />
                             <span>
                                 <strong class="font-medium"
-                                    >Create a submenu</strong
+                                >Create a submenu</strong
                                 >
                                 <span class="block text-muted-foreground"
-                                    >Drop directly onto a page.</span
+                                >Drop directly onto a page.</span
                                 >
                             </span>
                         </div>
@@ -484,27 +504,27 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                         >
                             <div
                                 v-if="index === 2"
-                                class="flex h-8 items-center gap-2 rounded bg-primary/15 px-3 text-primary ring-1 ring-inset ring-primary/40"
                                 :style="{
                                     marginLeft: `${page.depth * 1.5}rem`,
                                 }"
+                                class="flex h-8 items-center gap-2 rounded bg-primary/15 px-3 text-primary ring-1 ring-inset ring-primary/40"
                             >
-                                <span class="h-px flex-1 bg-primary/40" />
+                                <span class="h-px flex-1 bg-primary/40"/>
                                 <span class="text-xs font-semibold"
-                                    >Move here</span
+                                >Move here</span
                                 >
-                                <span class="h-px flex-1 bg-primary/40" />
+                                <span class="h-px flex-1 bg-primary/40"/>
                             </div>
-                            <div v-else class="h-1" />
+                            <div v-else class="h-1"/>
                             <article
                                 class="grid min-w-0 gap-3 rounded-md border border-border/80 bg-card p-3 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:grid-cols-[minmax(0,1fr)_7rem] sm:items-center"
                             >
                                 <div class="flex min-w-0 items-start gap-2">
                                     <div
-                                        class="flex h-10 shrink-0 items-center"
                                         :style="{
                                             marginLeft: `${page.depth * 1.5}rem`,
                                         }"
+                                        class="flex h-10 shrink-0 items-center"
                                     >
                                         <CornerDownRight
                                             v-if="page.depth"
@@ -547,23 +567,23 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                                     class="flex justify-end gap-1 border-t border-border/60 pt-3 sm:border-0 sm:pt-0"
                                 >
                                     <Button
-                                        variant="ghost"
-                                        size="icon"
                                         :aria-label="`Preview ${page.title}`"
+                                        size="icon"
+                                        variant="ghost"
                                     >
-                                        <Eye />
+                                        <Eye/>
                                     </Button>
                                     <Button
-                                        variant="ghost"
-                                        size="icon"
                                         :aria-label="`Edit ${page.title}`"
+                                        size="icon"
+                                        variant="ghost"
                                     >
-                                        <Pencil />
+                                        <Pencil/>
                                     </Button>
                                 </div>
                             </article>
                         </template>
-                        <div class="h-1" />
+                        <div class="h-1"/>
                     </div>
                     <div
                         class="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/30 p-3"
@@ -572,11 +592,12 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             Unsaved navigation changes
                         </span>
                         <div class="flex flex-wrap gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button size="sm" variant="outline">
                                 Discard changes
                             </Button>
                             <Button size="sm">
-                                <Rocket /> Save and publish navigation
+                                <Rocket/>
+                                Save and publish navigation
                             </Button>
                         </div>
                     </div>
@@ -584,7 +605,7 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
             </Card>
         </section>
 
-        <section class="space-y-4" aria-labelledby="content-heading">
+        <section aria-labelledby="content-heading" class="space-y-4">
             <div>
                 <h2 id="content-heading" class="text-xl font-semibold">
                     Content containers
@@ -596,55 +617,97 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
             </div>
             <div class="grid gap-4 md:grid-cols-3">
                 <Card
-                    ><CardHeader
-                        ><CardTitle>Card title</CardTitle
-                        ><CardDescription
-                            >Short description explains
-                            content.</CardDescription
-                        ></CardHeader
-                    ><CardContent class="text-sm"
-                        >Keep content scan-friendly.</CardContent
-                    ><CardFooter
-                        ><Button variant="outline" size="sm"
-                            >View details</Button
-                        ></CardFooter
-                    ></Card
-                ><Card class="border-primary/30"
-                    ><CardHeader
-                        ><CardTitle>Selected card</CardTitle
-                        ><CardDescription
-                            >Use border change sparingly.</CardDescription
-                        ></CardHeader
-                    ><CardContent class="text-sm"
-                        >Avoid alternate shadows or radii.</CardContent
-                    ></Card
-                ><Card
-                    ><CardContent class="space-y-3 p-6"
-                        ><Skeleton class="h-4 w-2/5" /><Skeleton
-                            class="h-4 w-full" /><Skeleton
-                            class="h-4 w-4/5" /></CardContent
-                ></Card>
+                >
+                    <CardHeader
+                    >
+                        <CardTitle>Card title
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Short description explains
+                            content.
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent class="text-sm"
+                    >Keep content scan-friendly.
+                    </CardContent
+                    >
+                    <CardFooter
+                    >
+                        <Button size="sm" variant="outline"
+                        >View details
+                        </Button
+                        >
+                    </CardFooter
+                    >
+                </Card
+                >
+                <Card class="border-primary/30"
+                >
+                    <CardHeader
+                    >
+                        <CardTitle>Selected card
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Use border change sparingly.
+                        </CardDescription
+                        >
+                    </CardHeader
+                    >
+                    <CardContent class="text-sm"
+                    >Avoid alternate shadows or radii.
+                    </CardContent
+                    >
+                </Card
+                >
+                <Card
+                >
+                    <CardContent class="space-y-3 p-6"
+                    >
+                        <Skeleton class="h-4 w-2/5"/>
+                        <Skeleton
+                            class="h-4 w-full"/>
+                        <Skeleton
+                            class="h-4 w-4/5"/>
+                    </CardContent
+                    >
+                </Card>
             </div>
             <Card class="overflow-hidden"
-                ><CardHeader
+            >
+                <CardHeader
                     class="flex-row items-center justify-between space-y-0 border-b border-border/70"
-                    ><div>
-                        <CardTitle>Data table</CardTitle
-                        ><CardDescription
-                            >Tablet table and phone cards use same data and
-                            actions.</CardDescription
+                >
+                    <div>
+                        <CardTitle>Data table
+                        </CardTitle
+                        >
+                        <CardDescription
+                        >Tablet table and phone cards use same data and
+                            actions.
+                        </CardDescription
                         >
                     </div>
-                    <Button size="sm"><Plus /> Add lodge</Button></CardHeader
-                ><CardContent class="p-0"
-                    ><div
+                    <Button size="sm">
+                        <Plus/>
+                        Add lodge
+                    </Button>
+                </CardHeader
+                >
+                <CardContent class="p-0"
+                >
+                    <div
                         class="hidden grid-cols-[minmax(12rem,1fr)_10rem_9rem_7rem] gap-4 border-b border-border/70 bg-muted/50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid"
                     >
                         <span>Lodge</span><span>Type</span><span>Status</span
-                        ><span class="text-right">Actions</span>
+                    ><span class="text-right">Actions</span>
                     </div>
                     <template v-for="lodge in lodges" :key="lodge.id"
-                        ><div
+                    >
+                        <div
                             class="hidden grid-cols-[minmax(12rem,1fr)_10rem_9rem_7rem] items-center gap-4 border-b border-border/60 px-4 py-4 transition-colors last:border-0 hover:bg-muted/35 md:grid"
                         >
                             <div>
@@ -654,28 +717,47 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                                 </p>
                             </div>
                             <span class="text-sm">{{ lodge.type }}</span
-                            ><Badge :variant="statusVariant(lodge.status)">{{
-                                lodge.status
-                            }}</Badge>
+                            >
+                            <Badge :variant="statusVariant(lodge.status)">{{
+                                    lodge.status
+                                }}
+                            </Badge>
                             <div class="flex justify-end gap-2">
-                                <Button variant="outline" size="sm">Edit</Button
-                                ><DropdownMenu
-                                    ><DropdownMenuTrigger as-child
-                                        ><Button
-                                            variant="ghost"
-                                            size="icon"
+                                <Button size="sm" variant="outline">Edit
+                                </Button
+                                >
+                                <DropdownMenu
+                                >
+                                    <DropdownMenuTrigger as-child
+                                    >
+                                        <Button
                                             :aria-label="`More actions for ${lodge.name}`"
-                                            ><MoreHorizontal /></Button></DropdownMenuTrigger
-                                    ><DropdownMenuContent align="end"
-                                        ><DropdownMenuItem
-                                            >View details</DropdownMenuItem
-                                        ><DropdownMenuItem
-                                            >Duplicate</DropdownMenuItem
-                                        ><DropdownMenuSeparator /><DropdownMenuItem
+                                            size="icon"
+                                            variant="ghost"
+                                        >
+                                            <MoreHorizontal/>
+                                        </Button>
+                                    </DropdownMenuTrigger
+                                    >
+                                    <DropdownMenuContent align="end"
+                                    >
+                                        <DropdownMenuItem
+                                        >View details
+                                        </DropdownMenuItem
+                                        >
+                                        <DropdownMenuItem
+                                        >Duplicate
+                                        </DropdownMenuItem
+                                        >
+                                        <DropdownMenuSeparator/>
+                                        <DropdownMenuItem
                                             class="text-destructive"
-                                            >Archive</DropdownMenuItem
-                                        ></DropdownMenuContent
-                                    ></DropdownMenu
+                                        >Archive
+                                        </DropdownMenuItem
+                                        >
+                                    </DropdownMenuContent
+                                    >
+                                </DropdownMenu
                                 >
                             </div>
                         </div>
@@ -690,43 +772,64 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                                     </p>
                                 </div>
                                 <Badge :variant="statusVariant(lodge.status)">{{
-                                    lodge.status
-                                }}</Badge>
+                                        lodge.status
+                                    }}
+                                </Badge>
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-muted-foreground">{{
-                                    lodge.type
-                                }}</span>
+                                        lodge.type
+                                    }}</span>
                                 <div class="flex gap-2">
-                                    <Button variant="outline" size="sm"
-                                        >Edit</Button
-                                    ><DropdownMenu
-                                        ><DropdownMenuTrigger as-child
-                                            ><Button
-                                                variant="ghost"
-                                                size="icon"
+                                    <Button size="sm" variant="outline"
+                                    >Edit
+                                    </Button
+                                    >
+                                    <DropdownMenu
+                                    >
+                                        <DropdownMenuTrigger as-child
+                                        >
+                                            <Button
                                                 :aria-label="`More actions for ${lodge.name}`"
-                                                ><MoreHorizontal /></Button></DropdownMenuTrigger
-                                        ><DropdownMenuContent align="end"
-                                            ><DropdownMenuItem
-                                                >View details</DropdownMenuItem
-                                            ><DropdownMenuItem
-                                                >Duplicate</DropdownMenuItem
-                                            ><DropdownMenuSeparator /><DropdownMenuItem
+                                                size="icon"
+                                                variant="ghost"
+                                            >
+                                                <MoreHorizontal/>
+                                            </Button>
+                                        </DropdownMenuTrigger
+                                        >
+                                        <DropdownMenuContent align="end"
+                                        >
+                                            <DropdownMenuItem
+                                            >View details
+                                            </DropdownMenuItem
+                                            >
+                                            <DropdownMenuItem
+                                            >Duplicate
+                                            </DropdownMenuItem
+                                            >
+                                            <DropdownMenuSeparator/>
+                                            <DropdownMenuItem
                                                 class="text-destructive"
-                                                >Archive</DropdownMenuItem
-                                            ></DropdownMenuContent
-                                        ></DropdownMenu
+                                            >Archive
+                                            </DropdownMenuItem
+                                            >
+                                        </DropdownMenuContent
+                                        >
+                                    </DropdownMenu
                                     >
                                 </div>
                             </div>
-                        </div></template
-                    ></CardContent
-                ></Card
+                        </div>
+                    </template
+                    >
+                </CardContent
+                >
+            </Card
             >
         </section>
 
-        <section class="space-y-4" aria-labelledby="progress-heading">
+        <section aria-labelledby="progress-heading" class="space-y-4">
             <div>
                 <h2 id="progress-heading" class="text-xl font-semibold">
                     Progress and goals
@@ -747,9 +850,9 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                     </CardHeader>
                     <CardContent class="space-y-5">
                         <ProgressSummary
-                            label="Directory profiles completed"
                             :value="68"
                             description="102 of 150 member profiles include the required details."
+                            label="Directory profiles completed"
                         />
                         <div class="space-y-2">
                             <div
@@ -775,16 +878,16 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                     </CardHeader>
                     <CardContent>
                         <ProgressSummary
-                            label="Temple restoration fund"
-                            :value="18750"
                             :max="25000"
-                            value-label="$18,750 of $25,000"
+                            :value="18750"
                             description="75% funded · $6,250 remaining"
+                            label="Temple restoration fund"
+                            value-label="$18,750 of $25,000"
                         />
                     </CardContent>
                     <CardFooter class="justify-between gap-3 border-t">
                         <span class="text-sm text-muted-foreground"
-                            >Campaign ends December 31</span
+                        >Campaign ends December 31</span
                         >
                         <Button size="sm">Contribute</Button>
                     </CardFooter>
@@ -792,7 +895,7 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
             </div>
         </section>
 
-        <section class="space-y-4" aria-labelledby="storefront-heading">
+        <section aria-labelledby="storefront-heading" class="space-y-4">
             <div>
                 <h2 id="storefront-heading" class="text-xl font-semibold">
                     Digital storefront
@@ -812,8 +915,9 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                             Merchandise, tickets, and digital products.
                         </CardDescription>
                     </div>
-                    <Button variant="outline" size="sm">
-                        <ShoppingCart /> Cart · 2
+                    <Button size="sm" variant="outline">
+                        <ShoppingCart/>
+                        Cart · 2
                     </Button>
                 </CardHeader>
                 <CardContent
@@ -829,8 +933,8 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                                 class="flex aspect-[4/3] items-center justify-center bg-muted/45"
                             >
                                 <Package
-                                    class="size-10 text-muted-foreground"
                                     aria-hidden="true"
+                                    class="size-10 text-muted-foreground"
                                 />
                             </div>
                             <div class="flex flex-1 flex-col gap-3 p-4">
@@ -850,24 +954,24 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                                     {{ product.description }}
                                 </p>
                                 <Badge
-                                    class="mt-auto w-fit"
                                     :variant="
                                         product.available
                                             ? 'secondary'
                                             : 'muted'
                                     "
+                                    class="mt-auto w-fit"
                                 >
                                     {{ product.inventory }}
                                 </Badge>
                                 <Button
-                                    class="w-full"
-                                    size="sm"
+                                    :disabled="!product.available"
                                     :variant="
                                         product.available
                                             ? 'default'
                                             : 'secondary'
                                     "
-                                    :disabled="!product.available"
+                                    class="w-full"
+                                    size="sm"
                                 >
                                     {{
                                         product.available
@@ -885,13 +989,13 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                         <div class="mt-4 space-y-3 text-sm">
                             <div class="flex justify-between gap-3">
                                 <span class="text-muted-foreground"
-                                    >Commemorative coin × 1</span
+                                >Commemorative coin × 1</span
                                 >
                                 <span class="tabular-nums">$18.00</span>
                             </div>
                             <div class="flex justify-between gap-3">
                                 <span class="text-muted-foreground"
-                                    >Digital lodge history × 1</span
+                                >Digital lodge history × 1</span
                                 >
                                 <span class="tabular-nums">$8.00</span>
                             </div>
@@ -912,7 +1016,7 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
             </Card>
         </section>
 
-        <section class="space-y-4" aria-labelledby="overlays-heading">
+        <section aria-labelledby="overlays-heading" class="space-y-4">
             <div>
                 <h2 id="overlays-heading" class="text-xl font-semibold">
                     Overlays and empty state
@@ -923,58 +1027,107 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                 </p>
             </div>
             <Card
-                ><CardContent class="flex flex-wrap items-center gap-3 p-6"
-                    ><Dialog
-                        ><DialogTrigger as-child
-                            ><Button>Open dialog</Button></DialogTrigger
-                        ><DialogContent
-                            ><DialogHeader
-                                ><DialogTitle>Confirm archive</DialogTitle
-                                ><DialogDescription
-                                    >Archive hides group from discovery.
+            >
+                <CardContent class="flex flex-wrap items-center gap-3 p-6"
+                >
+                    <Dialog
+                    >
+                        <DialogTrigger as-child
+                        >
+                            <Button>Open dialog</Button>
+                        </DialogTrigger
+                        >
+                        <DialogContent
+                        >
+                            <DialogHeader
+                            >
+                                <DialogTitle>Confirm archive
+                                </DialogTitle
+                                >
+                                <DialogDescription
+                                >Archive hides group from discovery.
                                     Existing memberships stay in
-                                    history.</DialogDescription
-                                ></DialogHeader
-                            ><DialogFooter
-                                ><Button variant="outline">Cancel</Button
-                                ><Button variant="destructive"
-                                    >Archive group</Button
-                                ></DialogFooter
-                            ></DialogContent
-                        ></Dialog
-                    ><DropdownMenu
-                        ><DropdownMenuTrigger as-child
-                            ><Button variant="outline"
-                                >More actions
-                                <ChevronDown /></Button></DropdownMenuTrigger
-                        ><DropdownMenuContent
-                            ><DropdownMenuLabel>Group actions</DropdownMenuLabel
-                            ><DropdownMenuSeparator /><DropdownMenuItem
-                                >Edit group</DropdownMenuItem
-                            ><DropdownMenuItem class="text-destructive"
-                                >Archive group</DropdownMenuItem
-                            ></DropdownMenuContent
-                        ></DropdownMenu
-                    ><TooltipProvider
-                        ><Tooltip
-                            ><TooltipTrigger as-child
-                                ><Button
-                                    variant="outline"
-                                    size="icon"
+                                    history.
+                                </DialogDescription
+                                >
+                            </DialogHeader
+                            >
+                            <DialogFooter
+                            >
+                                <Button variant="outline">Cancel
+                                </Button
+                                >
+                                <Button variant="destructive"
+                                >Archive group
+                                </Button
+                                >
+                            </DialogFooter
+                            >
+                        </DialogContent
+                        >
+                    </Dialog
+                    >
+                    <DropdownMenu
+                    >
+                        <DropdownMenuTrigger as-child
+                        >
+                            <Button variant="outline"
+                            >More actions
+                                <ChevronDown/>
+                            </Button>
+                        </DropdownMenuTrigger
+                        >
+                        <DropdownMenuContent
+                        >
+                            <DropdownMenuLabel>Group actions
+                            </DropdownMenuLabel
+                            >
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuItem
+                            >Edit group
+                            </DropdownMenuItem
+                            >
+                            <DropdownMenuItem class="text-destructive"
+                            >Archive group
+                            </DropdownMenuItem
+                            >
+                        </DropdownMenuContent
+                        >
+                    </DropdownMenu
+                    >
+                    <TooltipProvider
+                    >
+                        <Tooltip
+                        >
+                            <TooltipTrigger as-child
+                            >
+                                <Button
                                     aria-label="Help"
-                                    >?</Button
-                                ></TooltipTrigger
-                            ><TooltipContent
-                                >Explain uncommon controls.</TooltipContent
-                            ></Tooltip
-                        ></TooltipProvider
-                    ></CardContent
-                ></Card
+                                    size="icon"
+                                    variant="outline"
+                                >?
+                                </Button
+                                >
+                            </TooltipTrigger
+                            >
+                            <TooltipContent
+                            >Explain uncommon controls.
+                            </TooltipContent
+                            >
+                        </Tooltip
+                        >
+                    </TooltipProvider
+                    >
+                </CardContent
+                >
+            </Card
             >
             <Card
-                ><CardContent
+            >
+                <CardContent
                     class="flex min-h-48 flex-col items-center justify-center gap-3 p-6 text-center"
-                    ><Check class="size-8 text-muted-foreground" />
+                >
+                    <Check class="size-8 text-muted-foreground"/>
                     <div>
                         <p class="font-medium">No groups found</p>
                         <p class="text-sm text-muted-foreground">
@@ -982,9 +1135,12 @@ const statusVariant = (status: string): "default" | "secondary" | "muted" =>
                         </p>
                     </div>
                     <Button variant="outline"
-                        >Clear filters</Button
-                    ></CardContent
-                ></Card
+                    >Clear filters
+                    </Button
+                    >
+                </CardContent
+                >
+            </Card
             >
         </section>
     </main>

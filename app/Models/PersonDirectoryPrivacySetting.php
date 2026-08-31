@@ -12,11 +12,19 @@ class PersonDirectoryPrivacySetting extends Model
     /** @use HasFactory<PersonDirectoryPrivacySettingFactory> */
     use HasFactory;
 
+    public $incrementing = false;
     protected $guarded = [];
-
     protected $primaryKey = 'person_id';
 
-    public $incrementing = false;
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 
     protected function casts(): array
     {
@@ -28,15 +36,5 @@ class PersonDirectoryPrivacySetting extends Model
             'show_profile_photo' => 'boolean',
             'show_degree' => 'boolean',
         ];
-    }
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class);
-    }
-
-    public function updatedBy()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
     }
 }

@@ -1,15 +1,15 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { useEventListener, useMediaQuery, useVModel } from "@vueuse/core";
-import { TooltipProvider } from "radix-vue";
-import { computed, ref, type HTMLAttributes, type Ref } from "vue";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {useEventListener, useMediaQuery, useVModel} from "@vueuse/core";
+import {TooltipProvider} from "radix-vue";
+import {computed, type HTMLAttributes, ref, type Ref} from "vue";
 import {
+    provideSidebarContext,
     SIDEBAR_COOKIE_MAX_AGE,
     SIDEBAR_COOKIE_NAME,
     SIDEBAR_KEYBOARD_SHORTCUT,
     SIDEBAR_WIDTH,
     SIDEBAR_WIDTH_ICON,
-    provideSidebarContext,
 } from "./utils";
 
 const props = withDefaults(
@@ -82,18 +82,18 @@ provideSidebarContext({
 <template>
     <TooltipProvider :delay-duration="0">
         <div
-            :style="{
-                '--sidebar-width': SIDEBAR_WIDTH,
-                '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-            }"
             :class="
                 cn(
                     'group/sidebar-wrapper flex min-h-svh w-full text-sidebar-foreground has-[[data-variant=inset]]:bg-sidebar',
                     props.class,
                 )
             "
+            :style="{
+                '--sidebar-width': SIDEBAR_WIDTH,
+                '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+            }"
         >
-            <slot />
+            <slot/>
         </div>
     </TooltipProvider>
 </template>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import NavMain from "@/components/NavMain.vue";
 import NavUser from "@/components/NavUser.vue";
 import {
@@ -10,26 +10,26 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { type AuthenticatedSharedData, type NavItem } from "@/types";
-import { Link, router, usePage } from "@inertiajs/vue3";
+import {type AuthenticatedSharedData, type NavItem} from "@/types";
+import {Link, router, usePage} from "@inertiajs/vue3";
 import {
+    BookOpen,
     Building2,
     CalendarCog,
     ClipboardCheck,
     ContactRound,
     ExternalLink,
-    Mail,
-    PanelsTopLeft,
-    LayoutGrid,
-    BookOpen,
     HandHelping,
+    LayoutGrid,
+    Mail,
+    Network,
+    PanelsTopLeft,
     Settings,
     Tags,
-    Network,
     UserCog,
     Users,
 } from "lucide-vue-next";
-import { computed } from "vue";
+import {computed} from "vue";
 import AppLogo from "./AppLogo.vue";
 
 const page = usePage<AuthenticatedSharedData>();
@@ -44,9 +44,9 @@ const activeLodge = computed(
 );
 const platformNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
-        { title: "Dashboard", href: "/dashboard", icon: LayoutGrid },
+        {title: "Dashboard", href: "/dashboard", icon: LayoutGrid},
     ];
-    items.push({ title: "Ritual", href: "/ritual", icon: BookOpen });
+    items.push({title: "Ritual", href: "/ritual", icon: BookOpen});
     if (auth.value.user.is_platform_admin) {
         items.push({
             title: "Platform Lodges",
@@ -108,8 +108,8 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: lodge.can_manage_website
                 ? `/lodges/${lodge.id}/website`
                 : lodge.can_manage_galleries
-                  ? `/lodges/${lodge.id}/galleries/manage`
-                  : `/lodges/${lodge.id}/newsletters/manage`,
+                    ? `/lodges/${lodge.id}/galleries/manage`
+                    : `/lodges/${lodge.id}/newsletters/manage`,
             icon: PanelsTopLeft,
         });
     if (lodge.can_manage_events)
@@ -134,8 +134,8 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: lodge.can_view_people
                 ? `/lodges/${lodge.id}/people`
                 : lodge.can_manage_officers
-                  ? `/lodges/${lodge.id}/officers`
-                  : `/lodges/${lodge.id}/role-assignments`,
+                    ? `/lodges/${lodge.id}/officers`
+                    : `/lodges/${lodge.id}/role-assignments`,
             icon: ContactRound,
         });
     if (lodge.can_search_ritual)
@@ -163,48 +163,58 @@ const activate = (event: Event) => {
     <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader>
             <SidebarMenu class="group-data-[collapsible=icon]:items-center"
-                ><SidebarMenuItem class="group-data-[collapsible=icon]:w-8"
-                    ><SidebarMenuButton
-                        size="lg"
+            >
+                <SidebarMenuItem class="group-data-[collapsible=icon]:w-8"
+                >
+                    <SidebarMenuButton
                         as-child
                         class="group-data-[collapsible=icon]:justify-center"
-                        ><Link :href="route('dashboard')"
-                            ><AppLogo /></Link></SidebarMenuButton></SidebarMenuItem
-            ></SidebarMenu>
+                        size="lg"
+                    >
+                        <Link :href="route('dashboard')"
+                        >
+                            <AppLogo/>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem
+                >
+            </SidebarMenu>
             <div
                 v-if="auth.lodges.length"
                 class="px-2 group-data-[collapsible=icon]:hidden"
             >
                 <span
                     class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/60"
-                    >Active lodge</span
+                >Active lodge</span
                 ><select
-                    aria-label="Active lodge"
-                    :value="activeLodge?.id"
-                    class="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-2 text-sm"
-                    @change="activate"
+                :value="activeLodge?.id"
+                aria-label="Active lodge"
+                class="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-2 text-sm"
+                @change="activate"
+            >
+                <option
+                    v-for="lodge in auth.lodges"
+                    :key="lodge.id"
+                    :value="lodge.id"
                 >
-                    <option
-                        v-for="lodge in auth.lodges"
-                        :key="lodge.id"
-                        :value="lodge.id"
-                    >
-                        {{ lodge.name }}
-                    </option>
-                </select>
+                    {{ lodge.name }}
+                </option>
+            </select>
             </div>
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain label="Platform" :items="platformNavItems" />
+            <NavMain :items="platformNavItems" label="Platform"/>
             <NavMain
                 v-if="activeLodge && lodgeNavItems.length"
-                :label="activeLodge.name"
                 :items="lodgeNavItems"
+                :label="activeLodge.name"
             />
         </SidebarContent>
 
-        <SidebarFooter><NavUser /></SidebarFooter>
+        <SidebarFooter>
+            <NavUser/>
+        </SidebarFooter>
     </Sidebar>
-    <slot />
+    <slot/>
 </template>

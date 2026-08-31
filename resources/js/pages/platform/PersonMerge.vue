@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import {Head, useForm} from "@inertiajs/vue3";
 
-defineOptions({ layout: AppLayout });
+defineOptions({layout: AppLayout});
 const props = defineProps<{ people: any[] }>();
 const form = useForm({
     source_person_id: null as number | null,
@@ -17,55 +17,55 @@ const submit = () =>
     ) && form.post("/platform/people/merge");
 </script>
 <template>
-    <Head title="Merge people" />
+    <Head title="Merge people"/>
     <main class="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <PageHeader
-            title="Merge duplicate people"
             description="Membership and relationship history moves to the survivor. Conflicting lodge memberships or account links stop the merge."
+            title="Merge duplicate people"
         />
         <form
             class="mt-6 space-y-4 rounded-lg border border-border/80 bg-card p-4"
             @submit.prevent="submit"
         >
             <label class="block"
-                >Source record (retired)<select
-                    v-model="form.source_person_id"
-                    required
-                    class="field-input mt-1"
-                >
-                    <option :value="null">Select source</option>
-                    <option
-                        v-for="person in people"
-                        :key="person.id"
-                        :value="person.id"
-                    >
-                        {{ person.display_name }} —
-                        {{ person.email || "no email" }} ({{
-                            person.memberships_count
-                        }}
-                        memberships)
-                    </option>
-                </select></label
-            ><label class="block"
-                >Surviving record<select
-                    v-model="form.survivor_person_id"
-                    required
-                    class="field-input mt-1"
-                >
-                    <option :value="null">Select survivor</option>
-                    <option
-                        v-for="person in people"
-                        :key="person.id"
-                        :value="person.id"
-                    >
-                        {{ person.display_name }} —
-                        {{ person.email || "no email" }} ({{
-                            person.memberships_count
-                        }}
-                        memberships)
-                    </option>
-                </select></label
+            >Source record (retired)<select
+                v-model="form.source_person_id"
+                class="field-input mt-1"
+                required
             >
+                <option :value="null">Select source</option>
+                <option
+                    v-for="person in people"
+                    :key="person.id"
+                    :value="person.id"
+                >
+                    {{ person.display_name }} —
+                    {{ person.email || "no email" }} ({{
+                        person.memberships_count
+                    }}
+                    memberships)
+                </option>
+            </select></label
+            ><label class="block"
+        >Surviving record<select
+            v-model="form.survivor_person_id"
+            class="field-input mt-1"
+            required
+        >
+            <option :value="null">Select survivor</option>
+            <option
+                v-for="person in people"
+                :key="person.id"
+                :value="person.id"
+            >
+                {{ person.display_name }} —
+                {{ person.email || "no email" }} ({{
+                    person.memberships_count
+                }}
+                memberships)
+            </option>
+        </select></label
+        >
             <div
                 v-if="
                     selected(form.source_person_id) &&

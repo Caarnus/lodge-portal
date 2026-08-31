@@ -9,15 +9,6 @@ class LodgeGroup extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-            'has_public_landing_page' => 'boolean',
-            'archived_at' => 'datetime',
-        ];
-    }
-
     public function type()
     {
         return $this->belongsTo(LodgeGroupType::class, 'lodge_group_type_id');
@@ -46,5 +37,14 @@ class LodgeGroup extends Model
     public function scopeDiscoverable(Builder $query): Builder
     {
         return $query->active()->where('has_public_landing_page', true);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'has_public_landing_page' => 'boolean',
+            'archived_at' => 'datetime',
+        ];
     }
 }

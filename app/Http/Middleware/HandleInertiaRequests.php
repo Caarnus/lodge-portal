@@ -49,11 +49,11 @@ class HandleInertiaRequests extends Middleware
         $lodges = collect();
         if ($user instanceof User) {
             $lodgeQuery = Lodge::query();
-            if (! $user->is_platform_admin) {
-                $lodgeQuery->whereHas('users', fn (Builder $users) => $users->where('users.id', $user->id));
+            if (!$user->is_platform_admin) {
+                $lodgeQuery->whereHas('users', fn(Builder $users) => $users->where('users.id', $user->id));
             }
             $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug', 'status'])
-                ->map(fn (Lodge $lodge) => $lodge
+                ->map(fn(Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
                     ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_search_ritual', app(RitualAssistanceAccess::class)->canBrowse($user, $lodge))
@@ -71,11 +71,11 @@ class HandleInertiaRequests extends Middleware
                     ->setAttribute('can_manage_recipients', $user->hasLodgePermission($lodge, 'communications.recipients')));
         }
         $canReviewRegistrations = $user && ($user->is_platform_admin || DB::table('lodge_user_roles')
-            ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
-            ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
-            ->where('lodge_user_roles.user_id', $user->id)
-            ->where('permissions.key', 'registration.review')
-            ->exists());
+                    ->join('permission_role', 'lodge_user_roles.role_id', '=', 'permission_role.role_id')
+                    ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
+                    ->where('lodge_user_roles.user_id', $user->id)
+                    ->where('permissions.key', 'registration.review')
+                    ->exists());
 
         return array_merge(parent::share($request), [
             'name' => config('app.name'),
@@ -83,14 +83,14 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
                 'lodges' => $lodges,
-                'can_review_registrations' => (bool) $canReviewRegistrations,
+                'can_review_registrations' => (bool)$canReviewRegistrations,
             ],
-            'auth_lodge' => fn () => Lodge::where('id', $request->session()->get('auth_lodge_id'))
+            'auth_lodge' => fn() => Lodge::where('id', $request->session()->get('auth_lodge_id'))
                 ->where('status', LodgeStatus::Active)
                 ->first(['name', 'slug', 'number', 'logo_path', 'seal_path']),
             'flash' => [
-                'notice' => fn () => $request->session()->get('notice'),
-                'officer_role_prompt' => fn () => $request->session()->get('officer_role_prompt'),
+                'notice' => fn() => $request->session()->get('notice'),
+                'officer_role_prompt' => fn() => $request->session()->get('officer_role_prompt'),
             ],
         ]);
     }

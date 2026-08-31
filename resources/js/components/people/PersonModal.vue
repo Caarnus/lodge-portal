@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     Dialog,
     DialogDescription,
@@ -7,10 +7,10 @@ import {
     DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { formatPhone } from "@/lib/phone";
-import { router, useForm } from "@inertiajs/vue3";
-import { Link2, Link2Off, Trash2 } from "lucide-vue-next";
-import { computed, watch } from "vue";
+import {formatPhone} from "@/lib/phone";
+import {router, useForm} from "@inertiajs/vue3";
+import {Link2, Link2Off, Trash2} from "lucide-vue-next";
+import {computed, watch} from "vue";
 
 const props = defineProps<{
     open: boolean;
@@ -81,8 +81,8 @@ const relationshipForm = useForm({
         phone: string;
     },
 });
-const pastMasterForm = useForm({ year: new Date().getFullYear() });
-const photoForm = useForm<{ photo: File | null }>({ photo: null });
+const pastMasterForm = useForm({year: new Date().getFullYear()});
+const photoForm = useForm<{ photo: File | null }>({photo: null});
 const availableRelatedPeople = (personId: number) =>
     props.availablePeople.filter((candidate) => candidate.id !== personId);
 
@@ -164,14 +164,14 @@ const saveMembership = () => {
     if (!membership.value) return;
     membershipForm.put(
         `/lodges/${props.lodge.id}/memberships/${membership.value.id}`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 const addPastMasterYear = () => {
     if (!membership.value) return;
     pastMasterForm.post(
         `/lodges/${props.lodge.id}/memberships/${membership.value.id}/past-master-terms`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 const removePastMasterYear = (term: any) => {
@@ -179,21 +179,21 @@ const removePastMasterYear = (term: any) => {
         return;
     router.delete(
         `/lodges/${props.lodge.id}/memberships/${membership.value.id}/past-master-terms/${term.id}`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 const saveCommunicationPreference = () => {
     if (!membership.value) return;
     communicationPreferenceForm.put(
         `/lodges/${props.lodge.id}/memberships/${membership.value.id}/communication-preference`,
-        { preserveScroll: true },
+        {preserveScroll: true},
     );
 };
 const addRelationship = () => {
     if (!props.person) return;
     relationshipForm.post(
         `/lodges/${props.lodge.id}/people/${props.person.id}/relationships`,
-        { preserveScroll: true, onSuccess: () => relationshipForm.reset() },
+        {preserveScroll: true, onSuccess: () => relationshipForm.reset()},
     );
 };
 const toggleNewRelative = () => {
@@ -201,12 +201,12 @@ const toggleNewRelative = () => {
     relationshipForm.related_person = relationshipForm.related_person
         ? null
         : {
-              legal_first_name: "",
-              legal_last_name: "",
-              preferred_name: "",
-              email: "",
-              phone: "",
-          };
+            legal_first_name: "",
+            legal_last_name: "",
+            preferred_name: "",
+            email: "",
+            phone: "",
+        };
 };
 const updateRelationship = (relationship: any) =>
     props.person &&
@@ -267,12 +267,14 @@ const address = computed(() =>
         >
             <DialogHeader>
                 <DialogTitle
-                    >{{ person ? (mode === "edit" ? "Edit" : "View") : "Add" }}
-                    {{ person?.display_name ?? "person" }}</DialogTitle
+                >{{ person ? (mode === "edit" ? "Edit" : "View") : "Add" }}
+                    {{ person?.display_name ?? "person" }}
+                </DialogTitle
                 >
                 <DialogDescription
-                    >Identity information is shared with every lodge authorized
-                    to access this person.</DialogDescription
+                >Identity information is shared with every lodge authorized
+                    to access this person.
+                </DialogDescription
                 >
             </DialogHeader>
 
@@ -320,10 +322,12 @@ const address = computed(() =>
                             <Link2
                                 v-if="person.user"
                                 class="size-4 text-primary"
-                            /><Link2Off
+                            />
+                            <Link2Off
                                 v-else
                                 class="size-4 text-muted-foreground"
-                            />{{ person.user ? "Linked" : "Not linked" }}
+                            />
+                            {{ person.user ? "Linked" : "Not linked" }}
                         </dd>
                     </div>
                     <div>
@@ -391,8 +395,8 @@ const address = computed(() =>
                                 {{
                                     person.past_master_terms?.length
                                         ? person.past_master_terms
-                                              .map((term: any) => term.year)
-                                              .join(", ")
+                                            .map((term: any) => term.year)
+                                            .join(", ")
                                         : "No"
                                 }}
                             </dd>
@@ -467,8 +471,8 @@ const address = computed(() =>
                 <DialogFooter class="border-t border-border/70 pt-4">
                     <button
                         v-if="person.can_manage"
-                        type="button"
                         class="primary-button"
+                        type="button"
                         @click="emit('update:mode', 'edit')"
                     >
                         Edit
@@ -492,46 +496,46 @@ const address = computed(() =>
                                 Legal name
                             </legend>
                             <label class="field-label"
-                                >First name<input
-                                    v-model="personForm.legal_first_name"
-                                    required
-                                    class="field-input"
+                            >First name<input
+                                v-model="personForm.legal_first_name"
+                                class="field-input"
+                                required
                             /></label>
                             <label class="field-label"
-                                >Middle name<input
-                                    v-model="personForm.legal_middle_name"
-                                    class="field-input"
+                            >Middle name<input
+                                v-model="personForm.legal_middle_name"
+                                class="field-input"
                             /></label>
                             <label class="field-label"
-                                >Last name<input
-                                    v-model="personForm.legal_last_name"
-                                    required
-                                    class="field-input"
+                            >Last name<input
+                                v-model="personForm.legal_last_name"
+                                class="field-input"
+                                required
                             /></label>
                             <label class="field-label"
-                                >Suffix<select
-                                    v-model="personForm.legal_suffix"
-                                    class="field-input"
-                                >
-                                    <option value="">None</option>
-                                    <option value="Jr.">Jr.</option>
-                                    <option value="Sr.">Sr.</option>
-                                    <option value="I">I</option>
-                                    <option value="II">II</option>
-                                    <option value="III">III</option>
-                                    <option value="IV">IV</option>
-                                    <option value="V">V</option>
-                                    <option value="Esq.">Esq.</option>
-                                    <option value="MD">MD</option>
-                                    <option value="DO">DO</option>
-                                    <option value="DDS">DDS</option>
-                                    <option value="DVM">DVM</option>
-                                    <option value="PhD">PhD</option>
-                                    <option value="JD">JD</option>
-                                    <option value="CPA">CPA</option>
-                                    <option value="PE">PE</option>
-                                    <option value="Ret.">Ret.</option>
-                                </select></label
+                            >Suffix<select
+                                v-model="personForm.legal_suffix"
+                                class="field-input"
+                            >
+                                <option value="">None</option>
+                                <option value="Jr.">Jr.</option>
+                                <option value="Sr.">Sr.</option>
+                                <option value="I">I</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                                <option value="Esq.">Esq.</option>
+                                <option value="MD">MD</option>
+                                <option value="DO">DO</option>
+                                <option value="DDS">DDS</option>
+                                <option value="DVM">DVM</option>
+                                <option value="PhD">PhD</option>
+                                <option value="JD">JD</option>
+                                <option value="CPA">CPA</option>
+                                <option value="PE">PE</option>
+                                <option value="Ret.">Ret.</option>
+                            </select></label
                             >
                         </fieldset>
 
@@ -542,23 +546,23 @@ const address = computed(() =>
                                 Contact
                             </legend>
                             <label class="field-label"
-                                >Preferred name<input
-                                    v-model="personForm.preferred_name"
-                                    class="field-input"
+                            >Preferred name<input
+                                v-model="personForm.preferred_name"
+                                class="field-input"
                             /></label>
                             <label class="field-label"
-                                >Email<input
-                                    v-model="personForm.email"
-                                    type="email"
-                                    class="field-input"
+                            >Email<input
+                                v-model="personForm.email"
+                                class="field-input"
+                                type="email"
                             /></label>
                             <label class="field-label"
-                                >Phone<input
-                                    v-model="personForm.phone"
-                                    type="tel"
-                                    class="field-input"
-                                    placeholder="(812)555-0100 or +44 20 7946 0958"
-                                    @blur="
+                            >Phone<input
+                                v-model="personForm.phone"
+                                class="field-input"
+                                placeholder="(812)555-0100 or +44 20 7946 0958"
+                                type="tel"
+                                @blur="
                                         personForm.phone = formatPhone(
                                             personForm.phone,
                                         )
@@ -571,33 +575,33 @@ const address = computed(() =>
                                 Mailing address
                             </legend>
                             <label class="field-label"
-                                >Address line 1<input
-                                    v-model="personForm.mailing_address_line_1"
-                                    class="field-input"
+                            >Address line 1<input
+                                v-model="personForm.mailing_address_line_1"
+                                class="field-input"
                             /></label>
                             <label class="field-label"
-                                >Address line 2<input
-                                    v-model="personForm.mailing_address_line_2"
-                                    class="field-input"
+                            >Address line 2<input
+                                v-model="personForm.mailing_address_line_2"
+                                class="field-input"
                             /></label>
                             <div
                                 class="grid gap-3 md:grid-cols-[1fr_7rem_10rem]"
                             >
                                 <label class="field-label"
-                                    >City<input
-                                        v-model="personForm.mailing_city"
-                                        class="field-input"
+                                >City<input
+                                    v-model="personForm.mailing_city"
+                                    class="field-input"
                                 /></label>
                                 <label class="field-label"
-                                    >State<input
-                                        v-model="personForm.mailing_state"
-                                        maxlength="2"
-                                        class="field-input uppercase"
+                                >State<input
+                                    v-model="personForm.mailing_state"
+                                    class="field-input uppercase"
+                                    maxlength="2"
                                 /></label>
                                 <label class="field-label"
-                                    >Postal code<input
-                                        v-model="personForm.mailing_postal_code"
-                                        class="field-input"
+                                >Postal code<input
+                                    v-model="personForm.mailing_postal_code"
+                                    class="field-input"
                                 /></label>
                             </div>
                         </fieldset>
@@ -610,27 +614,27 @@ const address = computed(() =>
                                     Personal status
                                 </h4>
                                 <label class="flex items-center gap-2 text-sm"
-                                    ><input
-                                        v-model="personForm.is_deceased"
-                                        type="checkbox"
-                                    />
+                                ><input
+                                    v-model="personForm.is_deceased"
+                                    type="checkbox"
+                                />
                                     Deceased</label
                                 >
                             </div>
                             <div class="grid gap-3 md:grid-cols-3">
                                 <label class="field-label"
-                                    >Birth date<input
-                                        v-model="personForm.birth_date"
-                                        type="date"
-                                        class="field-input"
+                                >Birth date<input
+                                    v-model="personForm.birth_date"
+                                    class="field-input"
+                                    type="date"
                                 /></label>
                                 <label
                                     v-if="personForm.is_deceased"
                                     class="field-label"
-                                    >Death date<input
-                                        v-model="personForm.death_date"
-                                        type="date"
-                                        class="field-input"
+                                >Death date<input
+                                    v-model="personForm.death_date"
+                                    class="field-input"
+                                    type="date"
                                 /></label>
                             </div>
                         </section>
@@ -674,7 +678,7 @@ const address = computed(() =>
                     >
                         Processing status: {{ person.profile_photo_status }}
                         <span v-if="person.profile_photo_error"
-                            >— {{ person.profile_photo_error }}</span
+                        >— {{ person.profile_photo_error }}</span
                         >
                     </p>
                     <form
@@ -682,12 +686,12 @@ const address = computed(() =>
                         @submit.prevent="uploadPhoto"
                     >
                         <label class="field-label"
-                            >Photo<input
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                                required
-                                class="file-input"
-                                @change="
+                        >Photo<input
+                            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                            class="file-input"
+                            required
+                            type="file"
+                            @change="
                                     photoForm.photo =
                                         ($event.target as HTMLInputElement)
                                             .files?.[0] ?? null
@@ -717,51 +721,51 @@ const address = computed(() =>
                                 Membership standing
                             </legend>
                             <label class="field-label"
-                                >Type<select
-                                    v-model="membershipForm.membership_type_id"
-                                    class="field-input"
+                            >Type<select
+                                v-model="membershipForm.membership_type_id"
+                                class="field-input"
+                            >
+                                <option :value="null">Unknown</option>
+                                <option
+                                    v-for="item in membershipTypes"
+                                    :key="item.id"
+                                    :value="item.id"
                                 >
-                                    <option :value="null">Unknown</option>
-                                    <option
-                                        v-for="item in membershipTypes"
-                                        :key="item.id"
-                                        :value="item.id"
-                                    >
-                                        {{ item.name }}
-                                    </option>
-                                </select></label
+                                    {{ item.name }}
+                                </option>
+                            </select></label
                             >
                             <label class="field-label"
-                                >Status<select
-                                    v-model="
+                            >Status<select
+                                v-model="
                                         membershipForm.membership_status_id
                                     "
-                                    required
-                                    class="field-input"
+                                class="field-input"
+                                required
+                            >
+                                <option
+                                    v-for="item in membershipStatuses"
+                                    :key="item.id"
+                                    :value="item.id"
                                 >
-                                    <option
-                                        v-for="item in membershipStatuses"
-                                        :key="item.id"
-                                        :value="item.id"
-                                    >
-                                        {{ item.name }}
-                                    </option>
-                                </select></label
+                                    {{ item.name }}
+                                </option>
+                            </select></label
                             >
                             <label class="field-label"
-                                >Degree<select
-                                    v-model="membershipForm.masonic_degree_id"
-                                    class="field-input"
+                            >Degree<select
+                                v-model="membershipForm.masonic_degree_id"
+                                class="field-input"
+                            >
+                                <option :value="null">Unknown</option>
+                                <option
+                                    v-for="item in degrees"
+                                    :key="item.id"
+                                    :value="item.id"
                                 >
-                                    <option :value="null">Unknown</option>
-                                    <option
-                                        v-for="item in degrees"
-                                        :key="item.id"
-                                        :value="item.id"
-                                    >
-                                        {{ item.name }}
-                                    </option>
-                                </select></label
+                                    {{ item.name }}
+                                </option>
+                            </select></label
                             >
                         </fieldset>
                         <fieldset class="order-3 grid gap-3 md:grid-cols-3">
@@ -772,26 +776,26 @@ const address = computed(() =>
                                     Lodge records
                                 </h4>
                                 <label class="flex items-center gap-2 text-sm"
-                                    ><input
-                                        v-model="
+                                ><input
+                                    v-model="
                                             membershipForm.is_award_of_gold
                                         "
-                                        type="checkbox"
-                                    />
+                                    type="checkbox"
+                                />
                                     Award of Gold (50-year member)</label
                                 >
                             </div>
                             <label class="field-label"
-                                >Primary lodge number<input
-                                    v-model="
+                            >Primary lodge number<input
+                                v-model="
                                         membershipForm.primary_lodge_number
                                     "
-                                    class="field-input"
+                                class="field-input"
                             /></label>
                             <label class="field-label"
-                                >Member number<input
-                                    v-model="membershipForm.member_number"
-                                    class="field-input"
+                            >Member number<input
+                                v-model="membershipForm.member_number"
+                                class="field-input"
                             /></label>
                         </fieldset>
                         <fieldset class="order-2 grid gap-3 md:grid-cols-3">
@@ -801,46 +805,46 @@ const address = computed(() =>
                                 Masonic dates
                             </legend>
                             <label class="field-label"
-                                >EA date<input
-                                    v-model="
+                            >EA date<input
+                                v-model="
                                         membershipForm.entered_apprentice_date
                                     "
-                                    type="date"
-                                    class="field-input"
+                                class="field-input"
+                                type="date"
                             /></label>
                             <label class="field-label"
-                                >FC date<input
-                                    v-model="membershipForm.fellow_craft_date"
-                                    type="date"
-                                    class="field-input"
+                            >FC date<input
+                                v-model="membershipForm.fellow_craft_date"
+                                class="field-input"
+                                type="date"
                             /></label>
                             <label class="field-label"
-                                >MM date<input
-                                    v-model="membershipForm.master_mason_date"
-                                    type="date"
-                                    class="field-input"
+                            >MM date<input
+                                v-model="membershipForm.master_mason_date"
+                                class="field-input"
+                                type="date"
                             /></label>
                             <label class="field-label"
-                                >Affiliation date<input
-                                    v-model="membershipForm.affiliation_date"
-                                    type="date"
-                                    class="field-input"
+                            >Affiliation date<input
+                                v-model="membershipForm.affiliation_date"
+                                class="field-input"
+                                type="date"
                             /></label>
                             <label class="field-label"
-                                >Demit/withdrawal date<input
-                                    v-model="
+                            >Demit/withdrawal date<input
+                                v-model="
                                         membershipForm.demit_withdrawal_date
                                     "
-                                    type="date"
-                                    class="field-input"
+                                class="field-input"
+                                type="date"
                             /></label>
                         </fieldset>
                         <label class="order-4 field-label"
-                            >Private lodge notes<textarea
-                                v-model="membershipForm.notes"
-                                rows="3"
-                                class="field-input"
-                            />
+                        >Private lodge notes<textarea
+                            v-model="membershipForm.notes"
+                            class="field-input"
+                            rows="3"
+                        />
                         </label>
                     </div>
                     <p
@@ -862,8 +866,8 @@ const address = computed(() =>
                         </button>
                         <button
                             v-if="!membership.end_date && canManageMemberships"
-                            type="button"
                             class="secondary-button border-destructive/50 text-destructive hover:bg-destructive/10"
+                            type="button"
                             @click="endMembership"
                         >
                             End membership
@@ -871,7 +875,7 @@ const address = computed(() =>
                         <span
                             v-else-if="membership.end_date"
                             class="text-sm text-muted-foreground"
-                            >Ended {{ dateValue(membership.end_date) }}</span
+                        >Ended {{ dateValue(membership.end_date) }}</span
                         >
                     </div>
                 </form>
@@ -886,21 +890,21 @@ const address = computed(() =>
                     </h3>
                     <div class="mt-3 flex flex-wrap gap-5 text-sm">
                         <label class="flex items-center gap-2"
-                            ><input
-                                v-model="
+                        ><input
+                            v-model="
                                     communicationPreferenceForm.receives_lodge_email
                                 "
-                                type="checkbox"
-                            />
+                            type="checkbox"
+                        />
                             Receive lodge email</label
                         >
                         <label class="flex items-center gap-2"
-                            ><input
-                                v-model="
+                        ><input
+                            v-model="
                                     communicationPreferenceForm.receives_print_newsletter
                                 "
-                                type="checkbox"
-                            />
+                            type="checkbox"
+                        />
                             Receive mailed newsletter</label
                         >
                     </div>
@@ -919,20 +923,21 @@ const address = computed(() =>
                             v-for="term in person.past_master_terms"
                             :key="term.id"
                             class="inline-flex items-center gap-1 rounded-full bg-muted py-1 pl-3 pr-1 text-sm"
-                            >{{ term.year
+                        >{{
+                                term.year
                             }}<button
                                 v-if="canManageMemberships"
-                                type="button"
                                 :aria-label="`Remove Past Master year ${term.year}`"
                                 class="inline-flex size-7 items-center justify-center rounded-full text-destructive"
+                                type="button"
                                 @click="removePastMasterYear(term)"
                             >
-                                <Trash2 class="size-3.5" /></button></span
+                                <Trash2 class="size-3.5"/></button></span
                         ><span
-                            v-if="!person.past_master_terms?.length"
-                            class="text-sm text-muted-foreground"
-                            >No Past Master years recorded.</span
-                        >
+                        v-if="!person.past_master_terms?.length"
+                        class="text-sm text-muted-foreground"
+                    >No Past Master years recorded.</span
+                    >
                     </div>
                     <form
                         v-if="canManageMemberships"
@@ -941,12 +946,13 @@ const address = computed(() =>
                     >
                         <input
                             v-model="pastMasterForm.year"
-                            type="number"
-                            min="1700"
                             :max="new Date().getFullYear()"
                             aria-label="Past Master year"
                             class="field-input w-32"
-                        /><button class="secondary-button">Add year</button>
+                            min="1700"
+                            type="number"
+                        />
+                        <button class="secondary-button">Add year</button>
                     </form>
                     <p
                         v-if="pastMasterForm.errors.year"
@@ -970,13 +976,13 @@ const address = computed(() =>
                             class="flex flex-wrap items-center gap-2 py-2"
                         >
                             <span class="min-w-0 flex-1">{{
-                                relationship.statement
-                            }}</span>
+                                    relationship.statement
+                                }}</span>
                             <select
                                 v-if="relationship.can_manage"
                                 v-model="relationship.relationship_type_id"
-                                class="field-input w-auto"
                                 :aria-label="`Relationship type for ${relationship.related_person.display_name}`"
+                                class="field-input w-auto"
                             >
                                 <option
                                     v-for="item in relationshipTypes"
@@ -988,16 +994,16 @@ const address = computed(() =>
                             </select>
                             <button
                                 v-if="relationship.can_manage"
-                                type="button"
                                 class="secondary-button px-3"
+                                type="button"
                                 @click="updateRelationship(relationship)"
                             >
                                 Save
                             </button>
                             <button
                                 v-if="relationship.can_manage"
-                                type="button"
                                 class="secondary-button border-destructive/50 px-3 text-destructive hover:bg-destructive/10"
+                                type="button"
                                 @click="removeRelationship(relationship.id)"
                             >
                                 Remove
@@ -1008,8 +1014,8 @@ const address = computed(() =>
                         No family relationships recorded.
                     </p>
                     <button
-                        type="button"
                         class="mt-3 text-sm underline"
+                        type="button"
                         @click="toggleNewRelative"
                     >
                         {{
@@ -1027,15 +1033,15 @@ const address = computed(() =>
                             <span class="flex flex-wrap items-center gap-2">
                                 <span
                                     class="inline-flex h-10 items-center text-sm font-medium"
-                                    >{{ person.display_name }} is</span
+                                >{{ person.display_name }} is</span
                                 >
                                 <select
                                     v-model="
                                         relationshipForm.relationship_type_id
                                     "
-                                    required
-                                    class="field-input w-full sm:w-56"
                                     aria-label="Relationship type"
+                                    class="field-input w-full sm:w-56"
+                                    required
                                 >
                                     <option :value="null">
                                         Select relationship
@@ -1055,22 +1061,22 @@ const address = computed(() =>
                             class="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
                         >
                             <label class="field-label"
-                                >Person<select
-                                    v-model="relationshipForm.related_person_id"
-                                    required
-                                    class="field-input"
-                                >
-                                    <option :value="null">Select person</option>
-                                    <option
-                                        v-for="item in availableRelatedPeople(
+                            >Person<select
+                                v-model="relationshipForm.related_person_id"
+                                class="field-input"
+                                required
+                            >
+                                <option :value="null">Select person</option>
+                                <option
+                                    v-for="item in availableRelatedPeople(
                                             person.id,
                                         )"
-                                        :key="item.id"
-                                        :value="item.id"
-                                    >
-                                        {{ item.display_name }}
-                                    </option>
-                                </select></label
+                                    :key="item.id"
+                                    :value="item.id"
+                                >
+                                    {{ item.display_name }}
+                                </option>
+                            </select></label
                             >
                             <button class="secondary-button">
                                 Add relationship
@@ -1086,18 +1092,18 @@ const address = computed(() =>
                                         relationshipForm.related_person
                                             .legal_first_name
                                     "
-                                    required
                                     class="field-input"
                                     placeholder="First name"
+                                    required
                                 />
                                 <input
                                     v-model="
                                         relationshipForm.related_person
                                             .legal_last_name
                                     "
-                                    required
                                     class="field-input"
                                     placeholder="Last name"
+                                    required
                                 />
                                 <input
                                     v-model="
@@ -1111,17 +1117,17 @@ const address = computed(() =>
                                     v-model="
                                         relationshipForm.related_person.email
                                     "
-                                    type="email"
                                     class="field-input"
                                     placeholder="Email"
+                                    type="email"
                                 />
                                 <input
                                     v-model="
                                         relationshipForm.related_person.phone
                                     "
-                                    type="tel"
                                     class="field-input"
                                     placeholder="Phone"
+                                    type="tel"
                                     @blur="
                                         relationshipForm.related_person &&
                                         (relationshipForm.related_person.phone =
@@ -1152,16 +1158,16 @@ const address = computed(() =>
                     </p>
                     <button
                         v-if="!person.user && person.can_manage"
-                        type="button"
                         class="secondary-button mt-3"
+                        type="button"
                         @click="invite"
                     >
                         Invite account
                     </button>
                     <button
                         v-else-if="person.user && canManageRoles"
-                        type="button"
                         class="secondary-button mt-3 border-destructive/50 text-destructive hover:bg-destructive/10"
+                        type="button"
                         @click="revoke"
                     >
                         Revoke this lodge's access

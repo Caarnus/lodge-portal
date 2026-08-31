@@ -1,16 +1,16 @@
-<script setup lang="ts">
-import { cn } from "@/lib/utils";
-import { X } from "lucide-vue-next";
+<script lang="ts" setup>
+import {cn} from "@/lib/utils";
+import {X} from "lucide-vue-next";
 import {
     DialogClose,
     DialogContent,
+    type DialogContentEmits,
+    type DialogContentProps,
     DialogOverlay,
     DialogPortal,
     useForwardPropsEmits,
-    type DialogContentEmits,
-    type DialogContentProps,
 } from "radix-vue";
-import { computed, type HTMLAttributes } from "vue";
+import {computed, type HTMLAttributes} from "vue";
 
 const props = defineProps<
     DialogContentProps & { class?: HTMLAttributes["class"] }
@@ -18,7 +18,7 @@ const props = defineProps<
 const emits = defineEmits<DialogContentEmits>();
 
 const delegatedProps = computed(() => {
-    const { class: _, ...delegated } = props;
+    const {class: _, ...delegated} = props;
 
     return delegated;
 });
@@ -60,12 +60,12 @@ const preventScrollbarDismiss = (event: PointerDownOutsideEvent) => {
                 v-bind="forwarded"
                 @pointer-down-outside="preventScrollbarDismiss"
             >
-                <slot />
+                <slot/>
 
                 <DialogClose
                     class="absolute right-3 top-3 rounded-md p-0.5 transition-colors hover:bg-secondary"
                 >
-                    <X class="h-4 w-4" />
+                    <X class="h-4 w-4"/>
                     <span class="sr-only">Close</span>
                 </DialogClose>
             </DialogContent>

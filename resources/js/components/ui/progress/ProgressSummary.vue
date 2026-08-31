@@ -1,6 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import Progress from "./Progress.vue";
-import { computed } from "vue";
+import {computed} from "vue";
 
 const props = withDefaults(
     defineProps<{
@@ -10,7 +10,7 @@ const props = withDefaults(
         valueLabel?: string;
         description?: string;
     }>(),
-    { max: 100, valueLabel: undefined, description: undefined },
+    {max: 100, valueLabel: undefined, description: undefined},
 );
 
 const percentage = computed(() =>
@@ -34,10 +34,10 @@ const accessibleValue = () =>
             </span>
         </div>
         <Progress
-            :model-value="value"
-            :max="max"
-            :get-value-label="accessibleValue"
             :aria-label="label"
+            :get-value-label="accessibleValue"
+            :max="max"
+            :model-value="value"
         />
         <p v-if="description" class="text-xs text-muted-foreground">
             {{ description }}

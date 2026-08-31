@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "vue";
+import {cn} from "@/lib/utils";
+import type {HTMLAttributes} from "vue";
 
 const props = defineProps<{
     class?: HTMLAttributes["class"];
@@ -9,11 +9,11 @@ const props = defineProps<{
 
 <template>
     <span
-        role="link"
-        aria-disabled="true"
-        aria-current="page"
         :class="cn('font-normal text-foreground', props.class)"
+        aria-current="page"
+        aria-disabled="true"
+        role="link"
     >
-        <slot />
+        <slot/>
     </span>
 </template>

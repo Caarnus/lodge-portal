@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
     NavigationMenuLink,
     type NavigationMenuLinkEmits,
@@ -14,6 +14,6 @@ const forwarded = useForwardPropsEmits(props, emits);
 
 <template>
     <NavigationMenuLink v-bind="forwarded">
-        <slot />
+        <slot/>
     </NavigationMenuLink>
 </template>

@@ -12,11 +12,6 @@ class EventVolunteerCommitment extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['status' => VolunteerCommitmentStatus::class, 'committed_at' => 'datetime', 'withdrawn_at' => 'datetime', 'administratively_removed_at' => 'datetime'];
-    }
-
     public function position()
     {
         return $this->belongsTo(EventVolunteerPosition::class, 'event_volunteer_position_id');
@@ -50,5 +45,10 @@ class EventVolunteerCommitment extends Model
     public function reminderDelivery()
     {
         return $this->hasOne(EventVolunteerReminderDelivery::class, 'event_volunteer_commitment_id');
+    }
+
+    protected function casts(): array
+    {
+        return ['status' => VolunteerCommitmentStatus::class, 'committed_at' => 'datetime', 'withdrawn_at' => 'datetime', 'administratively_removed_at' => 'datetime'];
     }
 }

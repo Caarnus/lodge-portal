@@ -1,12 +1,13 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AppLayout from "@/layouts/AppLayout.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import { Head, Link } from "@inertiajs/vue3";
-defineOptions({ layout: AppLayout });
+import {Head, Link} from "@inertiajs/vue3";
+
+defineOptions({layout: AppLayout});
 defineProps<{ lodge: any; communication: any }>();
 </script>
 <template>
-    <Head :title="communication.subject" />
+    <Head :title="communication.subject"/>
     <main class="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
         <PageHeader :title="communication.subject">
             <template #actions>

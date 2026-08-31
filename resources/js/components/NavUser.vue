@@ -1,18 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import UserInfo from "@/components/UserInfo.vue";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { type AuthenticatedSharedData } from "@/types";
-import { usePage } from "@inertiajs/vue3";
-import { ChevronsUpDown } from "lucide-vue-next";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import {SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@/components/ui/sidebar";
+import {type AuthenticatedSharedData} from "@/types";
+import {usePage} from "@inertiajs/vue3";
+import {ChevronsUpDown} from "lucide-vue-next";
 import UserMenuContent from "./UserMenuContent.vue";
 
 const page = usePage<AuthenticatedSharedData>();
@@ -25,20 +17,20 @@ const user = page.props.auth.user;
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <SidebarMenuButton
-                        size="lg"
                         class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        size="lg"
                     >
-                        <UserInfo :user="user" />
-                        <ChevronsUpDown class="ml-auto size-4" />
+                        <UserInfo :user="user"/>
+                        <ChevronsUpDown class="ml-auto size-4"/>
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
+                    :side-offset="4"
+                    align="end"
                     class="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-lg"
                     side="bottom"
-                    align="end"
-                    :side-offset="4"
                 >
-                    <UserMenuContent :user="user" />
+                    <UserMenuContent :user="user"/>
                 </DropdownMenuContent>
             </DropdownMenu>
         </SidebarMenuItem>

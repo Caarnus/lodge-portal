@@ -1,5 +1,6 @@
-<script setup lang="ts">
-import { Head, useForm } from "@inertiajs/vue3";
+<script lang="ts" setup>
+import {Head, useForm} from "@inertiajs/vue3";
+
 defineProps<{ lodge: any }>();
 const form = useForm({
     requester_name: "",
@@ -17,7 +18,7 @@ const form = useForm({
 });
 </script>
 <template>
-    <Head title="Newsletter request" />
+    <Head title="Newsletter request"/>
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <main class="mx-auto w-full max-w-2xl flex-1 p-6">
             <h1 class="text-3xl font-bold">Newsletter delivery request</h1>
@@ -33,51 +34,51 @@ const form = useForm({
             >
                 <input
                     v-model="form.requester_name"
-                    required
+                    class="field-input"
                     placeholder="Your name"
-                    class="field-input"
+                    required
                 /><input
-                    v-model="form.requester_email"
-                    type="email"
-                    placeholder="Email"
-                    class="field-input"
-                /><label
-                    ><input v-model="form.receives_email" type="checkbox" />
-                    Electronic delivery</label
-                ><label
-                    ><input v-model="form.receives_print" type="checkbox" />
-                    Mailed delivery</label
-                ><input
-                    v-model="form.mailing_address_line_1"
-                    placeholder="Address line 1"
-                    class="field-input"
-                /><input
-                    v-model="form.mailing_city"
-                    placeholder="City"
-                    class="field-input"
-                /><input
-                    v-model="form.mailing_state"
-                    maxlength="2"
-                    placeholder="State"
-                    class="field-input"
-                /><input
-                    v-model="form.mailing_postal_code"
-                    placeholder="Postal code"
-                    class="field-input"
-                /><input
-                    v-model="form.claimed_relationship"
-                    placeholder="Relationship"
-                    class="field-input"
-                /><input
-                    v-model="form.claimed_related_member_name"
-                    placeholder="Related member name"
-                    class="field-input"
-                /><input
-                    v-model="form.website"
-                    class="hidden"
-                    tabindex="-1"
-                    autocomplete="off"
-                />
+                v-model="form.requester_email"
+                class="field-input"
+                placeholder="Email"
+                type="email"
+            /><label
+            ><input v-model="form.receives_email" type="checkbox"/>
+                Electronic delivery</label
+            ><label
+            ><input v-model="form.receives_print" type="checkbox"/>
+                Mailed delivery</label
+            ><input
+                v-model="form.mailing_address_line_1"
+                class="field-input"
+                placeholder="Address line 1"
+            /><input
+                v-model="form.mailing_city"
+                class="field-input"
+                placeholder="City"
+            /><input
+                v-model="form.mailing_state"
+                class="field-input"
+                maxlength="2"
+                placeholder="State"
+            /><input
+                v-model="form.mailing_postal_code"
+                class="field-input"
+                placeholder="Postal code"
+            /><input
+                v-model="form.claimed_relationship"
+                class="field-input"
+                placeholder="Relationship"
+            /><input
+                v-model="form.claimed_related_member_name"
+                class="field-input"
+                placeholder="Related member name"
+            /><input
+                v-model="form.website"
+                autocomplete="off"
+                class="hidden"
+                tabindex="-1"
+            />
                 <p v-if="Object.keys(form.errors).length" class="text-red-700">
                     {{ Object.values(form.errors)[0] }}
                 </p>

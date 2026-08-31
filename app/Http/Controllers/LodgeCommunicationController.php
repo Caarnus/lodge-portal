@@ -24,8 +24,8 @@ class LodgeCommunicationController extends Controller
         $sort = $filters['sort'] ?? 'sent_at';
         $direction = $filters['direction'] ?? 'desc';
         $communications = $lodge->communications()->withSum('distributionRuns as recipient_count', 'email_recipient_count')
-            ->when($filters['search'] ?? null, fn ($query, $search) => $query->where('subject', 'ilike', "%{$search}%"))
-            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status));
+            ->when($filters['search'] ?? null, fn($query, $search) => $query->where('subject', 'ilike', "%{$search}%"))
+            ->when($filters['status'] ?? null, fn($query, $status) => $query->where('status', $status));
         if ($sort === 'sent_at' && $direction === 'desc') {
             $communications->orderByRaw('sent_at DESC NULLS LAST')->orderByDesc('created_at');
         } else {
@@ -39,6 +39,17 @@ class LodgeCommunicationController extends Controller
             ...$this->recipientOptions($lodge),
             'editCommunicationId' => $request->integer('edit') ?: null,
         ]);
+    }
+
+    private function recipientOptions(Lodge $lodge): array
+    {
+        $memberships = Membership::query()->with(['person', 'degree', 'status'])->where('lodge_id', $lodge->id)->whereNull('end_date')->get();
+        $relationships = PersonRelationship::query()->with(['personOne', 'personTwo', 'type'])->where('owning_lodge_id', $lodge->id)->get();
+        $relations = $relationships->map(fn(PersonRelationship $relation) => ['person_id' => $relation->person_one_id, 'name' => $relation->personOne->display_name, 'related_to' => $relation->personTwo->display_name, 'type' => $relation->type->name])
+            ->merge($relationships->map(fn(PersonRelationship $relation) => ['person_id' => $relation->person_two_id, 'name' => $relation->personTwo->display_name, 'related_to' => $relation->personOne->display_name, 'type' => $relation->type->name]))
+            ->unique('person_id')->values();
+
+        return compact('memberships', 'relations');
     }
 
     public function store(Request $request, Lodge $lodge, WebsiteHtmlSanitizer $sanitizer, CommunicationDistributionService $distributions)
@@ -57,6 +68,13 @@ class LodgeCommunicationController extends Controller
         return redirect()->route('lodges.communications.index', $lodge);
     }
 
+    private function data(Request $request, WebsiteHtmlSanitizer $sanitizer): array
+    {
+        $data = $request->validate(['subject' => 'required|string|max:255', 'body_html' => 'required|string|max:100000', 'audience_mode' => 'nullable|in:all,filtered,selected', 'degree_keys' => 'array', 'degree_keys.*' => 'string|max:64', 'membership_status_keys' => 'array', 'membership_status_keys.*' => 'string|max:64', 'membership_ids' => 'array', 'membership_ids.*' => 'integer', 'relation_person_ids' => 'array', 'relation_person_ids.*' => 'integer']);
+
+        return ['subject' => $data['subject'], 'body_html' => $sanitizer->sanitize($data['body_html']), 'audience_mode' => $data['audience_mode'] ?? 'all', 'degree_keys' => $data['degree_keys'] ?? [], 'membership_status_keys' => $data['membership_status_keys'] ?? [], 'membership_ids' => $data['membership_ids'] ?? [], 'relation_person_ids' => $data['relation_person_ids'] ?? []];
+    }
+
     public function update(Request $request, Lodge $lodge, LodgeCommunication $communication, WebsiteHtmlSanitizer $sanitizer)
     {
         $this->allow($lodge, $communication);
@@ -66,6 +84,12 @@ class LodgeCommunicationController extends Controller
         Audit::record('lodge_communication.updated', $communication, $lodge, $before, ['subject' => $communication->subject]);
 
         return back();
+    }
+
+    private function allow(Lodge $lodge, LodgeCommunication $communication): void
+    {
+        abort_unless($communication->lodge_id === $lodge->id, 404);
+        $this->allowLodge($lodge, 'communications.send');
     }
 
     public function send(Request $request, Lodge $lodge, LodgeCommunication $communication, CommunicationDistributionService $distributions)
@@ -113,29 +137,5 @@ class LodgeCommunicationController extends Controller
         abort_unless($communication->lodge_id === $lodge->id && $communication->status === LodgeCommunicationStatus::Sent, 404);
 
         return Inertia::render('communications/Show', compact('lodge', 'communication'));
-    }
-
-    private function data(Request $request, WebsiteHtmlSanitizer $sanitizer): array
-    {
-        $data = $request->validate(['subject' => 'required|string|max:255', 'body_html' => 'required|string|max:100000', 'audience_mode' => 'nullable|in:all,filtered,selected', 'degree_keys' => 'array', 'degree_keys.*' => 'string|max:64', 'membership_status_keys' => 'array', 'membership_status_keys.*' => 'string|max:64', 'membership_ids' => 'array', 'membership_ids.*' => 'integer', 'relation_person_ids' => 'array', 'relation_person_ids.*' => 'integer']);
-
-        return ['subject' => $data['subject'], 'body_html' => $sanitizer->sanitize($data['body_html']), 'audience_mode' => $data['audience_mode'] ?? 'all', 'degree_keys' => $data['degree_keys'] ?? [], 'membership_status_keys' => $data['membership_status_keys'] ?? [], 'membership_ids' => $data['membership_ids'] ?? [], 'relation_person_ids' => $data['relation_person_ids'] ?? []];
-    }
-
-    private function allow(Lodge $lodge, LodgeCommunication $communication): void
-    {
-        abort_unless($communication->lodge_id === $lodge->id, 404);
-        $this->allowLodge($lodge, 'communications.send');
-    }
-
-    private function recipientOptions(Lodge $lodge): array
-    {
-        $memberships = Membership::query()->with(['person', 'degree', 'status'])->where('lodge_id', $lodge->id)->whereNull('end_date')->get();
-        $relationships = PersonRelationship::query()->with(['personOne', 'personTwo', 'type'])->where('owning_lodge_id', $lodge->id)->get();
-        $relations = $relationships->map(fn (PersonRelationship $relation) => ['person_id' => $relation->person_one_id, 'name' => $relation->personOne->display_name, 'related_to' => $relation->personTwo->display_name, 'type' => $relation->type->name])
-            ->merge($relationships->map(fn (PersonRelationship $relation) => ['person_id' => $relation->person_two_id, 'name' => $relation->personTwo->display_name, 'related_to' => $relation->personOne->display_name, 'type' => $relation->type->name]))
-            ->unique('person_id')->values();
-
-        return compact('memberships', 'relations');
     }
 }

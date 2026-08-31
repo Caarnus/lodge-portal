@@ -141,56 +141,12 @@ class PersonController extends Controller
             return [];
         }
 
-        return collect((array) $value)
-            ->filter(fn($id) => is_numeric($id) && (int) $id > 0)
-            ->map(fn($id) => (int) $id)
+        return collect((array)$value)
+            ->filter(fn($id) => is_numeric($id) && (int)$id > 0)
+            ->map(fn($id) => (int)$id)
             ->unique()
             ->values()
             ->all();
-    }
-
-    public function store(PersonRequest $request, Lodge $lodge)
-    {
-        $this->allowLodge($lodge, 'people.manage');
-        $data = $request->personData();
-        $person = DB::transaction(function () use ($data, $lodge) {
-            $person = filled($data['email']) ? Person::withTrashed()->where('email', $data['email'])->first() : null;
-            if ($person?->trashed()) {
-                throw ValidationException::withMessages(['email' => 'This email belongs to a retired or merged person record.']);
-            }
-            $person ??= Person::create($data);
-            if ($person->memberships()->where('lodge_id', $lodge->id)->exists()) {
-                throw ValidationException::withMessages(['email' => 'This person already has a membership in this lodge.']);
-            }
-            $statusId = MembershipStatus::query()->where('is_default', true)->value('id');
-            if (!$statusId) {
-                throw ValidationException::withMessages(['membership' => 'No default membership status is configured.']);
-            }
-            $membership = $person->memberships()->create([
-                'lodge_id' => $lodge->id,
-                'membership_status_id' => $statusId,
-                'primary_lodge_number' => $lodge->number,
-            ]);
-            Audit::record('person.created_or_reused', $person, $lodge, null, $person->toArray());
-            Audit::record('membership.created', $membership, $lodge, null, $membership->toArray());
-
-            return $person;
-        });
-
-        $nameMatch = Person::query()->whereKeyNot($person->id)->whereRaw('LOWER(name) = ?', [strtolower($data['name'])])->exists();
-
-        return redirect()->route('lodges.people.index', $lodge)
-            ->with('notice', $nameMatch ? 'A different person has the same full name. Review before adding more data.' : null);
-    }
-
-    public function update(PersonRequest $request, Lodge $lodge, Person $person, PersonAccess $access)
-    {
-        abort_unless($access->canManagePerson($request->user(), $lodge, $person), 403);
-        $before = $person->toArray();
-        $person->update($request->personData());
-        Audit::record('person.updated', $person, $lodge, $before, $person->fresh()->toArray());
-
-        return back();
     }
 
     private function attachRelationshipSummaries(Request $request, Lodge $lodge, $people, PersonAccess $access): void
@@ -242,5 +198,49 @@ class PersonController extends Controller
         }
 
         $people->each(fn(Person $person) => $person->setAttribute('relationship_summaries', $summaries[$person->id]));
+    }
+
+    public function store(PersonRequest $request, Lodge $lodge)
+    {
+        $this->allowLodge($lodge, 'people.manage');
+        $data = $request->personData();
+        $person = DB::transaction(function () use ($data, $lodge) {
+            $person = filled($data['email']) ? Person::withTrashed()->where('email', $data['email'])->first() : null;
+            if ($person?->trashed()) {
+                throw ValidationException::withMessages(['email' => 'This email belongs to a retired or merged person record.']);
+            }
+            $person ??= Person::create($data);
+            if ($person->memberships()->where('lodge_id', $lodge->id)->exists()) {
+                throw ValidationException::withMessages(['email' => 'This person already has a membership in this lodge.']);
+            }
+            $statusId = MembershipStatus::query()->where('is_default', true)->value('id');
+            if (!$statusId) {
+                throw ValidationException::withMessages(['membership' => 'No default membership status is configured.']);
+            }
+            $membership = $person->memberships()->create([
+                'lodge_id' => $lodge->id,
+                'membership_status_id' => $statusId,
+                'primary_lodge_number' => $lodge->number,
+            ]);
+            Audit::record('person.created_or_reused', $person, $lodge, null, $person->toArray());
+            Audit::record('membership.created', $membership, $lodge, null, $membership->toArray());
+
+            return $person;
+        });
+
+        $nameMatch = Person::query()->whereKeyNot($person->id)->whereRaw('LOWER(name) = ?', [strtolower($data['name'])])->exists();
+
+        return redirect()->route('lodges.people.index', $lodge)
+            ->with('notice', $nameMatch ? 'A different person has the same full name. Review before adding more data.' : null);
+    }
+
+    public function update(PersonRequest $request, Lodge $lodge, Person $person, PersonAccess $access)
+    {
+        abort_unless($access->canManagePerson($request->user(), $lodge, $person), 403);
+        $before = $person->toArray();
+        $person->update($request->personData());
+        Audit::record('person.updated', $person, $lodge, $before, $person->fresh()->toArray());
+
+        return back();
     }
 }

@@ -18,6 +18,11 @@ class EventReminderRuleController extends Controller
         return back();
     }
 
+    private function allow(Lodge $lodge, Event $event): void
+    {
+        abort_unless($event->lodge_id === $lodge->id && request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
+    }
+
     public function destroy(Lodge $lodge, Event $event, EventReminderRule $rule)
     {
         $this->allow($lodge, $event);
@@ -25,10 +30,5 @@ class EventReminderRuleController extends Controller
         $rule->delete();
 
         return back();
-    }
-
-    private function allow(Lodge $lodge, Event $event): void
-    {
-        abort_unless($event->lodge_id === $lodge->id && request()->user()?->hasLodgePermission($lodge, 'events.manage'), 403);
     }
 }

@@ -17,7 +17,9 @@ class WebsiteSectionCatalog
         'directory_placeholder', 'gallery_placeholder', 'custom_html',
     ];
 
-    public function __construct(private readonly WebsiteHtmlSanitizer $sanitizer) {}
+    public function __construct(private readonly WebsiteHtmlSanitizer $sanitizer)
+    {
+    }
 
     public function labels(): array
     {
@@ -35,7 +37,7 @@ class WebsiteSectionCatalog
 
     public function defaultConfiguration(string $type, bool $platformAdmin): array
     {
-        if (! in_array($type, self::TYPES, true) || ($type === 'custom_html' && ! $platformAdmin)) {
+        if (!in_array($type, self::TYPES, true) || ($type === 'custom_html' && !$platformAdmin)) {
             throw ValidationException::withMessages(['type' => 'This section type is not available.']);
         }
 
@@ -59,7 +61,7 @@ class WebsiteSectionCatalog
 
     public function validate(string $type, array $input, Lodge $lodge, bool $platformAdmin): array
     {
-        if (! in_array($type, self::TYPES, true) || ($type === 'custom_html' && ! $platformAdmin)) {
+        if (!in_array($type, self::TYPES, true) || ($type === 'custom_html' && !$platformAdmin)) {
             throw ValidationException::withMessages(['type' => 'This section type is not available.']);
         }
 
@@ -80,8 +82,8 @@ class WebsiteSectionCatalog
         foreach ($this->mediaIds($data) as $mediaId) {
             $valid = MediaAsset::query()->whereKey($mediaId)->where('processing_status', 'ready')
                 ->where('visibility', 'public')
-                ->where(fn ($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->exists();
-            if (! $valid) {
+                ->where(fn($query) => $query->where('lodge_id', $lodge->id)->orWhere('is_platform_shared', true))->exists();
+            if (!$valid) {
                 throw ValidationException::withMessages(['configuration.media_id' => 'Selected media is unavailable or still processing.']);
             }
         }
@@ -93,24 +95,24 @@ class WebsiteSectionCatalog
         return $data;
     }
 
+    private function safeUrlRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (!preg_match('~^(?:/(?!/)|https?://|mailto:|tel:)~i', (string)$value)) {
+                $fail("The {$attribute} must be a lodge-relative, HTTP(S), email, or telephone link.");
+            }
+        };
+    }
+
     public function mediaIds(array $configuration): array
     {
         $ids = [];
         array_walk_recursive($configuration, function ($value, $key) use (&$ids) {
-            if (($key === 'media_id' || str_ends_with((string) $key, '_media_id')) && is_numeric($value)) {
-                $ids[] = (int) $value;
+            if (($key === 'media_id' || str_ends_with((string)$key, '_media_id')) && is_numeric($value)) {
+                $ids[] = (int)$value;
             }
         });
 
         return array_values(array_unique($ids));
-    }
-
-    private function safeUrlRule(): \Closure
-    {
-        return function (string $attribute, mixed $value, \Closure $fail): void {
-            if (! preg_match('~^(?:/(?!/)|https?://|mailto:|tel:)~i', (string) $value)) {
-                $fail("The {$attribute} must be a lodge-relative, HTTP(S), email, or telephone link.");
-            }
-        };
     }
 }
