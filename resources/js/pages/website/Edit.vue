@@ -2,6 +2,8 @@
 import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import SectionFields from "@/components/website/SectionFields.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import {
@@ -103,37 +105,42 @@ const publish = () =>
 <template>
     <Head :title="`Edit ${draft.title}`" />
     <main class="mx-auto w-full max-w-6xl space-y-8 p-4 sm:p-6 lg:p-8">
-        <header class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <Link
+        <PageHeader :title="draft.title" description="Website page editor">
+            <template #eyebrow
+                ><Link
                     :href="`/lodges/${lodge.id}/website`"
-                    class="text-sm text-slate-500 hover:underline"
-                    >← Website</Link
-                >
-                <h1 class="text-3xl font-bold">{{ draft.title }}</h1>
-            </div>
-            <div class="flex gap-2">
-                <button class="secondary-button" @click="mediaOpen = true">
-                    <ImagePlus class="mr-1 size-4" /> Media library
-                </button>
-                <a
-                    :href="`/lodges/${lodge.id}/website/pages/${websitePage.id}/preview`"
-                    target="_blank"
-                    class="icon-button"
-                    aria-label="Preview draft"
-                    v-tooltip.top="{ value: 'Preview draft', showDelay: 2000 }"
-                    ><Eye class="size-5" /></a
-                ><button
-                    v-if="canPublish"
-                    class="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-white"
-                    @click="publish"
-                >
-                    <Rocket class="size-4" /> Publish
-                </button>
-            </div>
-        </header>
+                    class="hover:underline"
+                    >Website</Link
+                ></template
+            >
+            <template #actions
+                ><div class="flex gap-2">
+                    <button class="secondary-button" @click="mediaOpen = true">
+                        <ImagePlus class="mr-1 size-4" /> Media library
+                    </button>
+                    <a
+                        :href="`/lodges/${lodge.id}/website/pages/${websitePage.id}/preview`"
+                        target="_blank"
+                        class="icon-button"
+                        aria-label="Preview draft"
+                        v-tooltip.top="{
+                            value: 'Preview draft',
+                            showDelay: 2000,
+                        }"
+                        ><Eye class="size-5" /></a
+                    ><button
+                        v-if="canPublish"
+                        class="primary-button inline-flex items-center gap-2"
+                        @click="publish"
+                    >
+                        <Rocket class="size-4" /> Publish
+                    </button>
+                </div></template
+            >
+        </PageHeader>
+        <WorkspaceTabs :lodge="lodge" workspace="content" active="website" />
 
-        <section class="rounded-lg border p-5">
+        <section class="rounded-lg border border-border/80 bg-card p-5">
             <h2 class="text-lg font-semibold">Page settings</h2>
             <form
                 class="mt-4 grid gap-4 sm:grid-cols-2"
@@ -154,7 +161,7 @@ const publish = () =>
                 ><label class="field-label"
                     >Parent page<select
                         v-model.number="metadata.navigation_parent_page_id"
-                        class="file-input"
+                        class="field-input"
                     >
                         <option :value="null">None</option>
                         <option
@@ -248,7 +255,7 @@ const publish = () =>
                 </div>
                 <p
                     v-if="Object.keys(metadata.errors).length"
-                    class="text-sm text-red-600 sm:col-span-2"
+                    class="text-sm text-destructive sm:col-span-2"
                 >
                     {{ Object.values(metadata.errors)[0] }}
                 </p>
@@ -259,7 +266,7 @@ const publish = () =>
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-xl font-semibold">Sections</h2>
-                    <p class="text-sm text-slate-500">
+                    <p class="text-sm text-muted-foreground">
                         Use arrow buttons to set display order.
                     </p>
                 </div>
@@ -289,14 +296,17 @@ const publish = () =>
                     </button>
                 </div>
             </div>
-            <p v-if="sectionForm.errors.type" class="mt-2 text-sm text-red-600">
+            <p
+                v-if="sectionForm.errors.type"
+                class="mt-2 text-sm text-destructive"
+            >
                 {{ sectionForm.errors.type }}
             </p>
             <div class="mt-4 space-y-4">
                 <article
                     v-for="(section, index) in sections"
                     :key="section.id"
-                    class="rounded-lg border bg-white p-5"
+                    class="rounded-lg border border-border/80 bg-card p-5"
                 >
                     <header class="mb-4 flex items-center gap-2">
                         <h3 class="min-w-0 flex-1 font-semibold">
@@ -325,7 +335,7 @@ const publish = () =>
                         >
                             <ArrowDown class="size-4" /></button
                         ><button
-                            class="icon-button text-red-600"
+                            class="icon-button text-destructive hover:bg-destructive/10"
                             aria-label="Delete section"
                             v-tooltip.top="{
                                 value: 'Delete section',
@@ -353,7 +363,7 @@ const publish = () =>
                 </article>
                 <p
                     v-if="sections.length === 0"
-                    class="rounded-lg border border-dashed p-8 text-center text-sm text-slate-500"
+                    class="rounded-lg border border-dashed border-border/80 p-8 text-center text-sm text-muted-foreground"
                 >
                     Add first section.
                 </p>

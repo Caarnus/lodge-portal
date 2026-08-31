@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import { formatLocalTimestamp } from "@/utils/date";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import { Search, X } from "lucide-vue-next";
@@ -67,20 +68,19 @@ const displayedPositions = computed(() => {
 <template>
     <Head :title="`Volunteer roster — ${event.title}`" />
     <main class="mx-auto max-w-6xl space-y-5 p-4 md:p-6">
-        <div>
-            <Link
-                :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
-                class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
-            >
-                Back to occurrences
-            </Link>
-            <h1 class="mt-3 text-2xl font-semibold">
-                Volunteer roster — {{ event.title }}
-            </h1>
-            <p class="mt-1 text-sm text-muted-foreground">
-                {{ formatLocalTimestamp(occurrence.starts_at) }}
-            </p>
-        </div>
+        <PageHeader
+            :title="`Volunteer roster — ${event.title}`"
+            :description="formatLocalTimestamp(occurrence.starts_at)"
+        >
+            <template #actions>
+                <Link
+                    :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
+                    class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                >
+                    Back to occurrences
+                </Link>
+            </template>
+        </PageHeader>
 
         <section class="rounded-lg border border-border bg-card p-4">
             <h2 class="text-lg font-medium">Add volunteer</h2>

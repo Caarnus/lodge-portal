@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
@@ -32,7 +34,44 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 : 'mx-auto w-full min-w-0 max-w-4xl space-y-6 p-6'
         "
     >
-        <header class="flex justify-between">
+        <PageHeader
+            v-if="!embedded"
+            :title="draft.title"
+            description="Newsletter editor"
+        >
+            <template #eyebrow>
+                <Link :href="`/lodges/${lodge.id}/newsletters/manage`">
+                    Newsletters
+                </Link>
+            </template>
+            <template #actions>
+                <div class="flex gap-3">
+                    <a
+                        :href="`/lodges/${lodge.id}/newsletters/manage/${issue.id}/preview`"
+                        target="_blank"
+                        class="secondary-button"
+                        >Preview</a
+                    ><button
+                        v-if="canPublish"
+                        class="primary-button"
+                        @click="
+                            router.post(
+                                `/lodges/${lodge.id}/newsletters/manage/${issue.id}/publish`,
+                            )
+                        "
+                    >
+                        Publish
+                    </button>
+                </div>
+            </template>
+        </PageHeader>
+        <WorkspaceTabs
+            v-if="!embedded"
+            :lodge="lodge"
+            workspace="content"
+            active="newsletters"
+        />
+        <header v-else class="flex justify-between">
             <div>
                 <Link
                     v-if="!embedded"
@@ -50,7 +89,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
                     >Preview</a
                 ><button
                     v-if="canPublish"
-                    class="rounded bg-slate-900 px-4 py-2 text-white"
+                    class="primary-button"
                     @click="
                         router.post(
                             `/lodges/${lodge.id}/newsletters/manage/${issue.id}/publish`,
@@ -61,7 +100,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
                 </button>
             </div>
         </header>
-        <section class="rounded border p-5">
+        <section class="rounded-lg border border-border/80 bg-card p-5">
             <form
                 class="grid w-full min-w-0 gap-4"
                 @submit.prevent="
@@ -116,15 +155,16 @@ const upload = useForm<{ file: File | null }>({ file: null });
                     </select></label
                 >
                 <RichTextField v-model="form.body_html" class="min-w-0" />
-                <p v-if="Object.keys(form.errors).length" class="text-red-700">
+                <p
+                    v-if="Object.keys(form.errors).length"
+                    class="text-destructive"
+                >
                     {{ Object.values(form.errors)[0] }}
                 </p>
-                <button class="w-fit rounded bg-slate-900 px-4 py-2 text-white">
-                    Save draft
-                </button>
+                <button class="primary-button w-fit">Save draft</button>
             </form>
         </section>
-        <section class="rounded border p-5">
+        <section class="rounded-lg border border-border/80 bg-card p-5">
             <h2 class="font-semibold">Upload PDF</h2>
             <form
                 class="mt-3 flex gap-3"
@@ -145,7 +185,7 @@ const upload = useForm<{ file: File | null }>({ file: null });
                             ($event.target as HTMLInputElement).files?.[0] ??
                             null
                     "
-                /><button class="rounded border px-3 py-2">Upload</button>
+                /><button class="secondary-button">Upload</button>
             </form>
         </section>
     </main>

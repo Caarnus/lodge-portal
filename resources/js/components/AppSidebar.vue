@@ -98,7 +98,11 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             icon: ExternalLink,
             external: true,
         });
-    if (lodge.can_manage_website || lodge.can_manage_galleries || lodge.can_manage_newsletters)
+    if (
+        lodge.can_manage_website ||
+        lodge.can_manage_galleries ||
+        lodge.can_manage_newsletters
+    )
         items.push({
             title: "Content Management",
             href: lodge.can_manage_website
@@ -120,7 +124,11 @@ const lodgeNavItems = computed<NavItem[]>(() => {
             href: `/lodges/${lodge.id}/communications/manage`,
             icon: Mail,
         });
-    if (lodge.can_view_people || lodge.can_manage_officers || lodge.can_manage_roles)
+    if (
+        lodge.can_view_people ||
+        lodge.can_manage_officers ||
+        lodge.can_manage_roles
+    )
         items.push({
             title: "People",
             href: lodge.can_view_people

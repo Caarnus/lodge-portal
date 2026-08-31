@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ExpandableText from "@/components/ExpandableText.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import { Check, X } from "lucide-vue-next";
@@ -42,13 +43,15 @@ const decide = (id: number, decision: "approved" | "rejected") => {
     <Head title="Registrations" />
 
     <main class="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
-        <h1 class="text-2xl font-bold sm:text-3xl">Pending registrations</h1>
+        <PageHeader title="Pending registrations" />
 
-        <div class="mt-6 overflow-hidden rounded-lg border border-slate-200">
+        <div
+            class="mt-6 overflow-hidden rounded-lg border border-border/80 bg-card"
+        >
             <div
                 v-for="registration in registrations"
                 :key="registration.id"
-                class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-t border-slate-200 p-4 first:border-t-0"
+                class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-t border-border/80 p-4 first:border-t-0"
             >
                 <div class="min-w-0 space-y-1">
                     <ExpandableText
@@ -59,12 +62,12 @@ const decide = (id: number, decision: "approved" | "rejected") => {
                     <ExpandableText
                         :text="registration.email"
                         label="email address"
-                        class="text-sm text-slate-600"
+                        class="text-sm text-muted-foreground"
                     />
                     <ExpandableText
                         :text="registration.home_lodge?.name"
                         label="home lodge"
-                        class="text-sm text-slate-600"
+                        class="text-sm text-muted-foreground"
                     />
                 </div>
 
@@ -73,7 +76,7 @@ const decide = (id: number, decision: "approved" | "rejected") => {
                         type="button"
                         :aria-label="`Approve ${registration.name}`"
                         :disabled="processingId === registration.id"
-                        class="inline-flex size-10 items-center justify-center rounded-md bg-green-700 text-white transition hover:bg-green-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:cursor-wait disabled:opacity-50"
+                        class="icon-button border-primary bg-primary text-primary-foreground hover:bg-primary/90 disabled:cursor-wait disabled:opacity-50"
                         v-tooltip.top="{
                             value: `Approve ${registration.name}`,
                             showDelay: 2000,
@@ -86,7 +89,7 @@ const decide = (id: number, decision: "approved" | "rejected") => {
                         type="button"
                         :aria-label="`Reject ${registration.name}`"
                         :disabled="processingId === registration.id"
-                        class="inline-flex size-10 items-center justify-center rounded-md bg-red-700 text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-wait disabled:opacity-50"
+                        class="icon-button border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:cursor-wait disabled:opacity-50"
                         v-tooltip.top="{
                             value: `Reject ${registration.name}`,
                             showDelay: 2000,
@@ -100,7 +103,7 @@ const decide = (id: number, decision: "approved" | "rejected") => {
 
             <p
                 v-if="registrations.length === 0"
-                class="p-8 text-center text-sm text-slate-500"
+                class="p-8 text-center text-sm text-muted-foreground"
             >
                 There are no pending registrations.
             </p>

@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import MediaLibraryModal from "@/components/media/MediaLibraryModal.vue";
 import GalleryEditor from "@/pages/galleries/Edit.vue";
@@ -78,23 +79,22 @@ const remove = (album: any) =>
 
 <template>
     <Head title="Galleries" />
-    <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-        <header class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-semibold">Media Galleries</h1>
-                <p class="text-sm text-muted-foreground">
-                    Draft galleries stay private until published.
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <button class="secondary-button" @click="mediaOpen = true">
-                    <ImagePlus class="mr-1 size-4" /> Media library
-                </button>
-                <button class="primary-button" @click="creating = true">
-                    <Plus class="mr-1 size-4" /> New gallery
-                </button>
-            </div>
-        </header>
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Media galleries"
+            description="Draft galleries stay private until published."
+        >
+            <template #actions>
+                <div class="flex flex-wrap gap-2">
+                    <button class="secondary-button" @click="mediaOpen = true">
+                        <ImagePlus class="mr-1 size-4" /> Media library
+                    </button>
+                    <button class="primary-button" @click="creating = true">
+                        <Plus class="mr-1 size-4" /> New gallery
+                    </button>
+                </div>
+            </template>
+        </PageHeader>
         <WorkspaceTabs :lodge="lodge" workspace="content" active="galleries" />
         <p
             v-if="publishError"
@@ -103,7 +103,7 @@ const remove = (album: any) =>
         >
             {{ publishError }}
         </p>
-        <div class="rounded-lg border p-4">
+        <div class="rounded-lg border border-border/80 bg-card p-4">
             <label class="relative block"
                 ><Search
                     class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
@@ -113,7 +113,10 @@ const remove = (album: any) =>
                     placeholder="Search galleries"
             /></label>
         </div>
-        <div class="hidden overflow-hidden rounded-lg border md:block">
+        <div
+            v-if="albums.length"
+            class="hidden overflow-hidden rounded-lg border border-border/80 bg-card md:block"
+        >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
                     <col />
@@ -124,10 +127,20 @@ const remove = (album: any) =>
                 </colgroup>
                 <thead class="border-b bg-muted/40">
                     <tr>
-                        <th class="p-3">Title</th>
-                        <th class="p-3 text-right">Images</th>
-                        <th class="p-3">Visibility</th>
-                        <th class="p-3">Status</th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Title
+                        </th>
+                        <th
+                            class="p-3 text-right font-medium text-muted-foreground"
+                        >
+                            Images
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Visibility
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Status
+                        </th>
                         <th class="p-3">
                             <span class="sr-only">Actions</span>
                         </th>
@@ -137,7 +150,7 @@ const remove = (album: any) =>
                     <tr
                         v-for="album in albums"
                         :key="album.id"
-                        class="border-b last:border-0"
+                        class="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/35"
                     >
                         <td class="min-w-0 p-3 font-medium">
                             <span
@@ -213,11 +226,11 @@ const remove = (album: any) =>
                 </tbody>
             </table>
         </div>
-        <div class="space-y-3 md:hidden">
+        <div v-if="albums.length" class="space-y-3 md:hidden">
             <article
                 v-for="album in albums"
                 :key="album.id"
-                class="rounded-lg border p-4"
+                class="rounded-lg border border-border/80 bg-card p-4"
             >
                 <h2 class="font-medium">
                     {{ album.draft?.title ?? album.published?.title }}
@@ -247,7 +260,18 @@ const remove = (album: any) =>
                         </dd>
                     </div>
                 </dl>
-                <div class="mt-4 flex justify-end gap-1">
+                <div
+                    class="mt-4 flex justify-end gap-1 border-t border-border/60 pt-3"
+                >
+                    <a
+                        v-if="album.published"
+                        :href="`/l/${lodge.slug}/galleries/${album.slug}`"
+                        target="_blank"
+                        class="icon-button"
+                        title="View gallery"
+                    >
+                        <Eye class="size-4" />
+                    </a>
                     <button
                         class="icon-button"
                         title="Edit gallery"
@@ -262,6 +286,13 @@ const remove = (album: any) =>
                     >
                         <Rocket class="size-4" /></button
                     ><button
+                        v-else-if="canPublish && album.published"
+                        class="icon-button"
+                        title="Unpublish gallery"
+                        @click="unpublish(album)"
+                    >
+                        <Rocket class="size-4 rotate-180" /></button
+                    ><button
                         v-if="!album.published"
                         class="icon-button text-destructive"
                         title="Delete gallery"
@@ -271,6 +302,12 @@ const remove = (album: any) =>
                     </button>
                 </div>
             </article>
+        </div>
+        <div
+            v-if="!albums.length"
+            class="rounded-lg border border-dashed border-border/80 bg-card p-8 text-center text-sm text-muted-foreground"
+        >
+            No galleries match your search.
         </div>
     </main>
     <Dialog :open="creating" @update:open="creating = $event"

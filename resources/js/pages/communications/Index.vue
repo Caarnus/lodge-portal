@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
 import { formatLocalTimestamp } from "@/utils/date";
 import {
     Dialog,
-    DialogContent,
     DialogHeader,
+    DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Head, router, useForm } from "@inertiajs/vue3";
@@ -227,14 +228,20 @@ onMounted(() => {
 </script>
 <template>
     <Head title="Communications" />
-    <main class="mx-auto max-w-5xl space-y-6 p-6">
-        <div class="flex items-center justify-between gap-4">
-            <h1 class="text-3xl font-bold">Lodge communications</h1>
-            <button class="primary-button shrink-0" @click="open()">
-                <Plus class="mr-1 inline size-4" /> New message
-            </button>
-        </div>
-        <div class="flex flex-col gap-3 rounded border p-4 md:flex-row">
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Lodge communications"
+            :description="`Create and manage messages for ${lodge.name}.`"
+        >
+            <template #actions>
+                <button class="primary-button shrink-0" @click="open()">
+                    <Plus class="mr-1 inline size-4" /> New message
+                </button>
+            </template>
+        </PageHeader>
+        <div
+            class="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 md:flex-row"
+        >
             <label class="relative md:flex-1"
                 ><Search
                     class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
@@ -251,7 +258,9 @@ onMounted(() => {
                 <option value="cancelled">Cancelled</option>
             </select>
         </div>
-        <div class="hidden overflow-x-auto rounded border md:block">
+        <div
+            class="hidden overflow-x-auto rounded-lg border border-border bg-card md:block"
+        >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
                     <col />
@@ -387,7 +396,7 @@ onMounted(() => {
             <article
                 v-for="item in communications"
                 :key="item.id"
-                class="rounded border p-4"
+                class="rounded-lg border border-border bg-card p-4"
             >
                 <div>
                     <strong>{{ item.subject }}</strong>
@@ -435,7 +444,7 @@ onMounted(() => {
             </article>
         </div>
         <Dialog :open="creating" @update:open="creating = $event">
-            <DialogContent class="w-[calc(100vw-2rem)] max-w-3xl">
+            <DialogScrollContent class="w-[calc(100vw-2rem)] max-w-3xl">
                 <DialogHeader
                     ><DialogTitle>{{
                         editingId ? "Edit message" : "New message"
@@ -543,10 +552,10 @@ onMounted(() => {
                         Create editable resend
                     </button>
                 </section>
-            </DialogContent>
+            </DialogScrollContent>
         </Dialog>
         <Dialog :open="selectorOpen" @update:open="selectorOpen = $event">
-            <DialogContent class="max-w-4xl">
+            <DialogScrollContent class="max-w-4xl">
                 <DialogHeader
                     ><DialogTitle>Select people</DialogTitle></DialogHeader
                 >
@@ -666,7 +675,7 @@ onMounted(() => {
                 >
                     Done
                 </button>
-            </DialogContent>
+            </DialogScrollContent>
         </Dialog>
     </main>
 </template>

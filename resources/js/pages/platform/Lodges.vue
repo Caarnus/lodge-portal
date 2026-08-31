@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ExpandableText from "@/components/ExpandableText.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { ExternalLink, Pencil, Plus } from "lucide-vue-next";
@@ -29,21 +30,23 @@ const location = (lodge: Lodge) =>
     <Head title="Lodges" />
 
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
-        <div class="flex items-center justify-between gap-4">
-            <h1 class="min-w-0 text-2xl font-bold sm:text-3xl">Lodges</h1>
-            <Link
-                href="/platform/lodges/create"
-                aria-label="Create lodge"
-                class="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-slate-900 text-white transition hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-                v-tooltip.left="{ value: 'Create lodge', showDelay: 2000 }"
-            >
-                <Plus class="size-5" aria-hidden="true" />
-            </Link>
-        </div>
+        <PageHeader title="Lodges">
+            <template #actions
+                ><Link
+                    href="/platform/lodges/create"
+                    aria-label="Create lodge"
+                    class="primary-button size-10 shrink-0 p-0"
+                    v-tooltip.left="{ value: 'Create lodge', showDelay: 2000 }"
+                >
+                    <Plus class="size-5" aria-hidden="true" /> </Link
+            ></template>
+        </PageHeader>
 
-        <div class="mt-6 overflow-hidden rounded-lg border border-slate-200">
+        <div
+            class="mt-6 overflow-hidden rounded-lg border border-border/80 bg-card"
+        >
             <div
-                class="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 sm:grid"
+                class="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] gap-4 bg-muted px-4 py-3 text-sm font-semibold text-muted-foreground sm:grid"
             >
                 <span>Lodge</span>
                 <span>Location</span>
@@ -54,11 +57,11 @@ const location = (lodge: Lodge) =>
             <div
                 v-for="lodge in lodges"
                 :key="lodge.id"
-                class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-t border-slate-200 p-4 first:border-t-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] sm:gap-4 sm:first:border-t"
+                class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-t border-border/80 p-4 first:border-t-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(7rem,auto)_5.25rem] sm:gap-4 sm:first:border-t"
             >
                 <div class="min-w-0">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 sm:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
                         >Lodge</span
                     >
                     <ExpandableText
@@ -69,14 +72,14 @@ const location = (lodge: Lodge) =>
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 sm:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
                         >Location</span
                     >
                     <ExpandableText :text="location(lodge)" label="location" />
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 sm:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:hidden"
                         >Status</span
                     >
                     <ExpandableText
@@ -92,7 +95,7 @@ const location = (lodge: Lodge) =>
                         target="_blank"
                         rel="noopener"
                         :aria-label="`Visit ${lodge.name} public site`"
-                        class="inline-flex size-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                        class="icon-button text-muted-foreground"
                         v-tooltip.left="{
                             value: `Visit ${lodge.name} public site`,
                             showDelay: 2000,
@@ -103,7 +106,7 @@ const location = (lodge: Lodge) =>
                     <Link
                         :href="`/platform/lodges/${lodge.id}/edit`"
                         :aria-label="`Edit ${lodge.name}`"
-                        class="inline-flex size-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                        class="icon-button text-muted-foreground"
                         v-tooltip.left="{
                             value: `Edit ${lodge.name}`,
                             showDelay: 2000,
@@ -116,7 +119,7 @@ const location = (lodge: Lodge) =>
 
             <p
                 v-if="lodges.length === 0"
-                class="p-8 text-center text-sm text-slate-500"
+                class="p-8 text-center text-sm text-muted-foreground"
             >
                 No lodges found.
             </p>

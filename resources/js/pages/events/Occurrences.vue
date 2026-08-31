@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import {
     Dialog,
     DialogHeader,
@@ -75,17 +76,19 @@ const retryReminder = (id: number) => {
 
 <template>
     <main class="mx-auto max-w-6xl space-y-5 p-4 md:p-6">
-        <div>
-            <Link
-                :href="`/lodges/${lodge.id}/events`"
-                class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
-            >
-                Back to events
-            </Link>
-            <h1 class="mt-3 text-2xl font-semibold">
-                Occurrences: {{ event.title }}
-            </h1>
-        </div>
+        <PageHeader
+            :title="`Occurrences: ${event.title}`"
+            description="Manage reservations and volunteer staffing for each occurrence."
+        >
+            <template #actions>
+                <Link
+                    :href="`/lodges/${lodge.id}/events`"
+                    class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                >
+                    Back to events
+                </Link>
+            </template>
+        </PageHeader>
         <div
             class="hidden overflow-hidden rounded-lg border border-border md:block"
         >

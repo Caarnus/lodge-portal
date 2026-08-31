@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 
 defineOptions({ layout: AppLayout });
@@ -18,20 +19,19 @@ const submit = () =>
 <template>
     <Head title="Merge people" />
     <main class="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
-        <h1 class="text-2xl font-bold">Merge duplicate people</h1>
-        <p class="mt-2 text-sm text-slate-600">
-            Membership and relationship history moves to the survivor.
-            Conflicting lodge memberships or account links stop the merge.
-        </p>
+        <PageHeader
+            title="Merge duplicate people"
+            description="Membership and relationship history moves to the survivor. Conflicting lodge memberships or account links stop the merge."
+        />
         <form
-            class="mt-6 space-y-4 rounded-lg border p-4"
+            class="mt-6 space-y-4 rounded-lg border border-border/80 bg-card p-4"
             @submit.prevent="submit"
         >
             <label class="block"
                 >Source record (retired)<select
                     v-model="form.source_person_id"
                     required
-                    class="mt-1 w-full rounded border p-2"
+                    class="field-input mt-1"
                 >
                     <option :value="null">Select source</option>
                     <option
@@ -50,7 +50,7 @@ const submit = () =>
                 >Surviving record<select
                     v-model="form.survivor_person_id"
                     required
-                    class="mt-1 w-full rounded border p-2"
+                    class="field-input mt-1"
                 >
                     <option :value="null">Select survivor</option>
                     <option
@@ -85,7 +85,7 @@ const submit = () =>
                         },
                     ]"
                     :key="item.label"
-                    class="rounded border p-3"
+                    class="rounded border border-border/80 bg-muted/30 p-3"
                 >
                     <h2 class="font-semibold">{{ item.label }}</h2>
                     <dl class="mt-2 text-sm">
@@ -114,11 +114,13 @@ const submit = () =>
             <p
                 v-for="message in form.errors"
                 :key="message"
-                class="text-sm text-red-700"
+                class="text-sm text-destructive"
             >
                 {{ message }}
             </p>
-            <button class="rounded bg-red-700 px-4 py-2 text-white">
+            <button
+                class="primary-button bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
                 Merge records
             </button>
         </form>

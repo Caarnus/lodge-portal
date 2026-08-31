@@ -90,18 +90,18 @@ const applyHtml = () => {
 
 const buttonClass = (active = false) => [
     "icon-button",
-    active ? "bg-slate-200 text-slate-950" : "text-slate-600",
+    active ? "bg-muted text-foreground" : "text-muted-foreground",
 ];
 </script>
 
 <template>
     <div
-        class="block w-full min-w-0 max-w-none overflow-hidden rounded-md border border-slate-300 bg-white"
+        class="block w-full min-w-0 max-w-none overflow-hidden rounded-md border border-border/80 bg-card"
         style="inline-size: 100%; box-sizing: border-box"
     >
         <div
             v-if="editor && !editingHtml"
-            class="flex w-full min-w-0 flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2"
+            class="flex w-full min-w-0 flex-wrap gap-1 border-b border-border/80 bg-muted p-2"
             role="toolbar"
             aria-label="Rich text formatting"
         >
@@ -130,7 +130,7 @@ const buttonClass = (active = false) => [
                 <Heading3 class="size-4" />
             </button>
             <span
-                class="mx-1 border-l border-slate-300"
+                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
             ></span>
             <button
@@ -164,7 +164,7 @@ const buttonClass = (active = false) => [
                 <Underline class="size-4" />
             </button>
             <span
-                class="mx-1 border-l border-slate-300"
+                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
             ></span>
             <button
@@ -220,7 +220,7 @@ const buttonClass = (active = false) => [
                 <RemoveFormatting class="size-4" />
             </button>
             <span
-                class="mx-1 border-l border-slate-300"
+                class="mx-1 border-l border-border/80"
                 aria-hidden="true"
             ></span>
             <button
@@ -260,7 +260,7 @@ const buttonClass = (active = false) => [
         />
         <div
             v-if="editingHtml"
-            class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 p-2"
+            class="flex justify-end gap-2 border-t border-border/80 bg-muted p-2"
         >
             <button
                 type="button"

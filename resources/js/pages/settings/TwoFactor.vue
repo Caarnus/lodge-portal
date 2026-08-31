@@ -37,11 +37,7 @@ function disable() {
                 >This is required for administrators.</strong
             >
         </p>
-        <button
-            v-if="!enabled"
-            @click="enable"
-            class="mt-4 rounded bg-slate-900 px-4 py-2 text-white"
-        >
+        <button v-if="!enabled" @click="enable" class="primary-button mt-4">
             Enable 2FA</button
         ><template v-else
             ><button
@@ -63,9 +59,7 @@ function disable() {
                     inputmode="numeric"
                     placeholder="6-digit code"
                     class="rounded border p-2"
-                /><button class="rounded bg-slate-900 px-4 text-white">
-                    Confirm
-                </button>
+                /><button class="primary-button">Confirm</button>
             </form>
             <div v-if="recovery.length" class="mt-4">
                 <h3 class="font-semibold">Recovery codes</h3>

@@ -12,7 +12,7 @@ const form = useForm({});
                 Stop receiving lodge email from {{ lodge.name }}.
             </p>
             <button
-                class="mt-5 rounded bg-slate-900 px-4 py-2 text-white"
+                class="primary-button mt-5"
                 @click="
                     form.post(
                         `/l/${lodge.slug}/communications/unsubscribe/${token}`,
@@ -23,7 +23,7 @@ const form = useForm({});
             </button>
         </main>
         <footer
-            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
+            class="border-t border-border/80 bg-foreground px-5 py-10 text-center text-sm text-background"
         >
             <p class="font-semibold">{{ lodge.name }}</p>
             <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>

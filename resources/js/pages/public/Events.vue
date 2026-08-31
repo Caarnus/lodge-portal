@@ -134,7 +134,7 @@ const changeRange = (event: Event) =>
             </p>
         </main>
         <footer
-            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
+            class="border-t border-border/80 bg-foreground px-5 py-10 text-center text-sm text-background"
         >
             <p class="font-semibold">{{ lodge.name }}</p>
             <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>

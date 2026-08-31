@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, router } from "@inertiajs/vue3";
 
@@ -46,7 +56,14 @@ defineProps<{
         ritual_url: string;
     };
     volunteerCommitments: VolunteerCommitment[];
-    ritual: { current_total: number; highest_level: string | null; learning_count: number; proficient_count: number; credited_count: number; url: string } | null;
+    ritual: {
+        current_total: number;
+        highest_level: string | null;
+        learning_count: number;
+        proficient_count: number;
+        credited_count: number;
+        url: string;
+    } | null;
 }>();
 const withdraw = (commitment: VolunteerCommitment) =>
     router.patch(
@@ -58,137 +75,244 @@ const withdraw = (commitment: VolunteerCommitment) =>
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="mx-auto grid w-full max-w-6xl gap-4 p-6 md:grid-cols-2 lg:grid-cols-3"
-        >
-            <section class="rounded-xl border p-5">
-                <h2 class="font-semibold">Memberships</h2>
-                <p
-                    v-if="!memberships.length"
-                    class="mt-2 text-sm text-muted-foreground"
-                >
-                    No active memberships.
-                </p>
-                <ul v-else class="mt-2 space-y-3 text-sm">
-                    <li v-for="item in memberships" :key="item.id">
-                        <strong>{{ item.lodge }} · {{ item.number }}</strong
-                        ><br />{{
-                            [item.type, item.degree].filter(Boolean).join(" · ")
-                        }}
-                        <div class="mt-1 flex gap-3">
-                            <Link :href="item.site_url" class="underline"
-                                >Lodge site</Link
-                            ><Link
-                                v-if="item.directory_url"
-                                :href="item.directory_url"
-                                class="underline"
-                                >Directory</Link
-                            ><Link v-if="item.ritual_assistance_url" :href="item.ritual_assistance_url" class="underline">Ritual assistance</Link
-                            ><Link
-                                :href="item.newsletters_url"
-                                class="underline"
-                                >Newsletters</Link
+        <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+            <PageHeader
+                title="Dashboard"
+                description="Your lodge activity, memberships, and upcoming commitments."
+            />
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <Card>
+                    <CardHeader
+                        ><CardTitle>Memberships</CardTitle
+                        ><CardDescription
+                            >Your active lodge connections.</CardDescription
+                        ></CardHeader
+                    >
+                    <CardContent>
+                        <p
+                            v-if="!memberships.length"
+                            class="text-sm text-muted-foreground"
+                        >
+                            No active memberships.
+                        </p>
+                        <ul v-else class="space-y-4 text-sm">
+                            <li v-for="item in memberships" :key="item.id">
+                                <p class="font-medium">
+                                    {{ item.lodge }} · {{ item.number }}
+                                </p>
+                                <p
+                                    v-if="item.type || item.degree"
+                                    class="mt-1 text-muted-foreground"
+                                >
+                                    {{
+                                        [item.type, item.degree]
+                                            .filter(Boolean)
+                                            .join(" · ")
+                                    }}
+                                </p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <Button
+                                        :as="Link"
+                                        :href="item.site_url"
+                                        variant="outline"
+                                        size="sm"
+                                        >Lodge site</Button
+                                    >
+                                    <Button
+                                        v-if="item.directory_url"
+                                        :as="Link"
+                                        :href="item.directory_url"
+                                        variant="outline"
+                                        size="sm"
+                                        >Directory</Button
+                                    >
+                                    <Button
+                                        v-if="item.ritual_assistance_url"
+                                        :as="Link"
+                                        :href="item.ritual_assistance_url"
+                                        variant="outline"
+                                        size="sm"
+                                        >Ritual assistance</Button
+                                    >
+                                    <Button
+                                        :as="Link"
+                                        :href="item.newsletters_url"
+                                        variant="outline"
+                                        size="sm"
+                                        >Newsletters</Button
+                                    >
+                                </div>
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
+                <Card v-if="ritual"
+                    ><CardHeader
+                        ><CardTitle>Ritual progress</CardTitle
+                        ><CardDescription
+                            >Self-reported knowledge and open-lodge
+                            credit.</CardDescription
+                        ></CardHeader
+                    ><CardContent class="space-y-3"
+                        ><div class="flex flex-wrap gap-2">
+                            <Badge
+                                >{{ ritual.current_total }} current
+                                points</Badge
+                            ><Badge
+                                v-if="ritual.highest_level"
+                                variant="secondary"
+                                >{{ ritual.highest_level }}</Badge
                             >
                         </div>
-                    </li>
-                </ul>
-            </section>
-            <section v-if="ritual" class="rounded-xl border p-5"><h2 class="font-semibold">Ritual progress</h2><p class="mt-2 text-sm text-muted-foreground">{{ ritual.current_total }} current points<span v-if="ritual.highest_level"> · {{ ritual.highest_level }}</span></p><p class="mt-1 text-sm text-muted-foreground">{{ ritual.learning_count }} learning · {{ ritual.proficient_count }} proficient · {{ ritual.credited_count }} credited</p><Link :href="ritual.url" class="mt-2 inline-block text-sm underline">Manage ritual progress</Link></section>
-            <section class="rounded-xl border p-5">
-                <h2 class="font-semibold">Upcoming events</h2>
-                <p
-                    v-if="!upcomingEvents.length"
-                    class="mt-2 text-sm text-muted-foreground"
+                        <p class="text-sm text-muted-foreground">
+                            {{ ritual.learning_count }} learning ·
+                            {{ ritual.proficient_count }} proficient ·
+                            {{ ritual.credited_count }} credited
+                        </p>
+                        <Button
+                            :as="Link"
+                            :href="ritual.url"
+                            variant="outline"
+                            size="sm"
+                            >Manage ritual progress</Button
+                        ></CardContent
+                    ></Card
                 >
-                    No upcoming events.
-                </p>
-                <ul v-else class="mt-2 text-sm">
-                    <li v-for="item in upcomingEvents" :key="item.id">
-                        <Link :href="item.url" class="underline">{{
-                            item.event
-                        }}</Link>
-                        · {{ item.lodge }}
-                    </li>
-                </ul>
-            </section>
-            <section class="rounded-xl border p-5">
-                <h2 class="font-semibold">Profile</h2>
-                <p class="mt-2 text-sm text-muted-foreground">
-                    {{
-                        profile.linked
-                            ? `Directory: ${profile.directory_scope ?? "own lodge"}`
-                            : "Your account is not linked to a member profile."
-                    }}
-                </p>
-                <Link
-                    :href="profile.settings_url"
-                    class="mt-2 inline-block text-sm underline"
-                    >Profile and privacy settings</Link
+                <Card
+                    ><CardHeader
+                        ><CardTitle>Upcoming events</CardTitle
+                        ><CardDescription
+                            >Events on your lodge calendar.</CardDescription
+                        ></CardHeader
+                    ><CardContent>
+                        <p
+                            v-if="!upcomingEvents.length"
+                            class="text-sm text-muted-foreground"
+                        >
+                            No upcoming events.
+                        </p>
+                        <ul v-else class="space-y-2 text-sm">
+                            <li v-for="item in upcomingEvents" :key="item.id">
+                                <Link
+                                    :href="item.url"
+                                    class="font-medium text-primary hover:underline"
+                                    >{{ item.event }}</Link
+                                >
+                                · {{ item.lodge }}
+                            </li>
+                        </ul>
+                    </CardContent></Card
                 >
-                <Link v-if="profile.linked" :href="profile.ritual_url" class="mt-2 ml-3 inline-block text-sm underline">Ritual progress</Link>
-            </section>
-            <section class="rounded-xl border p-5">
-                <h2 class="font-semibold">Reservations</h2>
-                <p
-                    v-if="!reservations.length"
-                    class="mt-2 text-sm text-muted-foreground"
+                <Card
+                    ><CardHeader
+                        ><CardTitle>Profile</CardTitle
+                        ><CardDescription
+                            >Account and directory privacy.</CardDescription
+                        ></CardHeader
+                    ><CardContent
+                        ><p class="text-sm text-muted-foreground">
+                            {{
+                                profile.linked
+                                    ? `Directory: ${profile.directory_scope ?? "own lodge"}`
+                                    : "Your account is not linked to a member profile."
+                            }}
+                        </p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <Button
+                                :as="Link"
+                                :href="profile.settings_url"
+                                variant="outline"
+                                size="sm"
+                                >Profile and privacy</Button
+                            ><Button
+                                v-if="profile.linked"
+                                :as="Link"
+                                :href="profile.ritual_url"
+                                variant="outline"
+                                size="sm"
+                                >Ritual progress</Button
+                            >
+                        </div></CardContent
+                    ></Card
                 >
-                    No active reservations.
-                </p>
-                <ul v-else class="mt-2 text-sm">
-                    <li v-for="item in reservations" :key="item.id">
-                        {{ item.event }} · {{ item.lodge }}
-                    </li>
-                </ul>
-            </section>
-            <section class="rounded-xl border p-5">
-                <h2 class="font-semibold">Reminder subscriptions</h2>
-                <p
-                    v-if="!reminders.length"
-                    class="mt-2 text-sm text-muted-foreground"
+                <Card
+                    ><CardHeader><CardTitle>Reservations</CardTitle></CardHeader
+                    ><CardContent>
+                        <p
+                            v-if="!reservations.length"
+                            class="text-sm text-muted-foreground"
+                        >
+                            No active reservations.
+                        </p>
+                        <ul v-else class="space-y-2 text-sm">
+                            <li v-for="item in reservations" :key="item.id">
+                                {{ item.event }} · {{ item.lodge }}
+                            </li>
+                        </ul>
+                    </CardContent></Card
                 >
-                    No active reminders.
-                </p>
-                <ul v-else class="mt-2 text-sm">
-                    <li v-for="item in reminders" :key="item.id">
-                        {{ item.event }} · {{ item.lodge }}
-                    </li>
-                </ul>
-            </section>
-        </div>
-        <div class="mx-auto w-full max-w-4xl rounded-xl border p-6">
-            <h1 class="text-xl font-semibold">
-                Upcoming volunteer commitments
-            </h1>
-            <p
-                v-if="!volunteerCommitments.length"
-                class="mt-3 text-sm text-muted-foreground"
-            >
-                No upcoming volunteer commitments.
-            </p>
-            <ul v-else class="mt-4 divide-y">
-                <li
-                    v-for="commitment in volunteerCommitments"
-                    :key="commitment.id"
-                    class="py-4"
+                <Card
+                    ><CardHeader
+                        ><CardTitle
+                            >Reminder subscriptions</CardTitle
+                        ></CardHeader
+                    ><CardContent>
+                        <p
+                            v-if="!reminders.length"
+                            class="text-sm text-muted-foreground"
+                        >
+                            No active reminders.
+                        </p>
+                        <ul v-else class="space-y-2 text-sm">
+                            <li v-for="item in reminders" :key="item.id">
+                                {{ item.event }} · {{ item.lodge }}
+                            </li>
+                        </ul>
+                    </CardContent></Card
                 >
-                    <Link
-                        :href="`/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}`"
-                        class="font-medium text-primary underline"
-                        >{{ commitment.position }} —
-                        {{ commitment.event }}</Link
+            </div>
+            <Card>
+                <CardHeader
+                    ><CardTitle>Upcoming volunteer commitments</CardTitle
+                    ><CardDescription
+                        >Positions you have volunteered to
+                        fill.</CardDescription
+                    ></CardHeader
+                >
+                <CardContent>
+                    <p
+                        v-if="!volunteerCommitments.length"
+                        class="text-sm text-muted-foreground"
                     >
-                    <p class="mt-1 text-sm text-muted-foreground">
-                        {{ commitment.lodge }}
+                        No upcoming volunteer commitments.
                     </p>
-                    <button
-                        class="mt-2 text-sm underline"
-                        @click="withdraw(commitment)"
-                    >
-                        Withdraw commitment
-                    </button>
-                </li>
-            </ul>
-        </div>
+                    <ul v-else class="divide-y divide-border">
+                        <li
+                            v-for="commitment in volunteerCommitments"
+                            :key="commitment.id"
+                            class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                            <div>
+                                <Link
+                                    :href="`/l/${commitment.lodge_slug}/events/${commitment.occurrence_id}`"
+                                    class="font-medium text-primary underline"
+                                    >{{ commitment.position }} —
+                                    {{ commitment.event }}</Link
+                                >
+                                <p class="mt-1 text-sm text-muted-foreground">
+                                    {{ commitment.lodge }}
+                                </p>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                @click="withdraw(commitment)"
+                                >Withdraw commitment</Button
+                            >
+                        </li>
+                    </ul>
+                </CardContent>
+            </Card>
+        </main>
     </AppLayout>
 </template>

@@ -62,7 +62,7 @@ const loginHref = computed(
     <template v-else>
         <a
             :href="loginHref"
-            class="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
+            class="rounded-md border border-border/80 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
             >Log in</a
         >
         <AppearanceTabs compact />

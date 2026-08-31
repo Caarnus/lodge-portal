@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import {
+    Dialog,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogScrollContent,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Head, router, usePage } from "@inertiajs/vue3";
 import { Save, UserMinus } from "lucide-vue-next";
 import Tooltip from "primevue/tooltip";
@@ -30,6 +40,12 @@ const prompt = computed(() => page.props.flash?.officer_role_prompt);
 const promptOpen = ref(Boolean(page.props.flash?.officer_role_prompt));
 const assignmentFor = (positionId: number) =>
     props.assignments.find((item) => item.officer_position_id === positionId);
+const memberOptions = computed(() =>
+    props.memberships.map((membership) => ({
+        value: membership.id,
+        label: membership.person.display_name,
+    })),
+);
 
 watch(
     () => props.assignments,
@@ -77,28 +93,27 @@ const remove = (position: any) => {
 <template>
     <Head :title="`${lodge.name} officers`" />
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
-        <h1 class="text-2xl font-bold">Current officers</h1>
-        <p class="text-sm text-slate-600">
-            Assign a current member to each position for {{ lodge.name }}.
-        </p>
-        <WorkspaceTabs :lodge="lodge" workspace="people" active="officers" class="mt-6" />
+        <PageHeader
+            title="Current officers"
+            :description="`Assign a current member to each position for ${lodge.name}.`"
+        />
+        <WorkspaceTabs
+            :lodge="lodge"
+            workspace="people"
+            active="officers"
+            class="mt-6"
+        />
 
-        <div
-            v-if="prompt && promptOpen"
-            class="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
-            role="presentation"
-            @click.self="promptOpen = false"
-        >
-            <div
-                class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="officer-role-title"
-            >
-                <h2 id="officer-role-title" class="text-xl font-bold">
-                    Review officer access
-                </h2>
-                <p class="mt-3 text-sm">
+        <Dialog :open="promptOpen" @update:open="promptOpen = $event">
+            <DialogScrollContent v-if="prompt" class="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Review officer access</DialogTitle>
+                    <DialogDescription>
+                        Officer assignment and lodge access are managed
+                        separately.
+                    </DialogDescription>
+                </DialogHeader>
+                <p class="text-sm">
                     <template v-if="prompt.has_linked_user"
                         >The officer assignment was saved separately from
                         access. Review {{ prompt.person_name }}'s lodge roles
@@ -116,25 +131,27 @@ const remove = (position: any) => {
                         and link an account before assigning a role.</template
                     >
                 </p>
-                <div class="mt-5 flex justify-end gap-2">
+                <DialogFooter>
                     <button
-                        class="rounded border px-4 py-2"
+                        class="secondary-button"
                         @click="promptOpen = false"
                     >
                         Not now</button
                     ><a
                         v-if="prompt.has_linked_user"
                         :href="`/lodges/${lodge.id}/role-assignments`"
-                        class="rounded bg-slate-900 px-4 py-2 text-white"
+                        class="primary-button"
                         >Manage access</a
                     >
-                </div>
-            </div>
-        </div>
+                </DialogFooter>
+            </DialogScrollContent>
+        </Dialog>
 
-        <div class="mt-6 overflow-x-auto rounded-lg border">
+        <div
+            class="mt-6 overflow-hidden rounded-lg border border-border/80 bg-card"
+        >
             <div
-                class="hidden min-w-[58rem] grid-cols-[minmax(10rem,1fr)_minmax(14rem,1.5fr)_repeat(3,minmax(7rem,.7fr))_5.5rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
+                class="hidden grid-cols-[minmax(10rem,1fr)_minmax(14rem,1.5fr)_repeat(3,minmax(7rem,.7fr))_5.5rem] gap-4 bg-muted px-4 py-3 text-sm font-semibold text-muted-foreground md:grid"
             >
                 <span>Position</span><span>Member</span><span>Public</span
                 ><span>Public email</span><span>Public phone</span
@@ -143,23 +160,17 @@ const remove = (position: any) => {
             <div
                 v-for="position in positions"
                 :key="position.id"
-                class="grid gap-3 border-t p-4 first:border-t-0 md:min-w-[58rem] md:grid-cols-[minmax(10rem,1fr)_minmax(14rem,1.5fr)_repeat(3,minmax(7rem,.7fr))_5.5rem] md:items-center md:gap-4 md:first:border-t"
+                class="grid gap-3 border-t border-border/60 p-4 transition-colors first:border-t-0 hover:bg-muted/35 md:grid-cols-[minmax(10rem,1fr)_minmax(14rem,1.5fr)_repeat(3,minmax(7rem,.7fr))_5.5rem] md:items-center md:gap-4"
             >
                 <p class="font-medium">{{ position.name }}</p>
-                <select
+                <SearchableSelect
                     v-model="drafts[position.id].membership_id"
-                    :aria-label="`${position.name} member`"
-                    class="w-full rounded border p-2"
-                >
-                    <option :value="null">Unassigned</option>
-                    <option
-                        v-for="membership in memberships"
-                        :key="membership.id"
-                        :value="membership.id"
-                    >
-                        {{ membership.person.display_name }}
-                    </option>
-                </select>
+                    :options="memberOptions"
+                    placeholder="Unassigned"
+                    filter-placeholder="Filter members"
+                    :ariaLabel="`${position.name} member`"
+                    empty-label="No members match this filter."
+                />
                 <label class="flex items-center gap-2 text-sm"
                     ><input
                         v-model="drafts[position.id].is_public"
@@ -186,7 +197,7 @@ const remove = (position: any) => {
                         type="button"
                         :disabled="!drafts[position.id].membership_id"
                         :aria-label="`Save ${position.name}`"
-                        class="inline-flex size-10 items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-40"
+                        class="icon-button disabled:opacity-40"
                         v-tooltip.left="{
                             value: 'Save assignment',
                             showDelay: 2000,
@@ -199,7 +210,7 @@ const remove = (position: any) => {
                         v-if="assignmentFor(position.id)"
                         type="button"
                         :aria-label="`Remove ${position.name} assignment`"
-                        class="inline-flex size-10 items-center justify-center rounded-md text-red-700 hover:bg-red-50"
+                        class="icon-button text-destructive hover:bg-destructive/10"
                         v-tooltip.left="{
                             value: 'Remove assignment',
                             showDelay: 2000,

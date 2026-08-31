@@ -21,7 +21,7 @@ const form = useForm({
     <div class="flex min-h-dvh flex-col bg-background text-foreground">
         <main class="mx-auto w-full max-w-2xl flex-1 p-6">
             <h1 class="text-3xl font-bold">Newsletter delivery request</h1>
-            <p class="mt-2 text-slate-600">
+            <p class="mt-2 text-muted-foreground">
                 Request a family newsletter. This does not create an account or
                 member access.
             </p>
@@ -81,13 +81,11 @@ const form = useForm({
                 <p v-if="Object.keys(form.errors).length" class="text-red-700">
                     {{ Object.values(form.errors)[0] }}
                 </p>
-                <button class="w-fit rounded bg-slate-900 px-4 py-2 text-white">
-                    Submit request
-                </button>
+                <button class="primary-button w-fit">Submit request</button>
             </form>
         </main>
         <footer
-            class="border-t bg-slate-950 px-5 py-10 text-center text-sm text-white"
+            class="border-t border-border/80 bg-foreground px-5 py-10 text-center text-sm text-background"
         >
             <p class="font-semibold">{{ lodge.name }}</p>
             <p class="mt-1">{{ lodge.city }}, {{ lodge.state }}</p>

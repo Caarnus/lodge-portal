@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import EventEditor from "@/pages/events/Edit.vue";
 import {
     Dialog,
@@ -168,14 +169,11 @@ const retryReminder = (id: number) => {
 <template>
     <Head title="Events" />
     <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-semibold">Events</h1>
-                <p class="text-sm text-muted-foreground">
-                    Manage events for {{ lodge.name }}.
-                </p>
-            </div>
-            <div class="flex gap-2">
+        <PageHeader
+            title="Events"
+            :description="`Manage events for ${lodge.name}.`"
+        >
+            <template #actions>
                 <button
                     type="button"
                     class="primary-button"
@@ -183,9 +181,9 @@ const retryReminder = (id: number) => {
                 >
                     <Plus class="mr-1 size-4" /> Create event
                 </button>
-            </div>
-        </div>
-        <section class="rounded-lg border bg-slate-50">
+            </template>
+        </PageHeader>
+        <section class="rounded-lg border border-border/80 bg-muted">
             <button
                 type="button"
                 class="flex w-full items-center justify-between gap-3 p-4 text-left font-medium"
@@ -257,7 +255,7 @@ const retryReminder = (id: number) => {
         </section>
         <div
             v-if="events.data.length"
-            class="hidden overflow-hidden rounded-lg border md:block"
+            class="hidden overflow-hidden rounded-lg border border-border/80 bg-card md:block"
         >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
@@ -315,7 +313,7 @@ const retryReminder = (id: number) => {
                     <tr
                         v-for="event in events.data"
                         :key="event.id"
-                        class="border-t"
+                        class="border-t border-border/60 transition-colors hover:bg-muted/35"
                     >
                         <td class="p-3">
                             <p
@@ -395,7 +393,7 @@ const retryReminder = (id: number) => {
             <article
                 v-for="event in events.data"
                 :key="event.id"
-                class="rounded-lg border p-4"
+                class="rounded-lg border border-border/80 bg-card p-4"
             >
                 <strong class="block">{{ event.title }}</strong>
                 <p class="mt-1 text-sm text-muted-foreground">
@@ -464,7 +462,7 @@ const retryReminder = (id: number) => {
         </div>
         <div
             v-if="!events.data.length"
-            class="rounded-lg border border-dashed p-10 text-center text-muted-foreground"
+            class="rounded-lg border border-border/80 border-dashed bg-card p-10 text-center text-muted-foreground"
         >
             No events match these filters.
         </div>

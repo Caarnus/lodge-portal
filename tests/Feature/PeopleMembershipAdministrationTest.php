@@ -49,7 +49,7 @@ class PeopleMembershipAdministrationTest extends TestCase
             'person_two_id' => $relative->id, 'relationship_type_id' => RelationshipType::where('key', 'spouse')->value('id')]);
 
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people")->assertOk()->assertInertia(fn (Assert $page) => $page
-            ->has('people', 2)->where('people.0.id', fn ($id) => in_array($id, [$member->person_id, $relative->id], true)));
+            ->has('people', 1)->where('people.0.id', $member->person_id));
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=related")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('people.0.id', $relative->id)->where('people.0.can_manage', true));
     }
@@ -113,7 +113,7 @@ class PeopleMembershipAdministrationTest extends TestCase
             'primary_lodge_number' => $lodge->number,
         ]);
 
-        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?search=former")
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?search=former&status=all")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('people', 1)
@@ -188,7 +188,15 @@ class PeopleMembershipAdministrationTest extends TestCase
         $relative = Person::where('name', 'Taylor Example')->firstOrFail();
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=members")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('people.0.memberships.0.is_award_of_gold', true)
-                ->where('people.0.past_master_terms.0.year', 2012));
+            ->where('people.0.past_master_terms.0.year', 2012));
+
+        $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?past_master=1&award_of_gold=1")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('people', 1)
+                ->where('people.0.id', $member->person_id)
+                ->where('filters.past_master', true)
+                ->where('filters.award_of_gold', true));
         $this->actingAs($admin)->get("/lodges/{$lodge->id}/people?scope=related")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('people.0.id', $relative->id)
                 ->where('people.0.relationship_summaries.0.relationship_name', 'Child')

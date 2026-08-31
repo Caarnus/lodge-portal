@@ -156,7 +156,7 @@ const toggleGallery = (id: number, selected: boolean) => {
                     placeholder="/page or https://…"
                 /><button
                     type="button"
-                    class="rounded border px-3"
+                    class="secondary-button"
                     @click="config.links.splice(index, 1)"
                 >
                     Remove
@@ -164,7 +164,7 @@ const toggleGallery = (id: number, selected: boolean) => {
             </div>
             <button
                 type="button"
-                class="w-fit rounded border px-3 py-2 text-sm"
+                class="secondary-button w-fit text-sm"
                 @click="addLink"
             >
                 Add link
@@ -218,7 +218,9 @@ const toggleGallery = (id: number, selected: boolean) => {
                     class="field-input min-h-20"
                 ></textarea>
             </label>
-            <fieldset class="rounded-lg border border-border p-4">
+            <fieldset
+                class="rounded-lg border border-border/80 bg-muted/30 p-4"
+            >
                 <legend class="px-1 text-sm font-medium">Albums to show</legend>
                 <p class="mb-3 text-sm text-muted-foreground">
                     Select the published albums displayed in this section.

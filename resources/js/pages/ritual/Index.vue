@@ -1,6 +1,25 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Head, router } from "@inertiajs/vue3";
+import { ChevronDown } from "lucide-vue-next";
 import { ref } from "vue";
 
 const props = defineProps<{
@@ -182,296 +201,394 @@ const saveAvailability = () =>
             >
                 {{ Object.values(errors).join(" ") }}
             </p>
-            <section class="rounded-lg bg-muted/20 p-5">
-                <h1 class="text-xl font-semibold">Ritual progress</h1>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    Current points: {{ progress.current_total }}. Proficiency is
-                    self-reported; completed credit requires a performance from
-                    memory in an open lodge.
-                </p>
-            </section>
-            <section class="rounded-lg bg-muted/20 p-5">
-                <h2 class="font-semibold">
-                    Ritual visibility and availability
-                </h2>
-                <select
-                    v-model="visibilityScope"
-                    class="mt-3 rounded border p-2"
+            <PageHeader
+                title="Ritual progress"
+                description="Track your self-reported ritual knowledge, open-lodge credit, and general availability."
+            >
+                <template #actions
+                    ><Badge
+                        >{{ progress.current_total }} current points</Badge
+                    ></template
                 >
-                    <option value="hidden">Hidden</option>
-                    <option value="own_lodge">Own lodges</option>
-                    <option value="participating_lodges">
-                        WorkingTools lodges
-                    </option></select
-                ><textarea
-                    v-model="note"
-                    class="mt-3 w-full rounded border p-2"
-                    maxlength="500"
-                    placeholder="General availability note (visible only in ritual search)"
-                /><button
-                    class="mt-2 rounded bg-primary px-3 py-2 text-primary-foreground"
-                    @click="saveSettings"
-                >
-                    Save visibility
-                </button>
-                <p class="mt-2 text-xs text-muted-foreground">
-                    Availability is informational only and creates no
-                    commitment, booking, or assignment.
-                </p>
-            </section>
-            <section class="rounded-lg bg-muted/20 p-5">
-                <h2 class="font-semibold">General availability</h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    Choose broad weekday/daypart windows. This is not a
-                    reservation or commitment.
-                </p>
-                <div class="mt-3 overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr>
-                                <th class="p-2 text-left">Day</th>
-                                <th
+            </PageHeader>
+            <Card
+                ><CardHeader
+                    ><CardTitle>Visibility and availability</CardTitle
+                    ><CardDescription
+                        >Choose who can discover your ritual
+                        availability.</CardDescription
+                    ></CardHeader
+                ><CardContent>
+                    <select v-model="visibilityScope" class="field-input">
+                        <option value="hidden">Hidden</option>
+                        <option value="own_lodge">Own lodges</option>
+                        <option value="participating_lodges">
+                            WorkingTools lodges
+                        </option></select
+                    ><textarea
+                        v-model="note"
+                        class="field-input mt-3 min-h-24"
+                        maxlength="500"
+                        placeholder="General availability note (visible only in ritual search)"
+                    /><Button class="mt-3" @click="saveSettings">
+                        Save visibility
+                    </Button>
+                    <p class="mt-2 text-xs text-muted-foreground">
+                        Availability is informational only and creates no
+                        commitment, booking, or assignment.
+                    </p>
+                </CardContent></Card
+            >
+            <Card
+                ><CardHeader
+                    ><CardTitle>General availability</CardTitle
+                    ><CardDescription>
+                        Choose broad weekday/daypart windows. This is not a
+                        reservation or commitment.
+                    </CardDescription></CardHeader
+                ><CardContent
+                    ><div class="space-y-3 md:hidden">
+                        <div
+                            v-for="(day, index) in days"
+                            :key="day"
+                            class="rounded-md border border-border/60 bg-muted/30 p-3"
+                        >
+                            <p class="font-medium">{{ day }}</p>
+                            <div class="mt-3 grid grid-cols-3 gap-2">
+                                <label
                                     v-for="daypart in dayparts"
                                     :key="daypart"
-                                    class="p-2 capitalize"
+                                    class="flex flex-col items-center gap-2 rounded-md border border-border/50 bg-background px-2 py-3 text-center text-xs capitalize"
                                 >
-                                    {{ daypart }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(day, index) in days" :key="day">
-                                <th class="p-2 text-left">{{ day }}</th>
-                                <td
-                                    v-for="daypart in dayparts"
-                                    :key="daypart"
-                                    class="p-2 text-center"
-                                >
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         :checked="
                                             selectedWindows.has(
                                                 `${index + 1}:${daypart}`,
                                             )
                                         "
                                         :aria-label="`${day} ${daypart}`"
-                                        @change="
+                                        @update:checked="
                                             toggleWindow(index + 1, daypart)
                                         "
                                     />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button
-                    class="mt-3 rounded bg-primary px-3 py-2 text-primary-foreground"
-                    @click="saveAvailability"
-                >
-                    Save availability
-                </button>
-            </section>
-
-            <section class="rounded-lg bg-muted/20 p-5">
-                <h2 class="font-semibold">Completed in an open lodge</h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    Click a completion button to cycle: not completed, completed
-                    from memory in an open lodge, then completed and willing to
-                    assist. The last state does not accept an assignment.
-                </p>
-                <div
-                    v-for="category in categories"
-                    :key="category.id"
-                    class="mt-5 rounded-lg bg-muted/40 p-4"
-                >
-                    <h3
-                        class="border-b pb-2 text-sm font-semibold uppercase tracking-wide"
-                    >
-                        {{ category.name }}
-                    </h3>
-                    <div
-                        v-for="part in category.parts"
-                        :key="part.id"
-                        class="grid gap-3 rounded-md border border-border/50 bg-background p-3 md:grid-cols-[1fr_auto]"
-                    >
-                        <div>
-                            <strong>{{ part.name }}</strong>
-                            <p class="mt-1 text-sm text-muted-foreground">
-                                {{
-                                    part.point_value
-                                        ? `${part.point_value} points`
-                                        : "Does not count toward program points"
-                                }}
-                            </p>
+                                    {{ daypart }}
+                                </label>
+                            </div>
                         </div>
-                        <button
-                            type="button"
-                            class="flex min-h-16 w-full flex-col items-start justify-center rounded border px-3 py-2 text-left text-sm transition-colors md:w-64"
-                            :class="completionButtonClass(part)"
-                            :aria-label="`${part.name}: ${completionLabel(part)}. Click to change.`"
-                            @click="advanceCompletion(part)"
-                        >
-                            <span class="text-xs text-muted-foreground"
-                                >Open-lodge completion</span
-                            ><span class="font-medium">{{
-                                completionLabel(part)
-                            }}</span>
-                        </button>
                     </div>
-                </div>
-            </section>
+                    <div class="hidden overflow-x-auto md:block">
+                        <table class="w-full min-w-[480px] text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="p-2 text-left">Day</th>
+                                    <th
+                                        v-for="daypart in dayparts"
+                                        :key="daypart"
+                                        class="p-2 capitalize"
+                                    >
+                                        {{ daypart }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(day, index) in days" :key="day">
+                                    <th class="p-2 text-left">{{ day }}</th>
+                                    <td
+                                        v-for="daypart in dayparts"
+                                        :key="daypart"
+                                        class="p-2 text-center"
+                                    >
+                                        <Checkbox
+                                            :checked="
+                                                selectedWindows.has(
+                                                    `${index + 1}:${daypart}`,
+                                                )
+                                            "
+                                            :aria-label="`${day} ${daypart}`"
+                                            @update:checked="
+                                                toggleWindow(index + 1, daypart)
+                                            "
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Button class="mt-4" @click="saveAvailability">
+                        Save availability
+                    </Button>
+                </CardContent></Card
+            >
 
-            <section class="rounded-lg bg-muted/20 p-5">
-                <h2 class="font-semibold">Study and proficiency</h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    Set your current self-reported knowledge and learning
-                    interest.
-                </p>
-                <div
-                    v-for="category in categories"
-                    :key="category.id"
-                    class="mt-5 rounded-lg bg-muted/40 p-4"
-                >
-                    <h3
-                        class="border-b pb-2 text-sm font-semibold uppercase tracking-wide"
+            <Card
+                ><CardHeader
+                    ><CardTitle>Completed in an open lodge</CardTitle
+                    ><CardDescription>
+                        Click a completion button to cycle: not completed,
+                        completed from memory in an open lodge, then completed
+                        and willing to assist. The last state does not accept an
+                        assignment.
+                    </CardDescription></CardHeader
+                ><CardContent>
+                    <Collapsible
+                        v-for="(category, categoryIndex) in categories"
+                        :key="category.id"
+                        v-slot="{ open }"
+                        :default-open="categoryIndex === 0"
+                        class="mt-3 overflow-hidden rounded-lg border border-border/80 bg-muted/30 first:mt-0"
                     >
-                        {{ category.name }}
-                    </h3>
-                    <div
-                        v-for="part in category.parts"
-                        :key="part.id"
-                        class="grid gap-3 rounded-md border border-border/50 bg-background p-3"
-                    >
-                        <strong>{{ part.name }}</strong>
-                        <div
-                            class="grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end"
-                        >
-                            <label class="block w-full"
-                                >Status
-                                <select
-                                    class="mt-1 block w-full rounded border p-2"
-                                    :class="statusSelectClass(part)"
-                                    :value="saved(part).status"
-                                    @change="
-                                        update(part, {
-                                            status: (
-                                                $event.target as HTMLSelectElement
-                                            ).value,
-                                        })
-                                    "
-                                >
-                                    <option value="not_known">Not known</option>
-                                    <option value="learning">Learning</option>
-                                    <option value="proficient">
-                                        Proficient
-                                    </option>
-                                </select></label
-                            ><label class="block w-full"
-                                >First proficient
-                                <input
-                                    type="date"
-                                    class="mt-1 block w-full rounded border p-2"
-                                    :value="
-                                        saved(part)
-                                            .first_marked_proficient_on ?? ''
-                                    "
-                                    @change="
-                                        update(part, {
-                                            first_marked_proficient_on:
-                                                (
-                                                    $event.target as HTMLInputElement
-                                                ).value || null,
-                                        })
-                                    "
-                            /></label>
-                            <div
-                                class="block w-full md:col-span-2 xl:col-span-1"
+                        <CollapsibleTrigger as-child>
+                            <button
+                                type="button"
+                                class="flex w-full items-center justify-between gap-3 p-4 text-left"
                             >
-                                <span>Interested in learning</span
-                                ><label class="checkbox-field mt-1"
-                                    ><input
-                                        type="checkbox"
-                                        :checked="
-                                            saved(part).interested_in_learning
-                                        "
+                                <span>
+                                    <span class="block font-semibold">{{
+                                        category.name
+                                    }}</span>
+                                    <span
+                                        class="block text-sm text-muted-foreground"
+                                        >{{ category.parts.length }} ritual
+                                        parts</span
+                                    >
+                                </span>
+                                <ChevronDown
+                                    class="size-4 shrink-0 transition-transform"
+                                    :class="open && 'rotate-180'"
+                                />
+                            </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <div
+                                class="space-y-3 border-t border-border/70 p-3"
+                            >
+                                <div
+                                    v-for="part in category.parts"
+                                    :key="part.id"
+                                    class="grid gap-3 rounded-md border border-border/50 bg-background p-3 md:grid-cols-[1fr_auto]"
+                                >
+                                    <div>
+                                        <strong>{{ part.name }}</strong>
+                                        <p
+                                            class="mt-1 text-sm text-muted-foreground"
+                                        >
+                                            {{
+                                                part.point_value
+                                                    ? `${part.point_value} points`
+                                                    : "Does not count toward program points"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="flex min-h-16 w-full flex-col items-start justify-center rounded-md border px-3 py-2 text-left text-sm transition-colors md:w-64"
+                                        :class="completionButtonClass(part)"
+                                        :aria-label="`${part.name}: ${completionLabel(part)}. Click to change.`"
+                                        @click="advanceCompletion(part)"
+                                    >
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                            >Open-lodge completion</span
+                                        ><span class="font-medium">{{
+                                            completionLabel(part)
+                                        }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+                </CardContent></Card
+            >
+
+            <Card
+                ><CardHeader
+                    ><CardTitle>Study and proficiency</CardTitle
+                    ><CardDescription>
+                        Set your current self-reported knowledge and learning
+                        interest.
+                    </CardDescription></CardHeader
+                ><CardContent>
+                    <Collapsible
+                        v-for="(category, categoryIndex) in categories"
+                        :key="category.id"
+                        v-slot="{ open }"
+                        :default-open="categoryIndex === 0"
+                        class="mt-3 overflow-hidden rounded-lg border border-border/80 bg-muted/30 first:mt-0"
+                    >
+                        <CollapsibleTrigger as-child>
+                            <button
+                                type="button"
+                                class="flex w-full items-center justify-between gap-3 p-4 text-left"
+                            >
+                                <span>
+                                    <span class="block font-semibold">{{
+                                        category.name
+                                    }}</span>
+                                    <span
+                                        class="block text-sm text-muted-foreground"
+                                        >{{ category.parts.length }} ritual
+                                        parts</span
+                                    >
+                                </span>
+                                <ChevronDown
+                                    class="size-4 shrink-0 transition-transform"
+                                    :class="open && 'rotate-180'"
+                                />
+                            </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <div
+                                class="space-y-3 border-t border-border/70 p-3"
+                            >
+                                <div
+                                    v-for="part in category.parts"
+                                    :key="part.id"
+                                    class="grid gap-3 rounded-md border border-border/50 bg-background p-3"
+                                >
+                                    <strong>{{ part.name }}</strong>
+                                    <div
+                                        class="grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end"
+                                    >
+                                        <div class="block w-full">
+                                            <Label>Status</Label>
+                                            <select
+                                                class="field-input mt-1"
+                                                :class="statusSelectClass(part)"
+                                                :value="saved(part).status"
+                                                @change="
+                                                    update(part, {
+                                                        status: (
+                                                            $event.target as HTMLSelectElement
+                                                        ).value,
+                                                    })
+                                                "
+                                            >
+                                                <option value="not_known">
+                                                    Not known
+                                                </option>
+                                                <option value="learning">
+                                                    Learning
+                                                </option>
+                                                <option value="proficient">
+                                                    Proficient
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="block w-full">
+                                            <Label>First proficient</Label>
+                                            <Input
+                                                type="date"
+                                                class="mt-1"
+                                                :value="
+                                                    saved(part)
+                                                        .first_marked_proficient_on ??
+                                                    ''
+                                                "
+                                                @change="
+                                                    update(part, {
+                                                        first_marked_proficient_on:
+                                                            (
+                                                                $event.target as HTMLInputElement
+                                                            ).value || null,
+                                                    })
+                                                "
+                                            />
+                                        </div>
+                                        <div
+                                            class="block w-full md:col-span-2 xl:col-span-1"
+                                        >
+                                            <Label
+                                                >Interested in learning</Label
+                                            >
+                                            <label class="checkbox-field mt-2"
+                                                ><Checkbox
+                                                    :checked="
+                                                        saved(part)
+                                                            .interested_in_learning
+                                                    "
+                                                    @update:checked="
+                                                        update(part, {
+                                                            interested_in_learning:
+                                                                Boolean($event),
+                                                        })
+                                                    "
+                                                />
+                                                Yes</label
+                                            >
+                                        </div>
+                                    </div>
+                                    <textarea
+                                        class="field-input min-h-20 text-sm"
+                                        :value="saved(part).notes ?? ''"
+                                        maxlength="2000"
+                                        placeholder="Private notes"
                                         @change="
                                             update(part, {
-                                                interested_in_learning: (
-                                                    $event.target as HTMLInputElement
-                                                ).checked,
+                                                notes:
+                                                    (
+                                                        $event.target as HTMLTextAreaElement
+                                                    ).value || null,
                                             })
                                         "
                                     />
-                                    Yes</label
-                                >
+                                </div>
                             </div>
-                        </div>
-                        <textarea
-                            class="w-full rounded border p-2 text-sm"
-                            :value="saved(part).notes ?? ''"
-                            maxlength="2000"
-                            placeholder="Private notes"
-                            @change="
-                                update(part, {
-                                    notes:
-                                        ($event.target as HTMLTextAreaElement)
-                                            .value || null,
-                                })
-                            "
-                        />
-                    </div>
-                </div>
-            </section>
-            <section
+                        </CollapsibleContent>
+                    </Collapsible> </CardContent
+            ></Card>
+            <Collapsible
                 v-if="progress.credited_retired_parts.length"
-                class="rounded-lg bg-muted/20 p-5"
+                v-slot="{ open }"
             >
-                <h2 class="font-semibold">Retired credited parts</h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    These historical credit claims no longer count toward the
-                    current total.
-                </p>
-                <ul class="mt-3 list-disc pl-5">
-                    <li
-                        v-for="item in progress.credited_retired_parts"
-                        :key="item.id"
-                    >
-                        {{ item.part.name }}
-                    </li>
-                </ul>
-            </section>
+                <Card class="overflow-hidden">
+                    <CollapsibleTrigger as-child>
+                        <button
+                            type="button"
+                            class="flex w-full items-center justify-between gap-3 p-6 text-left"
+                        >
+                            <span>
+                                <span class="block font-semibold"
+                                    >Retired credited parts</span
+                                >
+                                <span
+                                    class="block text-sm text-muted-foreground"
+                                >
+                                    {{ progress.credited_retired_parts.length }}
+                                    historical credit
+                                    {{
+                                        progress.credited_retired_parts
+                                            .length === 1
+                                            ? "claim"
+                                            : "claims"
+                                    }}
+                                </span>
+                            </span>
+                            <ChevronDown
+                                class="size-4 shrink-0 transition-transform"
+                                :class="open && 'rotate-180'"
+                            />
+                        </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <CardContent
+                            class="border-t border-border/70 pt-6 text-sm text-muted-foreground"
+                        >
+                            <p>
+                                These historical credit claims no longer count
+                                toward the current total.
+                            </p>
+                            <ul class="mt-3 list-disc pl-5 text-foreground">
+                                <li
+                                    v-for="item in progress.credited_retired_parts"
+                                    :key="item.id"
+                                >
+                                    {{ item.part.name }}
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </CollapsibleContent>
+                </Card>
+            </Collapsible>
         </main>
     </AppLayout>
 </template>
-
-<style scoped>
-@media (min-width: 768px) {
-    main > section:nth-of-type(4),
-    main > section:nth-of-type(5) {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        column-gap: 1.5rem;
-    }
-
-    main > section:nth-of-type(4) > h2,
-    main > section:nth-of-type(4) > p,
-    main > section:nth-of-type(5) > h2,
-    main > section:nth-of-type(5) > p {
-        grid-column: 1 / -1;
-    }
-
-    main > section:nth-of-type(4) > div,
-    main > section:nth-of-type(5) > div {
-        display: grid;
-        grid-column: 1 / -1;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        column-gap: 1.5rem;
-        row-gap: 0.75rem;
-    }
-
-    main > section:nth-of-type(4) > div > h3,
-    main > section:nth-of-type(5) > div > h3 {
-        grid-column: 1 / -1;
-    }
-}
-</style>

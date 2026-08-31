@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
@@ -38,26 +39,44 @@ const send = () => {
 </script>
 <template>
     <Head :title="communication.subject" />
-    <main class="mx-auto max-w-4xl space-y-6 p-6">
-        <Link
-            :href="`/lodges/${lodge.id}/communications/manage`"
-            class="underline"
-            >← Communications</Link
+    <main class="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            :title="
+                communication.status === 'draft'
+                    ? 'Edit message'
+                    : communication.subject
+            "
+            :description="
+                communication.status === 'draft'
+                    ? 'Update the message and its recipients.'
+                    : 'Sent messages are preserved for the archive.'
+            "
         >
+            <template #actions>
+                <Link
+                    :href="`/lodges/${lodge.id}/communications/manage`"
+                    class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                >
+                    Back to communications
+                </Link>
+            </template>
+        </PageHeader>
         <form
             v-if="communication.status === 'draft'"
-            class="grid gap-4 rounded border p-5"
+            class="grid gap-4 rounded-lg border border-border bg-card p-5"
             @submit.prevent="
                 form.put(
                     `/lodges/${lodge.id}/communications/manage/${communication.id}`,
                 )
             "
         >
-            <input
-                v-model="form.subject"
-                required
-                class="field-input"
-            /><RichTextField v-model="form.body_html" />
+            <label class="field-label"
+                >Subject<input
+                    v-model="form.subject"
+                    required
+                    class="field-input"
+            /></label>
+            <RichTextField v-model="form.body_html" />
             <fieldset class="grid gap-3 border-t pt-4">
                 <legend class="font-semibold">Recipients</legend>
                 <select v-model="form.audience_mode" class="field-input">
@@ -68,7 +87,7 @@ const send = () => {
                     </option>
                 </select>
                 <template v-if="form.audience_mode === 'filtered'">
-                    <label
+                    <label class="field-label"
                         >Degrees<select
                             v-model="form.degree_keys"
                             multiple
@@ -83,7 +102,7 @@ const send = () => {
                             </option>
                         </select></label
                     >
-                    <label
+                    <label class="field-label"
                         >Membership statuses<select
                             v-model="form.membership_status_keys"
                             multiple
@@ -100,7 +119,7 @@ const send = () => {
                     >
                 </template>
                 <template v-if="form.audience_mode === 'selected'">
-                    <label
+                    <label class="field-label"
                         >Members<select
                             v-model="form.membership_ids"
                             multiple
@@ -117,7 +136,7 @@ const send = () => {
                             </option>
                         </select></label
                     >
-                    <label
+                    <label class="field-label"
                         >Relations<select
                             v-model="form.relation_person_ids"
                             multiple
@@ -137,12 +156,15 @@ const send = () => {
             </fieldset>
             <button
                 v-if="communication.status === 'draft'"
-                class="w-fit rounded bg-slate-900 px-4 py-2 text-white"
+                class="primary-button w-fit"
             >
                 Save draft
             </button>
         </form>
-        <section v-else class="space-y-4 rounded border p-5">
+        <section
+            v-else
+            class="space-y-4 rounded-lg border border-border bg-card p-5"
+        >
             <p>
                 Sent messages cannot be changed in place. Create an editable
                 copy to revise its content or recipients and send it again.
@@ -152,7 +174,7 @@ const send = () => {
                 v-html="communication.body_html"
             />
             <button
-                class="rounded border px-4 py-2"
+                class="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
                 @click="
                     router.post(
                         `/lodges/${lodge.id}/communications/manage/${communication.id}/duplicate`,
@@ -164,7 +186,7 @@ const send = () => {
         </section>
         <button
             v-if="communication.status === 'draft'"
-            class="rounded border px-4 py-2"
+            class="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
             @click="send"
         >
             Save and send

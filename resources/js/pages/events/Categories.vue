@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import { router } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 
@@ -33,18 +35,24 @@ const save = () =>
 </script>
 
 <template>
-    <main class="mx-auto max-w-3xl space-y-6 p-6">
-        <div>
-            <h1 class="text-2xl font-semibold">Event categories</h1>
-            <p class="text-sm text-muted-foreground">
-                Choose the categories {{ lodge.name }} can use for new events.
-            </p>
-        </div>
-        <form class="space-y-3" @submit.prevent="save">
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Event categories"
+            :description="`Choose the categories ${lodge.name} can use for new events.`"
+        />
+        <WorkspaceTabs
+            :lodge="lodge"
+            workspace="settings"
+            active="event-categories"
+        />
+        <form
+            class="space-y-3 rounded-lg border border-border/80 bg-card p-4"
+            @submit.prevent="save"
+        >
             <label
                 v-for="category in activeCategories"
                 :key="category.id"
-                class="flex cursor-pointer items-start gap-3 rounded-lg border p-4"
+                class="flex cursor-pointer items-start gap-3 rounded-lg border border-border/80 p-4"
             >
                 <input
                     v-model="selected"
@@ -61,10 +69,7 @@ const save = () =>
                     ></span
                 >
             </label>
-            <button
-                type="submit"
-                class="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-            >
+            <button type="submit" class="primary-button">
                 Save categories
             </button>
         </form>

@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import NewsletterEditor from "@/pages/newsletters/Edit.vue";
 import { formatLodgeDate } from "@/utils/date";
@@ -64,20 +65,23 @@ const publicationDate = (value: string | null) =>
 
 <template>
     <Head title="Newsletters" />
-    <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-        <header class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-semibold">Newsletters</h1>
-                <p class="text-sm text-muted-foreground">
-                    Drafts stay private until published.
-                </p>
-            </div>
-            <button class="primary-button" @click="creating = true">
-                <Plus class="mr-1 size-4" /> New newsletter
-            </button>
-        </header>
-        <WorkspaceTabs :lodge="lodge" workspace="content" active="newsletters" />
-        <div class="rounded-lg border p-4">
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Newsletters"
+            description="Drafts stay private until published."
+        >
+            <template #actions>
+                <button class="primary-button" @click="creating = true">
+                    <Plus class="mr-1 size-4" /> New newsletter
+                </button>
+            </template>
+        </PageHeader>
+        <WorkspaceTabs
+            :lodge="lodge"
+            workspace="content"
+            active="newsletters"
+        />
+        <div class="rounded-lg border border-border/80 bg-card p-4">
             <label class="relative block"
                 ><Search
                     class="absolute left-3 top-3 size-4 text-muted-foreground" /><input
@@ -87,7 +91,10 @@ const publicationDate = (value: string | null) =>
                     placeholder="Search newsletters"
             /></label>
         </div>
-        <div class="hidden overflow-hidden rounded-lg border md:block">
+        <div
+            v-if="issues.length"
+            class="hidden overflow-hidden rounded-lg border border-border/80 bg-card md:block"
+        >
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
                     <col />
@@ -97,9 +104,15 @@ const publicationDate = (value: string | null) =>
                 </colgroup>
                 <thead class="border-b bg-muted/40">
                     <tr>
-                        <th class="p-3">Title</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">Publication date</th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Title
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Status
+                        </th>
+                        <th class="p-3 font-medium text-muted-foreground">
+                            Publication date
+                        </th>
                         <th class="p-3">
                             <span class="sr-only">Actions</span>
                         </th>
@@ -109,7 +122,7 @@ const publicationDate = (value: string | null) =>
                     <tr
                         v-for="issue in issues"
                         :key="issue.id"
-                        class="border-b last:border-0"
+                        class="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/35"
                     >
                         <td class="min-w-0 p-3 font-medium">
                             <span
@@ -181,11 +194,11 @@ const publicationDate = (value: string | null) =>
                 </tbody>
             </table>
         </div>
-        <div class="space-y-3 md:hidden">
+        <div v-if="issues.length" class="space-y-3 md:hidden">
             <article
                 v-for="issue in issues"
                 :key="issue.id"
-                class="rounded-lg border p-4"
+                class="rounded-lg border border-border/80 bg-card p-4"
             >
                 <h2 class="font-medium">
                     {{ issue.draft?.title ?? issue.published?.title }}
@@ -208,7 +221,18 @@ const publicationDate = (value: string | null) =>
                         </dd>
                     </div>
                 </dl>
-                <div class="mt-4 flex justify-end gap-1">
+                <div
+                    class="mt-4 flex justify-end gap-1 border-t border-border/60 pt-3"
+                >
+                    <a
+                        v-if="issue.published"
+                        :href="`/lodges/${lodge.id}/newsletters/${issue.slug}`"
+                        target="_blank"
+                        class="icon-button"
+                        title="View newsletter"
+                    >
+                        <Eye class="size-4" />
+                    </a>
                     <button
                         class="icon-button"
                         title="Edit newsletter"
@@ -223,6 +247,13 @@ const publicationDate = (value: string | null) =>
                     >
                         <Rocket class="size-4" /></button
                     ><button
+                        v-else-if="canPublish && issue.published"
+                        class="icon-button"
+                        title="Unpublish newsletter"
+                        @click="unpublish(issue)"
+                    >
+                        <Rocket class="size-4 rotate-180" /></button
+                    ><button
                         v-if="!issue.published"
                         class="icon-button text-destructive"
                         title="Delete newsletter"
@@ -232,6 +263,12 @@ const publicationDate = (value: string | null) =>
                     </button>
                 </div>
             </article>
+        </div>
+        <div
+            v-if="!issues.length"
+            class="rounded-lg border border-dashed border-border/80 bg-card p-8 text-center text-sm text-muted-foreground"
+        >
+            No newsletters match your search.
         </div>
     </main>
     <Dialog :open="creating" @update:open="creating = $event"

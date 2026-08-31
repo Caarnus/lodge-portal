@@ -104,7 +104,7 @@ const sendContact = () =>
         />
         <figcaption
             v-if="section.configuration.caption"
-            class="mt-3 text-center text-sm text-slate-600"
+            class="mt-3 text-center text-sm text-muted-foreground"
         >
             {{ section.configuration.caption }}
         </figcaption>
@@ -126,7 +126,7 @@ const sendContact = () =>
             <h2 class="text-3xl font-bold">
                 {{ section.configuration.heading }}
             </h2>
-            <p class="mt-4 whitespace-pre-line text-slate-700">
+            <p class="mt-4 whitespace-pre-line text-foreground">
                 {{ section.configuration.body }}
             </p>
         </div>
@@ -142,7 +142,7 @@ const sendContact = () =>
             <li v-for="link in section.configuration.links" :key="link.url">
                 <a
                     :href="link.url"
-                    class="block px-4 py-3 font-medium hover:bg-slate-50"
+                    class="block px-4 py-3 font-medium hover:bg-muted"
                     >{{ link.label }} →</a
                 >
             </li>
@@ -296,7 +296,7 @@ const sendContact = () =>
                 class="rounded-xl border p-5"
             >
                 <p
-                    class="text-sm font-semibold uppercase tracking-wide text-slate-500"
+                    class="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
                 >
                     {{ officer.position }}
                 </p>
@@ -313,7 +313,7 @@ const sendContact = () =>
                 </p>
             </article>
         </div>
-        <p v-else class="mt-4 text-slate-600">
+        <p v-else class="mt-4 text-muted-foreground">
             {{
                 section.configuration.body ||
                 "Officer information will be available soon."
@@ -329,7 +329,7 @@ const sendContact = () =>
         </h2>
         <p
             v-if="section.configuration.body"
-            class="mt-3 max-w-2xl text-slate-600"
+            class="mt-3 max-w-2xl text-muted-foreground"
         >
             {{ section.configuration.body }}
         </p>
@@ -342,13 +342,13 @@ const sendContact = () =>
                 :key="`${term.year}-${term.name}`"
                 class="grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 border-b px-5 py-4 last:border-b-0"
             >
-                <span class="font-mono text-lg font-semibold text-slate-500">{{
-                    term.year
-                }}</span
+                <span
+                    class="font-mono text-lg font-semibold text-muted-foreground"
+                    >{{ term.year }}</span
                 ><span class="text-lg font-medium">{{ term.name }}</span>
             </li>
         </ol>
-        <p v-else class="mt-4 text-slate-600">
+        <p v-else class="mt-4 text-muted-foreground">
             Past Master records will be added soon.
         </p>
     </section>
@@ -359,7 +359,7 @@ const sendContact = () =>
         <h2 class="text-3xl font-bold">
             {{ section.configuration.heading || "Upcoming Events" }}
         </h2>
-        <p v-if="section.configuration.body" class="mt-3 text-slate-600">
+        <p v-if="section.configuration.body" class="mt-3 text-muted-foreground">
             {{ section.configuration.body }}
         </p>
         <ol
@@ -376,12 +376,12 @@ const sendContact = () =>
                     class="font-medium underline"
                     >{{ event.title }}</a
                 >
-                <p class="text-sm text-slate-600">
+                <p class="text-sm text-muted-foreground">
                     {{ new Date(event.starts_at).toLocaleString() }}
                 </p>
             </li>
         </ol>
-        <p v-else class="mt-4 text-slate-600">
+        <p v-else class="mt-4 text-muted-foreground">
             {{ section.configuration.body || "No upcoming events." }}
         </p>
         <a
@@ -399,7 +399,7 @@ const sendContact = () =>
             <h2 class="text-2xl font-bold">
                 {{ section.configuration.heading || "Member newsletters" }}
             </h2>
-            <p class="mt-3 text-slate-600">
+            <p class="mt-3 text-muted-foreground">
                 {{
                     section.configuration.body ||
                     "Read the latest member newsletters."
@@ -444,12 +444,12 @@ const sendContact = () =>
         class="mx-auto max-w-4xl px-5 py-10"
     >
         <div
-            class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
+            class="rounded-xl border border-dashed border-border/80 bg-muted p-8 text-center"
         >
             <h2 class="text-2xl font-bold">
                 {{ section.configuration.heading || "Member directory" }}
             </h2>
-            <p class="mt-3 text-slate-600">
+            <p class="mt-3 text-muted-foreground">
                 {{
                     section.configuration.body || "Search the member directory."
                 }}
@@ -476,22 +476,22 @@ const sendContact = () =>
                 v-for="album in displayedGalleries(section)"
                 :key="album.slug"
                 :href="`/l/${lodge.slug}/galleries/${album.slug}?from=${encodeURIComponent(galleryPageSlug)}`"
-                class="rounded-xl border p-4 hover:bg-slate-50"
+                class="rounded-xl border border-border/80 p-4 hover:bg-muted"
                 ><strong>{{ album.title }}</strong></a
             >
         </div>
-        <p v-else class="mt-3 text-slate-600">
+        <p v-else class="mt-3 text-muted-foreground">
             {{ section.configuration.body || "Photos will be available soon." }}
         </p>
     </section>
     <section v-else class="mx-auto max-w-4xl px-5 py-10">
         <div
-            class="rounded-xl border border-dashed bg-slate-50 p-8 text-center"
+            class="rounded-xl border border-dashed border-border/80 bg-muted p-8 text-center"
         >
             <h2 class="text-2xl font-bold">
                 {{ section.configuration.heading }}
             </h2>
-            <p class="mt-3 text-slate-600">
+            <p class="mt-3 text-muted-foreground">
                 {{
                     section.configuration.body ||
                     "More information will be available soon."

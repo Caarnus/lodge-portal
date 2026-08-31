@@ -26,10 +26,18 @@ class PersonController extends Controller
         $search = trim((string)$request->query('search'));
         $searchPattern = '%' . strtolower($search) . '%';
         $searchDigits = preg_replace('/\D/', '', $search);
-        $statusId = $request->integer('status') ?: null;
-        $degreeId = $request->integer('degree') ?: null;
+        $defaultStatusIds = MembershipStatus::query()
+            ->whereIn('key', ['active', 'petitioner'])
+            ->pluck('id')
+            ->all();
+        $defaultDegreeIds = MasonicDegree::query()->pluck('id')->all();
+        $statusIds = $this->filterIds($request->query('status'), $defaultStatusIds);
+        $degreeIds = $this->filterIds($request->query('degree'), $defaultDegreeIds);
+        $pastMaster = $request->boolean('past_master');
+        $awardOfGold = $request->boolean('award_of_gold');
         $account = in_array($request->query('account'), ['linked', 'unlinked'], true) ? $request->query('account') : 'all';
         $scope = in_array($request->query('scope'), ['members', 'related'], true) ? $request->query('scope') : 'all';
+        $degreeFilterIds = count($degreeIds) === count($defaultDegreeIds) ? [] : $degreeIds;
         $sort = in_array($request->query('sort'), ['name', 'membership', 'phone', 'email', 'location'], true) ? $request->query('sort') : 'name';
         $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
         $peopleQuery = $access->workspaceQuery($lodge)
@@ -50,13 +58,21 @@ class PersonController extends Controller
                     ->where('lodge_id', $lodge->id)->whereRaw('LOWER(member_number) LIKE ?', [$searchPattern]));
             });
         }
-        if ($statusId) {
+        if ($statusIds && $scope !== 'related') {
             $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships
-                ->where('lodge_id', $lodge->id)->where('membership_status_id', $statusId));
+                ->where('lodge_id', $lodge->id)->whereIn('membership_status_id', $statusIds));
         }
-        if ($degreeId) {
+        if ($degreeFilterIds && $scope !== 'related') {
             $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships
-                ->where('lodge_id', $lodge->id)->where('masonic_degree_id', $degreeId));
+                ->where('lodge_id', $lodge->id)->whereIn('masonic_degree_id', $degreeFilterIds));
+        }
+        if ($pastMaster && $scope !== 'related') {
+            $peopleQuery->whereHas('pastMasterTerms', fn(Builder $terms) => $terms
+                ->where('lodge_id', $lodge->id));
+        }
+        if ($awardOfGold && $scope !== 'related') {
+            $peopleQuery->whereHas('memberships', fn(Builder $memberships) => $memberships
+                ->where('lodge_id', $lodge->id)->where('is_award_of_gold', true));
         }
         if ($account === 'linked') {
             $peopleQuery->whereHas('user');
@@ -100,10 +116,11 @@ class PersonController extends Controller
         return Inertia::render('people/Index', [
             'lodge' => $lodge,
             'people' => $people,
-            'filters' => ['search' => $search, 'status' => $statusId, 'degree' => $degreeId, 'account' => $account, 'scope' => $scope,
-                'sort' => $sort, 'direction' => $direction],
+            'filters' => ['search' => $search, 'status' => $statusIds, 'degree' => $degreeIds,
+                'past_master' => $pastMaster, 'award_of_gold' => $awardOfGold, 'account' => $account,
+                'scope' => $scope, 'sort' => $sort, 'direction' => $direction],
             'membershipTypes' => MembershipType::query()->where('is_active', true)->orderBy('sort_order')->get(),
-            'membershipStatuses' => MembershipStatus::query()->orderBy('sort_order')->get(['id', 'name', 'is_active']),
+            'membershipStatuses' => MembershipStatus::query()->orderBy('sort_order')->get(['id', 'key', 'name', 'is_active']),
             'degrees' => MasonicDegree::query()->orderBy('sort_order')->get(['id', 'name', 'is_active']),
             'relationshipTypes' => RelationshipType::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'availablePeople' => $access->workspaceQuery($lodge)->orderBy('name')->get(['id', 'name', 'legal_first_name', 'legal_last_name', 'preferred_name']),
@@ -112,6 +129,24 @@ class PersonController extends Controller
             'canManageRoles' => $request->user()->hasLodgePermission($lodge, 'roles.manage'),
             'canManageCommunicationPreferences' => $request->user()->hasLodgePermission($lodge, 'communications.recipients'),
         ]);
+    }
+
+    private function filterIds(mixed $value, array $defaults): array
+    {
+        if ($value === null) {
+            return $defaults;
+        }
+
+        if ($value === 'all') {
+            return [];
+        }
+
+        return collect((array) $value)
+            ->filter(fn($id) => is_numeric($id) && (int) $id > 0)
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function store(PersonRequest $request, Lodge $lodge)

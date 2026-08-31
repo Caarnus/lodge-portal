@@ -2,6 +2,7 @@
 import {
     Dialog,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogScrollContent,
     DialogTitle,
@@ -280,49 +281,61 @@ const address = computed(() =>
                     class="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-3"
                 >
                     <div>
-                        <dt class="font-medium text-slate-500">Legal name</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            Legal name
+                        </dt>
                         <dd>{{ person.name }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">
+                        <dt class="font-medium text-muted-foreground">
                             Preferred name
                         </dt>
                         <dd>{{ person.preferred_name || "—" }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">Phone</dt>
+                        <dt class="font-medium text-muted-foreground">Phone</dt>
                         <dd>{{ formatPhone(person.phone) || "—" }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">Email</dt>
+                        <dt class="font-medium text-muted-foreground">Email</dt>
                         <dd class="break-all">{{ person.email || "—" }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">Address</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            Address
+                        </dt>
                         <dd>{{ address || "—" }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">City / State</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            City / State
+                        </dt>
                         <dd>{{ location || "—" }}</dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">Account</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            Account
+                        </dt>
                         <dd class="flex items-center gap-2">
                             <Link2
                                 v-if="person.user"
-                                class="size-4 text-green-700"
+                                class="size-4 text-primary"
                             /><Link2Off
                                 v-else
-                                class="size-4 text-slate-400"
+                                class="size-4 text-muted-foreground"
                             />{{ person.user ? "Linked" : "Not linked" }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="font-medium text-slate-500">Birth date</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            Birth date
+                        </dt>
                         <dd>{{ dateValue(person.birth_date) || "—" }}</dd>
                     </div>
                     <div v-if="person.is_deceased">
-                        <dt class="font-medium text-slate-500">Death date</dt>
+                        <dt class="font-medium text-muted-foreground">
+                            Death date
+                        </dt>
                         <dd>
                             {{ dateValue(person.death_date) || "Not recorded" }}
                         </dd>
@@ -330,48 +343,50 @@ const address = computed(() =>
                 </dl>
                 <section
                     v-if="membership"
-                    class="rounded-lg border p-4 text-sm"
+                    class="rounded-lg border border-border/80 bg-card p-4 text-sm"
                 >
                     <h3 class="font-semibold">{{ lodge.name }} membership</h3>
                     <dl
                         class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3"
                     >
                         <div>
-                            <dt class="text-slate-500">Type</dt>
+                            <dt class="text-muted-foreground">Type</dt>
                             <dd>
                                 {{ membership.type?.name || "Not recorded" }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Status</dt>
+                            <dt class="text-muted-foreground">Status</dt>
                             <dd>
                                 {{ membership.status?.name || "Not recorded" }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Degree</dt>
+                            <dt class="text-muted-foreground">Degree</dt>
                             <dd>
                                 {{ membership.degree?.name || "Not recorded" }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Member number</dt>
+                            <dt class="text-muted-foreground">Member number</dt>
                             <dd>{{ membership.member_number || "—" }}</dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Primary lodge number</dt>
+                            <dt class="text-muted-foreground">
+                                Primary lodge number
+                            </dt>
                             <dd>
                                 {{ membership.primary_lodge_number || "—" }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Award of Gold</dt>
+                            <dt class="text-muted-foreground">Award of Gold</dt>
                             <dd>
                                 {{ membership.is_award_of_gold ? "Yes" : "No" }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Past Master</dt>
+                            <dt class="text-muted-foreground">Past Master</dt>
                             <dd>
                                 {{
                                     person.past_master_terms?.length
@@ -383,7 +398,7 @@ const address = computed(() =>
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">EA date</dt>
+                            <dt class="text-muted-foreground">EA date</dt>
                             <dd>
                                 {{
                                     dateValue(
@@ -393,7 +408,7 @@ const address = computed(() =>
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">FC date</dt>
+                            <dt class="text-muted-foreground">FC date</dt>
                             <dd>
                                 {{
                                     dateValue(membership.fellow_craft_date) ||
@@ -402,7 +417,7 @@ const address = computed(() =>
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">MM date</dt>
+                            <dt class="text-muted-foreground">MM date</dt>
                             <dd>
                                 {{
                                     dateValue(membership.master_mason_date) ||
@@ -411,7 +426,9 @@ const address = computed(() =>
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Affiliation date</dt>
+                            <dt class="text-muted-foreground">
+                                Affiliation date
+                            </dt>
                             <dd>
                                 {{
                                     dateValue(membership.affiliation_date) ||
@@ -420,7 +437,7 @@ const address = computed(() =>
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">
+                            <dt class="text-muted-foreground">
                                 Demit/withdrawal date
                             </dt>
                             <dd>
@@ -435,7 +452,7 @@ const address = computed(() =>
                 </section>
                 <section
                     v-if="person.relationship_summaries?.length"
-                    class="rounded-lg border p-4 text-sm"
+                    class="rounded-lg border border-border/80 bg-card p-4 text-sm"
                 >
                     <h3 class="font-semibold">Relationships</h3>
                     <ul class="mt-2 list-disc space-y-1 pl-5">
@@ -447,7 +464,7 @@ const address = computed(() =>
                         </li>
                     </ul>
                 </section>
-                <div class="flex flex-wrap justify-end gap-2 border-t pt-4">
+                <DialogFooter class="border-t border-border/70 pt-4">
                     <button
                         v-if="person.can_manage"
                         type="button"
@@ -456,12 +473,12 @@ const address = computed(() =>
                     >
                         Edit
                     </button>
-                </div>
+                </DialogFooter>
             </template>
 
             <template v-else-if="mode === 'edit'">
                 <form
-                    class="rounded-lg border p-4"
+                    class="rounded-lg border border-border/80 bg-card p-4"
                     @submit.prevent="savePerson"
                 >
                     <h3 class="font-semibold">Identity and contact</h3>
@@ -621,7 +638,7 @@ const address = computed(() =>
                     <p
                         v-for="message in personForm.errors"
                         :key="message"
-                        class="mt-2 text-sm text-red-700"
+                        class="mt-2 text-sm text-destructive"
                     >
                         {{ message }}
                     </p>
@@ -640,7 +657,10 @@ const address = computed(() =>
                     </button>
                 </form>
 
-                <section v-if="person" class="rounded-lg border p-4">
+                <section
+                    v-if="person"
+                    class="rounded-lg border border-border/80 bg-card p-4"
+                >
                     <h3 class="font-semibold">Private profile photo</h3>
                     <img
                         v-if="person.profile_photo_status === 'ready'"
@@ -673,15 +693,11 @@ const address = computed(() =>
                                             .files?.[0] ?? null
                                 "
                         /></label>
-                        <button
-                            class="rounded border border-border bg-card px-4 py-2 hover:bg-accent"
-                        >
-                            Upload
-                        </button>
+                        <button class="secondary-button">Upload</button>
                     </form>
                     <p
                         v-if="photoForm.errors.photo"
-                        class="mt-2 text-sm text-red-700"
+                        class="mt-2 text-sm text-destructive"
                     >
                         {{ photoForm.errors.photo }}
                     </p>
@@ -689,7 +705,7 @@ const address = computed(() =>
 
                 <form
                     v-if="membership"
-                    class="rounded-lg border p-4"
+                    class="rounded-lg border border-border/80 bg-card p-4"
                     @submit.prevent="saveMembership"
                 >
                     <h3 class="font-semibold">{{ lodge.name }} membership</h3>
@@ -830,7 +846,7 @@ const address = computed(() =>
                     <p
                         v-for="message in membershipForm.errors"
                         :key="message"
-                        class="mt-2 text-sm text-red-700"
+                        class="mt-2 text-sm text-destructive"
                     >
                         {{ message }}
                     </p>
@@ -847,14 +863,14 @@ const address = computed(() =>
                         <button
                             v-if="!membership.end_date && canManageMemberships"
                             type="button"
-                            class="rounded border border-destructive px-4 py-2 text-destructive"
+                            class="secondary-button border-destructive/50 text-destructive hover:bg-destructive/10"
                             @click="endMembership"
                         >
                             End membership
                         </button>
                         <span
                             v-else-if="membership.end_date"
-                            class="text-sm text-slate-600"
+                            class="text-sm text-muted-foreground"
                             >Ended {{ dateValue(membership.end_date) }}</span
                         >
                     </div>
@@ -862,7 +878,7 @@ const address = computed(() =>
 
                 <form
                     v-if="membership && canManageCommunicationPreferences"
-                    class="rounded-lg border p-4"
+                    class="rounded-lg border border-border/80 bg-card p-4"
                     @submit.prevent="saveCommunicationPreference"
                 >
                     <h3 class="font-semibold">
@@ -893,25 +909,28 @@ const address = computed(() =>
                     </button>
                 </form>
 
-                <section v-if="membership" class="rounded-lg border p-4">
+                <section
+                    v-if="membership"
+                    class="rounded-lg border border-border/80 bg-card p-4"
+                >
                     <h3 class="font-semibold">Past Master years</h3>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <span
                             v-for="term in person.past_master_terms"
                             :key="term.id"
-                            class="inline-flex items-center gap-1 rounded-full bg-slate-100 py-1 pl-3 pr-1 text-sm"
+                            class="inline-flex items-center gap-1 rounded-full bg-muted py-1 pl-3 pr-1 text-sm"
                             >{{ term.year
                             }}<button
                                 v-if="canManageMemberships"
                                 type="button"
                                 :aria-label="`Remove Past Master year ${term.year}`"
-                                class="inline-flex size-7 items-center justify-center rounded-full text-red-700"
+                                class="inline-flex size-7 items-center justify-center rounded-full text-destructive"
                                 @click="removePastMasterYear(term)"
                             >
                                 <Trash2 class="size-3.5" /></button></span
                         ><span
                             v-if="!person.past_master_terms?.length"
-                            class="text-sm text-slate-500"
+                            class="text-sm text-muted-foreground"
                             >No Past Master years recorded.</span
                         >
                     </div>
@@ -927,21 +946,19 @@ const address = computed(() =>
                             :max="new Date().getFullYear()"
                             aria-label="Past Master year"
                             class="field-input w-32"
-                        /><button
-                            class="rounded border border-border bg-card px-4 py-2 hover:bg-accent"
-                        >
-                            Add year
-                        </button>
+                        /><button class="secondary-button">Add year</button>
                     </form>
                     <p
                         v-if="pastMasterForm.errors.year"
-                        class="mt-2 text-sm text-red-700"
+                        class="mt-2 text-sm text-destructive"
                     >
                         {{ pastMasterForm.errors.year }}
                     </p>
                 </section>
 
-                <section class="rounded-lg border p-4 text-sm">
+                <section
+                    class="rounded-lg border border-border/80 bg-card p-4 text-sm"
+                >
                     <h3 class="font-semibold">Family relationships</h3>
                     <ul
                         v-if="person.relationship_summaries?.length"
@@ -972,7 +989,7 @@ const address = computed(() =>
                             <button
                                 v-if="relationship.can_manage"
                                 type="button"
-                                class="rounded border border-border bg-card px-3 py-2 hover:bg-accent"
+                                class="secondary-button px-3"
                                 @click="updateRelationship(relationship)"
                             >
                                 Save
@@ -980,14 +997,14 @@ const address = computed(() =>
                             <button
                                 v-if="relationship.can_manage"
                                 type="button"
-                                class="rounded border border-destructive px-3 py-2 text-destructive"
+                                class="secondary-button border-destructive/50 px-3 text-destructive hover:bg-destructive/10"
                                 @click="removeRelationship(relationship.id)"
                             >
                                 Remove
                             </button>
                         </li>
                     </ul>
-                    <p v-else class="mt-2 text-slate-500">
+                    <p v-else class="mt-2 text-muted-foreground">
                         No family relationships recorded.
                     </p>
                     <button
@@ -1055,9 +1072,7 @@ const address = computed(() =>
                                     </option>
                                 </select></label
                             >
-                            <button
-                                class="rounded border border-border bg-card px-4 py-2 hover:bg-accent"
-                            >
+                            <button class="secondary-button">
                                 Add relationship
                             </button>
                         </div>
@@ -1118,9 +1133,7 @@ const address = computed(() =>
                                 />
                             </div>
                             <div class="flex justify-end">
-                                <button
-                                    class="rounded border border-border bg-card px-4 py-2 hover:bg-accent"
-                                >
+                                <button class="secondary-button">
                                     Add person and relationship
                                 </button>
                             </div>
@@ -1128,7 +1141,7 @@ const address = computed(() =>
                     </form>
                 </section>
 
-                <section class="rounded-lg border p-4">
+                <section class="rounded-lg border border-border/80 bg-card p-4">
                     <h3 class="font-semibold">Account access</h3>
                     <p class="mt-2 text-sm">
                         {{
@@ -1140,7 +1153,7 @@ const address = computed(() =>
                     <button
                         v-if="!person.user && person.can_manage"
                         type="button"
-                        class="mt-3 rounded border border-border bg-card px-4 py-2 hover:bg-accent"
+                        class="secondary-button mt-3"
                         @click="invite"
                     >
                         Invite account
@@ -1148,7 +1161,7 @@ const address = computed(() =>
                     <button
                         v-else-if="person.user && canManageRoles"
                         type="button"
-                        class="mt-3 rounded border border-destructive px-4 py-2 text-destructive"
+                        class="secondary-button mt-3 border-destructive/50 text-destructive hover:bg-destructive/10"
                         @click="revoke"
                     >
                         Revoke this lodge's access

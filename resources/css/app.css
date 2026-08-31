@@ -1,36 +1,36 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {
-    --color-background: #fff;
-    --color-foreground: #0f172a;
+    --color-background: #f7f8fa;
+    --color-foreground: #243244;
     --color-card: #fff;
-    --color-card-foreground: #0f172a;
+    --color-card-foreground: #243244;
     --color-popover: #fff;
-    --color-popover-foreground: #0f172a;
-    --color-primary: #0f172a;
-    --color-primary-foreground: #f8fafc;
-    --color-secondary: #e2e8f0;
-    --color-secondary-foreground: #0f172a;
-    --color-muted: #f1f5f9;
-    --color-muted-foreground: #64748b;
-    --color-accent: #f1f5f9;
-    --color-accent-foreground: #0f172a;
-    --color-destructive: #dc2626;
+    --color-popover-foreground: #243244;
+    --color-primary: #3f6288;
+    --color-primary-foreground: #fff;
+    --color-secondary: #eaf0f5;
+    --color-secondary-foreground: #314255;
+    --color-muted: #f0f3f6;
+    --color-muted-foreground: #667386;
+    --color-accent: #e8eef4;
+    --color-accent-foreground: #2d4055;
+    --color-destructive: #b94f4d;
     --color-destructive-foreground: #fff;
-    --color-border: #e2e8f0;
-    --color-input: #cbd5e1;
-    --color-ring: #334155;
-    --color-sidebar: #f8fafc;
-    --color-sidebar-foreground: #334155;
-    --color-sidebar-primary: #0f172a;
+    --color-border: #dfe5eb;
+    --color-input: #cbd4de;
+    --color-ring: #6f8eae;
+    --color-sidebar: #f1f4f7;
+    --color-sidebar-foreground: #405064;
+    --color-sidebar-primary: #3f6288;
     --color-sidebar-primary-foreground: #fff;
-    --color-sidebar-accent: #e2e8f0;
-    --color-sidebar-accent-foreground: #0f172a;
-    --color-sidebar-border: #e2e8f0;
-    --color-sidebar-ring: #2563eb;
-    --radius-lg: 0.5rem;
-    --radius-md: 0.375rem;
-    --radius-sm: 0.25rem;
+    --color-sidebar-accent: #e2e8ef;
+    --color-sidebar-accent-foreground: #2d4055;
+    --color-sidebar-border: #d9e0e7;
+    --color-sidebar-ring: #6f8eae;
+    --radius-lg: 0.75rem;
+    --radius-md: 0.5rem;
+    --radius-sm: 0.375rem;
 }
 html {
     font-family: ui-sans-serif, system-ui, sans-serif;
@@ -39,31 +39,33 @@ html {
 
 html.dark {
     color-scheme: dark;
-    --color-background: #0f172a;
-    --color-foreground: #f8fafc;
-    --color-card: #1e293b;
-    --color-card-foreground: #f8fafc;
-    --color-popover: #1e293b;
-    --color-popover-foreground: #f8fafc;
-    --color-primary: #f8fafc;
-    --color-primary-foreground: #0f172a;
-    --color-secondary: #334155;
-    --color-secondary-foreground: #f8fafc;
-    --color-muted: #1e293b;
-    --color-muted-foreground: #cbd5e1;
-    --color-accent: #334155;
-    --color-accent-foreground: #f8fafc;
-    --color-border: #334155;
-    --color-input: #475569;
-    --color-ring: #94a3b8;
-    --color-sidebar: #111827;
-    --color-sidebar-foreground: #e2e8f0;
-    --color-sidebar-primary: #f8fafc;
-    --color-sidebar-primary-foreground: #0f172a;
-    --color-sidebar-accent: #1e293b;
-    --color-sidebar-accent-foreground: #f8fafc;
-    --color-sidebar-border: #334155;
-    --color-sidebar-ring: #60a5fa;
+    --color-background: #161b21;
+    --color-foreground: #e3e8ed;
+    --color-card: #1d242c;
+    --color-card-foreground: #e3e8ed;
+    --color-popover: #232b34;
+    --color-popover-foreground: #e3e8ed;
+    --color-primary: #86afd5;
+    --color-primary-foreground: #172331;
+    --color-secondary: #2a333d;
+    --color-secondary-foreground: #dbe2e8;
+    --color-muted: #252d36;
+    --color-muted-foreground: #a8b3bf;
+    --color-accent: #303a45;
+    --color-accent-foreground: #e6ebf0;
+    --color-destructive: #c45b59;
+    --color-destructive-foreground: #fff;
+    --color-border: #35404b;
+    --color-input: #46525f;
+    --color-ring: #7fa3c5;
+    --color-sidebar: #141a20;
+    --color-sidebar-foreground: #cdd5dd;
+    --color-sidebar-primary: #86afd5;
+    --color-sidebar-primary-foreground: #172331;
+    --color-sidebar-accent: #252e37;
+    --color-sidebar-accent-foreground: #e3e8ed;
+    --color-sidebar-border: #303a44;
+    --color-sidebar-ring: #7fa3c5;
 }
 
 body {
@@ -71,44 +73,110 @@ body {
     color: var(--color-foreground);
 }
 
+/* Legacy utility bridge: older screens used direct slate/gray/neutral classes.
+   Keep their visual role semantic while individual screens migrate to shared components. */
+body .bg-white,
+body .bg-slate-50,
+body .bg-gray-50,
+body .bg-neutral-50 {
+    background-color: var(--color-card);
+}
+body .bg-slate-100,
+body .bg-gray-100,
+body .bg-neutral-100 {
+    background-color: var(--color-muted);
+}
+body .bg-slate-200,
+body .bg-gray-200,
+body .bg-neutral-200 {
+    background-color: var(--color-accent);
+}
+body .border-slate-200,
+body .border-slate-300,
+body .border-gray-200,
+body .border-gray-300,
+body .border-neutral-200,
+body .border-neutral-300 {
+    border-color: var(--color-border);
+}
+body .text-slate-400,
+body .text-slate-500,
+body .text-slate-600,
+body .text-gray-400,
+body .text-gray-500,
+body .text-gray-600,
+body .text-neutral-400,
+body .text-neutral-500,
+body .text-neutral-600 {
+    color: var(--color-muted-foreground);
+}
+body .text-slate-700,
+body .text-slate-800,
+body .text-slate-900,
+body .text-slate-950,
+body .text-gray-700,
+body .text-gray-800,
+body .text-gray-900,
+body .text-neutral-700,
+body .text-neutral-800,
+body .text-neutral-900,
+body .text-black {
+    color: var(--color-foreground);
+}
+body .hover\:bg-slate-50:hover,
+body .hover\:bg-slate-100:hover,
+body .hover\:bg-gray-50:hover,
+body .hover\:bg-gray-100:hover,
+body .hover\:bg-neutral-100:hover,
+body .hover\:bg-neutral-200:hover {
+    background-color: var(--color-accent);
+}
+body .hover\:text-slate-900:hover,
+body .hover\:text-slate-950:hover,
+body .hover\:text-neutral-800:hover,
+body .hover\:text-neutral-900:hover,
+body .hover\:text-black:hover {
+    color: var(--color-foreground);
+}
+
 /* Some application pages use light surface utilities directly. Keep those
    surfaces readable when the application-level dark class is active. */
 html.dark .bg-white {
-    background-color: #1e293b;
+    background-color: var(--color-card);
 }
 html.dark .bg-slate-50 {
-    background-color: #0f172a;
+    background-color: var(--color-background);
 }
 html.dark .bg-slate-100 {
-    background-color: #1e293b;
+    background-color: var(--color-muted);
 }
 html.dark .border,
 html.dark .border-slate-200,
 html.dark .border-slate-300 {
-    border-color: #334155;
+    border-color: var(--color-border);
 }
 html.dark .text-slate-900,
 html.dark .text-slate-800,
 html.dark .text-slate-700 {
-    color: #f1f5f9;
+    color: var(--color-foreground);
 }
 html.dark .text-slate-600,
 html.dark .text-slate-500 {
-    color: #cbd5e1;
+    color: var(--color-muted-foreground);
 }
 html.dark .hover\:bg-slate-50:hover,
 html.dark .hover\:bg-slate-100:hover {
-    background-color: #334155;
+    background-color: var(--color-accent);
 }
 html.dark input,
 html.dark select,
 html.dark textarea {
-    background-color: #1e293b;
-    color: #f8fafc;
-    border-color: #475569;
+    background-color: var(--color-card);
+    color: var(--color-foreground);
+    border-color: var(--color-input);
 }
 html.dark .public-rich-text p {
-    color: #cbd5e1;
+    color: var(--color-muted-foreground);
 }
 
 [data-pc-name="tooltip"] {
@@ -134,13 +202,13 @@ html.dark .public-rich-text p {
 
 @layer components {
     .icon-button {
-        @apply inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-card transition hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-30;
+        @apply inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-30;
     }
     .field-label {
         @apply grid gap-1 text-sm font-medium;
     }
     .field-input {
-        @apply w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
+        @apply w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
     }
     .file-input {
         @apply w-full cursor-pointer rounded-md border border-input bg-background text-sm text-foreground file:mr-3 file:border-0 file:border-r file:border-input file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring;
@@ -152,10 +220,10 @@ html.dark .public-rich-text p {
         @apply size-4 shrink-0 rounded border-input bg-background accent-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:accent-blue-400;
     }
     .primary-button {
-        @apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
+        @apply inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
     .secondary-button {
-        @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
+        @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-border/80 bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50;
     }
     .checkbox-field {
         @apply flex min-h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     Dialog,
+    DialogDescription,
     DialogHeader,
     DialogScrollContent,
     DialogTitle,
@@ -78,11 +79,15 @@ const remove = (asset: any) => {
 <template>
     <Dialog :open="open" @update:open="!$event && close()">
         <DialogScrollContent class="w-[calc(100vw-2rem)] max-w-5xl">
-            <DialogHeader
-                ><DialogTitle>Media library</DialogTitle></DialogHeader
-            >
+            <DialogHeader>
+                <DialogTitle>Media library</DialogTitle>
+                <DialogDescription>
+                    Upload and maintain images used throughout this lodge’s
+                    public content.
+                </DialogDescription>
+            </DialogHeader>
             <form
-                class="grid gap-4 rounded-lg border border-border bg-card p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+                class="grid gap-4 rounded-lg border border-border/80 bg-muted/25 p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
                 @submit.prevent="uploadMedia"
             >
                 <label class="field-label">
@@ -121,7 +126,10 @@ const remove = (asset: any) => {
             >
                 {{ error }}
             </p>
-            <div class="mt-5 hidden overflow-hidden rounded-lg border md:block">
+            <div
+                v-if="media.length"
+                class="mt-5 hidden overflow-hidden rounded-lg border border-border/80 bg-card md:block"
+            >
                 <table class="w-full table-fixed text-left text-sm">
                     <colgroup>
                         <col class="w-20" />
@@ -132,10 +140,18 @@ const remove = (asset: any) => {
                     </colgroup>
                     <thead class="border-b bg-muted/40">
                         <tr>
-                            <th class="p-3">Image</th>
-                            <th class="p-3">File</th>
-                            <th class="p-3">Alternative text</th>
-                            <th class="p-3">Status</th>
+                            <th class="p-3 font-medium text-muted-foreground">
+                                Image
+                            </th>
+                            <th class="p-3 font-medium text-muted-foreground">
+                                File
+                            </th>
+                            <th class="p-3 font-medium text-muted-foreground">
+                                Alternative text
+                            </th>
+                            <th class="p-3 font-medium text-muted-foreground">
+                                Status
+                            </th>
                             <th class="p-3">
                                 <span class="sr-only">Actions</span>
                             </th>
@@ -145,7 +161,7 @@ const remove = (asset: any) => {
                         <tr
                             v-for="asset in media"
                             :key="asset.id"
-                            class="border-b last:border-0"
+                            class="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/35"
                         >
                             <td class="p-2">
                                 <img
@@ -200,7 +216,7 @@ const remove = (asset: any) => {
                                 {{ asset.processing_status }}
                             </td>
                             <td class="p-3">
-                                <div class="flex justify-end gap-1">
+                                <div class="flex min-w-32 justify-end gap-1">
                                     <button
                                         v-if="editingId !== asset.id"
                                         type="button"
@@ -233,11 +249,11 @@ const remove = (asset: any) => {
                     </tbody>
                 </table>
             </div>
-            <div class="mt-5 space-y-3 md:hidden">
+            <div v-if="media.length" class="mt-5 space-y-3 md:hidden">
                 <article
                     v-for="asset in media"
                     :key="asset.id"
-                    class="rounded-lg border p-3"
+                    class="rounded-lg border border-border/80 bg-card p-4"
                 >
                     <div class="flex gap-3">
                         <img
@@ -273,7 +289,9 @@ const remove = (asset: any) => {
                             "
                         />
                     </label>
-                    <div class="mt-3 flex justify-end gap-1">
+                    <div
+                        class="mt-4 flex justify-end gap-1 border-t border-border/60 pt-3"
+                    >
                         <button
                             v-if="asset.processing_status === 'failed'"
                             type="button"
@@ -295,7 +313,7 @@ const remove = (asset: any) => {
             </div>
             <p
                 v-if="!media.length"
-                class="mt-5 rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground"
+                class="mt-5 rounded-lg border border-dashed border-border/80 bg-muted/25 p-8 text-center text-sm text-muted-foreground"
             >
                 No uploaded images yet.
             </p>

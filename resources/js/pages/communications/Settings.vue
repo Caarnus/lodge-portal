@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 defineOptions({ layout: AppLayout });
 const props = defineProps<{ lodge: any; settings: any }>();
@@ -12,46 +13,50 @@ const form = useForm({
 </script>
 <template>
     <Head title="Communication settings" />
-    <main class="mx-auto max-w-3xl p-6">
-        <Link :href="`/lodges/${lodge.id}/settings`" class="underline"
-            >← Lodge settings</Link
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Communication settings"
+            description="Used for future lodge communication headers and replies."
         >
-        <h1 class="mt-4 text-3xl font-bold">Communication settings</h1>
-        <p class="mt-2 text-slate-600">
-            Used for future lodge communication headers and replies.
-        </p>
+            <template #actions>
+                <Link
+                    :href="`/lodges/${lodge.id}/settings`"
+                    class="secondary-button"
+                >
+                    Back to lodge settings
+                </Link>
+            </template>
+        </PageHeader>
         <form
-            class="mt-6 grid gap-4 rounded border p-5"
+            class="grid gap-4 rounded-lg border border-border/80 bg-card p-5"
             @submit.prevent="
                 form.put(`/lodges/${lodge.id}/communication-settings`)
             "
         >
-            <label
+            <label class="field-label"
                 >Sender display name<input
                     v-model="form.sender_display_name"
                     class="field-input" /></label
-            ><label
+            ><label class="field-label"
                 >Reply-to email<input
                     v-model="form.reply_to_email"
                     type="email"
                     class="field-input" /></label
-            ><label
+            ><label class="field-label"
                 >Secretary email<input
                     v-model="form.secretary_email"
                     type="email"
                     class="field-input" /></label
-            ><label
+            ><label class="field-label"
                 >Newsletter contact email<input
                     v-model="form.newsletter_contact_email"
                     type="email"
                     class="field-input"
             /></label>
-            <p v-if="Object.keys(form.errors).length" class="text-red-700">
+            <p v-if="Object.keys(form.errors).length" class="text-destructive">
                 {{ Object.values(form.errors)[0] }}
             </p>
-            <button class="w-fit rounded bg-slate-900 px-4 py-2 text-white">
-                Save
-            </button>
+            <button class="primary-button w-fit">Save</button>
         </form>
     </main>
 </template>

@@ -177,6 +177,9 @@ Route::middleware(['auth', 'verified', 'approved', 'admin-2fa'])->group(function
     });
     Route::resource('platform/lodges', LodgeController::class)->except(['show', 'destroy'])->names('platform.lodges')->middleware('platform-admin');
     Route::get('platform/accounts', [AccountController::class, 'index'])->name('platform.accounts.index')->middleware('platform-admin');
+    Route::get('platform/ui-review', fn () => Inertia::render('platform/UiReview'))
+        ->name('platform.ui-review.index')
+        ->middleware('platform-admin');
     Route::delete('platform/accounts/{user}', [AccountController::class, 'destroy'])->name('platform.accounts.destroy')->middleware('platform-admin');
     Route::get('platform/event-categories', [PlatformEventCategoryController::class, 'index'])->name('platform.event-categories.index')->middleware('platform-admin');
     Route::post('platform/event-categories', [PlatformEventCategoryController::class, 'store'])->name('platform.event-categories.store')->middleware('platform-admin');

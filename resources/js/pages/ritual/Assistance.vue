@@ -6,6 +6,8 @@ import {
     DialogScrollContent,
     DialogTitle,
 } from "@/components/ui/dialog";
+import PageHeader from "@/components/PageHeader.vue";
+import { Card, CardContent } from "@/components/ui/card";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import { computed, reactive, ref } from "vue";
@@ -138,17 +140,12 @@ const isAvailable = (person: any, day: number, daypart: string) =>
         ]"
     >
         <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-            <header>
-                <h1 class="text-2xl font-bold">Ritual Assistance</h1>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    Proficiency and availability are self-reported. A listed
-                    member has not accepted an assignment; contact him
-                    separately. Lodge groups only narrow these consented
-                    results and grant no assignment authority.
-                </p>
-            </header>
+            <PageHeader
+                title="Ritual Assistance"
+                description="Proficiency and availability are self-reported. A listed member has not accepted an assignment; contact him separately. Lodge groups only narrow these consented results and grant no assignment authority."
+            />
             <form
-                class="grid gap-3 rounded-lg bg-muted/20 p-4 md:grid-cols-4"
+                class="grid gap-3 rounded-lg border border-border/80 bg-card p-4 md:grid-cols-4"
                 @submit.prevent="search()"
             >
                 <label class="text-sm"
@@ -264,13 +261,10 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                         placeholder="Display name"
                 /></label>
                 <div class="flex gap-2 md:col-span-4">
-                    <button
-                        class="rounded bg-primary px-4 py-2 text-primary-foreground"
-                    >
-                        Search</button
+                    <button class="primary-button">Search</button
                     ><button
                         type="button"
-                        class="rounded border px-4 py-2"
+                        class="secondary-button"
                         @click="reset"
                     >
                         Clear
@@ -282,140 +276,142 @@ const isAvailable = (person: any, day: number, daypart: string) =>
             </p>
             <p
                 v-else-if="!results?.total"
-                class="rounded-lg bg-muted/20 p-5 text-sm text-muted-foreground"
+                class="rounded-lg border border-dashed border-border/80 bg-card p-5 text-sm text-muted-foreground"
             >
                 No matching members. Try broader filters; hidden and unavailable
                 profiles are not counted.
             </p>
-            <section v-else class="overflow-x-auto rounded-lg bg-muted/20 p-4">
-                <table class="w-full min-w-[800px] text-left text-sm">
-                    <thead
-                        class="border-b text-xs uppercase tracking-wide text-muted-foreground"
-                    >
-                        <tr>
-                            <th class="p-3" :aria-sort="sortLabel('name')">
-                                <button
-                                    type="button"
-                                    class="font-bold hover:underline"
-                                    @click="sortBy('name')"
-                                >
-                                    NAME
-                                    <span aria-hidden="true">{{
-                                        sort === "name"
-                                            ? direction === "asc"
-                                                ? "↑"
-                                                : "↓"
-                                            : ""
-                                    }}</span>
-                                </button>
-                            </th>
-                            <th
-                                class="p-3"
-                                :aria-sort="sortLabel('affiliations')"
-                            >
-                                <button
-                                    type="button"
-                                    class="font-bold hover:underline"
-                                    @click="sortBy('affiliations')"
-                                >
-                                    AFFILIATIONS
-                                    <span aria-hidden="true">{{
-                                        sort === "affiliations"
-                                            ? direction === "asc"
-                                                ? "↑"
-                                                : "↓"
-                                            : ""
-                                    }}</span>
-                                </button>
-                            </th>
-                            <th
-                                class="p-3 text-center"
-                                :aria-sort="sortLabel('roles')"
-                            >
-                                <button
-                                    type="button"
-                                    class="font-bold hover:underline"
-                                    @click="sortBy('roles')"
-                                >
-                                    ROLES
-                                    <span aria-hidden="true">{{
-                                        sort === "roles"
-                                            ? direction === "asc"
-                                                ? "↑"
-                                                : "↓"
-                                            : ""
-                                    }}</span>
-                                </button>
-                            </th>
-                            <th class="p-3 text-center">AVAILABILITY</th>
-                            <th class="p-3">CONTACT</th>
-                            <th class="p-3">
-                                <span class="sr-only">Details</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="person in results?.data"
-                            :key="person.id"
-                            class="border-b border-border/50 last:border-0"
+            <Card v-else class="overflow-x-auto"
+                ><CardContent class="p-4">
+                    <table class="w-full min-w-[800px] text-left text-sm">
+                        <thead
+                            class="border-b text-xs uppercase tracking-wide text-muted-foreground"
                         >
-                            <td class="p-3 font-medium">
-                                {{ person.display_name }}
-                            </td>
-                            <td class="p-3 text-muted-foreground">
-                                {{
-                                    person.affiliations
-                                        .map(
-                                            (item: any) =>
-                                                `${item.name} · ${item.number}`,
-                                        )
-                                        .join(" • ")
-                                }}
-                            </td>
-                            <td class="p-3 text-center">
-                                {{ person.parts.length }}
-                            </td>
-                            <td class="p-3 text-center">
-                                {{ person.availability.length }}
-                            </td>
-                            <td class="p-3">
-                                <a
-                                    v-if="person.email"
-                                    :href="`mailto:${person.email}`"
-                                    class="block underline"
-                                    >{{ person.email }}</a
-                                ><a
-                                    v-if="person.phone"
-                                    :href="`tel:${person.phone}`"
-                                    class="block underline"
-                                    >{{ person.phone }}</a
-                                ><span
-                                    v-if="!person.email && !person.phone"
-                                    class="text-muted-foreground"
-                                    >Not shared</span
+                            <tr>
+                                <th class="p-3" :aria-sort="sortLabel('name')">
+                                    <button
+                                        type="button"
+                                        class="font-bold hover:underline"
+                                        @click="sortBy('name')"
+                                    >
+                                        NAME
+                                        <span aria-hidden="true">{{
+                                            sort === "name"
+                                                ? direction === "asc"
+                                                    ? "↑"
+                                                    : "↓"
+                                                : ""
+                                        }}</span>
+                                    </button>
+                                </th>
+                                <th
+                                    class="p-3"
+                                    :aria-sort="sortLabel('affiliations')"
                                 >
-                            </td>
-                            <td class="p-3 text-right">
-                                <button
-                                    type="button"
-                                    class="rounded border px-3 py-2"
-                                    :aria-label="`View ${person.display_name} ritual roles and availability`"
-                                    @click="selectedPerson = person"
+                                    <button
+                                        type="button"
+                                        class="font-bold hover:underline"
+                                        @click="sortBy('affiliations')"
+                                    >
+                                        AFFILIATIONS
+                                        <span aria-hidden="true">{{
+                                            sort === "affiliations"
+                                                ? direction === "asc"
+                                                    ? "↑"
+                                                    : "↓"
+                                                : ""
+                                        }}</span>
+                                    </button>
+                                </th>
+                                <th
+                                    class="p-3 text-center"
+                                    :aria-sort="sortLabel('roles')"
                                 >
-                                    Details
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+                                    <button
+                                        type="button"
+                                        class="font-bold hover:underline"
+                                        @click="sortBy('roles')"
+                                    >
+                                        ROLES
+                                        <span aria-hidden="true">{{
+                                            sort === "roles"
+                                                ? direction === "asc"
+                                                    ? "↑"
+                                                    : "↓"
+                                                : ""
+                                        }}</span>
+                                    </button>
+                                </th>
+                                <th class="p-3 text-center">AVAILABILITY</th>
+                                <th class="p-3">CONTACT</th>
+                                <th class="p-3">
+                                    <span class="sr-only">Details</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="person in results?.data"
+                                :key="person.id"
+                                class="border-b border-border/50 last:border-0"
+                            >
+                                <td class="p-3 font-medium">
+                                    {{ person.display_name }}
+                                </td>
+                                <td class="p-3 text-muted-foreground">
+                                    {{
+                                        person.affiliations
+                                            .map(
+                                                (item: any) =>
+                                                    `${item.name} · ${item.number}`,
+                                            )
+                                            .join(" • ")
+                                    }}
+                                </td>
+                                <td class="p-3 text-center">
+                                    {{ person.parts.length }}
+                                </td>
+                                <td class="p-3 text-center">
+                                    {{ person.availability.length }}
+                                </td>
+                                <td class="p-3">
+                                    <a
+                                        v-if="person.email"
+                                        :href="`mailto:${person.email}`"
+                                        class="block underline"
+                                        >{{ person.email }}</a
+                                    ><a
+                                        v-if="person.phone"
+                                        :href="`tel:${person.phone}`"
+                                        class="block underline"
+                                        >{{ person.phone }}</a
+                                    ><span
+                                        v-if="!person.email && !person.phone"
+                                        class="text-muted-foreground"
+                                        >Not shared</span
+                                    >
+                                </td>
+                                <td class="p-3 text-right">
+                                    <button
+                                        type="button"
+                                        class="rounded border px-3 py-2"
+                                        :aria-label="`View ${person.display_name} ritual roles and availability`"
+                                        @click="selectedPerson = person"
+                                    >
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </CardContent></Card
+            >
             <nav
                 v-if="results && results.last_page > 1"
                 class="flex items-center justify-between"
             >
                 <button
-                    class="rounded border px-3 py-2"
+                    class="secondary-button"
                     :disabled="results.current_page === 1"
                     @click="search(results.current_page - 1)"
                 >
@@ -424,7 +420,7 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                     >Page {{ results.current_page }} of
                     {{ results.last_page }}</span
                 ><button
-                    class="rounded border px-3 py-2"
+                    class="secondary-button"
                     :disabled="results.current_page === results.last_page"
                     @click="search(results.current_page + 1)"
                 >
@@ -551,7 +547,9 @@ const isAvailable = (person: any, day: number, daypart: string) =>
                     class="space-y-2"
                 >
                     <h2 class="font-semibold">Contact information</h2>
-                    <dl class="grid gap-2 rounded-md bg-muted/20 p-3 text-sm">
+                    <dl
+                        class="grid gap-2 rounded-md border border-border/80 bg-muted/40 p-3 text-sm"
+                    >
                         <div
                             v-if="selectedPerson.email"
                             class="grid gap-1 sm:grid-cols-[7rem_1fr]"

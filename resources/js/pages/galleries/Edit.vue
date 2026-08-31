@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 import { normalizeSlug } from "@/utils/slug";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import { ImagePlus } from "lucide-vue-next";
@@ -50,7 +52,34 @@ const save = () =>
                 : 'mx-auto w-full min-w-0 max-w-5xl space-y-5 p-4 md:p-6'
         "
     >
-        <header class="flex flex-wrap items-start justify-between gap-3">
+        <PageHeader
+            v-if="!embedded"
+            :title="draft.title"
+            description="Gallery editor"
+        >
+            <template #eyebrow>
+                <Link :href="`/lodges/${lodge.id}/galleries/manage`">
+                    Media galleries
+                </Link>
+            </template>
+            <template #actions>
+                <button
+                    v-if="canPublish"
+                    type="button"
+                    class="primary-button"
+                    @click="publish"
+                >
+                    Publish
+                </button>
+            </template>
+        </PageHeader>
+        <WorkspaceTabs
+            v-if="!embedded"
+            :lodge="lodge"
+            workspace="content"
+            active="galleries"
+        />
+        <header v-else class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <Link
                     v-if="!embedded"

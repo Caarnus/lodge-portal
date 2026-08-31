@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import WorkspaceTabs from "@/components/WorkspaceTabs.vue";
 defineOptions({ layout: AppLayout });
 const p = defineProps<{
     lodge?: any;
@@ -45,19 +47,38 @@ function submit() {
 </script>
 <template>
     <Head :title="lodge ? 'Edit lodge' : 'Create lodge'" />
-    <main class="mx-auto max-w-3xl p-8">
-        <div class="flex items-center justify-between gap-4">
-            <h1 class="text-3xl font-bold">
-                {{ lodge ? "Edit lodge" : "Create lodge" }}
-            </h1>
-            <Link
-                v-if="lodge"
-                :href="`/lodges/${lodge.id}/website`"
-                class="rounded border px-4 py-2 text-sm font-medium"
-                >Manage website</Link
+    <main
+        class="mx-auto w-full p-4 sm:p-6 lg:p-8"
+        :class="action ? 'max-w-6xl' : 'max-w-3xl'"
+    >
+        <PageHeader
+            :title="lodge ? 'Edit lodge' : 'Create lodge'"
+            :description="
+                lodge
+                    ? 'Manage lodge identity, public contact details, and branding.'
+                    : 'Set up the lodge identity, public contact details, and branding.'
+            "
+        >
+            <template #actions
+                ><Link
+                    v-if="lodge"
+                    :href="`/lodges/${lodge.id}/website`"
+                    class="secondary-button"
+                    >Manage website</Link
+                ></template
             >
-        </div>
-        <form @submit.prevent="submit" class="mt-8 grid gap-5 sm:grid-cols-2">
+        </PageHeader>
+        <WorkspaceTabs
+            v-if="lodge && action"
+            :lodge="lodge"
+            workspace="settings"
+            active="lodge"
+            class="mt-6"
+        />
+        <form
+            class="mt-6 grid gap-5 rounded-lg border border-border/80 bg-card p-4 sm:grid-cols-2 sm:p-6"
+            @submit.prevent="submit"
+        >
             <label
                 v-for="f in [
                     'name',
@@ -88,7 +109,7 @@ function submit() {
                             'public_phone',
                         ].includes(f)
                     "
-                /><small class="text-red-600">{{
+                /><small class="text-destructive">{{
                     form.errors[f]
                 }}</small></label
             ><label class="field-label"
@@ -96,7 +117,7 @@ function submit() {
                     v-model="form.contact_email"
                     type="email"
                     class="field-input"
-                /><small class="text-red-600">{{
+                /><small class="text-destructive">{{
                     form.errors.contact_email
                 }}</small
                 ><small class="text-muted-foreground"
@@ -131,12 +152,12 @@ function submit() {
                 >Primary color<input
                     v-model="form.primary_color"
                     type="color"
-                    class="h-10 w-full cursor-pointer rounded-md border p-1" /></label
+                    class="h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1" /></label
             ><label class="field-label"
                 >Secondary color<input
                     v-model="form.secondary_color"
                     type="color"
-                    class="h-10 w-full cursor-pointer rounded-md border p-1" /></label
+                    class="h-10 w-full cursor-pointer rounded-md border border-input bg-card p-1" /></label
             ><button
                 :disabled="form.processing"
                 class="primary-button sm:col-span-2"
@@ -144,13 +165,19 @@ function submit() {
                 Save lodge
             </button>
         </form>
-        <section v-if="lodge && !action" class="mt-10 border-t pt-6">
+        <section
+            v-if="lodge && !action"
+            class="mt-10 rounded-lg border border-border/80 bg-card p-4 sm:p-6"
+        >
             <h2 class="text-xl font-semibold">Lodge administrators</h2>
             <ul class="my-3 space-y-1">
                 <li v-for="a in admins" :key="a.id">
                     {{ a.name }} — {{ a.email }}
                 </li>
-                <li v-if="!admins?.length" class="text-sm text-slate-600">
+                <li
+                    v-if="!admins?.length"
+                    class="text-sm text-muted-foreground"
+                >
                     No lodge administrators assigned.
                 </li>
             </ul>
@@ -178,9 +205,12 @@ function submit() {
                 </button>
             </form>
         </section>
-        <section v-if="lodge && !action" class="mt-10 border-t pt-6">
+        <section
+            v-if="lodge && !action"
+            class="mt-10 rounded-lg border border-border/80 bg-card p-4 sm:p-6"
+        >
             <h2 class="text-xl font-semibold">Features</h2>
-            <p v-if="!features?.length" class="mt-2 text-slate-600">
+            <p v-if="!features?.length" class="mt-2 text-muted-foreground">
                 No release features are currently defined.
             </p>
             <form
@@ -190,7 +220,10 @@ function submit() {
                 "
                 class="mt-3"
             >
-                <label v-for="f in features" :key="f.id" class="flex gap-2"
+                <label
+                    v-for="f in features"
+                    :key="f.id"
+                    class="mt-2 flex items-center gap-2 rounded-md border border-border/80 bg-muted/30 p-3 first:mt-0"
                     ><input
                         v-model="flags.features"
                         type="checkbox"

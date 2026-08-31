@@ -74,7 +74,7 @@ const saveRole = (role: any) =>
 <template>
     <section
         v-if="canManageEvents || canManageRoles"
-        class="mt-10 border-t pt-6"
+        class="mt-10 border-t border-border/80 pt-6"
     >
         <h2 class="text-xl font-semibold">Management configuration</h2>
         <p class="mt-1 text-sm text-muted-foreground">
@@ -115,7 +115,7 @@ const saveRole = (role: any) =>
                         (item) => item.is_active,
                     )"
                     :key="category.id"
-                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-4"
+                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-border/80 bg-card p-4"
                 >
                     <input
                         v-model="selectedCategoryIds"
@@ -153,7 +153,7 @@ const saveRole = (role: any) =>
                     {{ lodge.name }}.
                 </DialogDescription>
             </DialogHeader>
-            <section class="rounded-lg border border-border bg-card p-4">
+            <section class="rounded-lg border border-border/80 bg-card p-4">
                 <h3 class="font-semibold">Create custom role</h3>
                 <form class="mt-3 space-y-4" @submit.prevent="createRole">
                     <label class="field-label">
@@ -203,7 +203,7 @@ const saveRole = (role: any) =>
                 <article
                     v-for="role in roles"
                     :key="role.id"
-                    class="rounded-lg border border-border bg-card p-4"
+                    class="rounded-lg border border-border/80 bg-card p-4"
                 >
                     <template v-if="role.is_system">
                         <p class="font-medium">

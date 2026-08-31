@@ -2,8 +2,10 @@
 import { Head, Link, router } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 
-import HeadingSmall from "@/components/HeadingSmall.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -23,7 +25,12 @@ interface Person {
     } | null;
     degree: string | null;
     profile_photo_url: string | null;
-    affiliations: Array<{ id: number; name: string; number: string; slug: string }>;
+    affiliations: Array<{
+        id: number;
+        name: string;
+        number: string;
+        slug: string;
+    }>;
 }
 
 interface Props {
@@ -67,7 +74,10 @@ const visit = (page?: number) => {
             audience: audience.value,
             query: query.value || undefined,
             degree: degree.value || undefined,
-            group: audience.value === "participating_lodges" ? group.value || undefined : undefined,
+            group:
+                audience.value === "participating_lodges"
+                    ? group.value || undefined
+                    : undefined,
             page,
         },
         { preserveState: true, preserveScroll: true, replace: true },
@@ -84,13 +94,13 @@ watch([query, audience, degree, group], () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head :title="`${lodge.name} directory`" />
         <main class="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-            <HeadingSmall
+            <PageHeader
                 :title="`${lodge.name} directory`"
                 description="Find members using the audience and contact choices they have shared."
             />
 
             <form
-                class="grid gap-4 rounded-lg border p-4 md:grid-cols-[minmax(0,1fr)_13rem_13rem_13rem]"
+                class="grid gap-4 rounded-lg border border-border/80 bg-card p-4 md:grid-cols-[minmax(0,1fr)_13rem_13rem_13rem]"
                 @submit.prevent="visit()"
             >
                 <div class="grid gap-2">
@@ -110,7 +120,7 @@ watch([query, audience, degree, group], () => {
                     ><select
                         id="directory-group"
                         v-model="group"
-                        class="h-9 rounded-md border bg-background px-3 text-sm"
+                        class="field-input"
                     >
                         <option value="">All active groups</option>
                         <option
@@ -127,7 +137,7 @@ watch([query, audience, degree, group], () => {
                     ><select
                         id="directory-audience"
                         v-model="audience"
-                        class="h-9 rounded-md border bg-background px-3 text-sm"
+                        class="field-input"
                     >
                         <option value="own_lodge">My lodge</option>
                         <option value="participating_lodges">
@@ -140,7 +150,7 @@ watch([query, audience, degree, group], () => {
                     ><select
                         id="directory-degree"
                         v-model="degree"
-                        class="h-9 rounded-md border bg-background px-3 text-sm"
+                        class="field-input"
                     >
                         <option value="">All degrees</option>
                         <option
@@ -161,94 +171,102 @@ watch([query, audience, degree, group], () => {
                 v-if="people.data.length"
                 class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
-                <article
+                <Card
                     v-for="person in people.data"
                     :key="person.id"
-                    class="rounded-lg border p-4"
+                    class="border-border/80"
                 >
-                    <div class="flex gap-3">
-                        <img
-                            v-if="person.profile_photo_url"
-                            :src="person.profile_photo_url"
-                            :alt="`${person.display_name} profile photo`"
-                            class="size-12 rounded-full object-cover"
-                        />
-                        <div
-                            v-else
-                            class="flex size-12 items-center justify-center rounded-full bg-muted text-sm"
-                            aria-hidden="true"
-                        >
-                            {{ person.display_name.slice(0, 1) }}
-                        </div>
-                        <div>
-                            <h2 class="font-medium">
-                                <Link
-                                    :href="
-                                        route('lodges.directory.show', {
-                                            lodge: lodge.id,
-                                            person: person.id,
-                                            audience,
-                                        })
-                                    "
-                                    class="underline-offset-4 hover:underline"
-                                    >{{ person.display_name }}</Link
-                                >
-                            </h2>
-                            <p
-                                v-if="person.degree"
-                                class="text-sm text-muted-foreground"
+                    <CardContent class="p-4">
+                        <div class="flex gap-3">
+                            <img
+                                v-if="person.profile_photo_url"
+                                :src="person.profile_photo_url"
+                                :alt="`${person.display_name} profile photo`"
+                                class="size-12 rounded-full object-cover"
+                            />
+                            <div
+                                v-else
+                                class="flex size-12 items-center justify-center rounded-full bg-muted text-sm"
+                                aria-hidden="true"
                             >
-                                {{ person.degree }}
-                            </p>
-                        </div>
-                    </div>
-                    <dl class="mt-4 space-y-2 text-sm">
-                        <div v-if="audience === 'participating_lodges' && person.affiliations.length">
-                            <dt class="font-medium">WorkingTools lodges</dt>
-                            <dd class="mt-1 flex flex-wrap gap-1">
-                                <span
-                                    v-for="affiliation in person.affiliations"
-                                    :key="affiliation.id"
-                                    class="rounded-full border px-2 py-0.5 text-xs"
+                                {{ person.display_name.slice(0, 1) }}
+                            </div>
+                            <div>
+                                <h2 class="font-medium">
+                                    <Link
+                                        :href="
+                                            route('lodges.directory.show', {
+                                                lodge: lodge.id,
+                                                person: person.id,
+                                                audience,
+                                            })
+                                        "
+                                        class="underline-offset-4 hover:underline"
+                                        >{{ person.display_name }}</Link
+                                    >
+                                </h2>
+                                <p
+                                    v-if="person.degree"
+                                    class="text-sm text-muted-foreground"
                                 >
-                                    {{ affiliation.name }} No. {{ affiliation.number }}
-                                </span>
-                            </dd>
+                                    {{ person.degree }}
+                                </p>
+                            </div>
                         </div>
-                        <div v-if="person.email">
-                            <dt class="sr-only">Email</dt>
-                            <dd>{{ person.email }}</dd>
-                        </div>
-                        <div v-if="person.phone">
-                            <dt class="sr-only">Phone</dt>
-                            <dd>{{ person.phone }}</dd>
-                        </div>
-                        <div v-if="person.address">
-                            <dt class="sr-only">Mailing address</dt>
-                            <dd>
-                                {{
-                                    [
-                                        person.address.line_1,
-                                        person.address.line_2,
+                        <dl class="mt-4 space-y-2 text-sm">
+                            <div
+                                v-if="
+                                    audience === 'participating_lodges' &&
+                                    person.affiliations.length
+                                "
+                            >
+                                <dt class="font-medium">WorkingTools lodges</dt>
+                                <dd class="mt-1 flex flex-wrap gap-1">
+                                    <Badge
+                                        v-for="affiliation in person.affiliations"
+                                        :key="affiliation.id"
+                                        variant="secondary"
+                                    >
+                                        {{ affiliation.name }} No.
+                                        {{ affiliation.number }}
+                                    </Badge>
+                                </dd>
+                            </div>
+                            <div v-if="person.email">
+                                <dt class="sr-only">Email</dt>
+                                <dd>{{ person.email }}</dd>
+                            </div>
+                            <div v-if="person.phone">
+                                <dt class="sr-only">Phone</dt>
+                                <dd>{{ person.phone }}</dd>
+                            </div>
+                            <div v-if="person.address">
+                                <dt class="sr-only">Mailing address</dt>
+                                <dd>
+                                    {{
                                         [
-                                            person.address.city,
-                                            person.address.state,
+                                            person.address.line_1,
+                                            person.address.line_2,
+                                            [
+                                                person.address.city,
+                                                person.address.state,
+                                            ]
+                                                .filter(Boolean)
+                                                .join(", "),
+                                            person.address.postal_code,
                                         ]
                                             .filter(Boolean)
-                                            .join(", "),
-                                        person.address.postal_code,
-                                    ]
-                                        .filter(Boolean)
-                                        .join(", ")
-                                }}
-                            </dd>
-                        </div>
-                    </dl>
-                </article>
+                                            .join(", ")
+                                    }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </CardContent>
+                </Card>
             </div>
             <p
                 v-else
-                class="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground"
+                class="rounded-lg border border-dashed border-border/80 bg-card p-8 text-center text-sm text-muted-foreground"
             >
                 No members match this directory view.
             </p>

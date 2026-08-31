@@ -14,7 +14,7 @@ const formatDate = (value: string | null) =>
             >← Archive</Link
         >
         <h1 class="mt-4 text-3xl font-bold">{{ version.title }}</h1>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1 text-muted-foreground">
             {{ formatDate(version.publication_date) }}
         </p>
         <img

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ExpandableText from "@/components/ExpandableText.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { Trash2 } from "lucide-vue-next";
@@ -53,13 +54,10 @@ const remove = (account: any) => {
     <Head title="Accounts" />
 
     <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
-        <div>
-            <h1 class="text-2xl font-bold sm:text-3xl">Accounts</h1>
-            <p class="mt-1 text-sm text-slate-600">
-                Remove account access without deleting a person’s membership or
-                historical lodge records.
-            </p>
-        </div>
+        <PageHeader
+            title="Accounts"
+            description="Remove account access without deleting a person’s membership or historical lodge records."
+        />
 
         <label class="mt-6 block max-w-xl">
             <span class="text-sm font-medium">Find an account</span>
@@ -70,14 +68,14 @@ const remove = (account: any) => {
                 placeholder="Search by name or email"
             />
         </label>
-        <p class="mt-3 text-sm text-slate-500">
+        <p class="mt-3 text-sm text-muted-foreground">
             Showing {{ accounts.from ?? 0 }}–{{ accounts.to ?? 0 }} of
             {{ accounts.total }} accounts.
         </p>
 
-        <div class="mt-4 overflow-hidden rounded-lg border">
+        <div class="mt-4 overflow-hidden rounded-lg border border-border/80 bg-card">
             <div
-                class="hidden grid-cols-[minmax(12rem,1fr)_minmax(16rem,1.5fr)_8rem_6rem_3rem] gap-4 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 md:grid"
+                class="hidden grid-cols-[minmax(12rem,1fr)_minmax(16rem,1.5fr)_8rem_6rem_3rem] gap-4 bg-muted px-4 py-3 text-sm font-semibold text-muted-foreground md:grid"
             >
                 <span>Name</span><span>Email</span><span>Status</span
                 ><span>Platform</span><span class="sr-only">Actions</span>
@@ -89,7 +87,7 @@ const remove = (account: any) => {
             >
                 <div class="min-w-0">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
                         >Name</span
                     ><ExpandableText
                         :text="account.name"
@@ -99,17 +97,17 @@ const remove = (account: any) => {
                 </div>
                 <div class="min-w-0">
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
                         >Email</span
                     ><ExpandableText
                         :text="account.email"
                         label="email address"
-                        class="text-sm text-slate-600"
+                        class="text-sm text-muted-foreground"
                     />
                 </div>
                 <div>
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
                         >Status</span
                     ><span class="capitalize">{{
                         account.approval_status
@@ -117,7 +115,7 @@ const remove = (account: any) => {
                 </div>
                 <div>
                     <span
-                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 md:hidden"
+                        class="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden"
                         >Platform</span
                     ><span>{{
                         account.is_platform_admin ? "Admin" : "—"
@@ -128,7 +126,7 @@ const remove = (account: any) => {
                         type="button"
                         :disabled="deletingId === account.id"
                         :aria-label="`Remove ${account.name}`"
-                        class="icon-button text-red-700 hover:bg-red-50 disabled:cursor-wait"
+                        class="icon-button text-destructive hover:bg-destructive/10 disabled:cursor-wait"
                         v-tooltip.left="{
                             value: 'Remove account',
                             showDelay: 2000,
@@ -141,7 +139,7 @@ const remove = (account: any) => {
             </div>
             <p
                 v-if="!accounts.data.length"
-                class="p-8 text-center text-sm text-slate-500"
+                class="p-8 text-center text-sm text-muted-foreground"
             >
                 No accounts match this search.
             </p>
@@ -158,9 +156,9 @@ const remove = (account: any) => {
                 :href="link.url || '#'"
                 preserve-state
                 preserve-scroll
-                class="rounded border px-3 py-2 text-sm"
+                class="secondary-button text-sm"
                 :class="{
-                    'bg-slate-900 text-white': link.active,
+                    'bg-primary text-primary-foreground': link.active,
                     'pointer-events-none opacity-40': !link.url,
                 }"
                 ><span v-html="link.label"

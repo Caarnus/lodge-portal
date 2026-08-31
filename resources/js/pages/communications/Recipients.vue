@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 
 defineOptions({ layout: AppLayout });
@@ -32,11 +33,14 @@ const formFor = (request: any) => {
 </script>
 <template>
     <Head title="Newsletter recipients" />
-    <main class="mx-auto max-w-6xl space-y-6 p-6">
-        <h1 class="text-3xl font-bold">Newsletter recipients</h1>
-        <section class="rounded border p-5">
+    <main class="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
+        <PageHeader
+            title="Newsletter recipients"
+            description="Review family subscription requests and active delivery recipients."
+        />
+        <section class="rounded-lg border border-border bg-card p-5">
             <h2 class="text-xl font-semibold">Requests awaiting review</h2>
-            <p v-if="!requests.length" class="mt-3 text-slate-600">
+            <p v-if="!requests.length" class="mt-3 text-muted-foreground">
                 No requests awaiting review.
             </p>
             <article
@@ -47,7 +51,7 @@ const formFor = (request: any) => {
                 <p class="font-medium">
                     {{ request.requester_name }} · {{ request.status }}
                 </p>
-                <p class="text-sm text-slate-600">
+                <p class="text-sm text-muted-foreground">
                     {{ request.claimed_relationship }} ·
                     {{ request.claimed_related_member_name }}
                 </p>
@@ -111,11 +115,7 @@ const formFor = (request: any) => {
                         />
                         Print</label
                     >
-                    <button
-                        class="w-fit rounded bg-slate-900 px-3 py-2 text-white"
-                    >
-                        Approve
-                    </button>
+                    <button class="primary-button w-fit">Approve</button>
                 </form>
                 <button
                     class="mt-2 text-red-700 underline"
@@ -129,9 +129,9 @@ const formFor = (request: any) => {
                 </button>
             </article>
         </section>
-        <section class="rounded border p-5">
+        <section class="rounded-lg border border-border bg-card p-5">
             <h2 class="text-xl font-semibold">Approved family subscriptions</h2>
-            <p v-if="!subscriptions.length" class="mt-3 text-slate-600">
+            <p v-if="!subscriptions.length" class="mt-3 text-muted-foreground">
                 No active subscriptions.
             </p>
             <ul v-else class="mt-3 divide-y">

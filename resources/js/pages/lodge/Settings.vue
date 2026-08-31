@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
-import LodgeConfigurationDialogs from "@/components/lodge/LodgeConfigurationDialogs.vue";
 import LodgeForm from "../platform/LodgeForm.vue";
 defineOptions({ layout: AppLayout });
 defineProps<{
@@ -13,14 +12,5 @@ defineProps<{
 }>();
 </script>
 <template>
-    <LodgeForm :lodge="lodge" :action="`/lodges/${lodge.id}/settings`">
-        <LodgeConfigurationDialogs
-            :lodge="lodge"
-            :can-manage-events="canManageEvents"
-            :can-manage-roles="canManageRoles"
-            :event-categories="eventCategories ?? []"
-            :roles="roles ?? []"
-            :permissions="permissions ?? []"
-        />
-    </LodgeForm>
+    <LodgeForm :lodge="lodge" :action="`/lodges/${lodge.id}/settings`"/>
 </template>

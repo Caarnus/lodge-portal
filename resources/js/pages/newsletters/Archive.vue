@@ -16,9 +16,9 @@ const formatDate = (value: string | null) =>
                 v-for="issue in issues"
                 :key="issue.id"
                 :href="`/lodges/${lodge.id}/newsletters/${issue.slug}`"
-                class="block p-4 hover:bg-slate-50"
+                class="block p-4 hover:bg-muted"
                 ><strong>{{ issue.published.title }}</strong>
-                <p class="text-sm text-slate-600">
+                <p class="text-sm text-muted-foreground">
                     {{ formatDate(issue.published.publication_date) }}
                 </p></Link
             >

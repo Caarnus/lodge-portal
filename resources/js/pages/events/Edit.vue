@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import RecurrenceBuilder from "@/components/events/RecurrenceBuilder.vue";
 import InputError from "@/components/InputError.vue";
 import RichTextField from "@/components/website/RichTextField.vue";
@@ -196,58 +197,55 @@ const deactivateVolunteerPosition = (id: number) =>
                 : 'mx-auto w-full min-w-0 max-w-5xl space-y-5 p-4 md:p-6'
         "
     >
-        <div
+        <PageHeader
             v-if="!embedded"
-            class="flex flex-wrap items-end justify-between gap-3"
+            :title="isNew ? 'Create event' : 'Edit event'"
+            :description="
+                !isNew
+                    ? `Status: ${event.status}`
+                    : 'Add the details, schedule, and attendance options for this event.'
+            "
         >
-            <div>
-                <Link
-                    :href="`/lodges/${lodge.id}/events`"
-                    class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
-                    >All events</Link
-                >
-                <h1 class="mt-2 text-2xl font-semibold">
-                    {{ isNew ? "Create event" : "Edit event" }}
-                </h1>
-                <p
-                    v-if="!isNew"
-                    class="mt-1 text-sm capitalize text-muted-foreground"
-                >
-                    Status: {{ event.status }}
-                </p>
-            </div>
-            <div v-if="!isNew" class="flex flex-wrap gap-2">
-                <Link
-                    :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
-                    class="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
-                    >Occurrences
-                </Link>
-                <button
-                    v-if="event.status === 'draft'"
-                    type="button"
-                    class="primary-button"
-                    @click="transition('publish')"
-                >
-                    Publish event
-                </button>
-                <button
-                    v-if="event.status === 'published'"
-                    type="button"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-md border border-destructive/50 bg-card px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
-                    @click="transition('cancel')"
-                >
-                    Cancel event
-                </button>
-                <button
-                    v-if="event.status === 'cancelled'"
-                    type="button"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
-                    @click="transition('archive')"
-                >
-                    Archive event
-                </button>
-            </div>
-        </div>
+            <template #actions>
+                <div class="flex flex-wrap gap-2">
+                    <Link
+                        :href="`/lodges/${lodge.id}/events`"
+                        class="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-accent"
+                        >All events</Link
+                    >
+                    <Link
+                        v-if="!isNew"
+                        :href="`/lodges/${lodge.id}/events/${event.id}/occurrences`"
+                        class="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
+                        >Occurrences
+                    </Link>
+                    <button
+                        v-if="!isNew && event.status === 'draft'"
+                        type="button"
+                        class="primary-button"
+                        @click="transition('publish')"
+                    >
+                        Publish event
+                    </button>
+                    <button
+                        v-if="!isNew && event.status === 'published'"
+                        type="button"
+                        class="inline-flex cursor-pointer items-center justify-center rounded-md border border-destructive/50 bg-card px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+                        @click="transition('cancel')"
+                    >
+                        Cancel event
+                    </button>
+                    <button
+                        v-if="!isNew && event.status === 'cancelled'"
+                        type="button"
+                        class="inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
+                        @click="transition('archive')"
+                    >
+                        Archive event
+                    </button>
+                </div>
+            </template>
+        </PageHeader>
         <form class="w-full min-w-0 space-y-6" @submit.prevent="submit">
             <div
                 v-if="Object.keys(form.errors).length"
