@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feature;
 use App\Models\Lodge;
+use App\Enums\LodgeStatus;
 use App\Services\LodgeModuleState;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,6 +25,7 @@ class LodgeModuleController extends Controller
     public function update(Request $request, Lodge $lodge, Feature $feature, LodgeModuleState $states)
     {
         $this->allowLodge($lodge, 'lodge_modules.manage');
+        abort_if($lodge->status === LodgeStatus::DisabledLocked, 403);
         $data = $request->validate(['is_enabled' => ['required', 'boolean']]);
         abort_unless($feature->is_active, 404);
         $states->setPreference($request->user(), $lodge, $feature, $data['is_enabled']);

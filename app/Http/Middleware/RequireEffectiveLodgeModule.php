@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Lodge;
+use App\Exceptions\LodgeModuleIneffective;
 use App\Services\LodgeModuleState;
 use Closure;
 use Illuminate\Http\Request;
@@ -16,7 +17,12 @@ class RequireEffectiveLodgeModule
         if (! $lodge instanceof Lodge) {
             $lodge = Lodge::find($lodge);
         }
-        abort_unless($lodge instanceof Lodge && app(LodgeModuleState::class)->isEffective($lodge, $module), 404);
+        abort_unless($lodge instanceof Lodge, 404);
+        try {
+            app(LodgeModuleState::class)->requireEffective($lodge, $module);
+        } catch (LodgeModuleIneffective) {
+            abort(404);
+        }
 
         return $next($request);
     }

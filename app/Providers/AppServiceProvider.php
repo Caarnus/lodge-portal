@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Domain\Events\RecurrenceExpander;
 use App\Domain\Events\RruleRecurrenceExpander;
+use App\Events\LodgeModuleStateChanged;
+use App\Listeners\InvalidateLodgeModuleProjections;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(LodgeModuleStateChanged::class, InvalidateLodgeModuleProjections::class);
     }
 }
