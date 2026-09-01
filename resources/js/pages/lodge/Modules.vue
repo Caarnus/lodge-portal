@@ -21,7 +21,7 @@ function confirmChange() { if (!pending.value) return; router.put(`/lodges/${pro
 
 <template>
     <Head :title="`Optional modules — ${lodge.name}`" />
-    <main class="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <main class="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
         <PageHeader eyebrow="Lodge settings" title="Optional modules" description="Enable an available module for this lodge. Enablement does not grant module permissions or publish public content." />
         <WorkspaceTabs :lodge="lodge" active="modules" workspace="settings" />
         <Card v-if="!modules.length"><CardContent class="p-6 text-sm text-muted-foreground">No optional modules are defined for this release.</CardContent></Card>

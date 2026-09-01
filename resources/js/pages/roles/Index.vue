@@ -34,7 +34,7 @@ const updateRole = (role: any) =>
 
 <template>
     <Head :title="`${lodge.name} role definitions`"/>
-    <main class="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
+    <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
         <PageHeader :description="lodge.name" title="Role definitions">
             <template #actions
             >
