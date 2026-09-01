@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\AuditEvent;
-use App\Models\Feature;
 use App\Models\Lodge;
 use App\Models\Permission;
 use App\Models\Person;
@@ -243,19 +242,6 @@ class PlatformFoundationTenancyTest extends TestCase
         $this->assertSame('approved', $invited->approval_status);
         $this->assertTrue($invited->hasLodgePermission($lodge, 'lodge.manage'));
         Notification::assertSentTo($invited, QueuedResetPassword::class, fn ($notification) => $notification instanceof ShouldQueue);
-    }
-
-    public function test_platform_admin_can_manage_existing_feature_assignments(): void
-    {
-        $lodge = Lodge::factory()->create();
-        $feature = Feature::create(['key' => 'test-feature', 'name' => 'Test feature']);
-        $platform = User::factory()->create(['is_platform_admin' => true]);
-        $lodgeAdmin = $this->adminFor($lodge);
-
-        $this->actingAs($platform)->put("/platform/lodges/{$lodge->id}/features", ['features' => [$feature->id]])->assertRedirect();
-        $this->assertDatabaseHas('feature_lodge', ['lodge_id' => $lodge->id, 'feature_id' => $feature->id, 'enabled' => true]);
-
-        $this->actingAs($lodgeAdmin)->put("/platform/lodges/{$lodge->id}/features", ['features' => []])->assertForbidden();
     }
 
     public function test_platform_admin_command_is_idempotent(): void

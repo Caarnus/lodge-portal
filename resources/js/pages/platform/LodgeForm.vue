@@ -9,7 +9,6 @@ const p = defineProps<{
     lodge?: any;
     action?: string;
     admins?: Array<any>;
-    features?: Array<any>;
 }>();
 const l = p.lodge ?? {};
 const form = useForm({
@@ -34,9 +33,6 @@ const form = useForm({
     logo: null as File | null,
 });
 const admin = useForm({email: "", name: ""});
-const flags = useForm({
-    features: (p.features ?? []).filter((f) => f.enabled).map((f) => f.id),
-});
 
 function submit() {
     if (p.lodge)
@@ -70,6 +66,12 @@ function submit() {
                 >Manage website
                 </Link
                 >
+                <Link
+                    v-if="lodge && !action"
+                    :href="`/platform/lodges/${lodge.id}/modules`"
+                    class="secondary-button"
+                >Manage optional modules
+                </Link>
             </template
             >
         </PageHeader>
@@ -209,39 +211,6 @@ function submit() {
                     class="primary-button sm:col-span-2"
                 >
                     Assign or create administrator
-                </button>
-            </form>
-        </section>
-        <section
-            v-if="lodge && !action"
-            class="mt-10 rounded-lg border border-border/80 bg-card p-4 sm:p-6"
-        >
-            <h2 class="text-xl font-semibold">Features</h2>
-            <p v-if="!features?.length" class="mt-2 text-muted-foreground">
-                No release features are currently defined.
-            </p>
-            <form
-                v-else
-                class="mt-3"
-                @submit.prevent="
-                    flags.put(`/platform/lodges/${lodge.id}/features`)
-                "
-            >
-                <label
-                    v-for="f in features"
-                    :key="f.id"
-                    class="mt-2 flex items-center gap-2 rounded-md border border-border/80 bg-muted/30 p-3 first:mt-0"
-                ><input
-                    v-model="flags.features"
-                    :value="f.id"
-                    type="checkbox"
-                />{{ f.name }}</label
-                >
-                <button
-                    :disabled="flags.processing"
-                    class="primary-button mt-3"
-                >
-                    Save features
                 </button>
             </form>
         </section>

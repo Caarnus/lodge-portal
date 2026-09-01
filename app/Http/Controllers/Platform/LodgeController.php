@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Platform;
 use App\Enums\LodgeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LodgeRequest;
-use App\Models\Feature;
 use App\Models\Lodge;
 use App\Models\Role;
 use App\Models\User;
@@ -53,19 +52,7 @@ class LodgeController extends Controller
         return Inertia::render('platform/LodgeForm', [
             'lodge' => $lodge,
             'admins' => $admins,
-            'features' => Feature::orderBy('name')->get()->map(fn($f) => $f->setAttribute('enabled', $lodge->features()->where('features.id', $f->id)->wherePivot('enabled', true)->exists())),
         ]);
-    }
-
-    public function features(Request $r, Lodge $lodge)
-    {
-        $ids = $r->validate(['features' => 'array', 'features.*' => 'integer|exists:features,id'])['features'] ?? [];
-        foreach (Feature::all() as $f) {
-            $lodge->features()->syncWithoutDetaching([$f->id => ['enabled' => in_array($f->id, $ids)]]);
-        }
-        Audit::record('lodge.features_updated', $lodge, $lodge, null, ['feature_ids' => $ids]);
-
-        return back();
     }
 
     public function assignAdmin(Request $r, Lodge $lodge, LodgeRoleCatalog $roles)

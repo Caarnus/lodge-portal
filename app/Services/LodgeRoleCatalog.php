@@ -10,6 +10,7 @@ class LodgeRoleCatalog
 {
     public const PERMISSIONS = [
         'lodge.manage' => 'Manage lodge identity and settings',
+        'lodge_modules.manage' => 'Manage optional lodge modules',
         'registration.review' => 'Review registrations',
         'website.manage' => 'Manage lodge website',
         'website.publish' => 'Publish lodge website',

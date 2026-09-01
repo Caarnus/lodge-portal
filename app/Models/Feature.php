@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Feature extends Model
 {
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
+    }
 }

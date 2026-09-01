@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             $lodges = $lodgeQuery->orderBy('name')->get(['id', 'name', 'slug', 'status'])
                 ->map(fn(Lodge $lodge) => $lodge
                     ->setAttribute('can_manage_lodge', $user->hasLodgePermission($lodge, 'lodge.manage'))
+                    ->setAttribute('can_manage_modules', $user->hasLodgePermission($lodge, 'lodge_modules.manage'))
                     ->setAttribute('can_view_directory', app(DirectoryAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_search_ritual', app(RitualAssistanceAccess::class)->canBrowse($user, $lodge))
                     ->setAttribute('can_view_lodge_site', $lodge->status === LodgeStatus::Active)

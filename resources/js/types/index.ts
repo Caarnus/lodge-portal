@@ -12,6 +12,7 @@ export interface LodgeSummary {
     name: string;
     slug: string;
     can_manage_lodge: boolean;
+    can_manage_modules: boolean;
     can_view_directory: boolean;
     can_search_ritual: boolean;
     can_view_lodge_site: boolean;

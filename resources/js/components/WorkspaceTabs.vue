@@ -69,6 +69,11 @@ const tabs = computed(() => {
             label: "Lodge settings",
             href: `/lodges/${props.lodge.id}/settings`,
         },
+        access.can_manage_modules && {
+            key: "modules",
+            label: "Optional modules",
+            href: `/lodges/${props.lodge.id}/modules`,
+        },
         access.can_manage_events && {
             key: "event-categories",
             label: "Event categories",

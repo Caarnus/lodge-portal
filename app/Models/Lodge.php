@@ -21,7 +21,7 @@ class Lodge extends Model
 
     public function features()
     {
-        return $this->belongsToMany(Feature::class)->withPivot('enabled')->withTimestamps();
+        return $this->belongsToMany(Feature::class)->withPivot('is_available', 'is_enabled')->withTimestamps();
     }
 
     public function websitePages()
